@@ -1,0 +1,39 @@
+[
+  {
+    "0": {
+      "name": "Wildlife",
+      "description": "Animals in their natural environments, capturing candid moments."
+    },
+    "1": {
+      "name": "Nature",
+      "description": "Scenic vistas, flora, and biological environments."
+    },
+    "2": {
+      "name": "Portrait",
+      "description": "Expressive close-ups and artistic human portraits."
+    },
+    "3": {
+      "name": "Street",
+      "description": "Candid moments of human life and urban culture."
+    },
+    "4": {
+      "name": "Landscape",
+      "description": "Majestic open spaces, mountains, deserts, and seascapes."
+    },
+    "5": {
+      "name": "Macro",
+      "description": "Extreme close-up photography of tiny details."
+    },
+    "6": {
+      "name": "Architecture",
+      "description": "Buildings, bridges, interiors, and architectural structures."
+    },
+    "7": {
+      "name": "Black & White",
+      "description": "Monochrome frames capturing tones, lighting, and textures."
+    },
+    "_id": "l3q6we5te6647",
+    "createdAt": "2026-07-09T09:32:16.647Z",
+    "updatedAt": "2026-07-09T09:32:16.647Z"
+  }
+]

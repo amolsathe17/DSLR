@@ -1,0 +1,21 @@
+[
+  {
+    "userId": "ttfq2csia9555",
+    "userName": "Pawan",
+    "userEmail": "pawan@gmail.com",
+    "eventId": "kriwkaviz6648",
+    "eventTitle": "National DSLR Wildlife & Landscape Championship 2026",
+    "packageId": "pkg-2",
+    "packageName": "Amateur (Up to 2 Photographs)",
+    "amount": 300,
+    "transactionId": "TXN-XUIVVOSZK2933",
+    "status": "Success",
+    "paymentMethod": "UPI",
+    "invoiceNumber": "INV-198933-5197",
+    "qrContent": "{\"txn\":\"TXN-XUIVVOSZK2933\",\"inv\":\"INV-198933-5197\",\"user\":\"pawan@gmail.com\",\"event\":\"National DSLR Wildlife & Landscape Championship 2026\",\"amount\":300,\"date\":\"2026-07-10\"}",
+    "paymentDate": "2026-07-10T04:36:38.933Z",
+    "_id": "8oru4uw0v8933",
+    "createdAt": "2026-07-10T04:36:38.933Z",
+    "updatedAt": "2026-07-10T04:36:38.933Z"
+  }
+]

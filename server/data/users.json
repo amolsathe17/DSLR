@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Event Administrator",
+    "email": "admin@contest.com",
+    "password": "$2a$10$nbclE2L5q4YJ0sw1yEhLZe8X.HCBE.ENHnWLgU3vkclM.RW0CD2kq",
+    "mobile": "9876543210",
+    "city": "Mumbai",
+    "role": "Admin",
+    "isVerified": true,
+    "_id": "2lzxlp6vg6644",
+    "createdAt": "2026-07-09T09:32:16.644Z",
+    "updatedAt": "2026-07-09T09:32:16.644Z"
+  },
+  {
+    "name": "Chief Judge Arthur",
+    "email": "judge@contest.com",
+    "password": "$2a$10$nbclE2L5q4YJ0sw1yEhLZerN/KB8ROUhqNrPQuYd6IZaLQAM1H.VG",
+    "mobile": "8765432109",
+    "city": "Delhi",
+    "role": "Judge",
+    "isVerified": true,
+    "_id": "eps1lkd0g6645",
+    "createdAt": "2026-07-09T09:32:16.645Z",
+    "updatedAt": "2026-07-09T09:32:16.645Z"
+  },
+  {
+    "name": "Amol Sathe",
+    "email": "amolsathe11@gmail.com",
+    "password": "$2a$10$O.9rPFgBUJdVXB6.hLnGKuivuAfMeyVUFJcYVm5UcPXn2pHOPWrV2",
+    "mobile": "7888135132",
+    "city": "Pune",
+    "role": "Admin",
+    "isVerified": true,
+    "_id": "espnqyo3f1304",
+    "createdAt": "2026-07-09T10:26:51.304Z",
+    "updatedAt": "2026-07-10T04:37:18.462Z",
+    "lastLogin": "2026-07-10T04:37:18.462Z"
+  },
+  {
+    "name": "Pawan",
+    "email": "pawan@gmail.com",
+    "mobile": "3333777737",
+    "password": "$2a$10$tCLOslauscSsPFpPr3dyJecltlajq7ajkCHVpXGK6yrOF3ImuYNhC",
+    "city": "mumbai",
+    "role": "Participant",
+    "isVerified": true,
+    "_id": "ttfq2csia9555",
+    "createdAt": "2026-07-10T04:36:19.555Z",
+    "updatedAt": "2026-07-10T04:36:29.795Z",
+    "lastLogin": "2026-07-10T04:36:29.794Z"
+  }
+]

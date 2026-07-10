@@ -1,0 +1,81 @@
+const express = require('express');
+const router = express.Router();
+const Category = require('../models/Category');
+const AuditLog = require('../models/AuditLog');
+const { protect, authorize } = require('../middleware/auth');
+
+// @desc    Get all categories
+// @route   GET /api/categories
+// @access  Public
+router.get('/', async (req, res) => {
+  try {
+    const categories = await Category.find({});
+    res.json({ success: true, categories });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Create a category
+// @route   POST /api/categories
+// @access  Private/Admin
+router.post('/', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Category name is required' });
+    }
+
+    const exists = await Category.findOne({ name });
+    if (exists) {
+      return res.status(400).json({ success: false, message: 'Category already exists' });
+    }
+
+    const category = await Category.create({ name, description });
+
+    await AuditLog.create({
+      userId: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Create Category',
+      details: `Created category: ${category.name}`,
+      ipAddress: req.ip
+    });
+
+    res.status(201).json({ success: true, category });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Delete a category
+// @route   DELETE /api/categories/:id
+// @access  Private/Admin
+router.delete('/:id', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+
+    await Category.deleteOne({ _id: req.params.id });
+
+    await AuditLog.create({
+      userId: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Delete Category',
+      details: `Deleted category: ${category.name}`,
+      ipAddress: req.ip
+    });
+
+    res.json({ success: true, message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+module.exports = router;

@@ -19,38 +19,22 @@ const reportRoutes = require("./routes/reports");
 const app = express();
 
 // Middleware
-// Secure CORS configuration matching allowed Vercel frontend URL & localhost
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://dslr-two.vercel.app",
-  process.env.FRONTEND_URL
-].filter(Boolean).map(url => url.replace(/\/$/, ""));
-
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow server-to-server or curl requests
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    const cleanOrigin = origin.replace(/\/$/, "");
-    const isAllowed = allowedOrigins.includes(cleanOrigin) || 
-                      cleanOrigin.endsWith(".vercel.app") ||
-                      /^https?:\/\/localhost(:\d+)?$/.test(cleanOrigin);
-
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS Warning: Blocked origin "${origin}"`);
-      callback(null, false);
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 200
-}));
+// Custom Bulletproof CORS middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  
+  // Respond immediately to preflight OPTIONS requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Capture raw request body for Razorpay webhook verification
 app.use(express.json({

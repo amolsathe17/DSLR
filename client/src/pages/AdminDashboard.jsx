@@ -381,7 +381,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ status: 'Active' })
       });
       if (data.success) {
-        alert('Contest activated successfully!');
+        triggerSuccessModal('Contest Activated', 'The contest event is now active and visible to all participants.');
         fetchJudgesAndEvents();
       }
     } catch (e) {
@@ -397,7 +397,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ assignedJudges: selectedJudgesForEvent })
       });
       if (data.success) {
-        alert('Event judges updated successfully!');
+        triggerSuccessModal('Judges Updated', 'The assigned judges for this event have been updated successfully.');
         setShowAssignJudgesModal(false);
         fetchJudgesAndEvents();
       }
@@ -414,7 +414,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ winners: winnerAssignments })
       });
       if (data.success) {
-        alert('Contest results published successfully!');
+        triggerSuccessModal('Results Published', 'The contest results and winners have been published successfully.');
         setEventToPublish(null);
         fetchJudgesAndEvents();
       }

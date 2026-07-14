@@ -73,6 +73,9 @@ export default function AdminDashboard() {
   const [showDeleteEventModal, setShowDeleteEventModal] = useState(false);
   const [eventToDeleteId, setEventToDeleteId] = useState(null);
   const [eventToDeleteTitle, setEventToDeleteTitle] = useState('');
+  const [showDeleteCatModal, setShowDeleteCatModal] = useState(false);
+  const [catToDeleteId, setCatToDeleteId] = useState(null);
+  const [catToDeleteName, setCatToDeleteName] = useState('');
   
   // Selection/Modals
   const [selectedPhoto, setSelectedPhoto] = useState(null); // zoom / detail
@@ -284,17 +287,22 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteCategory = async (id) => {
-    if (!confirm('Delete this category?')) return;
+  const executeDeleteCategory = async () => {
+    if (!catToDeleteId) return;
+    setShowDeleteCatModal(false);
     try {
-      const data = await apiFetch(`/api/categories/${id}`, {
+      const data = await apiFetch(`/api/categories/${catToDeleteId}`, {
         method: 'DELETE'
       });
       if (data.success) {
+        alert('Category deleted successfully!');
         fetchJudgesAndEvents();
       }
     } catch (e) {
       alert(e.message);
+    } finally {
+      setCatToDeleteId(null);
+      setCatToDeleteName('');
     }
   };
 
@@ -1238,7 +1246,11 @@ export default function AdminDashboard() {
                       <span className="font-bold">{c.name}</span>
                     </div>
                     <button
-                      onClick={() => handleDeleteCategory(c._id)}
+                      onClick={() => {
+                        setCatToDeleteId(c._id);
+                        setCatToDeleteName(c.name);
+                        setShowDeleteCatModal(true);
+                      }}
                       className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded"
                     >
                       <Trash2 size={12} />
@@ -1905,6 +1917,42 @@ export default function AdminDashboard() {
                 className="flex-1 bg-red-600 hover:bg-red-750 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
               >
                 Delete Contest
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CATEGORY CONFIRMATION MODAL */}
+      {showDeleteCatModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-550 rounded-2xl mb-2 animate-bounce">
+                <AlertTriangle size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Delete Category Confirmation
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to delete the category <strong>"{catToDeleteName}"</strong>? This will permanently delete the category. Proceed?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteCatModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDeleteCategory}
+                className="flex-1 bg-red-600 hover:bg-red-750 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+              >
+                Delete Category
               </button>
             </div>
           </div>

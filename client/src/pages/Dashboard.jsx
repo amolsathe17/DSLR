@@ -52,6 +52,7 @@ export default function Dashboard() {
 
   // Certificate Modal State
   const [showCertificate, setShowCertificate] = useState(false);
+  const [showFinalSubmitModal, setShowFinalSubmitModal] = useState(false);
 
   // Package & Declaration selection
   const [selectedPkgId, setSelectedPkgId] = useState("");
@@ -422,13 +423,12 @@ export default function Dashboard() {
     }
   };
 
-  const handleFinalSubmit = async () => {
-    if (
-      !confirm(
-        "FINAL SUBMISSION: This will lock all your photos and descriptions for grading. You cannot make changes afterwards. Proceed?",
-      )
-    )
-      return;
+  const handleFinalSubmit = () => {
+    setShowFinalSubmitModal(true);
+  };
+
+  const executeFinalSubmit = async () => {
+    setShowFinalSubmitModal(false);
     setLoading(true);
     setError("");
 
@@ -440,7 +440,7 @@ export default function Dashboard() {
 
       if (data.success) {
         setSubmission(data.submission);
-        confetti({ particleCount: 100, spread: 80 });
+        confetti({ particleCount: 200, spread: 100, duration: 4000 });
       }
     } catch (err) {
       setError(err.message);
@@ -1078,6 +1078,42 @@ export default function Dashboard() {
           event={event}
           onClose={() => setShowCertificate(false)}
         />
+      )}
+
+      {/* FINAL SUBMISSION CONFIRMATION MODAL */}
+      {showFinalSubmitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-2xl mb-2">
+                <AlertTriangle size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Final Entry Lock Confirmation
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                FINAL SUBMISSION: This will lock all your photos and descriptions for grading. You cannot make changes afterwards. Proceed?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowFinalSubmitModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
+              >
+                No, Go Back
+              </button>
+              <button
+                type="button"
+                onClick={executeFinalSubmit}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+              >
+                Yes, Finalize Entry
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

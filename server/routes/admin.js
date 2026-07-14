@@ -247,6 +247,47 @@ router.delete('/participants/:id', protect, authorize('Admin'), async (req, res)
   }
 });
 
+// @desc    Delete judge user
+// @route   DELETE /api/admin/judges/:id
+// @access  Private/Admin
+router.delete('/judges/:id', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Judge not found' });
+    }
+
+    if (user.role !== 'Judge') {
+      return res.status(400).json({ success: false, message: 'User is not a judge' });
+    }
+
+    await User.deleteOne({ _id: req.params.id });
+
+    // Pull from all event assignedJudges and confirmedJudges
+    const Event = require('../models/Event');
+    await Event.updateMany({}, {
+      $pull: {
+        assignedJudges: req.params.id,
+        confirmedJudges: req.params.id
+      }
+    });
+
+    await AuditLog.create({
+      userId: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Delete Judge',
+      details: `Deleted judge user and removed them from all assigned events: ${user.email}`,
+      ipAddress: req.ip
+    });
+
+    res.json({ success: true, message: 'Judge account deleted successfully and unassigned from all events' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @desc    Get all uploaded photographs (for approval / assignment)
 // @route   GET /api/admin/photographs
 // @access  Private/Admin

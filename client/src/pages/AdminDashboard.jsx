@@ -80,6 +80,9 @@ export default function AdminDashboard() {
   const [showDeleteParticipantModal, setShowDeleteParticipantModal] = useState(false);
   const [participantToDeleteId, setParticipantToDeleteId] = useState(null);
   const [participantToDeleteName, setParticipantToDeleteName] = useState('');
+  const [showDeleteJudgeModal, setShowDeleteJudgeModal] = useState(false);
+  const [judgeToDeleteId, setJudgeToDeleteId] = useState(null);
+  const [judgeToDeleteName, setJudgeToDeleteName] = useState('');
   const [showGeneralSuccessModal, setShowGeneralSuccessModal] = useState(false);
   const [generalSuccessTitle, setGeneralSuccessTitle] = useState('');
   const [generalSuccessMsg, setGeneralSuccessMsg] = useState('');
@@ -230,6 +233,25 @@ export default function AdminDashboard() {
     } finally {
       setParticipantToDeleteId(null);
       setParticipantToDeleteName('');
+    }
+  };
+
+  const executeDeleteJudge = async () => {
+    if (!judgeToDeleteId) return;
+    setShowDeleteJudgeModal(false);
+    try {
+      const data = await apiFetch(`/api/admin/judges/${judgeToDeleteId}`, {
+        method: 'DELETE'
+      });
+      if (data.success) {
+        triggerSuccessModal('Judge Deleted', 'The judge account has been permanently deleted and unassigned from all events.');
+        fetchJudgesAndEvents();
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setJudgeToDeleteId(null);
+      setJudgeToDeleteName('');
     }
   };
 
@@ -915,11 +937,19 @@ export default function AdminDashboard() {
                   <div key={j._id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-905 border border-slate-100 dark:border-slate-850 rounded-xl">
                     <div>
                       <p className="text-xs font-bold text-slate-900 dark:text-white">{j.name}</p>
-                      <span className="text-[9px] text-slate-400">{j.email}</span>
+                      <span className="text-[9px] text-slate-400">{j.email} • {j.city}</span>
                     </div>
-                    <span className="text-[9px] bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                      {j.city}
-                    </span>
+                    <button
+                      onClick={() => {
+                        setJudgeToDeleteId(j._id);
+                        setJudgeToDeleteName(j.name);
+                        setShowDeleteJudgeModal(true);
+                      }}
+                      className="p-1 text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg cursor-pointer transition-colors"
+                      title="Delete Judge permanently"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 ))}
                 {judges.length === 0 && (
@@ -2078,6 +2108,42 @@ export default function AdminDashboard() {
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
               >
                 Delete Participant
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE JUDGE CONFIRMATION MODAL */}
+      {showDeleteJudgeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-2xl mb-2 animate-bounce">
+                <AlertTriangle size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Delete Judge Confirmation
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to delete the judge <strong>"{judgeToDeleteName}"</strong>? This will permanently delete their account. Proceed?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteJudgeModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDeleteJudge}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+              >
+                Delete Judge
               </button>
             </div>
           </div>

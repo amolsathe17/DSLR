@@ -762,6 +762,8 @@ export default function AdminDashboard() {
                     src={photo.fileUrl} 
                     alt={photo.title} 
                     className="w-full aspect-video object-cover"
+                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
                   />
                   <button
                     onClick={() => setSelectedPhoto(photo)}
@@ -1551,6 +1553,8 @@ export default function AdminDashboard() {
                   src={selectedPhoto.fileUrl} 
                   alt={selectedPhoto.title}
                   className="w-full h-full object-contain"
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
                 />
               </div>
               <div className="lg:col-span-4 p-6 flex flex-col justify-between text-xs max-h-125 overflow-y-auto">
@@ -1752,6 +1756,8 @@ export default function AdminDashboard() {
                           src={photo.fileUrl} 
                           alt={photo.title}
                           className="w-24 h-24 object-cover rounded-lg shrink-0 border border-slate-200 dark:border-slate-800"
+                          crossOrigin="anonymous"
+                          referrerPolicy="no-referrer"
                         />
                         <div className="flex flex-col gap-1 min-w-0">
                           <h5 className="font-bold text-slate-900 dark:text-white truncate">{photo.title}</h5>

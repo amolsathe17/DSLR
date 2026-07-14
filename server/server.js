@@ -22,15 +22,27 @@ const app = express();
 // Secure CORS configuration matching allowed Vercel frontend URL & localhost
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:3000",
   process.env.FRONTEND_URL
-].filter(Boolean);
+].filter(Boolean).map(url => url.replace(/\/$/, ""));
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow server-to-server or curl requests
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const cleanOrigin = origin.replace(/\/$/, "");
+    const isAllowed = allowedOrigins.includes(cleanOrigin) || 
+                      cleanOrigin.endsWith(".vercel.app") ||
+                      /^https?:\/\/localhost(:\d+)?$/.test(cleanOrigin);
+
+    if (isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS Policy Violation: Origin "${origin}" not allowed.`));
+      console.warn(`CORS Warning: Blocked origin "${origin}"`);
+      callback(null, false);
     }
   },
   credentials: true

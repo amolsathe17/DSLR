@@ -1208,7 +1208,7 @@ export default function AdminDashboard() {
                           setEventToDeleteTitle(e.title);
                           setShowDeleteEventModal(true);
                         }}
-                        className="p-1.5 text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                        className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
                         title="Delete Contest permanently"
                       >
                         <Trash2 size={14} />
@@ -1730,7 +1730,7 @@ export default function AdminDashboard() {
             <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-right">
               <button
                 onClick={() => setSelectedParticipant(null)}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-850 dark:bg-indigo-650 dark:hover:bg-indigo-700 text-white font-bold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-850 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold rounded-xl cursor-pointer"
               >
                 Close Audit View
               </button>
@@ -1900,7 +1900,7 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={() => setShowEventSuccessModal(false)}
-              className="w-full bg-slate-900 hover:bg-slate-850 dark:bg-indigo-650 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+              className="w-full bg-slate-900 hover:bg-slate-850 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
             >
               Awesome, Understood
             </button>
@@ -1913,7 +1913,7 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
-              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-550 rounded-2xl mb-2 animate-bounce">
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-2xl mb-2 animate-bounce">
                 <AlertTriangle size={28} />
               </div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
@@ -1935,7 +1935,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={executeDeleteEvent}
-                className="flex-1 bg-red-600 hover:bg-red-750 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
               >
                 Delete Contest
               </button>
@@ -1949,7 +1949,7 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
-              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-550 rounded-2xl mb-2 animate-bounce">
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-2xl mb-2 animate-bounce">
                 <AlertTriangle size={28} />
               </div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
@@ -1971,7 +1971,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={executeDeleteCategory}
-                className="flex-1 bg-red-600 hover:bg-red-750 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
               >
                 Delete Category
               </button>
@@ -1985,7 +1985,7 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
-              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-550 rounded-2xl mb-2 animate-bounce">
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-2xl mb-2 animate-bounce">
                 <AlertTriangle size={28} />
               </div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">

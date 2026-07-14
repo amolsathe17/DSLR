@@ -9,7 +9,12 @@ const { protect, authorize } = require('../middleware/auth');
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const events = await Event.find({});
+    const { includeDrafts } = req.query;
+    let query = {};
+    if (includeDrafts !== 'true') {
+      query.status = { $ne: 'Draft' };
+    }
+    const events = await Event.find(query);
     res.json({ success: true, events });
   } catch (error) {
     console.error(error);
@@ -50,7 +55,9 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
       prizes,
       faqs,
       terms,
-      packages
+      packages,
+      status: 'Draft',
+      assignedJudges: []
     });
 
     await AuditLog.create({

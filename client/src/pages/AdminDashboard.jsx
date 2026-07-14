@@ -53,6 +53,9 @@ export default function AdminDashboard() {
   const [newJudgeMobile, setNewJudgeMobile] = useState('');
   const [newJudgeCity, setNewJudgeCity] = useState('');
   const [showJudgeModal, setShowJudgeModal] = useState(false);
+  const [showAssignJudgesModal, setShowAssignJudgesModal] = useState(false);
+  const [selectedEventForJudges, setSelectedEventForJudges] = useState(null);
+  const [selectedJudgesForEvent, setSelectedJudgesForEvent] = useState([]);
 
   // Events & Categories states
   const [events, setEvents] = useState([]);
@@ -126,7 +129,7 @@ export default function AdminDashboard() {
       const jData = await apiFetch('/api/admin/judges');
       if (jData.success) setJudges(jData.judges);
 
-      const eData = await apiFetch('/api/events');
+      const eData = await apiFetch('/api/events?includeDrafts=true');
       if (eData.success) setEvents(eData.events);
 
       const cData = await apiFetch('/api/categories');
@@ -312,6 +315,39 @@ export default function AdminDashboard() {
         setNewEventTheme('');
         setNewEventDeadline('');
         setNewEventRules('');
+        fetchJudgesAndEvents();
+      }
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  const handleActivateEvent = async (eventId) => {
+    if (!confirm('Are you sure you want to activate this contest? This will make it visible to all participants on the home page and enable registrations.')) return;
+    try {
+      const data = await apiFetch(`/api/events/${eventId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: 'Active' })
+      });
+      if (data.success) {
+        alert('Contest activated successfully!');
+        fetchJudgesAndEvents();
+      }
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  const handleSaveEventJudges = async () => {
+    if (!selectedEventForJudges) return;
+    try {
+      const data = await apiFetch(`/api/events/${selectedEventForJudges._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ assignedJudges: selectedJudgesForEvent })
+      });
+      if (data.success) {
+        alert('Event judges updated successfully!');
+        setShowAssignJudgesModal(false);
         fetchJudgesAndEvents();
       }
     } catch (e) {
@@ -856,17 +892,26 @@ export default function AdminDashboard() {
               <div className="flex flex-col gap-6 mt-4">
                 {/* Select contest */}
                 {events.map(e => {
-                  
-                  // Calculate rank averages
-                  const gradedPhotos = [];
-                  photographs.forEach(p => {
-                    if (p.scores && p.scores.length > 0) {
-                      gradedPhotos.push(p);
-                    }
-                  });
+                  // Calculate rank averages for this event specifically
+                  const eventPhotos = photographs.filter(p => p.eventId === e._id);
+                  const finalPhotos = eventPhotos.filter(p => p.isFinalSubmitted);
+                  const gradedPhotos = eventPhotos.filter(p => p.scores && p.scores.length > 0);
 
                   // Sort graded photos by score (total or average)
                   gradedPhotos.sort((a, b) => b.averageScore - a.averageScore);
+
+                  const assignedJudges = e.assignedJudges || [];
+                  const totalRequiredReviews = finalPhotos.length * assignedJudges.length;
+                  let completedReviews = 0;
+                  finalPhotos.forEach(p => {
+                    p.scores.forEach(s => {
+                      if (assignedJudges.includes(s.judgeId)) {
+                        completedReviews++;
+                      }
+                    });
+                  });
+
+                  const approvalsPending = assignedJudges.length === 0 || completedReviews < totalRequiredReviews;
 
                   return (
                     <div key={e._id} className="flex flex-col gap-4 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl">
@@ -878,6 +923,7 @@ export default function AdminDashboard() {
                         
                         {!e.winnersPublished ? (
                           <button
+                            disabled={approvalsPending || finalPhotos.length === 0}
                             onClick={() => {
                               setEventToPublish(e);
                               // Seed top 3 photos from leaderboard
@@ -893,12 +939,79 @@ export default function AdminDashboard() {
                               }
                               setWinnerAssignments(updatedWinners);
                             }}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-4 rounded-xl cursor-pointer"
+                            className={`font-bold text-xs py-1.5 px-4 rounded-xl transition-all cursor-pointer ${
+                              approvalsPending || finalPhotos.length === 0
+                                ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none dark:bg-slate-800"
+                                : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
+                            }`}
                           >
                             Assign Winners & Publish
                           </button>
                         ) : (
-                          <span className="text-xs bg-emerald-50 text-emerald-600 px-3 py-1 rounded font-bold">Results Published</span>
+                          <span className="text-xs bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 px-3 py-1 rounded font-bold">Results Published</span>
+                        )}
+                      </div>
+
+                      {/* Assigned Judges display */}
+                      <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800/80 p-2.5 rounded-xl text-xs">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">Event Judges:</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {assignedJudges.length > 0 ? (
+                              assignedJudges.map(jId => {
+                                const judgeObj = judges.find(j => j._id === jId);
+                                return (
+                                  <span key={jId} className="text-[10px] bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 px-2 py-0.5 rounded font-medium">
+                                    {judgeObj ? judgeObj.name : 'Unknown Judge'}
+                                  </span>
+                                );
+                              })
+                            ) : (
+                              <span className="text-[10px] text-amber-600 italic">No judges assigned.</span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSelectedEventForJudges(e);
+                            setSelectedJudgesForEvent(e.assignedJudges || []);
+                            setShowAssignJudgesModal(true);
+                          }}
+                          className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/25 dark:hover:bg-indigo-950/40 text-[10px] py-1.5 px-2.5 rounded-lg cursor-pointer transition-all font-semibold"
+                        >
+                          Manage Event Judges
+                        </button>
+                      </div>
+
+                      {/* Grading and Approval Progress */}
+                      <div className="flex flex-col gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800/80 p-3 rounded-xl">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">Grading Progress:</span>
+                          <span className="font-bold text-slate-900 dark:text-white">
+                            {completedReviews} / {totalRequiredReviews} Reviews Completed
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-300 ${approvalsPending ? 'bg-amber-500' : 'bg-emerald-600'}`}
+                            style={{ width: `${totalRequiredReviews > 0 ? (completedReviews / totalRequiredReviews) * 100 : 0}%` }}
+                          ></div>
+                        </div>
+                        {approvalsPending && (
+                          <div className="flex items-center gap-1.5 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                            <AlertTriangle size={12} className="shrink-0" />
+                            <span>
+                              {assignedJudges.length === 0 
+                                ? 'Please assign judges to this event to begin grading.' 
+                                : `Approvals Pending: All assigned judges must grade all ${finalPhotos.length} entries before results can be published.`}
+                            </span>
+                          </div>
+                        )}
+                        {!approvalsPending && finalPhotos.length > 0 && (
+                          <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium animate-pulse">
+                            <Check size={12} className="shrink-0" />
+                            <span>All judge approvals completed. Ready to publish results!</span>
+                          </div>
                         )}
                       </div>
 
@@ -1016,9 +1129,25 @@ export default function AdminDashboard() {
                       <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{e.title}</h4>
                       <p className="text-[10px] text-slate-400 mt-0.5">Theme: "{e.theme}" • Deadline: {new Date(e.deadline).toLocaleDateString()}</p>
                     </div>
-                    <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${e.status === 'Active' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' : 'bg-slate-100 text-slate-500'}`}>
-                      {e.status}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
+                        e.status === 'Active' 
+                          ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' 
+                          : e.status === 'Draft' 
+                            ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/20' 
+                            : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {e.status}
+                      </span>
+                      {e.status === 'Draft' && (
+                        <button
+                          onClick={() => handleActivateEvent(e._id)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                        >
+                          Activate
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1609,6 +1738,75 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ASSIGN JUDGES TO EVENT MODAL */}
+      {showAssignJudgesModal && selectedEventForJudges && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Assign Judges to Event
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Selected judges will have access to see and grade all submissions for <strong>{selectedEventForJudges.title}</strong>.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-1">
+              {judges.map(j => {
+                const isChecked = selectedJudgesForEvent.includes(j._id);
+                return (
+                  <label 
+                    key={j._id} 
+                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      isChecked 
+                        ? 'bg-indigo-50/50 border-indigo-200 dark:bg-indigo-950/10 dark:border-indigo-900' 
+                        : 'bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800'
+                    }`}
+                  >
+                    <input 
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedJudgesForEvent([...selectedJudgesForEvent, j._id]);
+                        } else {
+                          setSelectedJudgesForEvent(selectedJudgesForEvent.filter(id => id !== j._id));
+                        }
+                      }}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-200">{j.name}</span>
+                      <span className="text-[10px] text-slate-400">{j.email} • {j.city}</span>
+                    </div>
+                  </label>
+                );
+              })}
+              {judges.length === 0 && (
+                <p className="text-xs text-slate-400 text-center py-4">No judge accounts created yet. Please create judge accounts first.</p>
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-150 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowAssignJudgesModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-2 rounded-xl transition-all cursor-pointer font-bold text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEventJudges}
+                className="flex-1 bg-indigo-650 hover:bg-indigo-755 text-white py-2 rounded-xl shadow transition-all cursor-pointer font-bold text-xs"
+              >
+                Save Assignments
+              </button>
+            </div>
           </div>
         </div>
       )}

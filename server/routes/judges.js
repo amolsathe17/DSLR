@@ -12,18 +12,34 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge'), async (req,
     const { eventId } = req.params;
     const judgeId = req.user._id.toString();
 
-    // Find submissions for this event where at least one photograph has the judge assigned
-    const submissions = await Submission.find({
-      eventId,
-      isFinalSubmitted: true,
-      'photographs.assignedJudges': judgeId
-    });
+    const Event = require('../models/Event');
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    const isAssignedToEvent = event.assignedJudges && event.assignedJudges.includes(judgeId);
+
+    // Find submissions for this event
+    let submissions;
+    if (isAssignedToEvent) {
+      submissions = await Submission.find({
+        eventId,
+        isFinalSubmitted: true
+      });
+    } else {
+      submissions = await Submission.find({
+        eventId,
+        isFinalSubmitted: true,
+        'photographs.assignedJudges': judgeId
+      });
+    }
 
     // Extract only the photographs assigned to this judge
     const assignedPhotos = [];
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
-        if (photo.assignedJudges.includes(judgeId)) {
+        if (isAssignedToEvent || photo.assignedJudges.includes(judgeId)) {
           // Check if already graded
           const existingScore = photo.scores.find(s => s.judgeId === judgeId);
           assignedPhotos.push({
@@ -81,8 +97,12 @@ router.post('/score', protect, authorize('Judge'), async (req, res) => {
 
     const photo = submission.photographs[photoIndex];
 
-    // Check if the judge is indeed assigned to this photograph
-    if (!photo.assignedJudges.includes(judgeId)) {
+    // Check if the judge is indeed assigned to this photograph or the event
+    const Event = require('../models/Event');
+    const event = await Event.findById(submission.eventId);
+    const isAssignedToEvent = event && event.assignedJudges && event.assignedJudges.includes(judgeId);
+
+    if (!isAssignedToEvent && !photo.assignedJudges.includes(judgeId)) {
       return res.status(403).json({ success: false, message: 'You are not assigned to score this photograph' });
     }
 

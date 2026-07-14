@@ -263,6 +263,7 @@ router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
       sub.photographs.forEach(photo => {
         allPhotos.push({
           submissionId: sub._id,
+          eventId: sub.eventId,
           userId: sub.userId,
           participantName: sub.userName,
           participantEmail: sub.userEmail,

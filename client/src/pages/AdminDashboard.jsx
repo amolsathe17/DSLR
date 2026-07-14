@@ -19,7 +19,8 @@ import {
   AlertTriangle,
   UserCheck,
   Maximize2,
-  FileCheck
+  FileCheck,
+  RefreshCw
 } from 'lucide-react';
 import StatsCharts from '../components/StatsCharts';
 
@@ -154,6 +155,19 @@ export default function AdminDashboard() {
 
       const cData = await apiFetch('/api/categories');
       if (cData.success) setCategories(cData.categories);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRefreshAll = async () => {
+    try {
+      await Promise.all([
+        fetchJudgesAndEvents(),
+        fetchParticipants(),
+        fetchPhotographs(),
+        fetchStats()
+      ]);
     } catch (e) {
       console.error(e);
     }
@@ -940,9 +954,20 @@ export default function AdminDashboard() {
           {/* Right Column: Leaderboard / Publish results */}
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-4 border-b border-slate-100 dark:border-slate-800">
-                Score Leaderboard & Results Declaration
-              </h3>
+              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">
+                  Score Leaderboard & Results Declaration
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleRefreshAll}
+                  className="p-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold"
+                  title="Refresh Leaderboard & Progress"
+                >
+                  <RefreshCw size={12} className="shrink-0" />
+                  Refresh
+                </button>
+              </div>
 
               <div className="flex flex-col gap-6 mt-4">
                 {/* Select contest */}

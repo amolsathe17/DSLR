@@ -512,7 +512,7 @@ router.post('/final-submit', protect, async (req, res) => {
 // @access  Public
 router.get('/gallery', async (req, res) => {
   try {
-    const submissions = await Submission.find({ isFinalSubmitted: true });
+    const submissions = await Submission.find({ isFinalSubmitted: true, paymentStatus: 'Paid' });
     const approvedPhotos = [];
 
     submissions.forEach(sub => {

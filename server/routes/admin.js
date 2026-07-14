@@ -410,6 +410,7 @@ router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
           participantName: sub.userName,
           participantEmail: sub.userEmail,
           isFinalSubmitted: sub.isFinalSubmitted,
+          paymentStatus: sub.paymentStatus || 'Unpaid',
           photoId: photo.id,
           title: photo.title,
           category: photo.category,

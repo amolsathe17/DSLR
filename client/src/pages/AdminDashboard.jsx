@@ -1033,8 +1033,8 @@ export default function AdminDashboard() {
               <div className="flex flex-col gap-6 mt-4">
                 {/* Select contest */}
                 {events.map(e => {
-                  // Calculate rank averages for this event specifically
-                  const eventPhotos = photographs.filter(p => p.eventId === e._id);
+                  // Calculate rank averages for this event specifically (only paid ones)
+                  const eventPhotos = photographs.filter(p => p.eventId === e._id && p.paymentStatus === 'Paid');
                   const finalPhotos = eventPhotos.filter(p => p.isFinalSubmitted);
                   const gradedPhotos = eventPhotos.filter(p => p.scores && p.scores.length > 0);
 
@@ -1905,7 +1905,7 @@ export default function AdminDashboard() {
                         >
                           <option value="">-- Choose Photograph --</option>
                           {photographs
-                            .filter(p => p.status === 'Approved' && p.scores?.length > 0)
+                            .filter(p => p.status === 'Approved' && p.scores?.length > 0 && p.paymentStatus === 'Paid')
                             .map(p => (
                               <option key={p.photoId} value={`${p.submissionId}:${p.photoId}`}>
                                 {p.title} - By {p.participantName} (Avg: {p.averageScore})

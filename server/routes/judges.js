@@ -20,17 +20,19 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge'), async (req,
 
     const isAssignedToEvent = event.assignedJudges && event.assignedJudges.includes(judgeId);
 
-    // Find submissions for this event
+    // Find submissions for this event (only paid ones)
     let submissions;
     if (isAssignedToEvent) {
       submissions = await Submission.find({
         eventId,
-        isFinalSubmitted: true
+        isFinalSubmitted: true,
+        paymentStatus: 'Paid'
       });
     } else {
       submissions = await Submission.find({
         eventId,
         isFinalSubmitted: true,
+        paymentStatus: 'Paid',
         'photographs.assignedJudges': judgeId
       });
     }
@@ -39,6 +41,7 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge'), async (req,
     const assignedPhotos = [];
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
+        if (photo.status !== 'Approved') return;
         if (isAssignedToEvent || photo.assignedJudges.includes(judgeId)) {
           // Check if already graded
           const existingScore = photo.scores.find(s => s.judgeId === judgeId);
@@ -88,6 +91,10 @@ router.post('/score', protect, authorize('Judge'), async (req, res) => {
     const submission = await Submission.findById(submissionId);
     if (!submission) {
       return res.status(404).json({ success: false, message: 'Submission not found' });
+    }
+
+    if (submission.paymentStatus !== 'Paid') {
+      return res.status(400).json({ success: false, message: 'This entry is unpaid and cannot be scored' });
     }
 
     const photoIndex = submission.photographs.findIndex(p => p.id === photoId);

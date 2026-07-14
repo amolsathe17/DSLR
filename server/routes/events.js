@@ -163,4 +163,69 @@ router.post('/:id/publish-winners', protect, authorize('Admin'), async (req, res
   }
 });
 
+// @route   POST /api/events/:id/confirm-grading
+// @access  Private/Judge
+router.post('/:id/confirm-grading', protect, authorize('Judge'), async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    const judgeId = req.user._id.toString();
+    if (!event.assignedJudges || !event.assignedJudges.includes(judgeId)) {
+      return res.status(403).json({ success: false, message: 'You are not assigned as a judge for this event' });
+    }
+
+    // Double check that all finalized entries have been graded by this judge
+    const Submission = require('../models/Submission');
+    const submissions = await Submission.find({ eventId: event._id.toString(), isFinalSubmitted: true });
+    
+    let allGraded = true;
+    let pendingCount = 0;
+
+    submissions.forEach(sub => {
+      sub.photographs.forEach(photo => {
+        const hasScore = photo.scores.some(s => s.judgeId === judgeId);
+        if (!hasScore) {
+          allGraded = false;
+          pendingCount++;
+        }
+      });
+    });
+
+    if (!allGraded) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot confirm review yet. You have ${pendingCount} assigned photographs left to score.`
+      });
+    }
+
+    if (!event.confirmedJudges) {
+      event.confirmedJudges = [];
+    }
+
+    if (!event.confirmedJudges.includes(judgeId)) {
+      event.confirmedJudges.push(judgeId);
+    }
+
+    await event.save();
+
+    const AuditLog = require('../models/AuditLog');
+    await AuditLog.create({
+      userId: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Confirm Event Grading',
+      details: `Judge signed off on grading for event: ${event.title}`,
+      ipAddress: req.ip
+    });
+
+    res.json({ success: true, event, message: 'Grading evaluation successfully confirmed and signed off!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;

@@ -991,7 +991,9 @@ export default function AdminDashboard() {
                     });
                   });
 
-                  const approvalsPending = assignedJudges.length === 0 || completedReviews < totalRequiredReviews;
+                  const confirmedJudgesList = e.confirmedJudges || [];
+                  const allConfirmed = assignedJudges.every(jId => confirmedJudgesList.includes(jId));
+                  const approvalsPending = assignedJudges.length === 0 || completedReviews < totalRequiredReviews || !allConfirmed;
 
                   const pendingJudges = [];
                   if (approvalsPending && assignedJudges.length > 0) {
@@ -1004,10 +1006,17 @@ export default function AdminDashboard() {
                             gradedCount++;
                           }
                         });
+                        
+                        const isConfirmed = confirmedJudgesList.includes(jId);
                         if (gradedCount < finalPhotos.length) {
                           pendingJudges.push({
                             name: judgeObj.name,
-                            pendingCount: finalPhotos.length - gradedCount
+                            statusText: `${finalPhotos.length - gradedCount} left`
+                          });
+                        } else if (!isConfirmed) {
+                          pendingJudges.push({
+                            name: judgeObj.name,
+                            statusText: 'Awaiting Confirmation'
                           });
                         }
                       }
@@ -1110,7 +1119,7 @@ export default function AdminDashboard() {
                             </div>
                             {pendingJudges.length > 0 && (
                               <div className="pl-4.5 text-[9px] text-slate-500 dark:text-slate-400 font-semibold italic">
-                                Pending review from: {pendingJudges.map(pj => `${pj.name} (${pj.pendingCount} left)`).join(', ')}
+                                Pending review from: {pendingJudges.map(pj => `${pj.name} (${pj.statusText})`).join(', ')}
                               </div>
                             )}
                           </div>

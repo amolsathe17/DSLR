@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Camera, ShieldAlert, Award, Star, CheckCircle2, ChevronRight, X } from 'lucide-react';
+import { Camera, ShieldAlert, Award, Star, CheckCircle2, ChevronRight, X, Check, AlertTriangle } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function JudgeDashboard() {
@@ -129,9 +129,32 @@ export default function JudgeDashboard() {
     }
   };
 
+  const handleConfirmGrading = async () => {
+    if (!event) return;
+    if (!confirm("Are you sure you want to finalize and submit your final grading evaluations for this event? Once confirmed, you will sign off on your reviews for the administrator.")) return;
+    setLoading(true);
+    try {
+      const data = await apiFetch(`/api/events/${event._id}/confirm-grading`, {
+        method: 'POST'
+      });
+      if (data.success) {
+        setEvent(data.event);
+        setEvents(events.map(e => e._id === data.event._id ? data.event : e));
+        alert("Grading sign-off successfully submitted!");
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to submit grading sign-off");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Dynamic calculations
   const totalScore = creativity + composition + technicalQuality + storytelling + overallImpact;
   const averageScore = (totalScore / 5).toFixed(1);
+  const allGraded = photographs.length > 0 && photographs.every(p => p.graded);
+  const hasConfirmed = event?.confirmedJudges?.includes(user?._id);
 
   if (loading && photographs.length === 0) {
     return (
@@ -194,6 +217,41 @@ export default function JudgeDashboard() {
           
           {/* Photos grid */}
           <div className="lg:col-span-8 flex flex-col gap-6">
+            
+            {/* Confirmation Sign-Off Banner */}
+            {photographs.length > 0 && (
+              hasConfirmed ? (
+                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-800 dark:text-emerald-300">
+                  <div className="flex items-center gap-2 text-xs">
+                    <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <div>
+                      <p className="font-bold">Evaluation Signed Off</p>
+                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">You have confirmed your reviews for this event. Thank you!</p>
+                    </div>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg shrink-0">Confirmed</span>
+                </div>
+              ) : (
+                allGraded && (
+                  <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-850 dark:text-amber-300">
+                    <div className="flex items-start gap-2 text-xs">
+                      <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                      <div>
+                        <p className="font-bold">All Submissions Graded!</p>
+                        <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Please submit your final review confirmation to notify the administrator.</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleConfirmGrading}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-md cursor-pointer transition-colors shrink-0 text-center"
+                    >
+                      Confirm Review & Sign-Off
+                    </button>
+                  </div>
+                )
+              )
+            )}
+
             <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Assigned Submissions ({photographs.length})</h3>
             
             {photographs.length === 0 ? (

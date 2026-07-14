@@ -4,9 +4,10 @@ import { Camera, ShieldAlert, Award, Star, CheckCircle2, ChevronRight, X } from 
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function JudgeDashboard() {
-  const { apiFetch } = useAuth();
+  const { apiFetch, user } = useAuth();
   
   const [event, setEvent] = useState(null);
+  const [events, setEvents] = useState([]);
   const [photographs, setPhotographs] = useState([]);
   
   const [loading, setLoading] = useState(true);
@@ -25,13 +26,19 @@ export default function JudgeDashboard() {
     try {
       const eventData = await apiFetch('/api/events');
       if (eventData.success && eventData.events.length > 0) {
-        const active = eventData.events.find(e => e.status === 'Active') || eventData.events[0];
-        setEvent(active);
+        // Filter events where this judge is assigned
+        const assigned = eventData.events.filter(e => e.assignedJudges && e.assignedJudges.includes(user?._id));
+        setEvents(assigned);
         
-        // Fetch assigned photos for this active event
-        const photoData = await apiFetch(`/api/judges/assigned-photos/${active._id}`);
-        if (photoData.success) {
-          setPhotographs(photoData.photographs);
+        if (assigned.length > 0) {
+          const active = assigned.find(e => e.status === 'Active') || assigned[0];
+          setEvent(active);
+          
+          // Fetch assigned photos for this active event
+          const photoData = await apiFetch(`/api/judges/assigned-photos/${active._id}`);
+          if (photoData.success) {
+            setPhotographs(photoData.photographs);
+          }
         }
       }
     } catch (err) {
@@ -42,9 +49,30 @@ export default function JudgeDashboard() {
     }
   };
 
+  const handleEventChange = async (eId) => {
+    const selected = events.find(e => e._id === eId);
+    if (!selected) return;
+    setEvent(selected);
+    setLoading(true);
+    setActivePhoto(null);
+    try {
+      const photoData = await apiFetch(`/api/judges/assigned-photos/${selected._id}`);
+      if (photoData.success) {
+        setPhotographs(photoData.photographs);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Could not load photographs for this event');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchJudgeData();
-  }, []);
+    if (user?._id) {
+      fetchJudgeData();
+    }
+  }, [user?._id]);
 
   const handleOpenScoring = (photo) => {
     setActivePhoto(photo);
@@ -127,29 +155,55 @@ export default function JudgeDashboard() {
       )}
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
-          Judge Evaluation Portal
-        </h1>
-        <p className="text-xs text-slate-400">
-          Contest: <span className="font-semibold text-slate-700 dark:text-slate-200">{event?.title || 'None'}</span>
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div>
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
+            Judge Evaluation Portal
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Evaluating submissions assigned to your profile
+          </p>
+        </div>
+
+        {events.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-500">Contest:</span>
+            <select
+              value={event?._id || ''}
+              onChange={(e) => handleEventChange(e.target.value)}
+              className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              {events.map(e => (
+                <option key={e._id} value={e._id}>{e.title}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Photos grid */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-          <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Assigned Submissions ({photographs.length})</h3>
+      {events.length === 0 ? (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+          <Award size={48} className="text-indigo-600 dark:text-indigo-400 mb-2 animate-bounce" />
+          <h2 className="text-base font-extrabold text-slate-900 dark:text-white">No Assigned Contests</h2>
+          <p className="text-xs max-w-sm text-slate-500">
+            You are not currently assigned as a panel judge for any active events. Once the administrator assigns you to an event, you will see the photographs here for grading.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {photographs.length === 0 ? (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
-              <Camera size={36} className="text-slate-300" />
-              <p className="text-sm font-medium">No assigned photographs found.</p>
-              <p className="text-xs max-w-xs text-slate-500">The organizing administrator will assign photographic uploads to your judge profile for grading.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Photos grid */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Assigned Submissions ({photographs.length})</h3>
+            
+            {photographs.length === 0 ? (
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3 animate-pulse">
+                <Camera size={36} className="text-slate-300 mb-2" />
+                <p className="text-sm font-medium">No assigned photographs found.</p>
+                <p className="text-xs max-w-xs text-slate-500">There are no finalized contestant entry submissions uploaded for this contest yet.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {photographs.map((photo) => (
                 <div
                   key={photo.photoId}
@@ -288,9 +342,9 @@ export default function JudgeDashboard() {
             </div>
           )}
         </div>
-
       </div>
+    )}
 
-    </div>
-  );
+  </div>
+);
 }

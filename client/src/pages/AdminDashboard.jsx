@@ -993,6 +993,27 @@ export default function AdminDashboard() {
 
                   const approvalsPending = assignedJudges.length === 0 || completedReviews < totalRequiredReviews;
 
+                  const pendingJudges = [];
+                  if (approvalsPending && assignedJudges.length > 0) {
+                    assignedJudges.forEach(jId => {
+                      const judgeObj = judges.find(j => j._id === jId);
+                      if (judgeObj) {
+                        let gradedCount = 0;
+                        finalPhotos.forEach(p => {
+                          if (p.scores.some(s => s.judgeId === jId)) {
+                            gradedCount++;
+                          }
+                        });
+                        if (gradedCount < finalPhotos.length) {
+                          pendingJudges.push({
+                            name: judgeObj.name,
+                            pendingCount: finalPhotos.length - gradedCount
+                          });
+                        }
+                      }
+                    });
+                  }
+
                   return (
                     <div key={e._id} className="flex flex-col gap-4 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl">
                       <div className="flex justify-between items-center">
@@ -1078,13 +1099,20 @@ export default function AdminDashboard() {
                           ></div>
                         </div>
                         {approvalsPending && (
-                          <div className="flex items-center gap-1.5 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
-                            <AlertTriangle size={12} className="shrink-0" />
-                            <span>
-                              {assignedJudges.length === 0 
-                                ? 'Please assign judges to this event to begin grading.' 
-                                : `Approvals Pending: All assigned judges must grade all ${finalPhotos.length} entries before results can be published.`}
-                            </span>
+                          <div className="flex flex-col gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                            <div className="flex items-center gap-1.5">
+                              <AlertTriangle size={12} className="shrink-0" />
+                              <span>
+                                {assignedJudges.length === 0 
+                                  ? 'Please assign judges to this event to begin grading.' 
+                                  : `Approvals Pending: All assigned judges must grade all ${finalPhotos.length} entries before results can be published.`}
+                              </span>
+                            </div>
+                            {pendingJudges.length > 0 && (
+                              <div className="pl-4.5 text-[9px] text-slate-500 dark:text-slate-400 font-semibold italic">
+                                Pending review from: {pendingJudges.map(pj => `${pj.name} (${pj.pendingCount} left)`).join(', ')}
+                              </div>
+                            )}
                           </div>
                         )}
                         {!approvalsPending && finalPhotos.length > 0 && (

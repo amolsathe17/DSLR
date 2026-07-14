@@ -68,6 +68,8 @@ export default function AdminDashboard() {
   const [newEventTheme, setNewEventTheme] = useState('');
   const [newEventDeadline, setNewEventDeadline] = useState('');
   const [newEventRules, setNewEventRules] = useState('');
+  const [showEventSuccessModal, setShowEventSuccessModal] = useState(false);
+  const [createdEventTitle, setCreatedEventTitle] = useState('');
   
   // Selection/Modals
   const [selectedPhoto, setSelectedPhoto] = useState(null); // zoom / detail
@@ -311,10 +313,27 @@ export default function AdminDashboard() {
         })
       });
       if (data.success) {
+        setCreatedEventTitle(newEventTitle);
+        setShowEventSuccessModal(true);
         setNewEventTitle('');
         setNewEventTheme('');
         setNewEventDeadline('');
         setNewEventRules('');
+        fetchJudgesAndEvents();
+      }
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!confirm('Are you sure you want to delete this event? This will permanently delete the event record, rules, and winner lists. Proceed?')) return;
+    try {
+      const data = await apiFetch(`/api/events/${eventId}`, {
+        method: 'DELETE'
+      });
+      if (data.success) {
+        alert('Event deleted successfully!');
         fetchJudgesAndEvents();
       }
     } catch (e) {
@@ -1147,6 +1166,13 @@ export default function AdminDashboard() {
                           Activate
                         </button>
                       )}
+                      <button
+                        onClick={() => handleDeleteEvent(e._id)}
+                        className="p-1.5 text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                        title="Delete Contest permanently"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -1807,6 +1833,33 @@ export default function AdminDashboard() {
                 Save Assignments
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONTEST CREATION SUCCESS MODAL */}
+      {showEventSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-2xl mb-2">
+                <Check size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Contest Draft Created
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                The contest draft <strong>"{createdEventTitle}"</strong> has been successfully created. You can now assign judges to it or click "Activate" to publish it live for contestants.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowEventSuccessModal(false)}
+              className="w-full bg-slate-900 hover:bg-slate-850 dark:bg-indigo-650 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+            >
+              Awesome, Understood
+            </button>
           </div>
         </div>
       )}

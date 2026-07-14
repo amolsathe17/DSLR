@@ -17,6 +17,107 @@ const getStartOfDay = (d) => {
   return date;
 };
 
+// @desc    Get all events history with details
+// @route   GET /api/admin/events-history
+// @access  Private/Admin
+router.get('/events-history', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const Event = require('../models/Event');
+    const events = await Event.find({}).sort({ createdAt: -1 });
+
+    const history = [];
+
+    for (const event of events) {
+      // Find submissions for this event
+      const submissions = await Submission.find({ eventId: event._id.toString() });
+
+      // Unique participants count
+      const participantIds = new Set(submissions.map(s => s.userId));
+      const participantsCount = participantIds.size;
+
+      // Extract participant details (names and emails)
+      const participantDetails = [];
+      const seenUserIds = new Set();
+      submissions.forEach(sub => {
+        if (!seenUserIds.has(sub.userId)) {
+          seenUserIds.add(sub.userId);
+          participantDetails.push({
+            userId: sub.userId,
+            name: sub.userName || 'Unknown',
+            email: sub.userEmail || 'N/A',
+            isFinalSubmitted: sub.isFinalSubmitted
+          });
+        }
+      });
+
+      // Photos details
+      let totalPhotos = 0;
+      let approvedPhotos = 0;
+      let rejectedPhotos = 0;
+      let pendingPhotos = 0;
+
+      submissions.forEach(s => {
+        s.photographs.forEach(p => {
+          totalPhotos++;
+          if (p.status === 'Approved') approvedPhotos++;
+          else if (p.status === 'Rejected') rejectedPhotos++;
+          else pendingPhotos++;
+        });
+      });
+
+      // Payments stats for this event
+      const payments = await Payment.find({ eventId: event._id.toString(), status: 'Success' });
+      const totalPaymentsCount = payments.length;
+      const totalRevenue = payments.reduce((acc, curr) => acc + curr.amount, 0);
+
+      const paymentDetails = payments.map(p => ({
+        userName: p.userName || 'Unknown',
+        userEmail: p.userEmail || 'N/A',
+        amount: p.amount,
+        packageName: p.packageName,
+        transactionId: p.transactionId,
+        paymentDate: p.paymentDate || p.createdAt
+      }));
+
+      // Judges names
+      const judgeUsers = await User.find({ _id: { $in: event.assignedJudges || [] } });
+      const judgeDetails = judgeUsers.map(j => ({
+        id: j._id,
+        name: j.name,
+        email: j.email,
+        city: j.city,
+        hasConfirmed: event.confirmedJudges?.includes(j._id.toString())
+      }));
+
+      history.push({
+        id: event._id,
+        title: event.title,
+        theme: event.theme,
+        status: event.status,
+        deadline: event.deadline,
+        createdAt: event.createdAt,
+        winnersPublished: event.winnersPublished,
+        winners: event.winners || [],
+        participantsCount,
+        participantDetails,
+        totalPhotos,
+        approvedPhotos,
+        rejectedPhotos,
+        pendingPhotos,
+        totalPaymentsCount,
+        totalRevenue,
+        paymentDetails,
+        judgeDetails
+      });
+    }
+
+    res.json({ success: true, history });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @desc    Get dashboard statistics and chart data
 // @route   GET /api/admin/dashboard-stats
 // @access  Private/Admin

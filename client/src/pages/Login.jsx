@@ -56,11 +56,13 @@ export default function Login() {
       const data = await login(email, password);
       if (data?.success) {
         navigate(
-          redirectPath === '/' && data.user.role === 'Admin' 
-            ? '/admin' 
-            : redirectPath === '/' && data.user.role === 'Judge' 
-              ? '/judge' 
-              : redirectPath
+          redirectPath === '/'
+            ? (data.user.role === 'Admin' 
+                ? '/admin' 
+                : data.user.role === 'Judge' 
+                  ? '/judge' 
+                  : '/dashboard')
+            : redirectPath
         );
       }
     } catch (err) {
@@ -134,11 +136,13 @@ export default function Login() {
 
       if (data.success) {
         navigate(
-          redirectPath === '/' && data.user.role === 'Admin' 
-            ? '/admin' 
-            : redirectPath === '/' && data.user.role === 'Judge' 
-              ? '/judge' 
-              : redirectPath
+          redirectPath === '/'
+            ? (data.user.role === 'Admin' 
+                ? '/admin' 
+                : data.user.role === 'Judge' 
+                  ? '/judge' 
+                  : '/dashboard')
+            : redirectPath
         );
       }
     } catch (err) {

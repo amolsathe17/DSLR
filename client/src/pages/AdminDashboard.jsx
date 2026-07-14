@@ -76,6 +76,9 @@ export default function AdminDashboard() {
   const [showDeleteCatModal, setShowDeleteCatModal] = useState(false);
   const [catToDeleteId, setCatToDeleteId] = useState(null);
   const [catToDeleteName, setCatToDeleteName] = useState('');
+  const [showDeleteParticipantModal, setShowDeleteParticipantModal] = useState(false);
+  const [participantToDeleteId, setParticipantToDeleteId] = useState(null);
+  const [participantToDeleteName, setParticipantToDeleteName] = useState('');
   
   // Selection/Modals
   const [selectedPhoto, setSelectedPhoto] = useState(null); // zoom / detail
@@ -186,19 +189,24 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteParticipant = async (id) => {
-    if (!confirm('Are you sure you want to delete this participant? This deletes their account and all uploaded submissions permanently.')) return;
+  const executeDeleteParticipant = async () => {
+    if (!participantToDeleteId) return;
+    setShowDeleteParticipantModal(false);
     try {
-      const data = await apiFetch(`/api/admin/participants/${id}`, {
+      const data = await apiFetch(`/api/admin/participants/${participantToDeleteId}`, {
         method: 'DELETE'
       });
       if (data.success) {
+        alert('Participant deleted successfully!');
         fetchParticipants();
         fetchPhotographs();
         fetchStats();
       }
     } catch (e) {
       alert(e.message);
+    } finally {
+      setParticipantToDeleteId(null);
+      setParticipantToDeleteName('');
     }
   };
 
@@ -644,7 +652,11 @@ export default function AdminDashboard() {
                           <Ban size={14} />
                         </button>
                         <button
-                          onClick={() => handleDeleteParticipant(p._id)}
+                          onClick={() => {
+                            setParticipantToDeleteId(p._id);
+                            setParticipantToDeleteName(p.name);
+                            setShowDeleteParticipantModal(true);
+                          }}
                           className="p-1.5 bg-red-50 border border-red-200 text-red-600 dark:bg-red-950/20 rounded-lg cursor-pointer"
                           title="Delete User & Submissions"
                         >
@@ -1953,6 +1965,42 @@ export default function AdminDashboard() {
                 className="flex-1 bg-red-600 hover:bg-red-750 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
               >
                 Delete Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE PARTICIPANT CONFIRMATION MODAL */}
+      {showDeleteParticipantModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-550 rounded-2xl mb-2 animate-bounce">
+                <AlertTriangle size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Delete Participant Confirmation
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to delete the participant <strong>"{participantToDeleteName}"</strong>? This deletes their account and all uploaded submissions permanently. Proceed?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteParticipantModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDeleteParticipant}
+                className="flex-1 bg-red-650 hover:bg-red-755 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+              >
+                Delete Participant
               </button>
             </div>
           </div>

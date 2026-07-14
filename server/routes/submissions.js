@@ -368,7 +368,6 @@ router.delete('/photo/:eventId/:photoId', protect, async (req, res) => {
   try {
     const { eventId, photoId } = req.params;
     
-    const Event = require('../models/Event');
     const event = await Event.findById(eventId);
     if (event && event.status === 'Completed') {
       return res.status(400).json({ success: false, message: 'This contest has been completed. Submissions cannot be modified or deleted.' });
@@ -519,7 +518,6 @@ router.post('/final-submit', protect, async (req, res) => {
 // @access  Public
 router.get('/gallery', async (req, res) => {
   try {
-    const Event = require('../models/Event');
     const completedEvents = await Event.find({ status: 'Completed' });
     const completedEventIds = completedEvents.map(e => e._id.toString());
 

@@ -22,7 +22,6 @@ const getStartOfDay = (d) => {
 // @access  Private/Admin
 router.get('/events-history', protect, authorize('Admin'), async (req, res) => {
   try {
-    const Event = require('../models/Event');
     const events = await Event.find({}).sort({ createdAt: -1 });
 
     const history = [];
@@ -332,7 +331,6 @@ router.delete('/participants/:id', protect, authorize('Admin'), async (req, res)
     const Submission = require('../models/Submission');
     const submissions = await Submission.find({ userId: req.params.id });
     const eventIds = submissions.map(s => s.eventId);
-    const Event = require('../models/Event');
     const completedEvents = await Event.countDocuments({
       _id: { $in: eventIds },
       status: 'Completed'
@@ -377,7 +375,6 @@ router.delete('/judges/:id', protect, authorize('Admin'), async (req, res) => {
     }
 
     // Find if judge is assigned to any completed events
-    const Event = require('../models/Event');
     const completedEventsWithJudge = await Event.countDocuments({
       assignedJudges: req.params.id,
       status: 'Completed'
@@ -390,7 +387,6 @@ router.delete('/judges/:id', protect, authorize('Admin'), async (req, res) => {
     await User.deleteOne({ _id: req.params.id });
 
     // Pull from all event assignedJudges and confirmedJudges
-    const Event = require('../models/Event');
     await Event.updateMany({}, {
       $pull: {
         assignedJudges: req.params.id,

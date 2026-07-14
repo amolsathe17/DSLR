@@ -244,6 +244,7 @@ router.post('/dummy-bypass', protect, async (req, res) => {
     }
 
     // Create a local Payment record
+    const invoiceNumber = 'INV-' + Date.now().toString().slice(-6) + '-' + Math.floor(1000 + Math.random() * 9000);
     const dummyPaymentId = 'DUMMY-' + Math.random().toString(36).substring(2, 15).toUpperCase();
     const payment = new Payment({
       userId: req.user._id.toString(),
@@ -253,6 +254,7 @@ router.post('/dummy-bypass', protect, async (req, res) => {
       eventTitle: event.title,
       entryId: submission._id.toString(),
       packageId: plan.packageId,
+      packageName: plan.name,
       amount: plan.amount,
       currency: 'INR',
       paymentMethod: 'Dummy Bypass',
@@ -261,7 +263,8 @@ router.post('/dummy-bypass', protect, async (req, res) => {
       signatureVerified: true,
       status: 'Success',
       paymentDate: new Date(),
-      transactionId: dummyPaymentId
+      transactionId: dummyPaymentId,
+      invoiceNumber
     });
 
     await payment.save();

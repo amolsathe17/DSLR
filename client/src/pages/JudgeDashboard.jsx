@@ -22,6 +22,8 @@ export default function JudgeDashboard() {
   const [overallImpact, setOverallImpact] = useState(5);
   const [remarks, setRemarks] = useState('');
 
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState('all');
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successTitle, setSuccessTitle] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -48,6 +50,7 @@ export default function JudgeDashboard() {
           const photoData = await apiFetch(`/api/judges/assigned-photos/${active._id}`);
           if (photoData.success) {
             setPhotographs(photoData.photographs);
+            setSelectedSubmissionId('all');
           }
         }
       }
@@ -69,6 +72,7 @@ export default function JudgeDashboard() {
       const photoData = await apiFetch(`/api/judges/assigned-photos/${selected._id}`);
       if (photoData.success) {
         setPhotographs(photoData.photographs);
+        setSelectedSubmissionId('all');
       }
     } catch (err) {
       console.error(err);
@@ -166,6 +170,22 @@ export default function JudgeDashboard() {
   const allGraded = photographs.length > 0 && photographs.every(p => p.graded);
   const hasConfirmed = event?.confirmedJudges?.includes(user?.id);
 
+  const participants = [];
+  const seenSubmissions = new Set();
+  photographs.forEach(p => {
+    if (!seenSubmissions.has(p.submissionId)) {
+      seenSubmissions.add(p.submissionId);
+      participants.push({
+        submissionId: p.submissionId,
+        name: p.participantName
+      });
+    }
+  });
+
+  const displayedPhotos = selectedSubmissionId === 'all'
+    ? photographs
+    : photographs.filter(p => p.submissionId === selectedSubmissionId);
+
   if (loading && photographs.length === 0) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">
@@ -199,17 +219,35 @@ export default function JudgeDashboard() {
         </div>
 
         {events.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500">Contest:</span>
-            <select
-              value={event?._id || ''}
-              onChange={(e) => handleEventChange(e.target.value)}
-              className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-            >
-              {events.map(e => (
-                <option key={e._id} value={e._id}>{e.title}</option>
-              ))}
-            </select>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500">Contest:</span>
+              <select
+                value={event?._id || ''}
+                onChange={(e) => handleEventChange(e.target.value)}
+                className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              >
+                {events.map(e => (
+                  <option key={e._id} value={e._id}>{e.title}</option>
+                ))}
+              </select>
+            </div>
+
+            {participants.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500">Participant:</span>
+                <select
+                  value={selectedSubmissionId}
+                  onChange={(e) => setSelectedSubmissionId(e.target.value)}
+                  className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                >
+                  <option value="all">All Participants ({participants.length})</option>
+                  {participants.map(p => (
+                    <option key={p.submissionId} value={p.submissionId}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -262,17 +300,17 @@ export default function JudgeDashboard() {
               )
             )}
 
-            <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Assigned Submissions ({photographs.length})</h3>
+            <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Assigned Submissions ({displayedPhotos.length})</h3>
             
-            {photographs.length === 0 ? (
+            {displayedPhotos.length === 0 ? (
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3 animate-pulse">
                 <Camera size={36} className="text-slate-300 mb-2" />
                 <p className="text-sm font-medium">No assigned photographs found.</p>
-                <p className="text-xs max-w-xs text-slate-500">There are no finalized contestant entry submissions uploaded for this contest yet.</p>
+                <p className="text-xs max-w-xs text-slate-500">There are no finalized contestant entry submissions uploaded for this participant yet.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {photographs.map((photo) => (
+              {displayedPhotos.map((photo) => (
                 <div
                   key={photo.photoId}
                   className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"

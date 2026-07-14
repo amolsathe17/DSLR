@@ -41,6 +41,8 @@ export default function AdminDashboard() {
   const [photoSearch, setPhotoSearch] = useState('');
   const [photoCategory, setPhotoCategory] = useState('');
   const [photoStatus, setPhotoStatus] = useState('');
+  const [photoDslrStatus, setPhotoDslrStatus] = useState('');
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
 
   // Judges states
   const [judges, setJudges] = useState([]);
@@ -108,7 +110,7 @@ export default function AdminDashboard() {
 
   const fetchPhotographs = async () => {
     try {
-      const url = `/api/admin/photographs?search=${photoSearch}&category=${photoCategory}&status=${photoStatus}`;
+      const url = `/api/admin/photographs?search=${photoSearch}&category=${photoCategory}&status=${photoStatus}&dslrStatus=${photoDslrStatus}`;
       const data = await apiFetch(url);
       if (data.success) {
         setPhotographs(data.photographs);
@@ -155,7 +157,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchPhotographs();
-  }, [photoSearch, photoCategory, photoStatus]);
+  }, [photoSearch, photoCategory, photoStatus, photoDslrStatus]);
 
   // Actions
   const handleSuspendParticipant = async (id, isSuspended) => {
@@ -553,6 +555,13 @@ export default function AdminDashboard() {
                     <td className="py-3.5 pl-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button
+                          onClick={() => setSelectedParticipant(p)}
+                          className="p-1.5 bg-indigo-50 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/20 rounded-lg cursor-pointer"
+                          title="Audit Profile Details"
+                        >
+                          <FileCheck size={14} />
+                        </button>
+                        <button
                           onClick={() => handleSuspendParticipant(p._id, !p.isSuspended)}
                           className={`p-1.5 rounded-lg border cursor-pointer ${
                             p.isSuspended 
@@ -617,10 +626,20 @@ export default function AdminDashboard() {
                 onChange={(e) => setPhotoStatus(e.target.value)}
                 className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
               >
-                <option value="">All Statuses</option>
+                <option value="">All Audit Statuses</option>
                 <option value="Pending">Pending Audit</option>
                 <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
+              </select>
+              <select
+                value={photoDslrStatus}
+                onChange={(e) => setPhotoDslrStatus(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+              >
+                <option value="">All DSLR Statuses</option>
+                <option value="VERIFIED">Verified DSLR</option>
+                <option value="MANUAL_REVIEW">Manual Review EXIF</option>
+                <option value="REJECTED">Rejected Mobile</option>
               </select>
             </div>
           </div>
@@ -700,19 +719,34 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Actions / Status badges */}
-                  <div className="border-t border-slate-100 dark:border-slate-850 pt-3 flex items-center justify-between gap-2">
-                    <div>
-                      <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Audit State</span>
-                      {photo.status === 'Pending' ? (
-                        <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">Pending</span>
-                      ) : photo.status === 'Approved' ? (
-                        <span className="text-[10px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded font-bold">Approved</span>
-                      ) : (
-                        <div>
-                          <span className="text-[10px] bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 px-2 py-0.5 rounded font-bold">Rejected</span>
-                          <span className="block text-[9px] text-red-500 mt-1 line-clamp-1">"{photo.rejectReason}"</span>
-                        </div>
-                      )}
+                  <div className="border-t border-slate-100 dark:border-slate-850 pt-3 flex items-start justify-between gap-2">
+                    <div className="flex flex-col gap-2">
+                      <div>
+                        <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Audit State</span>
+                        {photo.status === 'Pending' ? (
+                          <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">Pending</span>
+                        ) : photo.status === 'Approved' ? (
+                          <span className="text-[10px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded font-bold">Approved</span>
+                        ) : (
+                          <div>
+                            <span className="text-[10px] bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 px-2 py-0.5 rounded font-bold">Rejected</span>
+                            <span className="block text-[9px] text-red-500 mt-1 line-clamp-1">"{photo.rejectReason}"</span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">DSLR Validation</span>
+                        {photo.dslrValidationStatus === 'VERIFIED' ? (
+                          <span className="text-[10px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded font-bold">Verified DSLR</span>
+                        ) : photo.dslrValidationStatus === 'REJECTED' ? (
+                          <span className="text-[10px] bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 px-2 py-0.5 rounded font-bold">Rejected Mobile</span>
+                        ) : (
+                          <div>
+                            <span className="text-[10px] bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400 px-2 py-0.5 rounded font-bold">Manual Review</span>
+                            <span className="block text-[8px] text-slate-400 mt-0.5 line-clamp-1">{photo.validationReason}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {photo.status === 'Pending' && (
@@ -1296,6 +1330,36 @@ export default function AdminDashboard() {
                         <span>Capture Date:</span>
                         <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.dateCaptured ? new Date(selectedPhoto.dateCaptured).toLocaleDateString() : 'N/A'}</p>
                       </div>
+                      <div>
+                        <span>Dimensions:</span>
+                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.width && selectedPhoto.height ? `${selectedPhoto.width}x${selectedPhoto.height}` : 'N/A'}</p>
+                      </div>
+                      <div>
+                        <span>Format:</span>
+                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.format || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Cloudinary & Security</span>
+                    <div className="text-[10px] text-slate-500 flex flex-col gap-1">
+                      <p>Cloudinary ID: <span className="font-mono text-slate-700 dark:text-slate-350">{selectedPhoto.cloudinaryPublicId || 'N/A'}</span></p>
+                      <p>Original File: <span className="font-mono text-slate-700 dark:text-slate-350">{selectedPhoto.originalFilename || 'N/A'}</span></p>
+                      <p>DSLR Validation: 
+                        <span className={`ml-1 font-bold ${
+                          selectedPhoto.dslrValidationStatus === 'VERIFIED' 
+                            ? 'text-emerald-500' 
+                            : selectedPhoto.dslrValidationStatus === 'REJECTED' 
+                              ? 'text-red-500' 
+                              : 'text-amber-500'
+                        }`}>
+                          {selectedPhoto.dslrValidationStatus}
+                        </span>
+                      </p>
+                      {selectedPhoto.validationReason && (
+                        <p className="italic text-slate-400 mt-0.5">"{selectedPhoto.validationReason}"</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1328,6 +1392,148 @@ export default function AdminDashboard() {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PARTICIPANT DETAIL INSPECTOR MODAL */}
+      {selectedParticipant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <div>
+                <h3 className="font-display font-black text-lg text-slate-900 dark:text-white">Photographer Profile Audit</h3>
+                <p className="text-xs text-slate-400">Detailed account, payment and entry records for {selectedParticipant.name}</p>
+              </div>
+              <button
+                onClick={() => setSelectedParticipant(null)}
+                className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 rounded-full cursor-pointer transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="p-6 overflow-y-auto flex flex-col gap-6 text-xs">
+              {/* Profile and Entry Overview Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* 1. Account Details */}
+                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 flex flex-col gap-2">
+                  <h4 className="font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider text-[10px]">Account Profile</h4>
+                  <div className="flex flex-col gap-1 text-slate-500">
+                    <p>Name: <span className="font-bold text-slate-800 dark:text-slate-200">{selectedParticipant.name}</span></p>
+                    <p>Email: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.email}</span></p>
+                    <p>Mobile: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.mobile}</span></p>
+                    <p>City: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.city}</span></p>
+                    <p>Registered: <span className="font-semibold text-slate-700 dark:text-slate-300">{new Date(selectedParticipant.createdAt).toLocaleString()}</span></p>
+                    <p>Last Login: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.lastLogin ? new Date(selectedParticipant.lastLogin).toLocaleString() : 'Never'}</span></p>
+                  </div>
+                </div>
+
+                {/* 2. Entry details */}
+                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 flex flex-col gap-2">
+                  <h4 className="font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider text-[10px]">Contest Folder</h4>
+                  <div className="flex flex-col gap-1 text-slate-500">
+                    <p>Entry Number: <span className="font-bold text-slate-800 dark:text-slate-200">{selectedParticipant.entryNumber}</span></p>
+                    <p>Plan Selected: <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      {selectedParticipant.packageId === 'pkg-1' ? 'Starter (1 Photo)' : selectedParticipant.packageId === 'pkg-2' ? 'Amateur (2 Photos)' : selectedParticipant.packageId === 'pkg-3' ? 'Pro (5 Photos)' : 'None'}
+                    </span></p>
+                    <p>Entry Amount: <span className="font-semibold text-slate-700 dark:text-slate-300 font-bold text-slate-950 dark:text-white">₹{selectedParticipant.amount}</span></p>
+                    <p>Slots Limit: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.photoLimit} photos</span></p>
+                    <p>Uploaded Count: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.photosCount} photos</span></p>
+                    <p>Remaining Slots: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.remainingSlots}</span></p>
+                    <p>Entry Status: 
+                      <span className={`ml-1 px-2 py-0.5 rounded text-[10px] font-bold ${
+                        selectedParticipant.entryStatus === 'Finalized' 
+                          ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' 
+                          : 'bg-slate-100 text-slate-650 dark:bg-slate-800'
+                      }`}>
+                        {selectedParticipant.entryStatus}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3. Payment Gateway Audits */}
+                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 flex flex-col gap-2">
+                  <h4 className="font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider text-[10px]">Razorpay Gateway Audit</h4>
+                  <div className="flex flex-col gap-1 text-slate-500">
+                    <p>Payment Status: 
+                      <span className={`ml-1 px-2 py-0.5 rounded text-[10px] font-bold ${
+                        selectedParticipant.paymentStatus === 'Paid' 
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' 
+                          : selectedParticipant.paymentStatus === 'Pending' 
+                            ? 'bg-amber-50 text-amber-650' 
+                            : 'bg-red-50 text-red-600 dark:bg-red-950/20'
+                      }`}>
+                        {selectedParticipant.paymentStatus}
+                      </span>
+                    </p>
+                    <p>Razorpay Order ID: <span className="font-mono font-semibold text-slate-700 dark:text-slate-350 block truncate">{selectedParticipant.razorpayOrderId}</span></p>
+                    <p>Razorpay Payment ID: <span className="font-mono font-semibold text-slate-700 dark:text-slate-350 block truncate">{selectedParticipant.razorpayPaymentId}</span></p>
+                    <p>Payment Date: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.paymentDate ? new Date(selectedParticipant.paymentDate).toLocaleString() : 'N/A'}</span></p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Uploaded Photos Section */}
+              <div>
+                <h4 className="font-bold text-slate-750 dark:text-slate-300 uppercase tracking-wider text-[10px] mb-3">Submitted Photographs ({selectedParticipant.photosCount})</h4>
+                
+                {selectedParticipant.photographs && selectedParticipant.photographs.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {selectedParticipant.photographs.map(photo => (
+                      <div key={photo.id} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex gap-3 p-3">
+                        <img 
+                          src={photo.fileUrl} 
+                          alt={photo.title}
+                          className="w-24 h-24 object-cover rounded-lg shrink-0 border border-slate-200 dark:border-slate-800"
+                        />
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <h5 className="font-bold text-slate-900 dark:text-white truncate">{photo.title}</h5>
+                          <p className="text-[9px] text-slate-400">Filename: <span className="font-mono truncate block">{photo.originalFilename || 'N/A'}</span></p>
+                          <p className="text-[9px] text-slate-500">Camera: <span className="font-semibold">{photo.cameraBrand} {photo.cameraModel}</span></p>
+                          <p className="text-[9px] text-slate-500">Lens: <span className="font-semibold">{photo.lensUsed || 'N/A'}</span></p>
+                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${
+                              photo.status === 'Approved' 
+                                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' 
+                                : photo.status === 'Rejected' 
+                                  ? 'bg-red-50 text-red-600' 
+                                  : 'bg-slate-100 text-slate-500'
+                            }`}>
+                              Audit: {photo.status}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${
+                              photo.dslrValidationStatus === 'VERIFIED' 
+                                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' 
+                                : photo.dslrValidationStatus === 'REJECTED' 
+                                  ? 'bg-red-50 text-red-600' 
+                                  : 'bg-amber-50 text-amber-650'
+                            }`}>
+                              EXIF: {photo.dslrValidationStatus}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-150 text-slate-450 italic">No photographs uploaded yet.</div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-right">
+              <button
+                onClick={() => setSelectedParticipant(null)}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-850 dark:bg-indigo-650 dark:hover:bg-indigo-700 text-white font-bold rounded-xl cursor-pointer"
+              >
+                Close Audit View
+              </button>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Submission = require('../models/Submission');
 const Payment = require('../models/Payment');
+const Photo = require('../models/Photo');
 const Event = require('../models/Event');
 const Category = require('../models/Category');
 const AuditLog = require('../models/AuditLog');
@@ -161,7 +162,17 @@ router.get('/participants', protect, authorize('Admin'), async (req, res) => {
         packageId: submission ? submission.packageId : 'None',
         isFinalSubmitted: submission ? submission.isFinalSubmitted : false,
         paymentStatus: payment ? 'Paid' : (submission?.paymentId ? 'Pending' : 'Unpaid'),
-        photosCount: submission ? submission.photographs.length : 0
+        photosCount: submission ? submission.photographs.length : 0,
+        // Entry metadata
+        entryNumber: submission ? submission.entryNumber : 'N/A',
+        amount: submission ? submission.amount : 0,
+        photoLimit: submission ? submission.photoLimit : 0,
+        remainingSlots: submission ? (submission.photoLimit - submission.photographs.length) : 0,
+        entryStatus: submission ? (submission.isFinalSubmitted ? 'Finalized' : 'Draft') : 'None',
+        razorpayOrderId: payment ? payment.razorpayOrderId : 'N/A',
+        razorpayPaymentId: payment ? payment.razorpayPaymentId : 'N/A',
+        paymentDate: payment ? payment.paymentDate : null,
+        photographs: submission ? submission.photographs : []
       };
     }));
 
@@ -241,7 +252,7 @@ router.delete('/participants/:id', protect, authorize('Admin'), async (req, res)
 // @access  Private/Admin
 router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { search, category, status } = req.query;
+    const { search, category, status, dslrStatus } = req.query;
     
     // Find all submissions containing photographs
     const query = {};
@@ -273,6 +284,16 @@ router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
           rejectReason: photo.rejectReason,
           assignedJudges: photo.assignedJudges,
           scores: photo.scores,
+          // Newly added fields
+          cloudinaryPublicId: photo.cloudinaryPublicId,
+          width: photo.width,
+          height: photo.height,
+          format: photo.format,
+          dslrValidationStatus: photo.dslrValidationStatus || 'MANUAL_REVIEW',
+          validationReason: photo.validationReason || '',
+          originalFilename: photo.originalFilename || '',
+          uploadTimestamp: photo.uploadTimestamp || photo.createdAt,
+          deletionStatus: photo.deletionStatus || false,
           averageScore: photo.scores.length > 0
             ? parseFloat((photo.scores.reduce((acc, s) => acc + s.averageScore, 0) / photo.scores.length).toFixed(2))
             : 0
@@ -286,6 +307,9 @@ router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
     }
     if (status) {
       allPhotos = allPhotos.filter(p => p.status === status);
+    }
+    if (dslrStatus) {
+      allPhotos = allPhotos.filter(p => p.dslrValidationStatus === dslrStatus);
     }
     if (search) {
       const term = search.toLowerCase();
@@ -327,6 +351,21 @@ router.put('/photographs/:submissionId/:photoId/status', protect, authorize('Adm
 
     submission.photographs[photoIndex].status = status;
     submission.photographs[photoIndex].rejectReason = status === 'Rejected' ? rejectReason : '';
+    
+    // Sync status change to stand-alone Photo collection
+    const photo = submission.photographs[photoIndex];
+    if (photo.cloudinaryPublicId) {
+      const photoDoc = await Photo.findOne({ 
+        entryId: submission._id.toString(),
+        cloudinaryPublicId: photo.cloudinaryPublicId
+      });
+      if (photoDoc) {
+        photoDoc.dslrValidationStatus = status === 'Approved' ? 'VERIFIED' : 'REJECTED';
+        photoDoc.validationReason = status === 'Approved' ? 'Admin approved.' : `Admin rejected. Reason: ${rejectReason}`;
+        await photoDoc.save();
+      }
+    }
+    
     await submission.save();
 
     await AuditLog.create({

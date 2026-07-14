@@ -19,8 +19,32 @@ const reportRoutes = require("./routes/reports");
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+// Secure CORS configuration matching allowed Vercel frontend URL & localhost
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS Policy Violation: Origin "${origin}" not allowed.`));
+    }
+  },
+  credentials: true
+}));
+
+// Capture raw request body for Razorpay webhook verification
+app.use(express.json({
+  limit: "10mb",
+  verify: (req, res, buf, encoding) => {
+    if (req.originalUrl && req.originalUrl.includes("/webhook")) {
+      req.rawBody = buf.toString(encoding || "utf8");
+    }
+  }
+}));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // Create uploads folder if it doesn't exist
@@ -42,6 +66,16 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/judges", judgeRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
+
+// Health Check Route
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "OK",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    isMockMode: require("./config/db").checkMockMode()
+  });
+});
 
 // Home Route
 app.get("/", (req, res) => {

@@ -3,7 +3,10 @@ const router = express.Router();
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const exifr = require('exifr');
+const cloudinary = require('../config/cloudinary');
 const Submission = require('../models/Submission');
+const Photo = require('../models/Photo');
 const Event = require('../models/Event');
 const Payment = require('../models/Payment');
 const AuditLog = require('../models/AuditLog');
@@ -21,12 +24,58 @@ const calculateFileHash = (filePath) => {
   });
 };
 
+// Helper for backend DSLR EXIF checks
+const validateDSLR = (exif) => {
+  if (!exif || (!exif.Make && !exif.Model)) {
+    return {
+      status: 'MANUAL_REVIEW',
+      reason: 'No camera EXIF device signatures detected.'
+    };
+  }
+
+  const make = (exif.Make || '').toLowerCase().trim();
+  const model = (exif.Model || '').toLowerCase().trim();
+
+  // Mobile device list
+  const mobileBrands = [
+    'apple', 'samsung', 'google', 'xiaomi', 'oneplus', 'huawei', 'oppo', 'vivo',
+    'realme', 'motorola', 'nokia', 'lg', 'htc', 'lenovo', 'asus', 'meizu', 'sony mobile'
+  ];
+
+  const isMobile = mobileBrands.some(brand => make.includes(brand) || model.includes(brand));
+  if (isMobile) {
+    return {
+      status: 'REJECTED',
+      reason: `Mobile photography is prohibited. Detected mobile camera: ${exif.Make} ${exif.Model}`
+    };
+  }
+
+  // DSLR / Mirrorless brands
+  const dslrBrands = [
+    'canon', 'nikon', 'sony', 'fujifilm', 'olympus', 'panasonic', 'leica', 'pentax',
+    'hasselblad', 'sigma', 'ricoh', 'phase one', 'kodak', 'mamiya'
+  ];
+
+  const isDslr = dslrBrands.some(brand => make.includes(brand));
+  if (isDslr) {
+    return {
+      status: 'VERIFIED',
+      reason: `DSLR/Mirrorless camera verification passed: ${exif.Make} ${exif.Model}`
+    };
+  }
+
+  return {
+    status: 'MANUAL_REVIEW',
+    reason: `EXIF camera brand (${exif.Make} ${exif.Model}) is inconclusive. Set to manual admin review.`
+  };
+};
+
 // @desc    Get participant's current submission
 // @route   GET /api/submissions/my-submission/:eventId
 // @access  Private
 router.get('/my-submission/:eventId', protect, async (req, res) => {
   try {
-    const submission = await Submission.findOne({ userId: req.user._id, eventId: req.params.eventId });
+    const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId: req.params.eventId });
     if (!submission) {
       return res.json({ success: true, submission: null });
     }
@@ -53,24 +102,41 @@ router.post('/start', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'You must accept the DSLR Eligibility Declaration' });
     }
 
-    let submission = await Submission.findOne({ userId: req.user._id, eventId });
+    const plansConfig = require('../config/plans');
+    const plan = plansConfig.getPlan(packageId);
+    if (!plan) {
+      return res.status(400).json({ success: false, message: 'Invalid plan selected' });
+    }
+
+    let submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
+
+    const entryNumber = submission && submission.entryNumber
+      ? submission.entryNumber
+      : 'ENT-' + Math.floor(100000 + Math.random() * 900000);
 
     if (submission) {
       if (submission.isFinalSubmitted) {
         return res.status(400).json({ success: false, message: 'Entry has already been finalized' });
       }
-      submission.packageId = packageId;
+      submission.packageId = plan.packageId;
+      submission.amount = plan.amount;
+      submission.photoLimit = plan.limit;
       submission.eligibilityAccepted = eligibilityAccepted;
       await submission.save();
     } else {
       submission = await Submission.create({
-        userId: req.user._id,
+        userId: req.user._id.toString(),
         userName: req.user.name,
         userEmail: req.user.email,
         eventId,
         eventTitle: event.title,
-        packageId,
+        packageId: plan.packageId,
         eligibilityAccepted,
+        entryNumber,
+        amount: plan.amount,
+        photoLimit: plan.limit,
+        paymentStatus: 'Unpaid',
+        entryStatus: 'Draft',
         isFinalSubmitted: false,
         photographs: []
       });
@@ -91,8 +157,8 @@ router.post('/upload', protect, upload.fields([
   { name: 'rawFile', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const { eventId, title, category, cameraBrand, cameraModel, lensUsed, location, dateCaptured, description } = req.body;
-    
+    const { eventId, title, category, location, description } = req.body;
+
     if (!req.files || !req.files.photoFile) {
       return res.status(400).json({ success: false, message: 'Please upload a photo' });
     }
@@ -100,12 +166,17 @@ router.post('/upload', protect, upload.fields([
     const photoFile = req.files.photoFile[0];
     const rawFile = req.files.rawFile ? req.files.rawFile[0] : null;
 
-    const submission = await Submission.findOne({ userId: req.user._id, eventId });
+    const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
     if (!submission) {
-      // Remove files if submission not started
       fs.unlinkSync(photoFile.path);
       if (rawFile) fs.unlinkSync(rawFile.path);
       return res.status(400).json({ success: false, message: 'Submission not started. Please select a package first.' });
+    }
+
+    if (submission.paymentStatus !== 'Paid') {
+      fs.unlinkSync(photoFile.path);
+      if (rawFile) fs.unlinkSync(rawFile.path);
+      return res.status(400).json({ success: false, message: 'Unpaid entry profile. Please complete the Razorpay checkout first.' });
     }
 
     if (submission.isFinalSubmitted) {
@@ -114,22 +185,17 @@ router.post('/upload', protect, upload.fields([
       return res.status(400).json({ success: false, message: 'Entry has already been finalized' });
     }
 
-    const event = await Event.findById(eventId);
-    const selectedPackage = event.packages.find(p => p.id === submission.packageId);
-    
-    if (submission.photographs.length >= selectedPackage.maxPhotos) {
+    if (submission.photographs.length >= submission.photoLimit) {
       fs.unlinkSync(photoFile.path);
       if (rawFile) fs.unlinkSync(rawFile.path);
-      return res.status(400).json({ 
-        success: false, 
-        message: `Upload limit reached. Your package allows a maximum of ${selectedPackage.maxPhotos} photographs.` 
+      return res.status(400).json({
+        success: false,
+        message: `Upload limit reached. Your plan allows a maximum of ${submission.photoLimit} photographs.`
       });
     }
 
     // Duplicate Check using MD5 Hash
     const fileHash = await calculateFileHash(photoFile.path);
-    
-    // Check if this hash exists in any submission in this event
     const duplicateSubmission = await Submission.findOne({
       eventId,
       'photographs.fileHash': fileHash
@@ -138,51 +204,166 @@ router.post('/upload', protect, upload.fields([
     if (duplicateSubmission) {
       fs.unlinkSync(photoFile.path);
       if (rawFile) fs.unlinkSync(rawFile.path);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Duplicate Image detected! This photograph has already been uploaded by you or another participant.' 
+      return res.status(400).json({
+        success: false,
+        message: 'Duplicate Image detected! This photograph has already been uploaded.'
       });
     }
 
-    // Generate relative file URLs
-    const fileUrl = `/uploads/${photoFile.filename}`;
-    const rawFileUrl = rawFile ? `/uploads/${rawFile.filename}` : undefined;
+    // Backend EXIF Validation Check via exifr
+    let exif = null;
+    let width = null;
+    let height = null;
+    let format = path.extname(photoFile.originalname).substring(1).toUpperCase();
+    let cameraMake = 'Unknown';
+    let cameraModel = 'Unknown';
+    let lensModel = '';
+    let originalCaptureDate = null;
 
-    const newPhoto = {
-      id: Math.random().toString(36).substring(2, 11) + Date.now().toString().slice(-4),
+    try {
+      exif = await exifr.parse(photoFile.path, {
+        tiff: true,
+        xmp: true,
+        exif: true
+      });
+
+      if (exif) {
+        cameraMake = exif.Make || 'Unknown';
+        cameraModel = exif.Model || 'Unknown';
+        lensModel = exif.LensModel || exif.LensUsed || '';
+        originalCaptureDate = exif.DateTimeOriginal ? new Date(exif.DateTimeOriginal) : null;
+        width = exif.ExifImageWidth || exif.ImageWidth || null;
+        height = exif.ExifImageHeight || exif.ImageHeight || null;
+      }
+    } catch (exifErr) {
+      console.warn('EXIF validation skipped:', exifErr.message);
+    }
+
+    const dslrCheck = validateDSLR(exif);
+
+    if (dslrCheck.status === 'REJECTED') {
+      fs.unlinkSync(photoFile.path);
+      if (rawFile) fs.unlinkSync(rawFile.path);
+      return res.status(400).json({
+        success: false,
+        message: dslrCheck.reason
+      });
+    }
+
+    // Cloudinary Upload
+    let cloudinaryResult;
+    try {
+      const folderPath = `photography-event/2026/${submission.entryNumber}/${req.user._id.toString()}`;
+      const publicId = `photo_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+      cloudinaryResult = await cloudinary.uploader.upload(photoFile.path, {
+        folder: folderPath,
+        public_id: publicId,
+        resource_type: 'image'
+      });
+    } catch (cldErr) {
+      console.error('Cloudinary Error:', cldErr.message);
+      fs.unlinkSync(photoFile.path);
+      if (rawFile) fs.unlinkSync(rawFile.path);
+      return res.status(500).json({
+        success: false,
+        message: 'Could not upload photograph online to Cloudinary.',
+        error: cldErr.message
+      });
+    }
+
+    // Clean up local temp photo
+    fs.unlinkSync(photoFile.path);
+
+    let rawFileUrl = '';
+    if (rawFile) {
+      try {
+        const folderPath = `photography-event/2026/${submission.entryNumber}/${req.user._id.toString()}`;
+        const rawPublicId = `raw_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        const rawCloudinaryResult = await cloudinary.uploader.upload(rawFile.path, {
+          folder: folderPath,
+          public_id: rawPublicId,
+          resource_type: 'raw'
+        });
+        rawFileUrl = rawCloudinaryResult.secure_url;
+      } catch (rawErr) {
+        console.warn('RAW file upload warning:', rawErr.message);
+      }
+      fs.unlinkSync(rawFile.path);
+    }
+
+    const photoId = Math.random().toString(36).substring(2, 11) + Date.now().toString().slice(-4);
+
+    // Save in Photo collection
+    await Photo.create({
+      userId: req.user._id.toString(),
+      entryId: submission._id.toString(),
       title: title || 'Untitled',
       category: category || 'General',
-      cameraBrand: cameraBrand || 'Unknown',
-      cameraModel: cameraModel || 'Unknown',
-      lensUsed: lensUsed || '',
-      location: location || '',
-      dateCaptured: dateCaptured || '',
       description: description || '',
-      fileUrl,
+      originalFilename: photoFile.originalname,
+      cloudinaryPublicId: cloudinaryResult.public_id,
+      secureUrl: cloudinaryResult.secure_url,
+      width: width || cloudinaryResult.width,
+      height: height || cloudinaryResult.height,
+      format: format || cloudinaryResult.format,
+      fileSize: photoFile.size,
+      cameraMake,
+      cameraModel,
+      lensModel,
+      originalCaptureDate,
+      exifData: exif,
+      dslrValidationStatus: dslrCheck.status,
+      validationReason: dslrCheck.reason,
+      uploadTimestamp: new Date(),
+      deletionStatus: false
+    });
+
+    const newPhoto = {
+      id: photoId,
+      title: title || 'Untitled',
+      category: category || 'General',
+      cameraBrand: cameraMake,
+      cameraModel,
+      lensUsed: lensModel,
+      location: location || '',
+      dateCaptured: originalCaptureDate ? originalCaptureDate.toISOString() : '',
+      description: description || '',
+      fileUrl: cloudinaryResult.secure_url,
       rawFileUrl,
       fileHash,
       fileSizeBytes: photoFile.size,
       status: 'Pending',
       scores: [],
-      assignedJudges: []
+      assignedJudges: [],
+      cloudinaryPublicId: cloudinaryResult.public_id,
+      width: width || cloudinaryResult.width,
+      height: height || cloudinaryResult.height,
+      format: format || cloudinaryResult.format,
+      dslrValidationStatus: dslrCheck.status,
+      validationReason: dslrCheck.reason,
+      originalFilename: photoFile.originalname,
+      uploadTimestamp: new Date(),
+      deletionStatus: false
     };
 
     submission.photographs.push(newPhoto);
+    submission.activePhotosCount = submission.photographs.length;
     await submission.save();
 
     await AuditLog.create({
-      userId: req.user._id,
+      userId: req.user._id.toString(),
       userName: req.user.name,
       userEmail: req.user.email,
       action: 'Upload Photograph',
-      details: `Uploaded photo: "${newPhoto.title}" (Hash: ${fileHash})`,
+      details: `Uploaded photo: "${newPhoto.title}" (EXIF: ${dslrCheck.status})`,
       ipAddress: req.ip
     });
 
     res.json({ success: true, submission, newPhoto });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Server error during upload. ' + error.message });
+    res.status(500).json({ success: false, message: 'Server error during upload: ' + error.message });
   }
 });
 
@@ -192,8 +373,8 @@ router.post('/upload', protect, upload.fields([
 router.delete('/photo/:eventId/:photoId', protect, async (req, res) => {
   try {
     const { eventId, photoId } = req.params;
-    const submission = await Submission.findOne({ userId: req.user._id, eventId });
-    
+    const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
+
     if (!submission) {
       return res.status(404).json({ success: false, message: 'Submission not found' });
     }
@@ -209,27 +390,34 @@ router.delete('/photo/:eventId/:photoId', protect, async (req, res) => {
 
     const photo = submission.photographs[photoIndex];
 
-    // Try to remove local files
-    try {
-      const mainPath = path.join(__dirname, '..', photo.fileUrl);
-      if (fs.existsSync(mainPath)) fs.unlinkSync(mainPath);
-      if (photo.rawFileUrl) {
-        const rawPath = path.join(__dirname, '..', photo.rawFileUrl);
-        if (fs.existsSync(rawPath)) fs.unlinkSync(rawPath);
+    // Soft-delete in Photo collection & delete from Cloudinary
+    const photoDoc = await Photo.findOne({
+      userId: req.user._id.toString(),
+      entryId: submission._id.toString(),
+      cloudinaryPublicId: photo.cloudinaryPublicId
+    });
+
+    if (photoDoc) {
+      try {
+        await cloudinary.uploader.destroy(photoDoc.cloudinaryPublicId);
+      } catch (cldErr) {
+        console.error('Cloudinary destroy error:', cldErr.message);
       }
-    } catch (e) {
-      console.error('File cleanup error: ', e.message);
+      photoDoc.deletionStatus = true;
+      photoDoc.deletionTimestamp = new Date();
+      await photoDoc.save();
     }
 
     submission.photographs.splice(photoIndex, 1);
+    submission.activePhotosCount = submission.photographs.length;
     await submission.save();
 
     await AuditLog.create({
-      userId: req.user._id,
+      userId: req.user._id.toString(),
       userName: req.user.name,
       userEmail: req.user.email,
       action: 'Delete Photograph',
-      details: `Removed photo ID: ${photoId}`,
+      details: `Removed photo ID: ${photoId} from entry number: ${submission.entryNumber}`,
       ipAddress: req.ip
     });
 
@@ -247,7 +435,7 @@ router.post('/save-draft', protect, async (req, res) => {
   try {
     const { eventId, photographs } = req.body;
 
-    const submission = await Submission.findOne({ userId: req.user._id, eventId });
+    const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
     if (!submission) {
       return res.status(404).json({ success: false, message: 'Submission not found' });
     }
@@ -286,7 +474,7 @@ router.post('/final-submit', protect, async (req, res) => {
   try {
     const { eventId } = req.body;
 
-    const submission = await Submission.findOne({ userId: req.user._id, eventId });
+    const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
     if (!submission) {
       return res.status(404).json({ success: false, message: 'Submission not found' });
     }
@@ -300,22 +488,21 @@ router.post('/final-submit', protect, async (req, res) => {
     }
 
     // Check payment status
-    const payment = await Payment.findOne({ userId: req.user._id, eventId, status: 'Success' });
-    if (!payment) {
-      return res.status(400).json({ success: false, message: 'No valid payment found for this event. Entry is valid only after payment.' });
+    if (submission.paymentStatus !== 'Paid') {
+      return res.status(400).json({ success: false, message: 'No valid payment found. Entry is valid only after payment.' });
     }
 
     submission.isFinalSubmitted = true;
-    submission.paymentId = payment._id;
+    submission.entryStatus = 'Finalized';
     submission.submissionDate = new Date();
     await submission.save();
 
     await AuditLog.create({
-      userId: req.user._id,
+      userId: req.user._id.toString(),
       userName: req.user.name,
       userEmail: req.user.email,
       action: 'Final Submit Contest Entry',
-      details: `Submission finalized with ${submission.photographs.length} photographs. Payment ID: ${payment._id}`,
+      details: `Submission finalized with ${submission.photographs.length} photographs. Entry Number: ${submission.entryNumber}`,
       ipAddress: req.ip
     });
 
@@ -333,7 +520,7 @@ router.get('/gallery', async (req, res) => {
   try {
     const submissions = await Submission.find({ isFinalSubmitted: true });
     const approvedPhotos = [];
-    
+
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
         if (photo.status === 'Approved') {

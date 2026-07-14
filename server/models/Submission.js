@@ -30,7 +30,18 @@ const photographSchema = new mongoose.Schema({
     averageScore: { type: Number },    // avg (max 10)
     remarks: { type: String },
     gradedAt: { type: Date, default: Date.now }
-  }]
+  }],
+  // Cloudinary and DSLR EXIF upgrades
+  cloudinaryPublicId: { type: String },
+  width: { type: Number },
+  height: { type: Number },
+  format: { type: String },
+  dslrValidationStatus: { type: String, enum: ['VERIFIED', 'MANUAL_REVIEW', 'REJECTED'], default: 'MANUAL_REVIEW' },
+  validationReason: { type: String },
+  originalFilename: { type: String },
+  deletionStatus: { type: Boolean, default: false },
+  deletionTimestamp: { type: Date },
+  uploadTimestamp: { type: Date, default: Date.now }
 });
 
 const submissionSchema = new mongoose.Schema({
@@ -44,7 +55,14 @@ const submissionSchema = new mongoose.Schema({
   eligibilityAccepted: { type: Boolean, default: false },
   isFinalSubmitted: { type: Boolean, default: false },
   submissionDate: { type: Date },
-  photographs: [photographSchema]
+  photographs: [photographSchema],
+  // Entry Level upgrades
+  entryNumber: { type: String },
+  amount: { type: Number, default: 0 },
+  photoLimit: { type: Number, default: 0 },
+  activePhotosCount: { type: Number, default: 0 },
+  paymentStatus: { type: String, enum: ['Unpaid', 'Paid'], default: 'Unpaid' },
+  entryStatus: { type: String, enum: ['Draft', 'Finalized'], default: 'Draft' }
 }, { timestamps: true });
 
 module.exports = getModel('Submission', submissionSchema);

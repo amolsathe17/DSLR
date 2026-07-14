@@ -15,7 +15,13 @@ const paymentSchema = new mongoose.Schema({
   paymentMethod: { type: String },
   invoiceNumber: { type: String },
   qrContent: { type: String },
-  paymentDate: { type: Date }
+  paymentDate: { type: Date },
+  entryId: { type: String },
+  paymentProvider: { type: String, default: 'Razorpay' },
+  razorpayOrderId: { type: String },
+  razorpayPaymentId: { type: String },
+  currency: { type: String, default: 'INR' },
+  signatureVerified: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = getModel('Payment', paymentSchema);

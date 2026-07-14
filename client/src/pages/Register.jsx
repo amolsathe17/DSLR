@@ -139,15 +139,9 @@ export default function Register() {
         
         {/* Brand Header */}
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="p-2.5 bg-indigo-600 rounded-xl text-white">
-            <Camera size={22} />
-          </div>
           <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">
-            {isVerifying ? 'Email Verification' : 'Create SumbaContest Account'}
+            {isVerifying ? 'Email Verification' : 'Register to submit entries and track results'}
           </h2>
-          <p className="text-xs text-slate-500">
-            {isVerifying ? 'Enter verification code' : 'Register to submit entries and track results'}
-          </p>
         </div>
 
         {error && (

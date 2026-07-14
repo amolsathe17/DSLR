@@ -225,31 +225,40 @@ export default function Gallery() {
                     </div>
                     
                     <div className="flex-1 flex flex-col justify-between h-full gap-4 text-center sm:text-left w-full">
-                      <div>
-                        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-2">
-                          <div>
-                            <span className={`text-[10px] font-black uppercase tracking-wider block ${idx === 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-400'}`}>
-                              {w.rank}
-                            </span>
-                            <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
-                              {w.photoTitle}
-                            </h3>
-                          </div>
-                          
-                          <span className="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 px-3 py-1 rounded-xl text-xs font-black">
-                            Grade: {w.score}/10
+                      <div className="flex-grow flex flex-col gap-3">
+                        <div>
+                          <span className={`text-[10px] font-black uppercase tracking-wider block ${idx === 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-400'}`}>
+                            {w.rank}
                           </span>
+                          <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white mt-0.5">
+                            {w.photoTitle}
+                          </h3>
                         </div>
 
-                        <p className="text-xs text-slate-500 font-medium mt-1">
-                          Captured by <span className="font-semibold text-slate-700 dark:text-slate-200">{w.userName}</span>
-                        </p>
-                      </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/60 pt-2.5">
+                          <div>
+                            <p className="font-bold text-slate-400 uppercase text-[9px] tracking-wider">Participant Details</p>
+                            <p className="mt-0.5 text-slate-850 dark:text-slate-200 font-semibold">{w.userName}</p>
+                            {w.userEmail && <p className="text-[10px] text-slate-400 mt-0.5">{w.userEmail}</p>}
+                            {w.userCity && <p className="text-[10px] text-slate-400">City: {w.userCity}</p>}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-400 uppercase text-[9px] tracking-wider">Evaluated By Judges</p>
+                            <p className="mt-0.5 text-slate-850 dark:text-slate-200 font-semibold">
+                              {w.judges && w.judges.length > 0 ? w.judges.join(', ') : 'Assigned Panel'}
+                            </p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Grade Score: {w.score}/10</p>
+                          </div>
+                        </div>
 
-                      <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center text-xs">
-                        <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                          Reward: {w.reward}
-                        </span>
+                        <div className="border-t border-slate-100 dark:border-slate-800/60 pt-2.5 flex justify-between items-center text-xs mt-1">
+                          <span className="font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20 px-3 py-1 rounded-xl">
+                            Reward: {w.reward}
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/25 px-2.5 py-1 rounded-xl">
+                            Verified Grade: {w.score}/10
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>

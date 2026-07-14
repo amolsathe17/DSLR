@@ -14,7 +14,33 @@ router.get('/', async (req, res) => {
     if (includeDrafts !== 'true') {
       query.status = { $ne: 'Draft' };
     }
-    const events = await Event.find(query);
+    
+    const User = require('../models/User');
+    const Submission = require('../models/Submission');
+    const events = await Event.find(query).sort({ createdAt: -1 }).lean();
+    
+    for (let event of events) {
+      if (event.winners && event.winners.length > 0) {
+        for (let w of event.winners) {
+          if (w.submissionId && w.photographId) {
+            const sub = await Submission.findById(w.submissionId);
+            const photo = sub?.photographs.find(p => p.id === w.photographId);
+            if (photo) {
+              w.fileUrl = w.fileUrl || photo.fileUrl;
+              w.judges = photo.scores?.map(s => s.judgeName) || [];
+            }
+            if (sub) {
+              const participantUser = await User.findById(sub.userId);
+              if (participantUser) {
+                w.userEmail = participantUser.email;
+                w.userCity = participantUser.city;
+              }
+            }
+          }
+        }
+      }
+    }
+
     res.json({ success: true, events });
   } catch (error) {
     console.error(error);
@@ -27,10 +53,33 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).lean();
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
+
+    if (event.winners && event.winners.length > 0) {
+      const User = require('../models/User');
+      const Submission = require('../models/Submission');
+      for (let w of event.winners) {
+        if (w.submissionId && w.photographId) {
+          const sub = await Submission.findById(w.submissionId);
+          const photo = sub?.photographs.find(p => p.id === w.photographId);
+          if (photo) {
+            w.fileUrl = w.fileUrl || photo.fileUrl;
+            w.judges = photo.scores?.map(s => s.judgeName) || [];
+          }
+          if (sub) {
+            const participantUser = await User.findById(sub.userId);
+            if (participantUser) {
+              w.userEmail = participantUser.email;
+              w.userCity = participantUser.city;
+            }
+          }
+        }
+      }
+    }
+
     res.json({ success: true, event });
   } catch (error) {
     console.error(error);

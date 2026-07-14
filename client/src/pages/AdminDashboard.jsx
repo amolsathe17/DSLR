@@ -1872,7 +1872,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={handleSaveEventJudges}
-                className="flex-1 bg-indigo-650 hover:bg-indigo-755 text-white py-2 rounded-xl shadow transition-all cursor-pointer font-bold text-xs"
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl shadow transition-all cursor-pointer font-bold text-xs"
               >
                 Save Assignments
               </button>
@@ -2007,7 +2007,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={executeDeleteParticipant}
-                className="flex-1 bg-red-650 hover:bg-red-755 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
               >
                 Delete Participant
               </button>
@@ -2035,7 +2035,7 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={() => setShowGeneralSuccessModal(false)}
-              className="w-full bg-slate-900 hover:bg-slate-855 dark:bg-indigo-650 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center font-bold"
+              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center font-bold"
             >
               Awesome, Understood
             </button>

@@ -79,6 +79,15 @@ export default function AdminDashboard() {
   const [showDeleteParticipantModal, setShowDeleteParticipantModal] = useState(false);
   const [participantToDeleteId, setParticipantToDeleteId] = useState(null);
   const [participantToDeleteName, setParticipantToDeleteName] = useState('');
+  const [showGeneralSuccessModal, setShowGeneralSuccessModal] = useState(false);
+  const [generalSuccessTitle, setGeneralSuccessTitle] = useState('');
+  const [generalSuccessMsg, setGeneralSuccessMsg] = useState('');
+
+  const triggerSuccessModal = (title, message) => {
+    setGeneralSuccessTitle(title);
+    setGeneralSuccessMsg(message);
+    setShowGeneralSuccessModal(true);
+  };
   
   // Selection/Modals
   const [selectedPhoto, setSelectedPhoto] = useState(null); // zoom / detail
@@ -197,7 +206,7 @@ export default function AdminDashboard() {
         method: 'DELETE'
       });
       if (data.success) {
-        alert('Participant deleted successfully!');
+        triggerSuccessModal('Participant Deleted', 'The participant account and all their photo submissions have been deleted successfully.');
         fetchParticipants();
         fetchPhotographs();
         fetchStats();
@@ -303,7 +312,7 @@ export default function AdminDashboard() {
         method: 'DELETE'
       });
       if (data.success) {
-        alert('Category deleted successfully!');
+        triggerSuccessModal('Category Deleted', 'The category has been deleted successfully.');
         fetchJudgesAndEvents();
       }
     } catch (e) {
@@ -353,7 +362,7 @@ export default function AdminDashboard() {
         method: 'DELETE'
       });
       if (data.success) {
-        alert('Event deleted successfully!');
+        triggerSuccessModal('Contest Deleted', 'The contest event and all associated lists have been deleted successfully.');
         fetchJudgesAndEvents();
       }
     } catch (e) {
@@ -2003,6 +2012,33 @@ export default function AdminDashboard() {
                 Delete Participant
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* GENERAL SUCCESS MESSAGE MODAL */}
+      {showGeneralSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-2xl mb-2">
+                <Check size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                {generalSuccessTitle}
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                {generalSuccessMsg}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowGeneralSuccessModal(false)}
+              className="w-full bg-slate-900 hover:bg-slate-855 dark:bg-indigo-650 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center font-bold"
+            >
+              Awesome, Understood
+            </button>
           </div>
         </div>
       )}

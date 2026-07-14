@@ -22,6 +22,16 @@ export default function JudgeDashboard() {
   const [overallImpact, setOverallImpact] = useState(5);
   const [remarks, setRemarks] = useState('');
 
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successTitle, setSuccessTitle] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const triggerSuccess = (title, message) => {
+    setSuccessTitle(title);
+    setSuccessMessage(message);
+    setShowSuccessModal(true);
+  };
+
   const fetchJudgeData = async () => {
     try {
       const eventData = await apiFetch('/api/events');
@@ -120,7 +130,7 @@ export default function JudgeDashboard() {
           setPhotographs(photoData.photographs);
         }
         setActivePhoto(null);
-        alert('Score reviews submitted successfully!');
+        triggerSuccess('Review Submitted', 'The photograph score evaluations and remarks have been saved successfully.');
       }
     } catch (err) {
       setError(err.message);
@@ -140,7 +150,7 @@ export default function JudgeDashboard() {
       if (data.success) {
         setEvent(data.event);
         setEvents(events.map(e => e._id === data.event._id ? data.event : e));
-        alert("Grading sign-off successfully submitted!");
+        triggerSuccess('Grading Signed Off', 'You have successfully finalized and signed off on your evaluations for this event.');
       }
     } catch (err) {
       console.error(err);
@@ -403,6 +413,33 @@ export default function JudgeDashboard() {
       </div>
     )}
 
-  </div>
-);
+      {/* SUCCESS MESSAGE MODAL */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-2xl mb-2">
+                <CheckCircle2 size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                {successTitle}
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                {successMessage}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center font-bold"
+            >
+              Awesome, Understood
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
 }

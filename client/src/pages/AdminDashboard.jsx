@@ -1057,7 +1057,7 @@ export default function AdminDashboard() {
             {/* Create Contest Form */}
             <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
               <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">
-                Setup New Photography Contest
+                Setup New Photography Contest (Saved as Draft)
               </h3>
               
               <form onSubmit={handleCreateEvent} className="flex flex-col gap-4 mt-4">
@@ -1114,7 +1114,7 @@ export default function AdminDashboard() {
                   type="submit"
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 px-6 rounded-xl self-start cursor-pointer shadow"
                 >
-                  Publish New Event
+                  Create Contest Draft
                 </button>
               </form>
             </div>

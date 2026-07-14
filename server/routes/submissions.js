@@ -173,12 +173,6 @@ router.post('/upload', protect, upload.fields([
       return res.status(400).json({ success: false, message: 'Submission not started. Please select a package first.' });
     }
 
-    if (submission.paymentStatus !== 'Paid') {
-      fs.unlinkSync(photoFile.path);
-      if (rawFile) fs.unlinkSync(rawFile.path);
-      return res.status(400).json({ success: false, message: 'Unpaid entry profile. Please complete the Razorpay checkout first.' });
-    }
-
     if (submission.isFinalSubmitted) {
       fs.unlinkSync(photoFile.path);
       if (rawFile) fs.unlinkSync(rawFile.path);
@@ -542,6 +536,50 @@ router.get('/gallery', async (req, res) => {
     });
 
     res.json({ success: true, photographs: approvedPhotos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   POST /api/submissions/payment-failed
+// @desc    Clean up uploaded photos for a failed/cancelled payment session
+// @access  Private
+router.post('/payment-failed', protect, async (req, res) => {
+  try {
+    const { eventId } = req.body;
+    if (!eventId) {
+      return res.status(400).json({ success: false, message: 'Event ID is required' });
+    }
+
+    const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
+    if (!submission) {
+      return res.status(404).json({ success: false, message: 'Submission not found' });
+    }
+
+    // Only clean up if the entry is unpaid!
+    if (submission.paymentStatus !== 'Paid') {
+      if (submission.photographs && submission.photographs.length > 0) {
+        for (const photo of submission.photographs) {
+          if (photo.cloudinaryPublicId) {
+            try {
+              await cloudinary.uploader.destroy(photo.cloudinaryPublicId);
+            } catch (err) {
+              console.error(`Failed to destroy Cloudinary asset: ${photo.cloudinaryPublicId}`, err);
+            }
+          }
+        }
+        submission.photographs = [];
+        submission.activePhotosCount = 0;
+        await submission.save();
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Unpaid uploaded photos automatically cleaned up successfully',
+      submission
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

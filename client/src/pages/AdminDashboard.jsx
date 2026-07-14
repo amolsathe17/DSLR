@@ -18,7 +18,8 @@ import {
   Download,
   AlertTriangle,
   UserCheck,
-  Maximize2
+  Maximize2,
+  FileCheck
 } from 'lucide-react';
 import StatsCharts from '../components/StatsCharts';
 

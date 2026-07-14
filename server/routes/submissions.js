@@ -367,6 +367,13 @@ router.post('/upload', protect, upload.fields([
 router.delete('/photo/:eventId/:photoId', protect, async (req, res) => {
   try {
     const { eventId, photoId } = req.params;
+    
+    const Event = require('../models/Event');
+    const event = await Event.findById(eventId);
+    if (event && event.status === 'Completed') {
+      return res.status(400).json({ success: false, message: 'This contest has been completed. Submissions cannot be modified or deleted.' });
+    }
+
     const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
 
     if (!submission) {

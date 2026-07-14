@@ -328,6 +328,20 @@ router.delete('/participants/:id', protect, authorize('Admin'), async (req, res)
       return res.status(404).json({ success: false, message: 'Participant not found' });
     }
 
+    // Find if user has any submissions in completed events
+    const Submission = require('../models/Submission');
+    const submissions = await Submission.find({ userId: req.params.id });
+    const eventIds = submissions.map(s => s.eventId);
+    const Event = require('../models/Event');
+    const completedEvents = await Event.countDocuments({
+      _id: { $in: eventIds },
+      status: 'Completed'
+    });
+
+    if (completedEvents > 0) {
+      return res.status(400).json({ success: false, message: 'Cannot delete participant as they have active submissions in a Completed contest.' });
+    }
+
     await User.deleteOne({ _id: req.params.id });
     await Submission.deleteMany({ userId: req.params.id });
     await Payment.deleteMany({ userId: req.params.id });
@@ -360,6 +374,17 @@ router.delete('/judges/:id', protect, authorize('Admin'), async (req, res) => {
 
     if (user.role !== 'Judge') {
       return res.status(400).json({ success: false, message: 'User is not a judge' });
+    }
+
+    // Find if judge is assigned to any completed events
+    const Event = require('../models/Event');
+    const completedEventsWithJudge = await Event.countDocuments({
+      assignedJudges: req.params.id,
+      status: 'Completed'
+    });
+
+    if (completedEventsWithJudge > 0) {
+      return res.status(400).json({ success: false, message: 'Cannot delete judge as they have evaluations in a Completed contest.' });
     }
 
     await User.deleteOne({ _id: req.params.id });

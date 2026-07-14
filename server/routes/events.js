@@ -86,6 +86,10 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
+    if (event.status === 'Completed') {
+      return res.status(400).json({ success: false, message: 'Completed contests cannot be modified' });
+    }
+
     event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
     await AuditLog.create({
@@ -112,6 +116,10 @@ router.delete('/:id', protect, authorize('Admin'), async (req, res) => {
     const event = await Event.findById(req.params.id);
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    if (event.status === 'Completed') {
+      return res.status(400).json({ success: false, message: 'Completed contests cannot be deleted' });
     }
 
     await Event.deleteOne({ _id: req.params.id });

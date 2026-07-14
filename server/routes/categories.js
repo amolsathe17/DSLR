@@ -60,6 +60,23 @@ router.delete('/:id', protect, authorize('Admin'), async (req, res) => {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
 
+    const Submission = require('../models/Submission');
+    const Event = require('../models/Event');
+
+    // Find all submissions containing photographs of this category
+    const submissions = await Submission.find({ 'photographs.category': category.name });
+    const eventIds = submissions.map(s => s.eventId);
+    
+    // Check if any of these events are Completed
+    const completedEvents = await Event.countDocuments({
+      _id: { $in: eventIds },
+      status: 'Completed'
+    });
+
+    if (completedEvents > 0) {
+      return res.status(400).json({ success: false, message: 'Cannot delete category as it has entry submissions in a Completed contest.' });
+    }
+
     await Category.deleteOne({ _id: req.params.id });
 
     await AuditLog.create({

@@ -1144,16 +1144,18 @@ export default function AdminDashboard() {
                             )}
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            setSelectedEventForJudges(e);
-                            setSelectedJudgesForEvent(e.assignedJudges || []);
-                            setShowAssignJudgesModal(true);
-                          }}
-                          className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/25 dark:hover:bg-indigo-950/40 text-[10px] py-1.5 px-2.5 rounded-lg cursor-pointer transition-all font-semibold"
-                        >
-                          Manage Event Judges
-                        </button>
+                        {e.status !== 'Completed' && (
+                          <button
+                            onClick={() => {
+                              setSelectedEventForJudges(e);
+                              setSelectedJudgesForEvent(e.assignedJudges || []);
+                              setShowAssignJudgesModal(true);
+                            }}
+                            className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/25 dark:hover:bg-indigo-950/40 text-[10px] py-1.5 px-2.5 rounded-lg cursor-pointer transition-all font-semibold"
+                          >
+                            Manage Event Judges
+                          </button>
+                        )}
                       </div>
 
                       {/* Grading and Approval Progress */}
@@ -1327,17 +1329,26 @@ export default function AdminDashboard() {
                           Activate
                         </button>
                       )}
-                      <button
-                        onClick={() => {
-                          setEventToDeleteId(e._id);
-                          setEventToDeleteTitle(e.title);
-                          setShowDeleteEventModal(true);
-                        }}
-                        className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
-                        title="Delete Contest permanently"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      {e.status !== 'Completed' ? (
+                        <button
+                          onClick={() => {
+                            setEventToDeleteId(e._id);
+                            setEventToDeleteTitle(e.title);
+                            setShowDeleteEventModal(true);
+                          }}
+                          className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                          title="Delete Contest permanently"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      ) : (
+                        <span
+                          className="p-1.5 text-slate-300 dark:text-slate-700 cursor-not-allowed"
+                          title="Completed contests cannot be deleted"
+                        >
+                          <Trash2 size={14} />
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

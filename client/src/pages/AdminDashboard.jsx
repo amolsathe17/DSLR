@@ -103,9 +103,9 @@ export default function AdminDashboard() {
   // Winner rankings states
   const [eventToPublish, setEventToPublish] = useState(null);
   const [winnerAssignments, setWinnerAssignments] = useState([
-    { rank: '1st Prize', reward: '₹50,000 Cash + Gold Trophy', submissionId: '', photoId: '', userName: '', photoTitle: '', score: 0 },
-    { rank: '2nd Prize', reward: '₹30,000 Cash + Silver Trophy', submissionId: '', photoId: '', userName: '', photoTitle: '', score: 0 },
-    { rank: '3rd Prize', reward: '₹20,000 Cash + Bronze Trophy', submissionId: '', photoId: '', userName: '', photoTitle: '', score: 0 }
+    { rank: '1st Prize', reward: '₹50,000 Cash + Gold Trophy', submissionId: '', photoId: '', photographId: '', userName: '', photoTitle: '', fileUrl: '', score: 0 },
+    { rank: '2nd Prize', reward: '₹30,000 Cash + Silver Trophy', submissionId: '', photoId: '', photographId: '', userName: '', photoTitle: '', fileUrl: '', score: 0 },
+    { rank: '3rd Prize', reward: '₹20,000 Cash + Bronze Trophy', submissionId: '', photoId: '', photographId: '', userName: '', photoTitle: '', fileUrl: '', score: 0 }
   ]);
 
   const [loading, setLoading] = useState(true);
@@ -1074,8 +1074,10 @@ export default function AdminDashboard() {
                                 if (gradedPhotos[idx]) {
                                   updatedWinners[idx].submissionId = gradedPhotos[idx].submissionId;
                                   updatedWinners[idx].photoId = gradedPhotos[idx].photoId;
+                                  updatedWinners[idx].photographId = gradedPhotos[idx].photoId;
                                   updatedWinners[idx].userName = gradedPhotos[idx].participantName;
                                   updatedWinners[idx].photoTitle = gradedPhotos[idx].title;
+                                  updatedWinners[idx].fileUrl = gradedPhotos[idx].fileUrl;
                                   updatedWinners[idx].score = gradedPhotos[idx].averageScore;
                                 }
                               }
@@ -1862,8 +1864,10 @@ export default function AdminDashboard() {
                             const updated = [...winnerAssignments];
                             updated[idx].submissionId = subId;
                             updated[idx].photoId = photoId;
+                            updated[idx].photographId = photoId;
                             updated[idx].userName = photo ? photo.participantName : '';
                             updated[idx].photoTitle = photo ? photo.title : '';
+                            updated[idx].fileUrl = photo ? photo.fileUrl : '';
                             updated[idx].score = photo ? photo.averageScore : 0;
                             setWinnerAssignments(updated);
                           }}

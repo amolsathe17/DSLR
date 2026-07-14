@@ -218,7 +218,7 @@ export default function Gallery() {
                   >
                     <div className="relative group shrink-0 w-full sm:w-48 aspect-video sm:aspect-square overflow-hidden rounded-2xl bg-slate-900">
                       <img
-                        src={w.fileUrl}
+                        src={w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl}
                         alt={w.photoTitle}
                         className="w-full h-full object-cover"
                       />

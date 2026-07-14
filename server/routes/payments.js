@@ -187,6 +187,107 @@ router.post('/verify', protect, async (req, res) => {
   }
 });
 
+// @desc    Initiate dummy simulated payment
+// @route   POST /api/payments/dummy-bypass
+// @access  Private
+router.post('/dummy-bypass', protect, async (req, res) => {
+  try {
+    const { eventId, packageId } = req.body;
+    if (!eventId || !packageId) {
+      return res.status(400).json({ success: false, message: 'Event ID and Package ID are required' });
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    const plan = plansConfig.getPlan(packageId);
+    if (!plan) {
+      return res.status(400).json({ success: false, message: 'Invalid package selection' });
+    }
+
+    // Verify if there is already a paid entry
+    let submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
+    if (submission && submission.paymentStatus === 'Paid') {
+      return res.status(400).json({ success: false, message: 'You have already paid for this event.' });
+    }
+
+    const entryNumber = submission && submission.entryNumber
+      ? submission.entryNumber
+      : 'ENT-' + Math.floor(100000 + Math.random() * 900000);
+
+    // Create or reuse unpaid entry
+    if (!submission) {
+      submission = new Submission({
+        userId: req.user._id.toString(),
+        userName: req.user.name,
+        userEmail: req.user.email,
+        eventId: event._id.toString(),
+        eventTitle: event.title,
+        packageId: plan.packageId,
+        eligibilityAccepted: true,
+        entryNumber,
+        amount: plan.amount,
+        photoLimit: plan.limit,
+        paymentStatus: 'Paid',
+        entryStatus: 'Draft',
+        photographs: []
+      });
+      await submission.save();
+    } else {
+      submission.packageId = plan.packageId;
+      submission.amount = plan.amount;
+      submission.photoLimit = plan.limit;
+      submission.paymentStatus = 'Paid';
+      await submission.save();
+    }
+
+    // Create a local Payment record
+    const dummyPaymentId = 'DUMMY-' + Math.random().toString(36).substring(2, 15).toUpperCase();
+    const payment = new Payment({
+      userId: req.user._id.toString(),
+      userName: req.user.name,
+      userEmail: req.user.email,
+      eventId: event._id.toString(),
+      eventTitle: event.title,
+      entryId: submission._id.toString(),
+      packageId: plan.packageId,
+      amount: plan.amount,
+      currency: 'INR',
+      paymentMethod: 'Dummy Bypass',
+      razorpayOrderId: 'dummy_order_' + Date.now(),
+      razorpayPaymentId: dummyPaymentId,
+      signatureVerified: true,
+      status: 'Success',
+      paymentDate: new Date(),
+      transactionId: dummyPaymentId
+    });
+
+    await payment.save();
+    submission.paymentId = payment._id.toString();
+    await submission.save();
+
+    await AuditLog.create({
+      userId: req.user._id.toString(),
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Dummy Payment Bypass',
+      details: `Processed dummy payment bypass for entry ${entryNumber} (Amount: ₹${plan.amount})`,
+      ipAddress: req.ip
+    });
+
+    res.json({
+      success: true,
+      message: 'Simulated payment processed successfully',
+      submission
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @desc    Razorpay webhook listener
 // @route   POST /api/payments/webhook
 // @access  Public (Signature Checked)

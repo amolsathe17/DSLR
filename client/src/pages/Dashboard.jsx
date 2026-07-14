@@ -367,6 +367,43 @@ export default function Dashboard() {
     }
   };
 
+  // Handle Dummy Simulated Payment Bypass
+  const handleDummyPayment = async () => {
+    setLoading(true);
+    setError("");
+    setShowPaymentModal(false);
+
+    try {
+      const data = await apiFetch("/api/payments/dummy-bypass", {
+        method: "POST",
+        body: JSON.stringify({
+          eventId: event._id,
+          packageId: submission.packageId,
+        }),
+      });
+
+      if (data.success) {
+        setSubmission(data.submission);
+        setPaymentSuccess(data.submission);
+        confetti({ particleCount: 150, spread: 80, duration: 3000 });
+
+        // Refresh submission state
+        const subData = await apiFetch(
+          `/api/submissions/my-submission/${event._id}`,
+        );
+        if (subData.success) {
+          setSubmission(subData.submission);
+        }
+      } else {
+        throw new Error(data.message || "Simulated payment failed.");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFinalSubmit = async () => {
     if (
       !confirm(
@@ -981,101 +1018,33 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-slate-500">
-                  Payment Option
-                </label>
-                <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("UPI")}
-                    className={`p-3 rounded-xl border-2 text-center transition-all cursor-pointer ${
-                      paymentMethod === "UPI"
-                        ? "border-indigo-600 bg-indigo-50/20 text-indigo-600"
-                        : "border-slate-250 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                    }`}
-                  >
-                    UPI / QR Scan
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("Card")}
-                    className={`p-3 rounded-xl border-2 text-center transition-all cursor-pointer ${
-                      paymentMethod === "Card"
-                        ? "border-indigo-600 bg-indigo-50/20 text-indigo-600"
-                        : "border-slate-250 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                    }`}
-                  >
-                    Credit / Debit Card
-                  </button>
-                </div>
-              </div>
-
-              {paymentMethod === "Card" && (
-                <div className="flex flex-col gap-3 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl animate-in slide-in-from-bottom-2 duration-200">
-                  <div className="flex flex-col gap-1 text-[11px]">
-                    <label className="font-semibold text-slate-400">
-                      Card Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="4111 2222 3333 4444"
-                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div className="flex flex-col gap-1">
-                      <label className="font-semibold text-slate-400">
-                        Expiry (MM/YY)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="12/29"
-                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="font-semibold text-slate-400">
-                        CVV
-                      </label>
-                      <input
-                        type="password"
-                        placeholder="•••"
-                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {paymentMethod === "UPI" && (
-                <div className="flex flex-col gap-2 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl text-[11px] animate-in slide-in-from-bottom-2 duration-200">
-                  <label className="font-semibold text-slate-400">
-                    UPI Address ID
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="username@okaxis"
-                    className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none text-xs"
-                  />
-                </div>
-              )}
             </div>
 
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowPaymentModal(false)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
-              >
-                Cancel Checkout
-              </button>
+            <div className="flex flex-col gap-3">
               <button
                 type="button"
                 onClick={handlePayment}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
               >
-                Pay ₹{selectedPackage?.price}.00
+                <CreditCard size={14} />
+                Pay via Razorpay (UPI, Cards, Netbanking)
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDummyPayment}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
+              >
+                <ShieldCheck size={14} />
+                Simulate Dummy Payment (Instant Bypass)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowPaymentModal(false)}
+                className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
+              >
+                Cancel Checkout
               </button>
             </div>
           </div>

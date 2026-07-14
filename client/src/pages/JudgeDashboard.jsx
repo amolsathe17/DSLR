@@ -27,7 +27,7 @@ export default function JudgeDashboard() {
       const eventData = await apiFetch('/api/events');
       if (eventData.success && eventData.events.length > 0) {
         // Filter events where this judge is assigned
-        const assigned = eventData.events.filter(e => e.assignedJudges && e.assignedJudges.includes(user?._id));
+        const assigned = eventData.events.filter(e => e.assignedJudges && e.assignedJudges.includes(user?.id));
         setEvents(assigned);
         
         if (assigned.length > 0) {
@@ -69,10 +69,10 @@ export default function JudgeDashboard() {
   };
 
   useEffect(() => {
-    if (user?._id) {
+    if (user?.id) {
       fetchJudgeData();
     }
-  }, [user?._id]);
+  }, [user?.id]);
 
   const handleOpenScoring = (photo) => {
     setActivePhoto(photo);
@@ -154,7 +154,7 @@ export default function JudgeDashboard() {
   const totalScore = creativity + composition + technicalQuality + storytelling + overallImpact;
   const averageScore = (totalScore / 5).toFixed(1);
   const allGraded = photographs.length > 0 && photographs.every(p => p.graded);
-  const hasConfirmed = event?.confirmedJudges?.includes(user?._id);
+  const hasConfirmed = event?.confirmedJudges?.includes(user?.id);
 
   if (loading && photographs.length === 0) {
     return (

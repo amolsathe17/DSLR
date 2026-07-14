@@ -28,6 +28,8 @@ export default function JudgeDashboard() {
   const [successTitle, setSuccessTitle] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  const [showSignOffModal, setShowSignOffModal] = useState(false);
+
   const triggerSuccess = (title, message) => {
     setSuccessTitle(title);
     setSuccessMessage(message);
@@ -143,9 +145,13 @@ export default function JudgeDashboard() {
     }
   };
 
-  const handleConfirmGrading = async () => {
+  const handleConfirmGrading = () => {
     if (!event) return;
-    if (!confirm("Are you sure you want to finalize and submit your final grading evaluations for this event? Once confirmed, you will sign off on your reviews for the administrator.")) return;
+    setShowSignOffModal(true);
+  };
+
+  const executeConfirmGrading = async () => {
+    setShowSignOffModal(false);
     setLoading(true);
     try {
       const data = await apiFetch(`/api/events/${event._id}/confirm-grading`, {
@@ -450,6 +456,42 @@ export default function JudgeDashboard() {
         </div>
       </div>
     )}
+
+      {/* CONFIRM SIGN-OFF MODAL */}
+      {showSignOffModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 rounded-2xl mb-2 animate-bounce">
+                <AlertTriangle size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Finalize Evaluations Sign-Off
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to finalize and submit your final grading evaluations for this event? Once confirmed, you will sign off on your reviews for the administrator.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowSignOffModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeConfirmGrading}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+              >
+                Yes, Sign Off
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SUCCESS MESSAGE MODAL */}
       {showSuccessModal && (

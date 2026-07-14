@@ -687,37 +687,21 @@ export default function Dashboard() {
                           DSLR Photograph File (Max 10MB) *
                         </label>
                         <DragDropUpload
-                          file={photoFile}
-                          setFile={setPhotoFile}
-                          accept="image/*"
-                          onFileSelect={handlePhotoSelect}
+                          onUpload={async (photo, raw) => {
+                            if (!title || !category) {
+                              alert("Please fill in the Photo Title and Category first.");
+                              throw new Error("Title and Category are required.");
+                            }
+                            // Trigger EXIF analyze on the photo first
+                            await handleFileAnalyze(photo);
+                            // Execute upload route
+                            await handleUploadPhoto(photo, raw);
+                          }}
+                          isUploading={uploading}
                         />
                       </div>
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    disabled={uploading || !photoFile || !title || !category}
-                    onClick={handleUploadPhoto}
-                    className={`w-full font-bold py-3 px-6 rounded-xl shadow-lg transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2 ${
-                      uploading || !photoFile || !title || !category
-                        ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-                        : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    }`}
-                  >
-                    {uploading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Uploading & parsing EXIF...
-                      </>
-                    ) : (
-                      <>
-                        <Plus size={16} />
-                        Add Upload to Contest Folder
-                      </>
-                    )}
-                  </button>
                 </div>
               )}
 

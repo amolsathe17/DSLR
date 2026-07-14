@@ -25,7 +25,7 @@ import QRInvoice from "../components/QRInvoice";
 import Certificate from "../components/Certificate";
 
 export default function Dashboard() {
-  const { apiFetch, user } = useAuth();
+  const { apiFetch, user, token } = useAuth();
   const [event, setEvent] = useState(null);
   const [submission, setSubmission] = useState(null);
   const [categories, setCategories] = useState([]);

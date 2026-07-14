@@ -154,13 +154,13 @@ export default function DragDropUpload({ onUpload, isUploading, allowedTypes = [
         </div>
       ) : (
         <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
+          <div className="flex items-center justify-between gap-3 min-w-0 w-full">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="p-2.5 bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
                 <ImageIcon size={20} />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 line-clamp-1">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate animate-in fade-in duration-200" title={photoFile.name}>
                   {photoFile.name}
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -206,11 +206,11 @@ export default function DragDropUpload({ onUpload, isUploading, allowedTypes = [
                 )}
               </div>
             ) : (
-              <div className="flex items-center justify-between bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-200/50 dark:border-emerald-900/30 p-2.5 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-emerald-500" />
-                  <div>
-                    <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 block line-clamp-1">
+              <div className="flex items-center justify-between bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-200/50 dark:border-emerald-900/30 p-2.5 rounded-lg gap-3 min-w-0 w-full">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 block truncate" title={rawFile.name}>
                       {rawFile.name}
                     </span>
                     <span className="text-[10px] text-emerald-600 dark:text-emerald-500">

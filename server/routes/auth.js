@@ -33,7 +33,7 @@ router.post('/register', async (req, res) => {
       mobile,
       password: hashedPassword,
       city,
-      role: role || 'Participant',
+      role: 'Participant',
       otp,
       otpExpires,
       isVerified: false
@@ -365,7 +365,7 @@ router.post('/mobile-otp-request', async (req, res) => {
         mobile,
         password: hashedPassword,
         city,
-        role: role || 'Participant',
+        role: 'Participant',
         otp,
         otpExpires,
         isVerified: false

@@ -4,7 +4,20 @@ import { Camera, Calendar, Award, BookOpen, ShieldAlert, Sparkles, ChevronDown, 
 import { useAuth } from '../context/AuthContext';
 
 export default function Landing() {
-  const { apiFetch } = useAuth();
+  const { apiFetch, user } = useAuth();
+
+  const getEnrollLink = () => {
+    if (!user) return '/register';
+    if (user.role === 'Admin') return '/admin';
+    if (user.role === 'Judge') return '/judge';
+    return '/dashboard';
+  };
+
+  const getEnrollText = (defaultText) => {
+    if (!user) return defaultText;
+    if (user.role === 'Participant') return 'Upload Photos & Pay';
+    return 'Go to Portal';
+  };
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -99,10 +112,10 @@ export default function Landing() {
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mt-2">
                 <Link
-                  to="/register"
+                  to={getEnrollLink()}
                   className="w-full sm:w-auto text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all"
                 >
-                  Register & Enter Now
+                  {getEnrollText('Register & Enter Now')}
                 </Link>
                 <a
                   href="#rules"
@@ -214,10 +227,10 @@ export default function Landing() {
                 </ul>
               </div>
               <Link
-                to="/register"
-                className="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 rounded-xl shadow-sm transition-all"
+                to={getEnrollLink()}
+                className="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 rounded-xl shadow-sm transition-all text-center"
               >
-                Select Package
+                {getEnrollText('Select Package')}
               </Link>
             </div>
           ))}

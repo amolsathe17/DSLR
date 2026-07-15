@@ -1374,7 +1374,7 @@ export default function AdminDashboard() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs text-slate-500 font-semibold">Contest Title</label>
                     <input
@@ -1387,13 +1387,12 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Theme</label>
-                    <input
-                      type="text"
+                    <label className="text-xs text-slate-500 font-semibold">Theme & Description (Text relevant to the contest/event)</label>
+                    <textarea
                       value={newEventTheme}
                       onChange={(e) => setNewEventTheme(e.target.value)}
-                      placeholder="e.g. Rain and Shadows"
-                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                      placeholder="e.g. Rain and Shadows - Capture the transition of weather, dark cloud details, reflecting pools, and urban silhouettes during rainfall."
+                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none"
                       required
                     />
                   </div>

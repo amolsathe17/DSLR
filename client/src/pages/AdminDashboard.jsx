@@ -77,9 +77,11 @@ export default function AdminDashboard() {
   const [prize1Reward, setPrize1Reward] = useState('₹50,000 Cash + Gold Trophy');
   const [prize2Reward, setPrize2Reward] = useState('₹30,000 Cash + Silver Trophy');
   const [prize3Reward, setPrize3Reward] = useState('₹20,000 Cash + Bronze Trophy');
-  const [pricePkg1, setPricePkg1] = useState(200);
-  const [pricePkg2, setPricePkg2] = useState(300);
-  const [pricePkg3, setPricePkg3] = useState(400);
+  const [newEventPackages, setNewEventPackages] = useState([
+    { name: 'Starter', price: 200, maxPhotos: 1 },
+    { name: 'Amateur', price: 300, maxPhotos: 2 },
+    { name: 'Pro', price: 400, maxPhotos: 5 }
+  ]);
 
   useEffect(() => {
     let defaultRules = '';
@@ -470,7 +472,7 @@ export default function AdminDashboard() {
           ],
           faqs: [
             { question: `Is digital work allowed?`, answer: eventType === 'Photography' ? 'No. Only DSLR/Mirrorless photos are allowed.' : 'No. Only physical hand-made works are accepted.' },
-            { question: 'What is the package fee?', answer: `We offer 3 packages: Starter (₹${pricePkg1}), Amateur (₹${pricePkg2}), and Pro (₹${pricePkg3}).` },
+            { question: 'What is the package fee?', answer: `We offer packages ranging from Starter to Pro options. View prices when starting your entry folder.` },
             { question: 'How will I receive my certificate?', answer: 'All valid participants can download a digital participation certificate directly from their dashboard after results are declared.' }
           ],
           terms: [
@@ -478,11 +480,12 @@ export default function AdminDashboard() {
             'Fees are non-refundable once payment is completed.',
             'The decision of the judging panel will be final and binding.'
           ],
-          packages: [
-            { id: 'pkg-1', name: `Starter (1 ${eventType === 'Photography' ? 'Photograph' : 'Entry'})`, price: Number(pricePkg1), maxPhotos: 1 },
-            { id: 'pkg-2', name: `Amateur (Up to 2 ${eventType === 'Photography' ? 'Photographs' : 'Entries'})`, price: Number(pricePkg2), maxPhotos: 2 },
-            { id: 'pkg-3', name: `Pro (Up to 5 ${eventType === 'Photography' ? 'Photographs' : 'Entries'})`, price: Number(pricePkg3), maxPhotos: 5 }
-          ]
+          packages: newEventPackages.map((pkg, idx) => ({
+            id: `pkg-${idx + 1}`,
+            name: `${pkg.name} (${pkg.maxPhotos} ${eventType === 'Photography' ? (pkg.maxPhotos > 1 ? 'Photographs' : 'Photograph') : (pkg.maxPhotos > 1 ? 'Entries' : 'Entry')})`,
+            price: Number(pkg.price),
+            maxPhotos: Number(pkg.maxPhotos)
+          }))
         })
       });
       if (data.success) {
@@ -499,9 +502,11 @@ export default function AdminDashboard() {
         setPrize1Reward('₹50,000 Cash + Gold Trophy');
         setPrize2Reward('₹30,000 Cash + Silver Trophy');
         setPrize3Reward('₹20,000 Cash + Bronze Trophy');
-        setPricePkg1(200);
-        setPricePkg2(300);
-        setPricePkg3(400);
+        setNewEventPackages([
+          { name: 'Starter', price: 200, maxPhotos: 1 },
+          { name: 'Amateur', price: 300, maxPhotos: 2 },
+          { name: 'Pro', price: 400, maxPhotos: 5 }
+        ]);
         fetchJudgesAndEvents();
       }
     } catch (e) {
@@ -1466,38 +1471,83 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-                  <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs mb-2">Package Entry Fees (INR)</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-medium">Starter Package (1 photo/entry)</label>
-                      <input
-                        type="number"
-                        value={pricePkg1}
-                        onChange={(e) => setPricePkg1(e.target.value)}
-                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-medium">Amateur Package (Up to 2 entries)</label>
-                      <input
-                        type="number"
-                        value={pricePkg2}
-                        onChange={(e) => setPricePkg2(e.target.value)}
-                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-medium">Pro Package (Up to 5 entries)</label>
-                      <input
-                        type="number"
-                        value={pricePkg3}
-                        onChange={(e) => setPricePkg3(e.target.value)}
-                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        required
-                      />
-                    </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs">Package Entry Fees (INR)</h4>
+                    <button
+                      type="button"
+                      onClick={() => setNewEventPackages([...newEventPackages, { name: '', price: 0, maxPhotos: 1 }])}
+                      className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
+                    >
+                      + Add Package
+                    </button>
+                  </div>
+                  
+                  <div className="flex flex-col gap-3">
+                    {newEventPackages.map((pkg, idx) => (
+                      <div key={idx} className="flex flex-wrap sm:flex-nowrap gap-3 items-end bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-150 dark:border-slate-850">
+                        <div className="flex-1 min-w-[120px] flex flex-col gap-1">
+                          <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
+                          <input
+                            type="text"
+                            value={pkg.name}
+                            onChange={(e) => {
+                              const updated = [...newEventPackages];
+                              updated[idx].name = e.target.value;
+                              setNewEventPackages(updated);
+                            }}
+                            placeholder="e.g. Starter, Amateur"
+                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="w-24 flex flex-col gap-1">
+                          <label className="text-[10px] text-slate-400 font-semibold">Price (₹)</label>
+                          <input
+                            type="number"
+                            value={pkg.price || ''}
+                            onChange={(e) => {
+                              const updated = [...newEventPackages];
+                              updated[idx].price = Number(e.target.value);
+                              setNewEventPackages(updated);
+                            }}
+                            placeholder="Price"
+                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+
+                        <div className="w-28 flex flex-col gap-1">
+                          <label className="text-[10px] text-slate-400 font-semibold">Max Uploads</label>
+                          <input
+                            type="number"
+                            value={pkg.maxPhotos || ''}
+                            onChange={(e) => {
+                              const updated = [...newEventPackages];
+                              updated[idx].maxPhotos = Number(e.target.value);
+                              setNewEventPackages(updated);
+                            }}
+                            placeholder="Max photos"
+                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+
+                        {newEventPackages.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = newEventPackages.filter((_, pIdx) => pIdx !== idx);
+                              setNewEventPackages(updated);
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                            title="Remove Package"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 

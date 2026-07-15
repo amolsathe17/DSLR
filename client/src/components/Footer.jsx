@@ -71,26 +71,26 @@ export default function Footer() {
   return (
     <footer className="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80 text-slate-600 dark:text-slate-400">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           
-          {/* Logo & Description */}
+          {/* Column 1: About Us */}
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
+            <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
+              About Us
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
+              A first-of-its-kind artfest in Maharashtra, Sumba was created to celebrate art in its truest form. This year shines a light on fading tribal traditions, many kept alive by only a few families. By giving these artists a stage, we hope their stories travel farther and last longer.
+            </p>
+            <div className="flex items-center gap-2 mt-1">
               <img 
                 src="/sumbacontest.jpg" 
                 alt="SumbaContest Logo" 
                 className="h-8 w-auto object-contain rounded"
               />
             </div>
-            <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider mt-1">
-              About Us
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-            A first-of-its-kind artfest in Maharashtra, Sumba was created to celebrate art in its truest form. This year shines a light on fading tribal traditions, many kept alive by only a few families. By giving these artists a stage, we hope their stories travel farther and last longer.
-            </p>
           </div>
 
-          {/* Quick Rules Check */}
+          {/* Column 2: Guidelines */}
           <div className="flex flex-col gap-3">
             <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
               {eventType} Guidelines
@@ -105,9 +105,9 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Help & Support */}
-          <div className="flex flex-col gap-2 text-sm">
-            <h3 className="font-display font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1 text-xs">
+          {/* Column 3: Support */}
+          <div className="flex flex-col gap-3 text-sm">
+            <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
               Support & Inquiries
             </h3>
             <p>Email: <a href="mailto:support@dslrcontest.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support@dslrcontest.com</a></p>

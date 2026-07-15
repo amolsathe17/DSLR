@@ -262,7 +262,7 @@ export default function Landing() {
             >
               <div className="flex flex-col gap-4">
                 <span className="font-display font-bold text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                  {pkg.name.split(' ')[0]} Entry
+                  {pkg.name}
                 </span>
                 <h3 className="font-display font-black text-4xl text-slate-900 dark:text-white">
                   ₹{pkg.price}

@@ -610,7 +610,7 @@ export default function AdminDashboard() {
           ],
           packages: newEventPackages.map((pkg, idx) => ({
             id: `pkg-${idx + 1}`,
-            name: `${pkg.name} (${pkg.maxPhotos} ${eventType === 'Photography' ? (pkg.maxPhotos > 1 ? 'Photographs' : 'Photograph') : (pkg.maxPhotos > 1 ? 'Entries' : 'Entry')})`,
+            name: pkg.name,
             price: Number(pkg.price),
             maxPhotos: Number(pkg.maxPhotos)
           }))
@@ -675,7 +675,7 @@ export default function AdminDashboard() {
     
     if (e.packages && e.packages.length > 0) {
       setEditEventPackages(e.packages.map(p => ({
-        name: p.name.split(' (')[0],
+        name: p.name,
         price: p.price,
         maxPhotos: p.maxPhotos
       })));
@@ -718,7 +718,7 @@ export default function AdminDashboard() {
           ],
           packages: editEventPackages.map((pkg, idx) => ({
             id: `pkg-${idx + 1}`,
-            name: `${pkg.name} (${pkg.maxPhotos} ${actualType === 'Photography' ? (pkg.maxPhotos > 1 ? 'Photographs' : 'Photograph') : (pkg.maxPhotos > 1 ? 'Entries' : 'Entry')})`,
+            name: pkg.name,
             price: Number(pkg.price),
             maxPhotos: Number(pkg.maxPhotos)
           }))
@@ -2851,39 +2851,82 @@ export default function AdminDashboard() {
 
               {/* Packages config */}
               <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
-                <span className="font-bold text-slate-850 dark:text-white">Submission Entry Packages Fees</span>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-bold text-slate-850 dark:text-white">Submission Entry Packages Fees</span>
+                  <button
+                    type="button"
+                    onClick={() => setEditEventPackages([...editEventPackages, { name: '', price: 0, maxPhotos: 1 }])}
+                    className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
+                  >
+                    + Add Package
+                  </button>
+                </div>
+                
                 <div className="flex flex-col gap-3">
                   {editEventPackages.map((pkg, idx) => (
-                    <div key={idx} className="flex flex-wrap sm:flex-nowrap gap-3 items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-850">
-                      <span className="font-bold text-slate-500 w-16 text-[10px] uppercase">{pkg.name}</span>
-                      <div className="flex items-center gap-1">
-                        <span className="text-slate-400">Price (₹)</span>
+                    <div key={idx} className="flex flex-wrap sm:flex-nowrap gap-3 items-end bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-100 dark:border-slate-850">
+                      
+                      <div className="flex-1 min-w-[120px] flex flex-col gap-1">
+                        <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
                         <input
-                          type="number"
-                          value={pkg.price}
+                          type="text"
+                          value={pkg.name}
                           onChange={(e) => {
                             const newPkgs = [...editEventPackages];
-                            newPkgs[idx].price = e.target.value;
+                            newPkgs[idx].name = e.target.value;
                             setEditEventPackages(newPkgs);
                           }}
-                          className="w-20 px-2 py-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded"
+                          placeholder="e.g. Starter, Amateur"
+                          className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold"
                           required
                         />
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-slate-400">Max Entries</span>
+                      
+                      <div className="w-24 flex flex-col gap-1">
+                        <label className="text-[10px] text-slate-400 font-semibold">Price (₹)</label>
                         <input
                           type="number"
-                          value={pkg.maxPhotos}
+                          value={pkg.price || ''}
                           onChange={(e) => {
                             const newPkgs = [...editEventPackages];
-                            newPkgs[idx].maxPhotos = e.target.value;
+                            newPkgs[idx].price = Number(e.target.value);
                             setEditEventPackages(newPkgs);
                           }}
-                          className="w-16 px-2 py-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded"
+                          placeholder="Price"
+                          className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                           required
                         />
                       </div>
+
+                      <div className="w-28 flex flex-col gap-1">
+                        <label className="text-[10px] text-slate-400 font-semibold">Max Uploads</label>
+                        <input
+                          type="number"
+                          value={pkg.maxPhotos || ''}
+                          onChange={(e) => {
+                            const newPkgs = [...editEventPackages];
+                            newPkgs[idx].maxPhotos = Number(e.target.value);
+                            setEditEventPackages(newPkgs);
+                          }}
+                          placeholder="Max photos"
+                          className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                          required
+                        />
+                      </div>
+
+                      {editEventPackages.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newPkgs = editEventPackages.filter((_, pIdx) => pIdx !== idx);
+                            setEditEventPackages(newPkgs);
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                          title="Remove Package"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

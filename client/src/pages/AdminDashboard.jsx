@@ -113,6 +113,10 @@ export default function AdminDashboard() {
     { name: 'Pro', price: 400, maxPhotos: 5 }
   ]);
 
+  // Purge confirmation modal states
+  const [showPurgeConfirmModal, setShowPurgeConfirmModal] = useState(false);
+  const [purgeBackupTarget, setPurgeBackupTarget] = useState(null);
+
   useEffect(() => {
     let defaultRules = '';
     let defaultDesc = '';
@@ -543,11 +547,16 @@ export default function AdminDashboard() {
     }
   };
 
-  const handlePurgeBackup = async (backup) => {
-    if (!confirm(`Are you absolutely sure you want to PERMANENTLY PURGE "${backup.title}"? This will delete all submissions, payments, uploaded photographs, and judges evaluations from the database forever. This action CANNOT be undone.`)) return;
+  const handlePurgeBackup = (backup) => {
+    setPurgeBackupTarget(backup);
+    setShowPurgeConfirmModal(true);
+  };
 
+  const executePurgeBackup = async () => {
+    if (!purgeBackupTarget) return;
+    setShowPurgeConfirmModal(false);
     try {
-      const data = await apiFetch(`/api/events/backups/${backup._id}/purge`, {
+      const data = await apiFetch(`/api/events/backups/${purgeBackupTarget._id}/purge`, {
         method: 'DELETE'
       });
       if (data.success) {
@@ -557,6 +566,8 @@ export default function AdminDashboard() {
       }
     } catch (e) {
       alert(e.message);
+    } finally {
+      setPurgeBackupTarget(null);
     }
   };
 
@@ -2894,6 +2905,45 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* PERMANENT PURGE CONFIRMATION MODAL */}
+      {showPurgeConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-2xl mb-2 animate-bounce">
+                <AlertTriangle size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Permanent Purge Warning
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you absolutely sure you want to PERMANENTLY PURGE <strong>"{purgeBackupTarget?.title}"</strong>? This will delete all submissions, payments, uploaded photographs, and judges evaluations from the database forever. This action CANNOT be undone.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPurgeConfirmModal(false);
+                  setPurgeBackupTarget(null);
+                }}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executePurgeBackup}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+              >
+                Yes, Purge Everything
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -94,7 +94,7 @@ export default function Certificate({ user, submission, event, onClose }) {
       doc.setFont('helvetica', 'bold');
       doc.setTextColor('#1e293b');
       doc.text(new Date(event.eventDate).toLocaleDateString(), 70, 151, { align: 'center' });
-      doc.text('SumbaContest Panel', 227, 151, { align: 'center' });
+      doc.text('DSLR Contest Panel', 227, 151, { align: 'center' });
 
       // Verification QR
       const verifyData = JSON.stringify({
@@ -198,7 +198,7 @@ export default function Certificate({ user, submission, event, onClose }) {
 
               <div className="text-right">
                 <p className="font-display font-semibold text-xs text-slate-800 dark:text-slate-200 border-t border-slate-200 dark:border-slate-800 pt-1.5 min-w-[140px]">
-                  SumbaContest Panel
+                  DSLR Contest Panel
                 </p>
                 <p className="text-[10px] text-slate-400">Organizing Committee</p>
               </div>

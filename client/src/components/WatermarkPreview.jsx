@@ -56,7 +56,7 @@ export default function WatermarkPreview({ src, className = "" }) {
       ctx.translate(width / 2, height / 2);
       ctx.rotate(-35 * Math.PI / 180);
 
-      const text = "SUMBACONTEST PREVIEW";
+      const text = "DSLR CONTEST PREVIEW";
       
       // Draw a grid of watermark texts
       const spacingX = Math.round(width / 2);

@@ -328,7 +328,7 @@ export default function Dashboard() {
         key: data.keyId,
         amount: data.amount,
         currency: data.currency,
-        name: "SumbaContest",
+        name: "DSLR Contest Portal",
         description: "Contest Package Registration Fee",
         order_id: data.orderId,
         handler: async function (response) {

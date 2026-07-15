@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import JudgeDashboard from './pages/JudgeDashboard';
 import Gallery from './pages/Gallery';
+import About from './pages/About';
 
 // Route Guard for authenticated users
 function ProtectedRoute({ children }) {
@@ -62,6 +63,7 @@ function MainLayout() {
           {/* Public Routes */}
           <Route path="/" element={<Register />} />
           <Route path="/info" element={<Landing />} />
+          <Route path="/about" element={<About />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

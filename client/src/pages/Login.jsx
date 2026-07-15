@@ -213,7 +213,7 @@ export default function Login() {
             className="font-display font-extrabold text-xl text-slate-900 dark:text-white cursor-pointer select-none hover:opacity-85 transition-opacity"
             title="Click to cycle Login Portals"
           >
-            {loginRole === 'Admin' ? 'Admin Login' : loginRole === 'Judge' ? 'Judge Login' : 'SumbaContest Login'}
+            {loginRole === 'Admin' ? 'Admin Login' : loginRole === 'Judge' ? 'Judge Login' : 'Contestant Login'}
           </h2>
           <p className="text-xs text-slate-500">
             {loginRole === 'Admin' 

@@ -29,7 +29,7 @@ export default function QRInvoice({ payment, onClose }) {
       doc.setTextColor('#ffffff');
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(22);
-      doc.text('SUMBACONTEST INVOICE', 15, 25);
+      doc.text('DSLR CONTEST INVOICE', 15, 25);
       
       // Payment Status Badge
       doc.setFillColor('#10b981'); // emerald 500
@@ -100,7 +100,7 @@ export default function QRInvoice({ payment, onClose }) {
       doc.setTextColor('#94a3b8');
       doc.setFontSize(8);
       doc.text('This is a computer-generated invoice. No physical signature is required.', 15, 190);
-      doc.text('For queries, please email support@sumbacontest.com', 15, 195);
+      doc.text('For queries, please email support@dslrcontest.com', 15, 195);
 
       // Save PDF
       doc.save(`invoice-${payment.invoiceNumber}.pdf`);

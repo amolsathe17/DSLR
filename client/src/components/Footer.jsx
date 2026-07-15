@@ -80,11 +80,11 @@ export default function Footer() {
                 <Camera size={16} />
               </div>
               <span className="font-display font-bold text-slate-900 dark:text-white">
-                SumbaContest
+                DSLR Contest Portal
               </span>
             </div>
-            <p className="text-sm max-w-sm">
-              {getDescription()}
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
+              We are dedicated to celebrating the authentic art of photography and visual skills. Our platform provides a transparent, professional environment for camera enthusiasts and artists to showcase their craftsmanship and compete.
             </p>
           </div>
 
@@ -108,14 +108,14 @@ export default function Footer() {
             <h3 className="font-display font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1 text-xs">
               Support & Inquiries
             </h3>
-            <p>Email: <a href="mailto:support@sumbacontest.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support@sumbacontest.com</a></p>
+            <p>Email: <a href="mailto:support@dslrcontest.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support@dslrcontest.com</a></p>
             <p>Phone: +91 98765 43210 (Mon-Sat, 9AM - 6PM)</p>
-            <p>Address: SumbaContest Inc., Bandra Kurla Complex, Mumbai, India</p>
+            <p>Address: DSLR Contest Association, BKC, Mumbai, India</p>
           </div>
         </div>
 
         <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-4 text-xs text-center">
-          <p>&copy; {new Date().getFullYear()} SumbaContest. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} DSLR Contest Portal. All rights reserved.</p>
         </div>
       </div>
     </footer>

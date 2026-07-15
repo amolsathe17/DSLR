@@ -65,7 +65,7 @@ export default function Profile() {
           </div>
           <div>
             <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">Profile Settings</h2>
-            <p className="text-xs text-slate-400">Manage your SumbaContest account details</p>
+            <p className="text-xs text-slate-400">Manage your DSLR Contest Portal account details</p>
           </div>
         </div>
 

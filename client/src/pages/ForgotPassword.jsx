@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Camera, Mail, Lock, ShieldAlert, ArrowLeft, Key } from 'lucide-react';
+import { Camera, Mail, Lock, ShieldAlert, ArrowLeft, Key, Check } from 'lucide-react';
 
 export default function ForgotPassword() {
   const { forgotPassword, resetPassword, apiFetch } = useAuth();
   const navigate = useNavigate();
   const [loginBgUrl, setLoginBgUrl] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   React.useEffect(() => {
     const fetchEvent = async () => {
@@ -73,8 +74,10 @@ export default function ForgotPassword() {
     try {
       const data = await resetPassword(userId, otpVal, newPassword);
       if (data.success) {
-        alert('Password updated successfully! Redirecting to login...');
-        navigate('/login');
+        setShowSuccessModal(true);
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       }
     } catch (err) {
       setError(err.message || 'Failed to reset password');
@@ -210,6 +213,24 @@ export default function ForgotPassword() {
 
         </div>
       </div>
+
+      {/* Success Redirect Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-4 items-center text-center animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-full flex items-center justify-center">
+              <Check size={24} className="stroke-[3]" />
+            </div>
+            <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white mt-2">
+              Password Reset Successful!
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              Your password has been successfully updated. You are now being redirected to the login page.
+            </p>
+            <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mt-2"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

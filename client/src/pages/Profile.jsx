@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Phone, Lock, Building, Camera, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { User, Phone, Lock, Building, Camera, CheckCircle2, ShieldAlert, Check } from 'lucide-react';
 
 export default function Profile() {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
+  const navigate = useNavigate();
   const [name, setName] = useState(user?.name || '');
   const [mobile, setMobile] = useState(user?.mobile || '');
   const [city, setCity] = useState(user?.city || '');
@@ -12,6 +14,7 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,8 +36,16 @@ export default function Profile() {
       });
 
       if (data.success) {
-        setSuccess('Profile updated successfully!');
-        setPassword('');
+        if (password.trim() !== '') {
+          setShowSuccessModal(true);
+          setPassword('');
+          setTimeout(() => {
+            logout();
+            navigate('/login');
+          }, 3000);
+        } else {
+          setSuccess('Profile updated successfully!');
+        }
       }
     } catch (err) {
       setError(err.message || 'Failed to update profile');
@@ -164,6 +175,24 @@ export default function Profile() {
 
         </form>
       </div>
+
+      {/* Success Redirect Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-4 items-center text-center animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-full flex items-center justify-center">
+              <Check size={24} className="stroke-[3]" />
+            </div>
+            <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white mt-2">
+              Password Updated Successfully!
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              Your security details have changed. You are being logged out and redirected to the login page.
+            </p>
+            <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mt-2"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

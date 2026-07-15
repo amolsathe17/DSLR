@@ -1027,9 +1027,16 @@ export default function AdminDashboard() {
                 {participants.map(p => (
                   <tr key={p._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
                     <td className="py-3.5 pr-4">
-                      <p className="font-semibold text-slate-900 dark:text-white">{p.name}</p>
-                      <span className="text-[10px] text-slate-400 block">{p.email}</span>
-                    </td>
+                       <div className="flex items-center gap-2">
+                         <p className="font-semibold text-slate-900 dark:text-white">{p.name}</p>
+                         {p.isSuspended && (
+                           <span className="px-1.5 py-0.5 rounded font-bold text-[8px] bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400 uppercase tracking-wider shrink-0">
+                             Suspended
+                           </span>
+                         )}
+                       </div>
+                       <span className="text-[10px] text-slate-400 block">{p.email}</span>
+                     </td>
                     <td className="py-3.5 px-4 text-slate-500 font-medium">{p.mobile}</td>
                     <td className="py-3.5 px-4 text-slate-500 font-medium">{p.city}</td>
                     <td className="py-3.5 px-4 text-center text-indigo-600 dark:text-indigo-400 font-semibold">

@@ -106,7 +106,7 @@ function MainLayout() {
             path="/judge" 
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['Judge']}>
+                <RoleRoute allowedRoles={['Judge', 'Admin']}>
                   <JudgeDashboard />
                 </RoleRoute>
               </ProtectedRoute>

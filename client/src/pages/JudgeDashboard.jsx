@@ -40,8 +40,9 @@ export default function JudgeDashboard() {
     try {
       const eventData = await apiFetch('/api/events');
       if (eventData.success && eventData.events.length > 0) {
-        // Filter events where this judge is assigned
-        const assigned = eventData.events.filter(e => e.assignedJudges && e.assignedJudges.includes(user?.id));
+        const assigned = user?.role === 'Admin' 
+          ? eventData.events 
+          : eventData.events.filter(e => e.assignedJudges && e.assignedJudges.includes(user?.id));
         setEvents(assigned);
         
         if (assigned.length > 0) {
@@ -206,6 +207,13 @@ export default function JudgeDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
       
+      {user?.role === 'Admin' && (
+        <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4 flex items-center gap-3 text-amber-600 dark:text-amber-400 mb-6 text-xs font-semibold">
+          <ShieldAlert size={18} className="shrink-0" />
+          <span>Viewing in Admin Mode (Read-Only). You can review judge evaluations but cannot modify scores or sign off.</span>
+        </div>
+      )}
+      
       {error && (
         <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-6">
           <ShieldAlert size={18} className="shrink-0 mt-0.5" />
@@ -273,7 +281,7 @@ export default function JudgeDashboard() {
           <div className="lg:col-span-8 flex flex-col gap-6">
             
             {/* Confirmation Sign-Off Banner */}
-            {photographs.length > 0 && (
+            {user?.role !== 'Admin' && photographs.length > 0 && (
               hasConfirmed ? (
                 <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-800 dark:text-emerald-300">
                   <div className="flex items-center gap-2 text-xs">
@@ -387,6 +395,40 @@ export default function JudgeDashboard() {
 
               <form onSubmit={handleScoreSubmit} className="flex flex-col gap-4 text-xs">
                 
+                {/* Admin judge reviews inspector */}
+                {user?.role === 'Admin' && activePhoto.allScores && activePhoto.allScores.length > 0 && (
+                  <div className="flex flex-col gap-2 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 rounded-2xl">
+                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-wider block">
+                      Judge Evaluations ({activePhoto.allScores.length})
+                    </span>
+                    <div className="flex flex-col gap-2 mt-1">
+                      {activePhoto.allScores.map((s, sIdx) => (
+                        <div 
+                          key={sIdx} 
+                          onClick={() => {
+                            setCreativity(s.creativity || 5);
+                            setComposition(s.composition || 5);
+                            setTechnicalQuality(s.technicalQuality || 5);
+                            setStorytelling(s.storytelling || 5);
+                            setOverallImpact(s.overallImpact || 5);
+                            setRemarks(s.remarks || '');
+                          }}
+                          className="flex justify-between items-center text-[10px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer hover:border-indigo-400 transition-colors"
+                          title="Click to view details in sliders"
+                        >
+                          <div className="text-left">
+                            <p className="font-bold text-slate-800 dark:text-white">{s.judgeName}</p>
+                            <p className="text-[8px] text-slate-400 truncate max-w-[150px]">"{s.remarks || 'No remarks'}"</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="font-black text-indigo-600 dark:text-indigo-400">{s.averageScore}/10</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
                 {/* Scoring criteria sliders */}
                 {[
                   { label: 'Creativity (1-10)', val: creativity, set: setCreativity, desc: 'Originality, artistic expression, and concept.' },
@@ -406,7 +448,8 @@ export default function JudgeDashboard() {
                       max={10}
                       value={item.val}
                       onChange={(e) => item.set(Number(e.target.value))}
-                      className="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                      className="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
+                      disabled={user?.role === 'Admin'}
                     />
                     <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
                   </div>
@@ -433,18 +476,25 @@ export default function JudgeDashboard() {
                   <textarea
                     value={remarks}
                     onChange={(e) => setRemarks(e.target.value)}
-                    placeholder="Provide constructive feedback for the photographer..."
+                    placeholder={user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
-                    required
+                    required={user?.role !== 'Admin'}
+                    disabled={user?.role === 'Admin'}
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer transition-colors text-center"
-                >
-                  Submit Grade Evaluation
-                </button>
+                {user?.role === 'Admin' ? (
+                  <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold py-2.5 rounded-xl text-center text-[10px]">
+                    Evaluation Read-Only (Admin Mode)
+                  </div>
+                ) : (
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer transition-colors text-center"
+                  >
+                    Submit Grade Evaluation
+                  </button>
+                )}
               </form>
             </div>
           ) : (

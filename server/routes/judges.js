@@ -7,9 +7,10 @@ const { protect, authorize } = require('../middleware/auth');
 // @desc    Get all photographs assigned to the logged-in judge
 // @route   GET /api/judges/assigned-photos/:eventId
 // @access  Private/Judge
-router.get('/assigned-photos/:eventId', protect, authorize('Judge'), async (req, res) => {
+router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), async (req, res) => {
   try {
     const { eventId } = req.params;
+    const isAdmin = req.user.role === 'Admin';
     const judgeId = req.user._id.toString();
 
     const Event = require('../models/Event');
@@ -18,7 +19,7 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge'), async (req,
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    const isAssignedToEvent = event.assignedJudges && event.assignedJudges.includes(judgeId);
+    const isAssignedToEvent = isAdmin || (event.assignedJudges && event.assignedJudges.includes(judgeId));
 
     // Find submissions for this event (only paid ones)
     let submissions;
@@ -37,14 +38,17 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge'), async (req,
       });
     }
 
-    // Extract only the photographs assigned to this judge
+    // Extract only the photographs assigned to this judge (or all if Admin)
     const assignedPhotos = [];
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
         if (photo.status !== 'Approved') return;
         if (isAssignedToEvent || photo.assignedJudges.includes(judgeId)) {
-          // Check if already graded
-          const existingScore = photo.scores.find(s => s.judgeId === judgeId);
+          // If Admin, the "existingScore" can be the average score of all judges, or the first judge's score
+          const existingScore = isAdmin 
+            ? (photo.scores && photo.scores.length > 0 ? photo.scores[0] : null) 
+            : photo.scores.find(s => s.judgeId === judgeId);
+          
           assignedPhotos.push({
             submissionId: sub._id,
             participantName: sub.userName,
@@ -61,8 +65,9 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge'), async (req,
             rawFileUrl: photo.rawFileUrl,
             fileSizeBytes: photo.fileSizeBytes,
             status: photo.status,
-            graded: !!existingScore,
-            score: existingScore || null
+            graded: isAdmin ? (photo.scores && photo.scores.length > 0) : !!existingScore,
+            score: existingScore || null,
+            allScores: photo.scores || [] // Expose all scores for the Admin to review
           });
         }
       });

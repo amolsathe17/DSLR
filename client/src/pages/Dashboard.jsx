@@ -1057,6 +1057,21 @@ export default function Dashboard() {
                 </div>
               </div>
 
+              {/* Test Mode Help Alert */}
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/50 p-3.5 rounded-2xl flex flex-col gap-1 text-[11px] text-amber-700 dark:text-amber-300 text-left">
+                <span className="font-bold flex items-center gap-1">
+                  <AlertTriangle size={13} className="shrink-0" />
+                  Razorpay Test Mode Info
+                </span>
+                <p className="leading-relaxed">
+                  This portal is in <strong>Test Mode</strong>. You will not receive a real OTP on your phone. To complete the payment:
+                </p>
+                <ul className="list-disc pl-4 mt-1 flex flex-col gap-1">
+                  <li>Use any 6-digit number (e.g., <strong>123456</strong>) on the OTP screen and click <strong>Continue</strong>.</li>
+                  <li>Or click the <strong>"Pay on bank's page"</strong> link on the OTP screen and click <strong>"Success"</strong>.</li>
+                </ul>
+              </div>
+
             </div>
 
             <div className="flex flex-col gap-3">

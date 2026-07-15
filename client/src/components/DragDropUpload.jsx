@@ -30,6 +30,12 @@ export default function DragDropUpload({ onUpload, isUploading, allowedTypes = [
       setError('Only JPEG, PNG, or TIFF files are allowed for the main photograph.');
       return false;
     }
+    
+    if (file.size > 800 * 1024) {
+      setError('Photograph file size must be below 800 KB.');
+      return false;
+    }
+
     setError('');
     return true;
   };
@@ -143,7 +149,7 @@ export default function DragDropUpload({ onUpload, isUploading, allowedTypes = [
             Drag & Drop your photograph here
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-3">
-            Supports JPEG, PNG, TIFF (Max size 50MB)
+            Supports JPEG, PNG, TIFF (Max size 800 KB)
           </p>
           <button
             type="button"

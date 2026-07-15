@@ -192,6 +192,10 @@ export default function Dashboard() {
   };
 
   const handleUploadPhoto = async (photoFile, rawFile) => {
+    if (photoFile && photoFile.size > 800 * 1024) {
+      setError("Photograph file size must be below 800 KB.");
+      return;
+    }
     setUploading(true);
     setError("");
 

@@ -173,6 +173,12 @@ router.post('/upload', protect, upload.fields([
     const photoFile = req.files.photoFile[0];
     const rawFile = req.files.rawFile ? req.files.rawFile[0] : null;
 
+    if (photoFile.size > 800 * 1024) {
+      fs.unlinkSync(photoFile.path);
+      if (rawFile) fs.unlinkSync(rawFile.path);
+      return res.status(400).json({ success: false, message: 'Photograph file size must be below 800 KB.' });
+    }
+
     const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
     if (!submission) {
       fs.unlinkSync(photoFile.path);

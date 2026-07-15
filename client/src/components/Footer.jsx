@@ -76,12 +76,11 @@ export default function Footer() {
           {/* Logo & Description */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-indigo-600 rounded-lg text-white">
-                <Camera size={16} />
-              </div>
-              <span className="font-display font-bold text-slate-900 dark:text-white">
-                DSLR Contest Portal
-              </span>
+              <img 
+                src="/sumbacontest.jpg" 
+                alt="SumbaContest Logo" 
+                className="h-8 w-auto object-contain rounded"
+              />
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
               We are dedicated to celebrating the authentic art of photography and visual skills. Our platform provides a transparent, professional environment for camera enthusiasts and artists to showcase their craftsmanship and compete.

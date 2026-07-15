@@ -26,12 +26,11 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/login" className="flex items-center gap-2 group">
-              <div className="p-2 bg-indigo-600 rounded-xl text-white group-hover:scale-105 transition-transform">
-                <Camera size={20} />
-              </div>
-              <span className="font-display font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                DSLR<span className="text-indigo-600 dark:text-indigo-400">Contest</span>
-              </span>
+              <img 
+                src="/sumbacontest.jpg" 
+                alt="SumbaContest Logo" 
+                className="h-10 w-auto object-contain rounded-lg transition-transform group-hover:scale-102"
+              />
             </Link>
           </div>
 

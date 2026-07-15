@@ -139,6 +139,11 @@ export default function Register() {
         
         {/* Brand Header */}
         <div className="flex flex-col items-center gap-2 text-center">
+          <img 
+            src="/sumbacontest.jpg" 
+            alt="SumbaContest Logo" 
+            className="h-10 w-auto object-contain rounded-lg mb-1"
+          />
           <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">
             {isVerifying ? 'Email Verification' : 'Register to submit entries and track results'}
           </h2>

@@ -99,9 +99,11 @@ export default function ForgotPassword() {
         
         {/* Brand Header */}
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="p-2.5 bg-indigo-600 rounded-xl text-white">
-            <Camera size={22} />
-          </div>
+          <img 
+            src="/sumbacontest.jpg" 
+            alt="SumbaContest Logo" 
+            className="h-10 w-auto object-contain rounded-lg"
+          />
           <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">
             Reset Password
           </h2>

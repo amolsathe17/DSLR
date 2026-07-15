@@ -42,19 +42,45 @@ export default function Login() {
 
   const redirectPath = location.state?.from?.pathname || '/';
 
-  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [loginRole, setLoginRole] = useState('Participant'); // 'Participant', 'Admin', 'Judge'
 
   useEffect(() => {
     if (redirectPath === '/admin') {
-      setIsAdminMode(true);
+      setLoginRole('Admin');
+    } else if (redirectPath === '/judge') {
+      setLoginRole('Judge');
     }
   }, [redirectPath]);
 
-  const primaryBg = isAdminMode ? 'bg-amber-600' : 'bg-indigo-600';
-  const primaryHoverBg = isAdminMode ? 'hover:bg-amber-700' : 'hover:bg-indigo-700';
-  const primaryText = isAdminMode ? 'text-amber-600 dark:text-amber-400' : 'text-indigo-600 dark:text-indigo-400';
-  const primaryFocusBorder = isAdminMode ? 'focus:border-amber-600 dark:focus:border-amber-400' : 'focus:border-indigo-600 dark:focus:border-indigo-400';
-  const primaryBorderColor = isAdminMode ? 'border-amber-500/35 dark:border-amber-500/20 shadow-amber-500/5' : 'border-white/20 dark:border-white/5';
+  const primaryBg = loginRole === 'Admin' 
+    ? 'bg-amber-600' 
+    : loginRole === 'Judge' 
+      ? 'bg-emerald-600' 
+      : 'bg-indigo-600';
+
+  const primaryHoverBg = loginRole === 'Admin' 
+    ? 'hover:bg-amber-700' 
+    : loginRole === 'Judge' 
+      ? 'hover:bg-emerald-700' 
+      : 'hover:bg-indigo-700';
+
+  const primaryText = loginRole === 'Admin' 
+    ? 'text-amber-600 dark:text-amber-400' 
+    : loginRole === 'Judge' 
+      ? 'text-emerald-600 dark:text-emerald-400' 
+      : 'text-indigo-600 dark:text-indigo-400';
+
+  const primaryFocusBorder = loginRole === 'Admin' 
+    ? 'focus:border-amber-600 dark:focus:border-amber-400' 
+    : loginRole === 'Judge' 
+      ? 'focus:border-emerald-600 dark:focus:border-emerald-400' 
+      : 'focus:border-indigo-600 dark:focus:border-indigo-400';
+
+  const primaryBorderColor = loginRole === 'Admin' 
+    ? 'border-amber-500/35 dark:border-amber-500/20 shadow-amber-500/5' 
+    : loginRole === 'Judge' 
+      ? 'border-emerald-500/35 dark:border-emerald-500/20 shadow-emerald-500/5' 
+      : 'border-white/20 dark:border-white/5';
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
@@ -179,14 +205,22 @@ export default function Login() {
             <Camera size={22} />
           </div>
           <h2 
-            onClick={() => setIsAdminMode(!isAdminMode)} 
+            onClick={() => {
+              if (loginRole === 'Participant') setLoginRole('Admin');
+              else if (loginRole === 'Admin') setLoginRole('Judge');
+              else setLoginRole('Participant');
+            }} 
             className="font-display font-extrabold text-xl text-slate-900 dark:text-white cursor-pointer select-none hover:opacity-85 transition-opacity"
-            title="Click to toggle Admin Portal"
+            title="Click to cycle Login Portals"
           >
-            {isAdminMode ? 'Admin Login' : 'SumbaContest Login'}
+            {loginRole === 'Admin' ? 'Admin Login' : loginRole === 'Judge' ? 'Judge Login' : 'SumbaContest Login'}
           </h2>
           <p className="text-xs text-slate-500">
-            {isAdminMode ? 'Access your administrator control panel' : 'Access your event participant dashboard'}
+            {loginRole === 'Admin' 
+              ? 'Access your administrator control panel' 
+              : loginRole === 'Judge' 
+                ? 'Access your scoring & evaluation portal' 
+                : 'Access your event participant dashboard'}
           </p>
         </div>
 
@@ -358,24 +392,36 @@ export default function Login() {
           </Link>
         </div>
 
-        <div className="text-center text-xs text-slate-400 mt-2 border-t border-slate-100 dark:border-slate-800/60 pt-3">
-          {isAdminMode ? (
-            <button
-              type="button"
-              onClick={() => setIsAdminMode(false)}
-              className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer inline-flex items-center gap-1"
-            >
-              Back to Contestant Login
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsAdminMode(true)}
-              className="text-amber-600 dark:text-amber-500 font-semibold hover:underline cursor-pointer inline-flex items-center gap-1"
-            >
-              Admin Portal Login
-            </button>
-          )}
+        <div className="text-center text-xs text-slate-400 mt-2 border-t border-slate-100 dark:border-slate-800/60 pt-3 flex flex-col gap-2">
+          <div className="flex justify-center gap-4 flex-wrap">
+            {loginRole !== 'Participant' && (
+              <button
+                type="button"
+                onClick={() => setLoginRole('Participant')}
+                className="text-indigo-650 dark:text-indigo-400 font-semibold hover:underline cursor-pointer"
+              >
+                Contestant Login
+              </button>
+            )}
+            {loginRole !== 'Admin' && (
+              <button
+                type="button"
+                onClick={() => setLoginRole('Admin')}
+                className="text-amber-600 dark:text-amber-500 font-semibold hover:underline cursor-pointer"
+              >
+                Admin Portal
+              </button>
+            )}
+            {loginRole !== 'Judge' && (
+              <button
+                type="button"
+                onClick={() => setLoginRole('Judge')}
+                className="text-emerald-600 dark:text-emerald-450 font-semibold hover:underline cursor-pointer"
+              >
+                Judges Portal
+              </button>
+            )}
+          </div>
         </div>
 
         </div>
@@ -385,7 +431,7 @@ export default function Login() {
           <div className="hidden md:flex flex-col gap-6 text-white max-w-md bg-slate-950/45 p-8 rounded-3xl border border-white/10 backdrop-blur-sm shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-white/10 rounded-2xl text-white">
-                <Calendar size={28} className={isAdminMode ? 'text-amber-500' : 'text-indigo-400'} />
+                <Calendar size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
               </div>
               <div>
                 <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">Exhibition Schedule</p>
@@ -403,7 +449,7 @@ export default function Login() {
             
             <div className="flex items-start gap-3">
               <div className="p-3 bg-white/10 rounded-2xl text-white mt-0.5">
-                <MapPin size={28} className="text-indigo-450" />
+                <MapPin size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
               </div>
               <div>
                 <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">Exhibition Venue</p>

@@ -74,7 +74,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Logo & Description */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <img 
                 src="/sumbacontest.jpg" 
@@ -82,8 +82,11 @@ export default function Footer() {
                 className="h-8 w-auto object-contain rounded"
               />
             </div>
+            <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider mt-1">
+              About Us
+            </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-              We are dedicated to celebrating the authentic art of photography and visual skills. Our platform provides a transparent, professional environment for camera enthusiasts and artists to showcase their craftsmanship and compete.
+            A first-of-its-kind artfest in Maharashtra, Sumba was created to celebrate art in its truest form. This year shines a light on fading tribal traditions, many kept alive by only a few families. By giving these artists a stage, we hope their stories travel farther and last longer.
             </p>
           </div>
 

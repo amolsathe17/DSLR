@@ -201,11 +201,6 @@ export default function Login() {
         
         {/* Brand */}
         <div className="flex flex-col items-center gap-2 text-center">
-          <img 
-            src="/sumbacontest.jpg" 
-            alt="SumbaContest Logo" 
-            className="h-10 w-auto object-contain rounded-lg"
-          />
           <h2 
             onClick={() => {
               if (loginRole === 'Participant') setLoginRole('Admin');

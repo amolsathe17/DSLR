@@ -41,7 +41,7 @@ export default function Navbar() {
               <img 
                 src="/sumbacontest.jpg" 
                 alt="SumbaContest Logo" 
-                className="h-10 w-auto object-contain rounded-lg transition-transform group-hover:scale-102"
+                className="h-16 w-auto object-contain rounded-lg transition-transform group-hover:scale-102"
               />
             </Link>
           </div>

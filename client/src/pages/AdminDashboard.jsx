@@ -117,6 +117,10 @@ export default function AdminDashboard() {
   const [showPurgeConfirmModal, setShowPurgeConfirmModal] = useState(false);
   const [purgeBackupTarget, setPurgeBackupTarget] = useState(null);
 
+  // Activate confirmation modal states
+  const [showActivateConfirmModal, setShowActivateConfirmModal] = useState(false);
+  const [activateTargetId, setActivateTargetId] = useState(null);
+
   useEffect(() => {
     let defaultRules = '';
     let defaultDesc = '';
@@ -757,10 +761,15 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleActivateEvent = async (eventId) => {
-    if (!confirm('Are you sure you want to activate this contest? This will make it visible to all participants on the home page and enable registrations.')) return;
+  const handleActivateEvent = (eventId) => {
+    setActivateTargetId(eventId);
+    setShowActivateConfirmModal(true);
+  };
+
+  const executeActivateEvent = async () => {
+    if (!activateTargetId) return;
     try {
-      const data = await apiFetch(`/api/events/${eventId}`, {
+      const data = await apiFetch(`/api/events/${activateTargetId}`, {
         method: 'PUT',
         body: JSON.stringify({ status: 'Active' })
       });
@@ -770,6 +779,9 @@ export default function AdminDashboard() {
       }
     } catch (e) {
       alert(e.message);
+    } finally {
+      setShowActivateConfirmModal(false);
+      setActivateTargetId(null);
     }
   };
 
@@ -2948,6 +2960,45 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ACTIVATE CONTEST CONFIRMATION MODAL */}
+      {showActivateConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-650 dark:text-indigo-400 rounded-2xl mb-2 animate-bounce">
+                <Sparkles size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Activate Contest
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to activate this contest? This will make it visible to all participants on the home page and enable registrations.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActivateConfirmModal(false);
+                  setActivateTargetId(null);
+                }}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeActivateEvent}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+              >
+                Yes, Activate
+              </button>
+            </div>
           </div>
         </div>
       )}

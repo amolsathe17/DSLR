@@ -70,6 +70,69 @@ export default function AdminDashboard() {
   const [newEventTheme, setNewEventTheme] = useState('');
   const [newEventDeadline, setNewEventDeadline] = useState('');
   const [newEventRules, setNewEventRules] = useState('');
+  const [eventType, setEventType] = useState('Photography');
+  const [customEventType, setCustomEventType] = useState('');
+  const [newEventDescription, setNewEventDescription] = useState('');
+  const [newEventVenue, setNewEventVenue] = useState('Bal-Gandharv Art Gallery, Jangali Mharaj Road Pune 411030');
+  const [prize1Reward, setPrize1Reward] = useState('₹50,000 Cash + Gold Trophy');
+  const [prize2Reward, setPrize2Reward] = useState('₹30,000 Cash + Silver Trophy');
+  const [prize3Reward, setPrize3Reward] = useState('₹20,000 Cash + Bronze Trophy');
+  const [pricePkg1, setPricePkg1] = useState(200);
+  const [pricePkg2, setPricePkg2] = useState(300);
+  const [pricePkg3, setPricePkg3] = useState(400);
+
+  useEffect(() => {
+    let defaultRules = '';
+    let defaultDesc = '';
+    const actualType = eventType === 'Other' ? (customEventType || 'Contest') : eventType;
+    
+    if (eventType === 'Photography') {
+      defaultRules = [
+        'All submissions must be captured using a DSLR or Mirrorless Camera. Mobile photography is strictly prohibited and results in immediate disqualification.',
+        'Participants must upload high-resolution images in JPEG, PNG, or TIFF format. RAW files (.cr2, .nef, etc.) are highly recommended for metadata verification.',
+        'Submissions must not contain watermarks, signatures, or borders added by post-processing.',
+        'Basic editing (brightness, contrast, crop) is allowed. Heavily manipulated composites, AI additions, or removals are strictly forbidden.',
+        'Entries must be uploaded before the submission deadline. Late entries will not be accepted under any circumstances.'
+      ].join('\n');
+      defaultDesc = 'The premier national photography competition designed exclusively for DSLR & Mirrorless camera enthusiasts. Show us your vision of nature, wildlife, and landscapes.';
+    } else if (eventType === 'Painting') {
+      defaultRules = [
+        'All submissions must be original hand-painted physical works (Watercolor, Acrylic, Oil, Canvas, etc.). Digital paintings are strictly prohibited.',
+        'Participants must upload a clear high-resolution photograph of the physical painting under balanced lighting.',
+        'Entries must not contain digital borders, frames, watermarks, or signatures.',
+        'Only original artwork created solely by the participant will be considered. Plagiarism results in immediate disqualification.'
+      ].join('\n');
+      defaultDesc = 'Celebrate the beauty of color and texture. An open competition for physical painting entries highlighting original artistic expressions.';
+    } else if (eventType === 'Drawing') {
+      defaultRules = [
+        'All submissions must be hand-drawn artworks (Pencil sketch, Charcoal, Ink, Pastels, etc.). Digital drawings are not allowed.',
+        'Participants must upload a clear high-resolution scan or photo of the drawing.',
+        'Entries must be 100% hand-made without digital enhancements or retouching.',
+        'Plagiarism or copying from pre-existing copyrighted artwork is strictly prohibited.'
+      ].join('\n');
+      defaultDesc = 'A national championship celebrating the art of lines, shading, and sketches. Unveil your creations in pencil, charcoal, or ink.';
+    } else if (eventType === 'Paper Craft') {
+      defaultRules = [
+        'Submissions must be original three-dimensional craft works made primarily from paper (Origami, Paper Quilling, Paper Sculptures, Paper mache, etc.).',
+        'Participants must upload a clear showcase photograph displaying their craft from the best angle.',
+        'Structural materials (like wire, wood or glue) must be minimal and subordinate to paper.',
+        'Submissions using pre-fabricated kits or commercial templates are strictly prohibited.'
+      ].join('\n');
+      defaultDesc = 'Turning paper into awe-inspiring art. Join the premier national craft championship for origami and paper sculpture enthusiasts.';
+    } else {
+      defaultRules = [
+        'All entries must be original works created by the participant.',
+        'Participants must upload high-resolution images or files of their entry.',
+        'Plagiarism or copying from existing works is strictly prohibited.',
+        'Decisions of the evaluation panel will be final.'
+      ].join('\n');
+      defaultDesc = `The national ${actualType.toLowerCase()} championship. Open to all creative minds to showcase their talent in this category.`;
+    }
+    
+    setNewEventRules(defaultRules);
+    setNewEventDescription(defaultDesc);
+  }, [eventType, customEventType]);
+
   const [showEventSuccessModal, setShowEventSuccessModal] = useState(false);
   const [createdEventTitle, setCreatedEventTitle] = useState('');
   const [showDeleteEventModal, setShowDeleteEventModal] = useState(false);
@@ -387,17 +450,38 @@ export default function AdminDashboard() {
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {
+      const actualType = eventType === 'Other' ? customEventType : eventType;
+      
       const data = await apiFetch('/api/events', {
         method: 'POST',
         body: JSON.stringify({
           title: newEventTitle,
+          eventType: actualType || 'Photography',
           theme: newEventTheme,
-          deadline: newEventDeadline,
+          description: newEventDescription,
+          venue: newEventVenue,
           rules: newEventRules.split('\n').filter(r => r.trim() !== ''),
+          deadline: newEventDeadline,
+          eventDate: new Date(new Date(newEventDeadline).getTime() + 15 * 24 * 60 * 60 * 1000), // Default event date 15 days after deadline
+          prizes: [
+            { rank: '1st Prize', reward: prize1Reward, description: 'Winner of the Championship Title' },
+            { rank: '2nd Prize', reward: prize2Reward, description: 'Runner-up of the Championship' },
+            { rank: '3rd Prize', reward: prize3Reward, description: 'Second Runner-up of the Championship' }
+          ],
+          faqs: [
+            { question: `Is digital work allowed?`, answer: eventType === 'Photography' ? 'No. Only DSLR/Mirrorless photos are allowed.' : 'No. Only physical hand-made works are accepted.' },
+            { question: 'What is the package fee?', answer: `We offer 3 packages: Starter (₹${pricePkg1}), Amateur (₹${pricePkg2}), and Pro (₹${pricePkg3}).` },
+            { question: 'How will I receive my certificate?', answer: 'All valid participants can download a digital participation certificate directly from their dashboard after results are declared.' }
+          ],
+          terms: [
+            'Participants retain copyright of their entries, but grant the organizer rights to showcase submissions on websites and promotional materials.',
+            'Fees are non-refundable once payment is completed.',
+            'The decision of the judging panel will be final and binding.'
+          ],
           packages: [
-            { id: 'pkg-1', name: 'Starter (1 Photograph)', price: 200, maxPhotos: 1 },
-            { id: 'pkg-2', name: 'Amateur (Up to 2 Photographs)', price: 300, maxPhotos: 2 },
-            { id: 'pkg-3', name: 'Pro (Up to 5 Photographs)', price: 400, maxPhotos: 5 }
+            { id: 'pkg-1', name: `Starter (1 ${eventType === 'Photography' ? 'Photograph' : 'Entry'})`, price: Number(pricePkg1), maxPhotos: 1 },
+            { id: 'pkg-2', name: `Amateur (Up to 2 ${eventType === 'Photography' ? 'Photographs' : 'Entries'})`, price: Number(pricePkg2), maxPhotos: 2 },
+            { id: 'pkg-3', name: `Pro (Up to 5 ${eventType === 'Photography' ? 'Photographs' : 'Entries'})`, price: Number(pricePkg3), maxPhotos: 5 }
           ]
         })
       });
@@ -408,6 +492,16 @@ export default function AdminDashboard() {
         setNewEventTheme('');
         setNewEventDeadline('');
         setNewEventRules('');
+        setEventType('Photography');
+        setCustomEventType('');
+        setNewEventDescription('');
+        setNewEventVenue('Bal-Gandharv Art Gallery, Jangali Mharaj Road Pune 411030');
+        setPrize1Reward('₹50,000 Cash + Gold Trophy');
+        setPrize2Reward('₹30,000 Cash + Silver Trophy');
+        setPrize3Reward('₹20,000 Cash + Bronze Trophy');
+        setPricePkg1(200);
+        setPricePkg2(300);
+        setPricePkg3(400);
         fetchJudgesAndEvents();
       }
     } catch (e) {
@@ -1239,10 +1333,42 @@ export default function AdminDashboard() {
             {/* Create Contest Form */}
             <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
               <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">
-                Setup New Photography Contest (Saved as Draft)
+                Setup New Contest (Saved as Draft)
               </h3>
               
               <form onSubmit={handleCreateEvent} className="flex flex-col gap-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Contest Type</label>
+                    <select
+                      value={eventType}
+                      onChange={(e) => setEventType(e.target.value)}
+                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                      required
+                    >
+                      <option value="Photography">Photography</option>
+                      <option value="Painting">Painting</option>
+                      <option value="Drawing">Drawing</option>
+                      <option value="Paper Craft">Paper Craft (Origami, Quilling, etc.)</option>
+                      <option value="Other">Other (Custom Type)</option>
+                    </select>
+                  </div>
+
+                  {eventType === 'Other' && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-slate-500 font-semibold">Custom Type Name</label>
+                      <input
+                        type="text"
+                        value={customEventType}
+                        onChange={(e) => setCustomEventType(e.target.value)}
+                        placeholder="e.g. Sculpting, Pottery, Collage"
+                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs text-slate-500 font-semibold">Contest Title</label>
@@ -1279,14 +1405,108 @@ export default function AdminDashboard() {
                       required
                     />
                   </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Exhibition Venue</label>
+                    <input
+                      type="text"
+                      value={newEventVenue}
+                      onChange={(e) => setNewEventVenue(e.target.value)}
+                      placeholder="e.g. Bal-Gandharv Art Gallery Pune"
+                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs text-slate-500 font-semibold">Rules & Regulations (One per line)</label>
+                  <label className="text-xs text-slate-500 font-semibold">Contest Description</label>
+                  <textarea
+                    value={newEventDescription}
+                    onChange={(e) => setNewEventDescription(e.target.value)}
+                    placeholder="Enter descriptive details for the competition..."
+                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-16"
+                    required
+                  />
+                </div>
+
+                <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs mb-2">Rewards & Prize Valuation</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-medium">1st Prize Reward</label>
+                      <input
+                        type="text"
+                        value={prize1Reward}
+                        onChange={(e) => setPrize1Reward(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-medium">2nd Prize Reward</label>
+                      <input
+                        type="text"
+                        value={prize2Reward}
+                        onChange={(e) => setPrize2Reward(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-medium">3rd Prize Reward</label>
+                      <input
+                        type="text"
+                        value={prize3Reward}
+                        onChange={(e) => setPrize3Reward(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs mb-2">Package Entry Fees (INR)</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-medium">Starter Package (1 photo/entry)</label>
+                      <input
+                        type="number"
+                        value={pricePkg1}
+                        onChange={(e) => setPricePkg1(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-medium">Amateur Package (Up to 2 entries)</label>
+                      <input
+                        type="number"
+                        value={pricePkg2}
+                        onChange={(e) => setPricePkg2(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-medium">Pro Package (Up to 5 entries)</label>
+                      <input
+                        type="number"
+                        value={pricePkg3}
+                        onChange={(e) => setPricePkg3(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <label className="text-xs text-slate-500 font-semibold">Rules & Guidelines (One per line, auto-seeded)</label>
                   <textarea
                     value={newEventRules}
                     onChange={(e) => setNewEventRules(e.target.value)}
-                    placeholder="e.g. Only DSLR/Mirrorless RAW checks...&#10;Photos must contain EXIF metadata..."
+                    placeholder="Rules..."
                     className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-24"
                     required
                   />
@@ -1294,7 +1514,7 @@ export default function AdminDashboard() {
 
                 <button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 px-6 rounded-xl self-start cursor-pointer shadow"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 px-6 rounded-xl self-start cursor-pointer shadow mt-2"
                 >
                   Create Contest Draft
                 </button>

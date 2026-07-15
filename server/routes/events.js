@@ -92,10 +92,11 @@ router.get('/:id', async (req, res) => {
 // @access  Private/Admin
 router.post('/', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { title, theme, description, rules, deadline, eventDate, prizes, faqs, terms, packages } = req.body;
+    const { title, eventType, theme, description, rules, deadline, eventDate, prizes, faqs, terms, packages } = req.body;
 
     const event = await Event.create({
       title,
+      eventType: eventType || 'Photography',
       theme,
       description,
       rules,

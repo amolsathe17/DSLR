@@ -3,6 +3,7 @@ const { getModel } = require('../config/db');
 
 const eventSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  eventType: { type: String, default: 'Photography' },
   theme: { type: String, required: true },
   description: { type: String },
   rules: [{ type: String }],

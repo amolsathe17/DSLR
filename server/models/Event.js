@@ -30,7 +30,7 @@ const eventSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     maxPhotos: { type: Number, required: true }
   }],
-  status: { type: String, enum: ['Draft', 'Active', 'Closed', 'Completed'], default: 'Draft' },
+  status: { type: String, enum: ['Draft', 'Active', 'Closed', 'Completed', 'Archived'], default: 'Draft' },
   assignedJudges: [{ type: String }],
   confirmedJudges: [{ type: String }],
   winnersPublished: { type: Boolean, default: false },

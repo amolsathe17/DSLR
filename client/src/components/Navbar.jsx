@@ -69,6 +69,17 @@ export default function Navbar() {
             >
               Admin Portal
             </Link>
+
+            <Link
+              to="/judge"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/judge') 
+                  ? 'text-indigo-600 dark:text-indigo-400' 
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+              }`}
+            >
+              Judges Portal
+            </Link>
             
             {user && user.role === 'Participant' && (
               <Link
@@ -196,6 +207,16 @@ export default function Navbar() {
               }`}
             >
               Admin Portal
+            </Link>
+
+            <Link
+              to="/judge"
+              onClick={() => setIsOpen(false)}
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActive('/judge') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+              }`}
+            >
+              Judges Portal
             </Link>
 
             {user && user.role === 'Participant' && (

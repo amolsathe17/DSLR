@@ -1,8 +1,73 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { Camera, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Footer() {
+  const { apiFetch } = useAuth();
+  const [eventType, setEventType] = useState('Photography');
+
+  useEffect(() => {
+    const fetchActiveEvent = async () => {
+      try {
+        const data = await apiFetch('/api/events');
+        if (data.success && data.events.length > 0) {
+          const active = data.events.find(e => e.status === 'Active') || data.events[0];
+          if (active) {
+            setEventType(active.eventType || 'Photography');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchActiveEvent();
+  }, [apiFetch]);
+
+  const getDescription = () => {
+    switch (eventType) {
+      case 'Photography':
+        return 'The premier platform for organizing professional DSLR and Mirrorless photography competitions. Championing genuine photographic crafts worldwide.';
+      case 'Painting':
+        return 'The premier platform for organizing professional physical painting competitions. Celebrating color, texture, and original canvas artistry.';
+      case 'Drawing':
+        return 'The premier platform for organizing professional sketching and hand-drawn competitions. Showcasing fine line work, charcoal art, and sketches.';
+      case 'Paper Craft':
+        return 'The premier platform for organizing creative paper craft, origami, and paper sculpture competitions. Crafting wonder from simple sheets.';
+      default:
+        return 'The premier platform for organizing fine art and creative skill championships. Championing genuine craftsmanship and artistic designs.';
+    }
+  };
+
+  const getRule1 = () => {
+    switch (eventType) {
+      case 'Photography':
+        return 'Mobile photography, action cameras, and drone frames are strictly prohibited.';
+      case 'Painting':
+        return 'Digital paintings, digital prints, and AI-generated artwork are strictly prohibited.';
+      case 'Drawing':
+        return 'Digital sketches, AI-generated drawings, and trace-overs are strictly prohibited.';
+      case 'Paper Craft':
+        return 'Pre-fabricated kits, plastic models, and commercial templates are prohibited.';
+      default:
+        return 'Copying, plagiarism, and AI-generated submissions are strictly prohibited.';
+    }
+  };
+
+  const getRule2 = () => {
+    switch (eventType) {
+      case 'Photography':
+        return 'All uploads are scanned for camera brand and lens EXIF tags dynamically.';
+      case 'Painting':
+        return 'All painting entries must be clear, high-resolution photographs of physical art pieces.';
+      case 'Drawing':
+        return 'All drawings must be hand-made and uploaded as clear scans or high-resolution photos.';
+      case 'Paper Craft':
+        return 'All entries must be made primarily of paper and show clear 3D details.';
+      default:
+        return 'All submissions must be original creations and follow theme specifications.';
+    }
+  };
+
   return (
     <footer className="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80 text-slate-600 dark:text-slate-400">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -19,22 +84,22 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm max-w-sm">
-              The premier platform for organizing professional DSLR and Mirrorless photography competitions. Championing genuine photographic crafts worldwide.
+              {getDescription()}
             </p>
           </div>
 
           {/* Quick Rules Check */}
           <div className="flex flex-col gap-3">
             <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-              DSLR Guidelines
+              {eventType} Guidelines
             </h3>
             <div className="flex items-start gap-2 text-sm text-slate-500 dark:text-slate-400">
               <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
-              <span>Mobile photography, action cameras, and drone frames are strictly prohibited.</span>
+              <span>{getRule1()}</span>
             </div>
             <div className="flex items-start gap-2 text-sm text-slate-500 dark:text-slate-400">
               <AlertCircle size={16} className="text-indigo-500 shrink-0 mt-0.5" />
-              <span>All uploads are scanned for camera brand and lens EXIF tags dynamically.</span>
+              <span>{getRule2()}</span>
             </div>
           </div>
 

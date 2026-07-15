@@ -249,10 +249,10 @@ export default function Landing() {
                 Contest Rules
               </div>
               <h2 className="font-display font-extrabold text-3xl text-slate-900 dark:text-white">
-                Contest Guidelines & DSLR Mandate
+                Contest Guidelines & {event.eventType === 'Photography' ? 'DSLR Mandate' : event.eventType === 'Painting' ? 'Canvas Mandate' : event.eventType === 'Drawing' ? 'Drawing Mandate' : event.eventType === 'Paper Craft' ? 'Paper Craft Mandate' : 'Artistry Mandate'}
               </h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm">
-                SumbaContest is a platform designed to honor genuine lensmanship. Please review the criteria carefully to avoid submission disqualification.
+                SumbaContest is a platform designed to honor genuine {event.eventType === 'Photography' ? 'lensmanship' : event.eventType === 'Painting' ? 'painting artistry' : event.eventType === 'Drawing' ? 'drawing talents' : event.eventType === 'Paper Craft' ? 'paper-crafting expertise' : 'artistic craftsmanship'}. Please review the criteria carefully to avoid submission disqualification.
               </p>
 
               <div className="flex flex-col gap-3 mt-2">

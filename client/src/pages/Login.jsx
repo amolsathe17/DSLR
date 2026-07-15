@@ -42,6 +42,20 @@ export default function Login() {
 
   const redirectPath = location.state?.from?.pathname || '/';
 
+  const [isAdminMode, setIsAdminMode] = useState(false);
+
+  useEffect(() => {
+    if (redirectPath === '/admin') {
+      setIsAdminMode(true);
+    }
+  }, [redirectPath]);
+
+  const primaryBg = isAdminMode ? 'bg-amber-600' : 'bg-indigo-600';
+  const primaryHoverBg = isAdminMode ? 'hover:bg-amber-700' : 'hover:bg-indigo-700';
+  const primaryText = isAdminMode ? 'text-amber-600 dark:text-amber-400' : 'text-indigo-600 dark:text-indigo-400';
+  const primaryFocusBorder = isAdminMode ? 'focus:border-amber-600 dark:focus:border-amber-400' : 'focus:border-indigo-600 dark:focus:border-indigo-400';
+  const primaryBorderColor = isAdminMode ? 'border-amber-500/35 dark:border-amber-500/20 shadow-amber-500/5' : 'border-white/20 dark:border-white/5';
+
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
@@ -157,17 +171,23 @@ export default function Login() {
       <div className="absolute inset-0 bg-slate-950/15"></div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center md:items-end justify-center md:justify-between gap-12">
-        <div className="relative w-full max-w-md bg-white/85 dark:bg-slate-950/75 border border-white/20 dark:border-white/5 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 backdrop-blur-lg shrink-0">
+        <div className={`relative w-full max-w-md bg-white/85 dark:bg-slate-950/75 border rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 backdrop-blur-lg shrink-0 ${primaryBorderColor}`}>
         
         {/* Brand */}
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="p-2.5 bg-indigo-600 rounded-xl text-white">
+          <div className={`p-2.5 rounded-xl text-white ${primaryBg}`}>
             <Camera size={22} />
           </div>
-          <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">
-            SumbaContest Login
+          <h2 
+            onClick={() => setIsAdminMode(!isAdminMode)} 
+            className="font-display font-extrabold text-xl text-slate-900 dark:text-white cursor-pointer select-none hover:opacity-85 transition-opacity"
+            title="Click to toggle Admin Portal"
+          >
+            {isAdminMode ? 'Admin Login' : 'SumbaContest Login'}
           </h2>
-          <p className="text-xs text-slate-500">Access your photography dashboard</p>
+          <p className="text-xs text-slate-500">
+            {isAdminMode ? 'Access your administrator control panel' : 'Access your event participant dashboard'}
+          </p>
         </div>
 
         {error && (
@@ -218,7 +238,7 @@ export default function Login() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@email.com"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none ${primaryFocusBorder}`}
                       required
                     />
                   </div>
@@ -229,7 +249,7 @@ export default function Login() {
                     <label className="text-xs font-semibold text-slate-500">Password</label>
                     <Link
                       to="/forgot-password"
-                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                      className={`text-xs hover:underline ${primaryText}`}
                     >
                       Forgot Password?
                     </Link>
@@ -241,7 +261,7 @@ export default function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none ${primaryFocusBorder}`}
                       required
                     />
                   </div>
@@ -250,7 +270,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
+                  className={`w-full text-white font-semibold py-2.5 rounded-xl shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2 ${primaryBg} ${primaryHoverBg}`}
                 >
                   <LogIn size={16} />
                   {loading ? 'Logging in...' : 'Log In'}
@@ -268,7 +288,7 @@ export default function Login() {
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
                       placeholder="9876543210"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none ${primaryFocusBorder}`}
                       required
                     />
                   </div>
@@ -277,7 +297,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
+                  className={`w-full text-white font-semibold py-2.5 rounded-xl shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2 ${primaryBg} ${primaryHoverBg}`}
                 >
                   <Key size={16} />
                   {loading ? 'Sending OTP...' : 'Send Login OTP'}
@@ -288,9 +308,9 @@ export default function Login() {
         ) : (
           /* OTP verification code form */
           <form onSubmit={handleOtpVerify} className="flex flex-col gap-4 animate-in fade-in duration-200">
-            <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-4 flex flex-col gap-1">
+            <div className={`border rounded-2xl p-4 flex flex-col gap-1 ${isAdminMode ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-250/20' : 'bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-100 dark:border-indigo-900/30'}`}>
               <span className="text-[10px] font-extrabold uppercase text-slate-400">Test OTP Code (Development Only)</span>
-              <span className="font-mono text-lg font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">
+              <span className={`font-mono text-lg font-bold tracking-wider ${primaryText}`}>
                 {devOtp}
               </span>
             </div>
@@ -305,7 +325,7 @@ export default function Login() {
                 value={otpVal}
                 onChange={(e) => setOtpVal(e.target.value)}
                 placeholder="123456"
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-center font-mono text-lg tracking-widest focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-center font-mono text-lg tracking-widest focus:outline-none ${primaryFocusBorder}`}
                 required
               />
             </div>
@@ -313,7 +333,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className={`w-full text-white font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer ${primaryBg} ${primaryHoverBg}`}
             >
               Verify OTP
             </button>
@@ -331,11 +351,31 @@ export default function Login() {
           Don't have an account?{' '}
           <Link
             to="/register"
-            className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline inline-flex items-center gap-0.5"
+            className={`font-semibold hover:underline inline-flex items-center gap-0.5 ${primaryText}`}
           >
             Register here
             <ArrowRight size={12} />
           </Link>
+        </div>
+
+        <div className="text-center text-xs text-slate-400 mt-2 border-t border-slate-100 dark:border-slate-800/60 pt-3">
+          {isAdminMode ? (
+            <button
+              type="button"
+              onClick={() => setIsAdminMode(false)}
+              className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer inline-flex items-center gap-1"
+            >
+              Back to Contestant Login
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsAdminMode(true)}
+              className="text-amber-600 dark:text-amber-500 font-semibold hover:underline cursor-pointer inline-flex items-center gap-1"
+            >
+              Admin Portal Login
+            </button>
+          )}
         </div>
 
         </div>

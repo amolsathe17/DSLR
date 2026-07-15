@@ -27,10 +27,18 @@ router.post('/pay', protect, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    const plan = plansConfig.getPlan(packageId);
-    if (!plan) {
+    // Find dynamic package from event configurations
+    const matchedPkg = event.packages.find(p => p.id === packageId || p.name === packageId || p._id?.toString() === packageId);
+    if (!matchedPkg) {
       return res.status(400).json({ success: false, message: 'Invalid package selected' });
     }
+
+    const plan = {
+      amount: matchedPkg.price,
+      limit: matchedPkg.maxPhotos,
+      packageId: matchedPkg.id || matchedPkg._id?.toString(),
+      name: matchedPkg.name
+    };
 
     // Verify if there is already a paid entry
     let submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
@@ -202,10 +210,18 @@ router.post('/dummy-bypass', protect, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    const plan = plansConfig.getPlan(packageId);
-    if (!plan) {
+    // Find dynamic package from event configurations
+    const matchedPkg = event.packages.find(p => p.id === packageId || p.name === packageId || p._id?.toString() === packageId);
+    if (!matchedPkg) {
       return res.status(400).json({ success: false, message: 'Invalid package selection' });
     }
+
+    const plan = {
+      amount: matchedPkg.price,
+      limit: matchedPkg.maxPhotos,
+      packageId: matchedPkg.id || matchedPkg._id?.toString(),
+      name: matchedPkg.name
+    };
 
     // Verify if there is already a paid entry
     let submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });

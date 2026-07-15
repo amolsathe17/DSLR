@@ -102,11 +102,18 @@ router.post('/start', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'You must accept the DSLR Eligibility Declaration' });
     }
 
-    const plansConfig = require('../config/plans');
-    const plan = plansConfig.getPlan(packageId);
-    if (!plan) {
+    // Find dynamic package from event configurations
+    const matchedPkg = event.packages.find(p => p.id === packageId || p.name === packageId || p._id?.toString() === packageId);
+    if (!matchedPkg) {
       return res.status(400).json({ success: false, message: 'Invalid plan selected' });
     }
+
+    const plan = {
+      amount: matchedPkg.price,
+      limit: matchedPkg.maxPhotos,
+      packageId: matchedPkg.id || matchedPkg._id?.toString(),
+      name: matchedPkg.name
+    };
 
     let submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
 

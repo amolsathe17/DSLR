@@ -436,14 +436,14 @@ export default function Login() {
                 <Calendar size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
               </div>
               <div>
-                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">Exhibition Schedule</p>
+                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">EXHIBITION DATE</p>
                 <p className="text-sm font-black font-display text-white">
-                  {event.hasExhibition && event.exhibitionFromDate && event.exhibitionToDate ? (
-                    `${new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'medium' })} - ${new Date(event.exhibitionToDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}`
-                  ) : event.hasExhibition && event.exhibitionFromDate ? (
-                    `Starts ${new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'long' })}`
+                  {event.exhibitionFromDate ? (
+                    new Date(event.exhibitionFromDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                  ) : event.eventDate ? (
+                    new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
                   ) : (
-                    new Date(event.eventDate || event.deadline).toLocaleDateString(undefined, { dateStyle: 'long' })
+                    new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
                   )}
                 </p>
               </div>
@@ -454,7 +454,7 @@ export default function Login() {
                 <MapPin size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
               </div>
               <div>
-                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">Exhibition Venue</p>
+                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">EXHIBITION VENUE</p>
                 <p className="text-sm font-semibold leading-relaxed text-white">
                   {event.venue || 'Bal-Gandharv Art Gallery, Jangali Maharaj Road, Pune 411030'}
                 </p>
@@ -463,7 +463,7 @@ export default function Login() {
 
             <div className="border-t border-white/10 pt-4 mt-2">
               <p className="text-xs text-slate-300/80 leading-relaxed font-medium">
-                National DSLR Wildlife & Landscape Championship. Submissions are active until July 15, 2026.
+                {event.title}. Submissions are active until {new Date(event.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
               </p>
             </div>
           </div>

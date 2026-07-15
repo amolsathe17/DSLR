@@ -317,6 +317,19 @@ router.delete('/backups/:id/purge', protect, authorize('Admin'), async (req, res
       }
     }
 
+    // Delete participants (User documents) if they are not associated with any other event
+    const User = require('../models/User');
+    const participantUserIds = [...new Set(submissions.map(s => s.userId).filter(Boolean))];
+    for (const pUserId of participantUserIds) {
+      const otherSubmissionsCount = await Submission.countDocuments({
+        userId: pUserId,
+        eventId: { $ne: eventId }
+      });
+      if (otherSubmissionsCount === 0) {
+        await User.deleteOne({ _id: pUserId, role: 'Participant' });
+      }
+    }
+
     // Cascade database purging
     await Submission.deleteMany({ eventId });
     await Payment.deleteMany({ eventId });

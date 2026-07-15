@@ -77,6 +77,8 @@ export default function AdminDashboard() {
   const [hasExhibition, setHasExhibition] = useState(false);
   const [exhibitionFromDate, setExhibitionFromDate] = useState('');
   const [exhibitionToDate, setExhibitionToDate] = useState('');
+  const [loginBgUrl, setLoginBgUrl] = useState('');
+  const [uploadingBg, setUploadingBg] = useState(false);
   const [prize1Reward, setPrize1Reward] = useState('₹50,000 Cash + Gold Trophy');
   const [prize2Reward, setPrize2Reward] = useState('₹30,000 Cash + Silver Trophy');
   const [prize3Reward, setPrize3Reward] = useState('₹20,000 Cash + Bronze Trophy');
@@ -452,6 +454,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLoginBgUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('loginBg', file);
+
+    setUploadingBg(true);
+    try {
+      const response = await fetch('/api/events/upload-bg', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+      const data = await response.json();
+      if (data.success) {
+        setLoginBgUrl(data.fileUrl);
+      } else {
+        alert(data.message || 'Upload failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error uploading login background image');
+    } finally {
+      setUploadingBg(false);
+    }
+  };
+
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {
@@ -473,6 +505,7 @@ export default function AdminDashboard() {
           hasExhibition,
           exhibitionFromDate: hasExhibition && exhibitionFromDate ? new Date(exhibitionFromDate) : null,
           exhibitionToDate: hasExhibition && exhibitionToDate ? new Date(exhibitionToDate) : null,
+          loginBgUrl: loginBgUrl || null,
           prizes: [
             { rank: '1st Prize', reward: prize1Reward, description: 'Winner of the Championship Title' },
             { rank: '2nd Prize', reward: prize2Reward, description: 'Runner-up of the Championship' },
@@ -510,6 +543,7 @@ export default function AdminDashboard() {
         setHasExhibition(false);
         setExhibitionFromDate('');
         setExhibitionToDate('');
+        setLoginBgUrl('');
         setPrize1Reward('₹50,000 Cash + Gold Trophy');
         setPrize2Reward('₹30,000 Cash + Silver Trophy');
         setPrize3Reward('₹20,000 Cash + Bronze Trophy');
@@ -1353,7 +1387,7 @@ export default function AdminDashboard() {
               </h3>
               
               <form onSubmit={handleCreateEvent} className="flex flex-col gap-4 mt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs text-slate-500 font-semibold">Contest Type</label>
                     <select
@@ -1370,20 +1404,52 @@ export default function AdminDashboard() {
                     </select>
                   </div>
 
-                  {eventType === 'Other' && (
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs text-slate-500 font-semibold">Custom Type Name</label>
-                      <input
-                        type="text"
-                        value={customEventType}
-                        onChange={(e) => setCustomEventType(e.target.value)}
-                        placeholder="e.g. Sculpting, Pottery, Collage"
-                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        required
-                      />
+                  <div className="flex flex-col gap-1">
+                    {eventType === 'Other' ? (
+                      <>
+                        <label className="text-xs text-slate-500 font-semibold">Custom Type Name</label>
+                        <input
+                          type="text"
+                          value={customEventType}
+                          onChange={(e) => setCustomEventType(e.target.value)}
+                          placeholder="e.g. Sculpture"
+                          className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                          required
+                        />
+                      </>
+                    ) : (
+                      <div className="hidden md:block"></div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Login Page Background Image</label>
+                    <div className="flex items-center gap-2">
+                      <label className="flex-1 flex items-center justify-center px-3 py-2 bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
+                        <span className="text-[11px] text-slate-500 truncate">
+                          {uploadingBg ? 'Uploading...' : loginBgUrl ? 'Image Uploaded ✓' : 'Upload Image (PNG/JPG)'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLoginBgUpload}
+                          className="hidden"
+                          disabled={uploadingBg}
+                        />
+                      </label>
+                      {loginBgUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setLoginBgUrl('')}
+                          className="text-[10px] text-red-500 hover:underline cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
+
 
                 <div className="grid grid-cols-1 gap-4">
                   <div className="flex flex-col gap-1">

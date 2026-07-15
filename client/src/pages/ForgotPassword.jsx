@@ -4,8 +4,26 @@ import { useAuth } from '../context/AuthContext';
 import { Camera, Mail, Lock, ShieldAlert, ArrowLeft, Key } from 'lucide-react';
 
 export default function ForgotPassword() {
-  const { forgotPassword, resetPassword } = useAuth();
+  const { forgotPassword, resetPassword, apiFetch } = useAuth();
   const navigate = useNavigate();
+  const [loginBgUrl, setLoginBgUrl] = useState('');
+
+  React.useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const data = await apiFetch('/api/events');
+        if (data.success && data.events.length > 0) {
+          const active = data.events.find(e => e.status === 'Active') || data.events[0];
+          if (active && active.loginBgUrl) {
+            setLoginBgUrl(active.loginBgUrl);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching event in ForgotPassword:', err);
+      }
+    };
+    fetchEvent();
+  }, [apiFetch]);
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -68,7 +86,7 @@ export default function ForgotPassword() {
   return (
     <div 
       className="min-h-[calc(100vh-4rem)] w-full flex items-center bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/login_bg.jpg')" }}
+      style={{ backgroundImage: `url('${loginBgUrl || '/login_bg.jpg'}')` }}
     >
       {/* Dark tint overlay without blur */}
       <div className="absolute inset-0 bg-slate-950/15"></div>

@@ -129,7 +129,7 @@ export default function Register() {
   return (
     <div 
       className="min-h-[calc(100vh-4rem)] w-full flex items-center bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/login_bg.jpg')" }}
+      style={{ backgroundImage: `url('${event?.loginBgUrl || '/login_bg.jpg'}')` }}
     >
       {/* Dark tint overlay without blur */}
       <div className="absolute inset-0 bg-slate-950/15"></div>

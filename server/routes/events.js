@@ -286,4 +286,54 @@ router.post('/:id/confirm-grading', protect, authorize('Judge'), async (req, res
   }
 });
 
+// @desc    Upload login background image
+// @route   POST /api/events/upload-bg
+// @access  Private (Admin only)
+router.post('/upload-bg', protect, authorize('Admin'), (req, res, next) => {
+  const upload = require('../middleware/upload');
+  upload.single('loginBg')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload a background image' });
+    }
+
+    const path = require('path');
+    const fs = require('fs');
+    let fileUrl = `/uploads/${req.file.filename}`;
+
+    // Try Cloudinary if configured
+    try {
+      const cloudinary = require('../config/cloudinary');
+      if (cloudinary && process.env.CLOUDINARY_CLOUD_NAME) {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'dslr_contest/assets',
+          resource_type: 'image'
+        });
+        fileUrl = result.secure_url;
+        
+        // Clean up local temp file
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+      }
+    } catch (cloudinaryErr) {
+      console.warn('Cloudinary upload failed, falling back to local file:', cloudinaryErr.message);
+    }
+
+    res.json({
+      success: true,
+      fileUrl
+    });
+  } catch (error) {
+    console.error('Upload background error:', error);
+    res.status(500).json({ success: false, message: 'Server error during background upload: ' + error.message });
+  }
+});
+
 module.exports = router;

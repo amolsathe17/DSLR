@@ -12,6 +12,7 @@ const eventSchema = new mongoose.Schema({
   exhibitionFromDate: { type: Date },
   exhibitionToDate: { type: Date },
   hasExhibition: { type: Boolean, default: false },
+  loginBgUrl: { type: String },
   venue: { type: String },
   prizes: [{
     rank: { type: String },

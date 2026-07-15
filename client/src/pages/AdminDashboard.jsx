@@ -90,6 +90,29 @@ export default function AdminDashboard() {
     { name: 'Pro', price: 400, maxPhotos: 5 }
   ]);
 
+  // Edit Event states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingEventId, setEditingEventId] = useState(null);
+  const [editEventTitle, setEditEventTitle] = useState('');
+  const [editEventTheme, setEditEventTheme] = useState('');
+  const [editEventDeadline, setEditEventDeadline] = useState('');
+  const [editEventRules, setEditEventRules] = useState('');
+  const [editEventType, setEditEventType] = useState('Photography');
+  const [editCustomEventType, setEditCustomEventType] = useState('');
+  const [editEventDescription, setEditEventDescription] = useState('');
+  const [editEventVenue, setEditEventVenue] = useState('');
+  const [editHasExhibition, setEditHasExhibition] = useState(false);
+  const [editExhibitionFromDate, setEditExhibitionFromDate] = useState('');
+  const [editExhibitionToDate, setEditExhibitionToDate] = useState('');
+  const [editPrize1Reward, setEditPrize1Reward] = useState('');
+  const [editPrize2Reward, setEditPrize2Reward] = useState('');
+  const [editPrize3Reward, setEditPrize3Reward] = useState('');
+  const [editEventPackages, setEditEventPackages] = useState([
+    { name: 'Starter', price: 200, maxPhotos: 1 },
+    { name: 'Amateur', price: 300, maxPhotos: 2 },
+    { name: 'Pro', price: 400, maxPhotos: 5 }
+  ]);
+
   useEffect(() => {
     let defaultRules = '';
     let defaultDesc = '';
@@ -609,6 +632,97 @@ export default function AdminDashboard() {
       }
     } catch (e) {
       alert(e.message);
+    }
+  };
+
+  const handleEditClick = (e) => {
+    setEditingEventId(e._id);
+    setEditEventTitle(e.title || '');
+    setEditEventType(e.eventType || 'Photography');
+    setEditCustomEventType('');
+    setEditEventTheme(e.theme || '');
+    setEditEventDescription(e.description || '');
+    setEditEventVenue(e.venue || '');
+    setEditEventRules(e.rules ? e.rules.join('\n') : '');
+    
+    const dDate = e.deadline ? new Date(e.deadline).toISOString().split('T')[0] : '';
+    setEditEventDeadline(dDate);
+    setEditHasExhibition(!!e.hasExhibition);
+    
+    const fromD = e.exhibitionFromDate ? new Date(e.exhibitionFromDate).toISOString().split('T')[0] : '';
+    setEditExhibitionFromDate(fromD);
+    
+    const toD = e.exhibitionToDate ? new Date(e.exhibitionToDate).toISOString().split('T')[0] : '';
+    setEditExhibitionToDate(toD);
+    
+    const p1 = e.prizes && e.prizes.find(p => p.rank === '1st Prize');
+    setEditPrize1Reward(p1 ? p1.reward : '');
+    const p2 = e.prizes && e.prizes.find(p => p.rank === '2nd Prize');
+    setEditPrize2Reward(p2 ? p2.reward : '');
+    const p3 = e.prizes && e.prizes.find(p => p.rank === '3rd Prize');
+    setEditPrize3Reward(p3 ? p3.reward : '');
+    
+    if (e.packages && e.packages.length > 0) {
+      setEditEventPackages(e.packages.map(p => ({
+        name: p.name.split(' (')[0],
+        price: p.price,
+        maxPhotos: p.maxPhotos
+      })));
+    } else {
+      setEditEventPackages([
+        { name: 'Starter', price: 200, maxPhotos: 1 },
+        { name: 'Amateur', price: 300, maxPhotos: 2 },
+        { name: 'Pro', price: 400, maxPhotos: 5 }
+      ]);
+    }
+    
+    setShowEditModal(true);
+  };
+
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault();
+    try {
+      const actualType = editEventType === 'Other' ? editCustomEventType : editEventType;
+      
+      const data = await apiFetch(`/api/events/${editingEventId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          title: editEventTitle,
+          eventType: actualType || 'Photography',
+          theme: editEventTheme,
+          description: editEventDescription,
+          venue: editEventVenue,
+          rules: editEventRules.split('\n').filter(r => r.trim() !== ''),
+          deadline: editEventDeadline,
+          eventDate: editHasExhibition && editExhibitionFromDate 
+            ? new Date(editExhibitionFromDate) 
+            : new Date(new Date(editEventDeadline).getTime() + 15 * 24 * 60 * 60 * 1000),
+          hasExhibition: editHasExhibition,
+          exhibitionFromDate: editHasExhibition && editExhibitionFromDate ? new Date(editExhibitionFromDate) : null,
+          exhibitionToDate: editHasExhibition && editExhibitionToDate ? new Date(editExhibitionToDate) : null,
+          prizes: [
+            { rank: '1st Prize', reward: editPrize1Reward, description: 'Winner of the Championship Title' },
+            { rank: '2nd Prize', reward: editPrize2Reward, description: 'Runner-up of the Championship' },
+            { rank: '3rd Prize', reward: editPrize3Reward, description: 'Second Runner-up of the Championship' }
+          ],
+          packages: editEventPackages.map((pkg, idx) => ({
+            id: `pkg-${idx + 1}`,
+            name: `${pkg.name} (${pkg.maxPhotos} ${actualType === 'Photography' ? (pkg.maxPhotos > 1 ? 'Photographs' : 'Photograph') : (pkg.maxPhotos > 1 ? 'Entries' : 'Entry')})`,
+            price: Number(pkg.price),
+            maxPhotos: Number(pkg.maxPhotos)
+          }))
+        })
+      });
+      if (data.success) {
+        triggerSuccessModal('Contest Updated', `The contest "${editEventTitle}" has been updated successfully.`);
+        setShowEditModal(false);
+        fetchJudgesAndEvents();
+      } else {
+        alert(data.message || 'Failed to update event');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error updating contest event: ' + err.message);
     }
   };
 
@@ -1766,12 +1880,20 @@ export default function AdminDashboard() {
                         {e.status}
                       </span>
                       {e.status === 'Draft' && (
-                        <button
-                          onClick={() => handleActivateEvent(e._id)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
-                        >
-                          Activate
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleEditClick(e)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleActivateEvent(e._id)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                          >
+                            Activate
+                          </button>
+                        </div>
                       )}
                       <button
                         onClick={() => {
@@ -2524,6 +2646,254 @@ export default function AdminDashboard() {
             >
               Awesome, Understood
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT EVENT MODAL */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20">
+              <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white">
+                Edit Draft Contest
+              </h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-1.5 hover:bg-slate-150 dark:hover:bg-slate-800 rounded-lg text-slate-400 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateEvent} className="p-6 overflow-y-auto max-h-[80vh] flex flex-col gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Contest Title</label>
+                  <input
+                    type="text"
+                    value={editEventTitle}
+                    onChange={(e) => setEditEventTitle(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 font-medium"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Contest Category Type</label>
+                  <select
+                    value={editEventType}
+                    onChange={(e) => setEditEventType(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 font-bold cursor-pointer"
+                  >
+                    <option value="Photography">Photography</option>
+                    <option value="Painting">Painting</option>
+                    <option value="Sculpting">Sculpting</option>
+                    <option value="Writing">Writing</option>
+                    <option value="Digital Art">Digital Art</option>
+                    <option value="Other">Other (Custom Type)</option>
+                  </select>
+                </div>
+              </div>
+
+              {editEventType === 'Other' && (
+                <div className="flex flex-col gap-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Custom Category Name</label>
+                  <input
+                    type="text"
+                    value={editCustomEventType}
+                    onChange={(e) => setEditCustomEventType(e.target.value)}
+                    placeholder="e.g. Calligraphy"
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none"
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Contest Theme / Subtitle</label>
+                  <input
+                    type="text"
+                    value={editEventTheme}
+                    onChange={(e) => setEditEventTheme(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Submission Deadline</label>
+                  <input
+                    type="date"
+                    value={editEventDeadline}
+                    onChange={(e) => setEditEventDeadline(e.target.value)}
+                    className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none cursor-pointer"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">Venue Location Address</label>
+                <input
+                  type="text"
+                  value={editEventVenue}
+                  onChange={(e) => setEditEventVenue(e.target.value)}
+                  className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">Contest Description</label>
+                <textarea
+                  value={editEventDescription}
+                  onChange={(e) => setEditEventDescription(e.target.value)}
+                  className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">Rules & Guidelines (One per line)</label>
+                <textarea
+                  value={editEventRules}
+                  onChange={(e) => setEditEventRules(e.target.value)}
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-24 focus:outline-none focus:border-indigo-600"
+                  required
+                />
+              </div>
+
+              {/* Exhibition Range */}
+              <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
+                <label className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editHasExhibition}
+                    onChange={(e) => setEditHasExhibition(e.target.checked)}
+                    className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <span>Is there an Exhibition scheduled at the Venue?</span>
+                </label>
+
+                {editHasExhibition && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold text-slate-500">Exhibition Start Date</span>
+                      <input
+                        type="date"
+                        value={editExhibitionFromDate}
+                        onChange={(e) => setEditExhibitionFromDate(e.target.value)}
+                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold text-slate-500">Exhibition End Date</span>
+                      <input
+                        type="date"
+                        value={editExhibitionToDate}
+                        onChange={(e) => setEditExhibitionToDate(e.target.value)}
+                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Prizes Rewards */}
+              <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
+                <span className="font-bold text-slate-850 dark:text-white">Prizes & Awards Configuration</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-slate-500 font-bold">1st Prize Reward</span>
+                    <input
+                      type="text"
+                      value={editPrize1Reward}
+                      onChange={(e) => setEditPrize1Reward(e.target.value)}
+                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-slate-500 font-bold">2nd Prize Reward</span>
+                    <input
+                      type="text"
+                      value={editPrize2Reward}
+                      onChange={(e) => setEditPrize2Reward(e.target.value)}
+                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-slate-500 font-bold">3rd Prize Reward</span>
+                    <input
+                      type="text"
+                      value={editPrize3Reward}
+                      onChange={(e) => setEditPrize3Reward(e.target.value)}
+                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Packages config */}
+              <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
+                <span className="font-bold text-slate-850 dark:text-white">Submission Entry Packages Fees</span>
+                <div className="flex flex-col gap-3">
+                  {editEventPackages.map((pkg, idx) => (
+                    <div key={idx} className="flex flex-wrap sm:flex-nowrap gap-3 items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-850">
+                      <span className="font-bold text-slate-500 w-16 text-[10px] uppercase">{pkg.name}</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-slate-400">Price (₹)</span>
+                        <input
+                          type="number"
+                          value={pkg.price}
+                          onChange={(e) => {
+                            const newPkgs = [...editEventPackages];
+                            newPkgs[idx].price = e.target.value;
+                            setEditEventPackages(newPkgs);
+                          }}
+                          className="w-20 px-2 py-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded"
+                          required
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-slate-400">Max Entries</span>
+                        <input
+                          type="number"
+                          value={pkg.maxPhotos}
+                          onChange={(e) => {
+                            const newPkgs = [...editEventPackages];
+                            newPkgs[idx].maxPhotos = e.target.value;
+                            setEditEventPackages(newPkgs);
+                          }}
+                          className="w-16 px-2 py-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded"
+                          required
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-2 px-6 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl cursor-pointer shadow-md"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

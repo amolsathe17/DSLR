@@ -2492,7 +2492,26 @@ export default function AdminDashboard() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-150 text-slate-450 italic">No photographs uploaded yet.</div>
+                  <div className="text-center py-8 px-6 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-3">
+                    <p className="text-xs text-slate-500 italic">No photographs uploaded yet.</p>
+                    <div className="w-full max-w-sm mt-1 p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl flex flex-col gap-2 items-center text-center">
+                      <span className="text-[10px] text-indigo-650 dark:text-indigo-400 font-bold uppercase tracking-wider">
+                        Contestant Upload Link
+                      </span>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Copy and share this direct link with the participant so they can log in and submit their photographs:
+                      </p>
+                      <div className="flex items-center gap-1.5 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 mt-1 select-all font-mono text-[10px] text-slate-700 dark:text-slate-300 break-all justify-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                        onClick={() => {
+                          navigator.clipboard.writeText(window.location.origin + "/dashboard");
+                          alert("Upload link copied to clipboard!");
+                        }}
+                        title="Click to copy link"
+                      >
+                        {window.location.origin}/dashboard
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

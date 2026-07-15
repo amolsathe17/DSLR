@@ -67,7 +67,7 @@ router.get('/submissions', protect, authorize('Admin'), async (req, res) => {
   try {
     const submissions = await Submission.find({ isFinalSubmitted: true });
     
-    let csv = 'SubmissionID,ParticipantName,ParticipantEmail,PhotoID,PhotoTitle,Category,CameraBrand,CameraModel,Lens,UploadStatus,AverageScore\n';
+    let csv = 'SubmissionID,ParticipantName,ParticipantEmail,PhotoID,PhotoTitle,Category,CameraBrandOrMedium,CameraModelOrDimensions,LensOrMaterials,UploadStatus,AverageScore\n';
     
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {

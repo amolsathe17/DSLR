@@ -630,7 +630,8 @@ export default function AdminDashboard() {
 
   const handleExportCSV = (reportType, eventId = '') => {
     const token = localStorage.getItem('token');
-    const path = `/api/reports/${reportType}${eventId ? '/' + eventId : ''}`;
+    const baseUrl = import.meta.env.VITE_API_URL || '';
+    const path = `${baseUrl}/api/reports/${reportType}${eventId ? '/' + eventId : ''}`;
     
     // Trigger download with headers
     fetch(path, {
@@ -638,7 +639,12 @@ export default function AdminDashboard() {
         'Authorization': `Bearer ${token}`
       }
     })
-      .then(res => res.blob())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to export report: ${res.statusText}`);
+        }
+        return res.blob();
+      })
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -648,7 +654,10 @@ export default function AdminDashboard() {
         a.click();
         a.remove();
       })
-      .catch(e => console.error(e));
+      .catch(e => {
+        console.error(e);
+        alert(`Failed to export CSV: ${e.message}`);
+      });
   };
 
   if (loading && !stats) {

@@ -77,20 +77,22 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Home Route
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "DSLR Photography Contest API is running",
+// Serve Client production build if compiled
+const clientBuildPath = path.join(__dirname, "..", "client", "dist");
+if (fs.existsSync(clientBuildPath)) {
+  app.use(express.static(clientBuildPath));
+  
+  // SPA Fallback: Serve index.html for all non-API GET requests
+  app.get(/^(?!\/api\/).*$/, (req, res) => {
+    res.sendFile(path.resolve(clientBuildPath, "index.html"));
   });
-});
-
-// Production Build
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "..", "client", "dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "..", "client", "dist", "index.html"));
+} else {
+  // Development Fallback Home Route
+  app.get("/", (req, res) => {
+    res.json({
+      success: true,
+      message: "DSLR Photography Contest API is running",
+    });
   });
 }
 

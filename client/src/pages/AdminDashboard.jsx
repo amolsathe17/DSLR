@@ -79,6 +79,8 @@ export default function AdminDashboard() {
   const [exhibitionToDate, setExhibitionToDate] = useState('');
   const [loginBgUrl, setLoginBgUrl] = useState('');
   const [uploadingBg, setUploadingBg] = useState(false);
+  const [backups, setBackups] = useState([]);
+  const [loadingBackups, setLoadingBackups] = useState(false);
   const [prize1Reward, setPrize1Reward] = useState('₹50,000 Cash + Gold Trophy');
   const [prize2Reward, setPrize2Reward] = useState('₹30,000 Cash + Silver Trophy');
   const [prize3Reward, setPrize3Reward] = useState('₹20,000 Cash + Bronze Trophy');
@@ -226,6 +228,20 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchBackups = async () => {
+    setLoadingBackups(true);
+    try {
+      const data = await apiFetch('/api/events/backups/list');
+      if (data.success) {
+        setBackups(data.backups || []);
+      }
+    } catch (e) {
+      console.error('Error fetching event backups:', e.message);
+    } finally {
+      setLoadingBackups(false);
+    }
+  };
+
   const fetchJudgesAndEvents = async () => {
     try {
       const jData = await apiFetch('/api/admin/judges');
@@ -264,7 +280,8 @@ export default function AdminDashboard() {
         fetchJudgesAndEvents(),
         fetchParticipants(),
         fetchPhotographs(),
-        fetchStats()
+        fetchStats(),
+        fetchBackups()
       ]);
     } catch (e) {
       console.error(e);
@@ -277,7 +294,8 @@ export default function AdminDashboard() {
       fetchStats(),
       fetchParticipants(),
       fetchPhotographs(),
-      fetchJudgesAndEvents()
+      fetchJudgesAndEvents(),
+      fetchBackups()
     ]);
     setLoading(false);
   };
@@ -567,8 +585,9 @@ export default function AdminDashboard() {
         method: 'DELETE'
       });
       if (data.success) {
-        triggerSuccessModal('Contest Deleted', 'The contest event and all associated lists have been deleted successfully.');
+        triggerSuccessModal('Contest Deleted & Archived', 'The contest event has been successfully deleted. A complete ledger history and results snapshot PDF has been generated and archived.');
         fetchJudgesAndEvents();
+        fetchBackups();
       }
     } catch (e) {
       alert(e.message);
@@ -1719,29 +1738,54 @@ export default function AdminDashboard() {
                           Activate
                         </button>
                       )}
-                      {e.status !== 'Completed' ? (
-                        <button
-                          onClick={() => {
-                            setEventToDeleteId(e._id);
-                            setEventToDeleteTitle(e.title);
-                            setShowDeleteEventModal(true);
-                          }}
-                          className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
-                          title="Delete Contest permanently"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      ) : (
-                        <span
-                          className="p-1.5 text-slate-300 dark:text-slate-700 cursor-not-allowed"
-                          title="Completed contests cannot be deleted"
-                        >
-                          <Trash2 size={14} />
-                        </span>
-                      )}
+                      <button
+                        onClick={() => {
+                          setEventToDeleteId(e._id);
+                          setEventToDeleteTitle(e.title);
+                          setShowDeleteEventModal(true);
+                        }}
+                        className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                        title="Delete & Archive Contest"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Deleted Contests Backups */}
+            <div className="flex flex-col gap-4 mt-6">
+              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Deleted Contest Backups & Archives</h3>
+              <div className="flex flex-col gap-3">
+                {backups.map(b => (
+                  <div key={b._id} className="glass-panel border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/20">
+                    <div>
+                      <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{b.title}</h4>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        Type: {b.eventType} • Deleted: {new Date(b.deletedAt || b.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <a
+                        href={b.backupPath.startsWith('http') ? b.backupPath : `${import.meta.env.VITE_API_URL || ''}${b.backupPath}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1.5 px-3.5 rounded-lg cursor-pointer transition-all shadow-sm"
+                        download={`${b.title.replace(/\s+/g, '_')}_ledger.pdf`}
+                      >
+                        Download PDF Backup
+                      </a>
+                    </div>
+                  </div>
+                ))}
+
+                {backups.length === 0 && (
+                  <div className="text-center text-xs text-slate-400 py-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                    No deleted event archives or backups found.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -2684,14 +2728,28 @@ export default function AdminDashboard() {
                         </h4>
                         <p className="text-[10px] text-slate-400 mt-0.5">Theme: {activeHistoryEvent.theme}</p>
                       </div>
-                      <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${
-                        activeHistoryEvent.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' :
-                        activeHistoryEvent.status === 'Closed' ? 'bg-red-50 text-red-600 dark:bg-red-950/20' :
-                        activeHistoryEvent.status === 'Active' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' :
-                        'bg-slate-100 text-slate-500'
-                      }`}>
-                        {activeHistoryEvent.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${
+                          activeHistoryEvent.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' :
+                          activeHistoryEvent.status === 'Closed' ? 'bg-red-50 text-red-600 dark:bg-red-950/20' :
+                          activeHistoryEvent.status === 'Active' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' :
+                          'bg-slate-100 text-slate-500'
+                        }`}>
+                          {activeHistoryEvent.status}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setEventToDeleteId(activeHistoryEvent.id);
+                            setEventToDeleteTitle(activeHistoryEvent.title);
+                            setShowDeleteEventModal(true);
+                            setShowHistoryModal(false);
+                          }}
+                          className="p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 rounded-lg cursor-pointer transition-colors"
+                          title="Archive & Delete Contest"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Quick stats grid */}

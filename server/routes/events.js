@@ -163,30 +163,104 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
 // @access  Private/Admin
 router.delete('/:id', protect, authorize('Admin'), async (req, res) => {
   try {
+    const EventBackup = require('../models/EventBackup');
+    const Submission = require('../models/Submission');
+    const Payment = require('../models/Payment');
+    const { generateBackupPdf } = require('../utils/backupPdf');
+    const path = require('path');
+    const fs = require('fs');
+
     const event = await Event.findById(req.params.id);
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    if (event.status === 'Completed') {
-      return res.status(400).json({ success: false, message: 'Completed contests cannot be deleted' });
-    }
+    // Retrieve all related submissions and payments for backup
+    const submissions = await Submission.find({ eventId: event._id });
+    const payments = await Payment.find({ eventId: event._id });
 
-    await Event.deleteOne({ _id: req.params.id });
+    // Generate snapshot PDF path
+    const sanitizedTitle = event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const filename = `${sanitizedTitle}_backup_${Date.now()}.pdf`;
+    const backupDir = path.join(__dirname, '..', 'uploads', 'backups');
+    const outputPath = path.join(backupDir, filename);
+
+    // Generate PDF backup
+    await generateBackupPdf(event, submissions, payments, outputPath);
+
+    // Save backup DB reference
+    await EventBackup.create({
+      title: event.title,
+      eventType: event.eventType,
+      eventDate: event.eventDate || event.deadline,
+      backupPath: `/uploads/backups/${filename}`
+    });
+
+    // Cleanup participant photographs files (local disk and Cloudinary)
+    submissions.forEach(sub => {
+      if (sub.photographs && sub.photographs.length > 0) {
+        sub.photographs.forEach(photo => {
+          // Delete main file
+          if (photo.fileUrl && photo.fileUrl.startsWith('/uploads/')) {
+            const fullPath = path.join(__dirname, '..', photo.fileUrl);
+            if (fs.existsSync(fullPath)) {
+              try { fs.unlinkSync(fullPath); } catch (err) { console.error('Unlink photo error:', err.message); }
+            }
+          }
+          // Delete raw file
+          if (photo.rawFileUrl && photo.rawFileUrl.startsWith('/uploads/')) {
+            const fullRawPath = path.join(__dirname, '..', photo.rawFileUrl);
+            if (fs.existsSync(fullRawPath)) {
+              try { fs.unlinkSync(fullRawPath); } catch (err) { console.error('Unlink RAW error:', err.message); }
+            }
+          }
+          // Delete Cloudinary assets
+          if (photo.cloudinaryPublicId) {
+            try {
+              const cloudinary = require('../config/cloudinary');
+              if (cloudinary && process.env.CLOUDINARY_CLOUD_NAME) {
+                cloudinary.uploader.destroy(photo.cloudinaryPublicId).catch(cErr => console.error('Cloudinary destroy error:', cErr.message));
+              }
+            } catch (err) {
+              console.warn('Cloudinary cleanup skipped:', err.message);
+            }
+          }
+        });
+      }
+    });
+
+    // Perform cascade database deletions
+    await Submission.deleteMany({ eventId: event._id });
+    await Payment.deleteMany({ eventId: event._id });
+    await Event.deleteOne({ _id: event._id });
 
     await AuditLog.create({
       userId: req.user._id,
       userName: req.user.name,
       userEmail: req.user.email,
-      action: 'Delete Event',
-      details: `Deleted event ID: ${req.params.id}`,
+      action: 'Delete Event with PDF Backup',
+      details: `Deleted event: "${event.title}" and generated archive ledger PDF backup`,
       ipAddress: req.ip
     });
 
-    res.json({ success: true, message: 'Event deleted' });
+    res.json({ success: true, message: 'Event successfully archived & deleted' });
+  } catch (error) {
+    console.error('Delete event backup error:', error);
+    res.status(500).json({ success: false, message: 'Server error during delete: ' + error.message });
+  }
+});
+
+// @desc    Get all event backups
+// @route   GET /api/events/backups/list
+// @access  Private/Admin
+router.get('/backups/list', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const EventBackup = require('../models/EventBackup');
+    const backups = await EventBackup.find({}).sort({ deletedAt: -1 });
+    res.json({ success: true, backups });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error retrieving backups' });
   }
 });
 

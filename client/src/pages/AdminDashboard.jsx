@@ -74,6 +74,9 @@ export default function AdminDashboard() {
   const [customEventType, setCustomEventType] = useState('');
   const [newEventDescription, setNewEventDescription] = useState('');
   const [newEventVenue, setNewEventVenue] = useState('Bal-Gandharv Art Gallery, Jangali Mharaj Road Pune 411030');
+  const [hasExhibition, setHasExhibition] = useState(false);
+  const [exhibitionFromDate, setExhibitionFromDate] = useState('');
+  const [exhibitionToDate, setExhibitionToDate] = useState('');
   const [prize1Reward, setPrize1Reward] = useState('₹50,000 Cash + Gold Trophy');
   const [prize2Reward, setPrize2Reward] = useState('₹30,000 Cash + Silver Trophy');
   const [prize3Reward, setPrize3Reward] = useState('₹20,000 Cash + Bronze Trophy');
@@ -464,7 +467,12 @@ export default function AdminDashboard() {
           venue: newEventVenue,
           rules: newEventRules.split('\n').filter(r => r.trim() !== ''),
           deadline: newEventDeadline,
-          eventDate: new Date(new Date(newEventDeadline).getTime() + 15 * 24 * 60 * 60 * 1000), // Default event date 15 days after deadline
+          eventDate: hasExhibition && exhibitionFromDate 
+            ? new Date(exhibitionFromDate) 
+            : new Date(new Date(newEventDeadline).getTime() + 15 * 24 * 60 * 60 * 1000),
+          hasExhibition,
+          exhibitionFromDate: hasExhibition && exhibitionFromDate ? new Date(exhibitionFromDate) : null,
+          exhibitionToDate: hasExhibition && exhibitionToDate ? new Date(exhibitionToDate) : null,
           prizes: [
             { rank: '1st Prize', reward: prize1Reward, description: 'Winner of the Championship Title' },
             { rank: '2nd Prize', reward: prize2Reward, description: 'Runner-up of the Championship' },
@@ -499,6 +507,9 @@ export default function AdminDashboard() {
         setCustomEventType('');
         setNewEventDescription('');
         setNewEventVenue('Bal-Gandharv Art Gallery, Jangali Mharaj Road Pune 411030');
+        setHasExhibition(false);
+        setExhibitionFromDate('');
+        setExhibitionToDate('');
         setPrize1Reward('₹50,000 Cash + Gold Trophy');
         setPrize2Reward('₹30,000 Cash + Silver Trophy');
         setPrize3Reward('₹20,000 Cash + Bronze Trophy');
@@ -1420,6 +1431,41 @@ export default function AdminDashboard() {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-150 dark:border-slate-850 flex flex-col gap-3">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-350 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={hasExhibition}
+                      onChange={(e) => setHasExhibition(e.target.checked)}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                    />
+                    <span>Organizing physical exhibition at this venue?</span>
+                  </label>
+                  
+                  {hasExhibition && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-slate-400 font-semibold">Exhibition Start Date (Optional)</label>
+                        <input
+                          type="date"
+                          value={exhibitionFromDate}
+                          onChange={(e) => setExhibitionFromDate(e.target.value)}
+                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-slate-400 font-semibold">Exhibition End Date (Optional)</label>
+                        <input
+                          type="date"
+                          value={exhibitionToDate}
+                          onChange={(e) => setExhibitionToDate(e.target.value)}
+                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1">

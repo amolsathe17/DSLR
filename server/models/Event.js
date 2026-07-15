@@ -9,6 +9,9 @@ const eventSchema = new mongoose.Schema({
   rules: [{ type: String }],
   deadline: { type: Date, required: true },
   eventDate: { type: Date },
+  exhibitionFromDate: { type: Date },
+  exhibitionToDate: { type: Date },
+  hasExhibition: { type: Boolean, default: false },
   venue: { type: String },
   prizes: [{
     rank: { type: String },

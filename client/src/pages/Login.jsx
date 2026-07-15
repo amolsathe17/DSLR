@@ -385,12 +385,18 @@ export default function Login() {
           <div className="hidden md:flex flex-col gap-6 text-white max-w-md bg-slate-950/45 p-8 rounded-3xl border border-white/10 backdrop-blur-sm shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-white/10 rounded-2xl text-white">
-                <Calendar size={28} className="text-indigo-450" />
+                <Calendar size={28} className={isAdminMode ? 'text-amber-500' : 'text-indigo-400'} />
               </div>
               <div>
-                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">Exhibition Date</p>
-                <p className="text-xl font-black font-display text-white">
-                  {new Date(event.eventDate).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">Exhibition Schedule</p>
+                <p className="text-sm font-black font-display text-white">
+                  {event.hasExhibition && event.exhibitionFromDate && event.exhibitionToDate ? (
+                    `${new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'medium' })} - ${new Date(event.exhibitionToDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}`
+                  ) : event.hasExhibition && event.exhibitionFromDate ? (
+                    `Starts ${new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'long' })}`
+                  ) : (
+                    new Date(event.eventDate || event.deadline).toLocaleDateString(undefined, { dateStyle: 'long' })
+                  )}
                 </p>
               </div>
             </div>

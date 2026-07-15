@@ -183,6 +183,26 @@ export default function Landing() {
                   </div>
                 )}
 
+                {event.hasExhibition && (
+                  <div className="flex items-start gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <Calendar className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" size={20} />
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Exhibition Schedule</p>
+                      <p className="text-xs font-semibold text-slate-900 dark:text-white leading-relaxed">
+                        {event.exhibitionFromDate && event.exhibitionToDate ? (
+                          `${new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'medium' })} to ${new Date(event.exhibitionToDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}`
+                        ) : event.exhibitionFromDate ? (
+                          `Starts ${new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'long' })}`
+                        ) : event.exhibitionToDate ? (
+                          `Until ${new Date(event.exhibitionToDate).toLocaleDateString(undefined, { dateStyle: 'long' })}`
+                        ) : (
+                          'Dates to be announced'
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-3 font-semibold uppercase tracking-wider">
                     Time Remaining

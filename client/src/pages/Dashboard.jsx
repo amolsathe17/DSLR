@@ -103,6 +103,23 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    const autoSelectActiveTab = async () => {
+      try {
+        const eventData = await apiFetch("/api/events");
+        if (eventData.success && eventData.events.length > 0) {
+          const activeEvent = eventData.events.find((e) => e.status === "Active");
+          if (activeEvent) {
+            setSelectedTypeTab(activeEvent.eventType);
+          }
+        }
+      } catch (err) {
+        console.error("Auto select active tab failed:", err);
+      }
+    };
+    autoSelectActiveTab();
+  }, []);
+
+  useEffect(() => {
     fetchDashboardData(selectedTypeTab);
   }, [selectedTypeTab]);
 

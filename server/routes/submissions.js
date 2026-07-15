@@ -622,4 +622,77 @@ router.post('/payment-failed', protect, async (req, res) => {
   }
 });
 
+// @desc    Update photograph metadata details
+// @route   PUT /api/submissions/photographs/:photoId
+// @access  Private
+router.put('/photographs/:photoId', protect, async (req, res) => {
+  try {
+    const { eventId, title, category, cameraBrand, cameraModel, lensUsed, location, dateCaptured, description } = req.body;
+    const { photoId } = req.params;
+
+    const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
+    if (!submission) {
+      return res.status(404).json({ success: false, message: 'Submission not found' });
+    }
+
+    if (submission.isFinalSubmitted) {
+      return res.status(400).json({ success: false, message: 'Entry has already been finalized' });
+    }
+
+    const idx = submission.photographs.findIndex(p => p.id === photoId);
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Photograph not found in submission' });
+    }
+
+    // Update the values in the subdocument
+    submission.photographs[idx].title = title || submission.photographs[idx].title;
+    submission.photographs[idx].category = category || submission.photographs[idx].category;
+    submission.photographs[idx].cameraBrand = cameraBrand !== undefined ? cameraBrand : submission.photographs[idx].cameraBrand;
+    submission.photographs[idx].cameraModel = cameraModel !== undefined ? cameraModel : submission.photographs[idx].cameraModel;
+    submission.photographs[idx].lensUsed = lensUsed !== undefined ? lensUsed : submission.photographs[idx].lensUsed;
+    submission.photographs[idx].location = location !== undefined ? location : submission.photographs[idx].location;
+    submission.photographs[idx].dateCaptured = dateCaptured !== undefined ? dateCaptured : submission.photographs[idx].dateCaptured;
+    submission.photographs[idx].description = description !== undefined ? description : submission.photographs[idx].description;
+
+    await submission.save();
+
+    // Also update the Photo collection (if it exists)
+    const Photo = require('../models/Photo');
+    const photoDoc = await Photo.findOne({ 
+      entryId: submission._id.toString(), 
+      userId: req.user._id.toString(), 
+      $or: [
+        { id: photoId }, 
+        { cloudinaryPublicId: submission.photographs[idx].cloudinaryPublicId }
+      ] 
+    });
+    if (photoDoc) {
+      photoDoc.title = title || photoDoc.title;
+      photoDoc.category = category || photoDoc.category;
+      photoDoc.description = description !== undefined ? description : photoDoc.description;
+      photoDoc.cameraMake = cameraBrand !== undefined ? cameraBrand : photoDoc.cameraMake;
+      photoDoc.cameraModel = cameraModel !== undefined ? cameraModel : photoDoc.cameraModel;
+      photoDoc.lensModel = lensUsed !== undefined ? lensUsed : photoDoc.lensModel;
+      if (dateCaptured) {
+        photoDoc.originalCaptureDate = new Date(dateCaptured);
+      }
+      await photoDoc.save();
+    }
+
+    await AuditLog.create({
+      userId: req.user._id.toString(),
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Update Photograph Metadata',
+      details: `Updated photo ID: ${photoId} details in entry number: ${submission.entryNumber}`,
+      ipAddress: req.ip
+    });
+
+    res.json({ success: true, submission });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;

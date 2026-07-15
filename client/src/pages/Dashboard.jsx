@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
   Plus,
   Trash2,
+  Edit2,
   Lock,
   ChevronRight,
   ShieldCheck,
@@ -44,6 +45,17 @@ export default function Dashboard() {
   const [location, setLocation] = useState("");
   const [dateCaptured, setDateCaptured] = useState("");
   const [description, setDescription] = useState("");
+
+  // Edit Photo Modal states
+  const [editingPhoto, setEditingPhoto] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editCameraBrand, setEditCameraBrand] = useState("");
+  const [editCameraModel, setEditCameraModel] = useState("");
+  const [editLensUsed, setEditLensUsed] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+  const [editDateCaptured, setEditDateCaptured] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   // Payment states
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -396,6 +408,64 @@ export default function Dashboard() {
       rzp.open();
     } catch (err) {
       setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const handleEditPhotoClick = (photo) => {
+    setEditingPhoto(photo);
+    setEditTitle(photo.title || "");
+    setEditCategory(photo.category || "");
+    setEditCameraBrand(photo.cameraBrand || "");
+    setEditCameraModel(photo.cameraModel || "");
+    setEditLensUsed(photo.lensUsed || "");
+    setEditLocation(photo.location || "");
+    setEditDescription(photo.description || "");
+    if (photo.dateCaptured) {
+      try {
+        const d = new Date(photo.dateCaptured);
+        if (!isNaN(d.getTime())) {
+          setEditDateCaptured(d.toISOString().substring(0, 10));
+        } else {
+          setEditDateCaptured("");
+        }
+      } catch {
+        setEditDateCaptured("");
+      }
+    } else {
+      setEditDateCaptured("");
+    }
+  };
+
+  const handleUpdatePhoto = async (e) => {
+    e.preventDefault();
+    if (!editingPhoto) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await apiFetch(`/api/submissions/photographs/${editingPhoto.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          eventId: event._id,
+          title: editTitle,
+          category: editCategory,
+          cameraBrand: editCameraBrand,
+          cameraModel: editCameraModel,
+          lensUsed: editLensUsed,
+          location: editLocation,
+          dateCaptured: editDateCaptured,
+          description: editDescription,
+        }),
+      });
+
+      if (data.success) {
+        setSubmission(data.submission);
+        setEditingPhoto(null);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -878,13 +948,22 @@ export default function Dashboard() {
                           </div>
 
                           {!isFinalized && (
-                            <button
-                              onClick={() => handleDeletePhoto(photo.id)}
-                              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors cursor-pointer"
-                              title="Delete Photo"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            <div className="flex gap-2 items-center">
+                              <button
+                                onClick={() => handleEditPhotoClick(photo)}
+                                className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 rounded-lg transition-colors cursor-pointer"
+                                title="Edit Details"
+                              >
+                                <Edit2 size={15} />
+                              </button>
+                              <button
+                                onClick={() => handleDeletePhoto(photo.id)}
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors cursor-pointer"
+                                title="Delete Photo"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           )}
                         </div>
 
@@ -1036,6 +1115,143 @@ export default function Dashboard() {
                 uploads must match DSLR/Mirrorless EXIF properties.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT PHOTOGRAPH DETAILS MODAL */}
+      {editingPhoto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 text-left">
+              <div className="flex items-center gap-2">
+                <Edit2 className="text-indigo-600 dark:text-indigo-400" size={20} />
+                <h3 className="font-display font-black text-slate-900 dark:text-white text-base">
+                  Edit Entry Details
+                </h3>
+              </div>
+              <button
+                onClick={() => setEditingPhoto(null)}
+                className="text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 font-bold text-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdatePhoto} className="flex flex-col gap-4 text-left">
+              <div className="flex flex-col gap-1 text-[11px]">
+                <label className="font-semibold text-slate-400">Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-slate-800 dark:text-slate-100 font-medium"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1 text-[11px]">
+                <label className="font-semibold text-slate-400">Category *</label>
+                <select
+                  required
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-xs text-slate-800 dark:text-slate-100 font-medium"
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1 text-[11px]">
+                  <label className="font-semibold text-slate-400">Camera Brand</label>
+                  <input
+                    type="text"
+                    value={editCameraBrand}
+                    onChange={(e) => setEditCameraBrand(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-slate-800 dark:text-slate-100 font-medium"
+                    placeholder="e.g. Nikon"
+                  />
+                </div>
+                <div className="flex flex-col gap-1 text-[11px]">
+                  <label className="font-semibold text-slate-400">Camera Model</label>
+                  <input
+                    type="text"
+                    value={editCameraModel}
+                    onChange={(e) => setEditCameraModel(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-slate-800 dark:text-slate-100 font-medium"
+                    placeholder="e.g. Z6"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1 text-[11px]">
+                  <label className="font-semibold text-slate-400">Lens Used</label>
+                  <input
+                    type="text"
+                    value={editLensUsed}
+                    onChange={(e) => setEditLensUsed(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-slate-800 dark:text-slate-100 font-medium"
+                    placeholder="e.g. 24-70mm f2.8"
+                  />
+                </div>
+                <div className="flex flex-col gap-1 text-[11px]">
+                  <label className="font-semibold text-slate-400">Location</label>
+                  <input
+                    type="text"
+                    value={editLocation}
+                    onChange={(e) => setEditLocation(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-slate-800 dark:text-slate-100 font-medium"
+                    placeholder="e.g. Sumba Beach"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1 text-[11px]">
+                  <label className="font-semibold text-slate-400">Date Captured</label>
+                  <input
+                    type="date"
+                    value={editDateCaptured}
+                    onChange={(e) => setEditDateCaptured(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-xs text-slate-800 dark:text-slate-100 font-medium animate-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1 text-[11px]">
+                <label className="font-semibold text-slate-400">Description</label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={2}
+                  className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-slate-800 dark:text-slate-100 font-medium resize-none"
+                  placeholder="Tell us about the photograph..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingPhoto(null)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-250 font-bold rounded-xl cursor-pointer text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md cursor-pointer text-xs transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -233,6 +233,20 @@ router.post('/upload', protect, upload.fields([
       console.warn('EXIF validation skipped:', exifErr.message);
     }
 
+    // Override or fallback with user-supplied details from request body if provided
+    if (req.body.cameraBrand) {
+      cameraMake = req.body.cameraBrand;
+    }
+    if (req.body.cameraModel) {
+      cameraModel = req.body.cameraModel;
+    }
+    if (req.body.lensUsed) {
+      lensModel = req.body.lensUsed;
+    }
+    if (req.body.dateCaptured) {
+      originalCaptureDate = new Date(req.body.dateCaptured);
+    }
+
     const dslrCheck = validateDSLR(exif);
 
     if (dslrCheck.status === 'REJECTED') {

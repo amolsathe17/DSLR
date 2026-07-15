@@ -513,7 +513,7 @@ export default function AdminDashboard() {
 
     setUploadingBg(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/events/upload-bg`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}/api/events/upload-bg`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -537,7 +537,7 @@ export default function AdminDashboard() {
   const handleDownloadBackup = async (backup) => {
     const fileUrl = backup.backupPath.startsWith('http') 
       ? backup.backupPath 
-      : `${import.meta.env.VITE_API_URL || ''}${backup.backupPath}`;
+      : `${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}${backup.backupPath}`;
     window.open(fileUrl, '_blank');
 
     try {
@@ -822,7 +822,7 @@ export default function AdminDashboard() {
 
   const handleExportCSV = (reportType, eventId = '') => {
     const token = localStorage.getItem('token');
-    const baseUrl = import.meta.env.VITE_API_URL || '';
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app';
     const path = `${baseUrl}/api/reports/${reportType}${eventId ? '/' + eventId : ''}`;
     
     // Trigger download with headers

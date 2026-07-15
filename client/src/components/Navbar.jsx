@@ -17,6 +17,18 @@ export default function Navbar() {
     setIsOpen(false);
   };
 
+  const handleAdminClick = () => {
+    if (user && (user.role === 'Participant' || user.role === 'Judge')) {
+      logout();
+    }
+  };
+
+  const handleJudgeClick = () => {
+    if (user && user.role === 'Participant') {
+      logout();
+    }
+  };
+
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -71,6 +83,7 @@ export default function Navbar() {
 
             <Link
               to="/admin"
+              onClick={handleAdminClick}
               className={`text-sm font-medium transition-colors ${
                 isActive('/admin') 
                   ? 'text-indigo-600 dark:text-indigo-400' 
@@ -82,6 +95,7 @@ export default function Navbar() {
 
             <Link
               to="/judge"
+              onClick={handleJudgeClick}
               className={`text-sm font-medium transition-colors ${
                 isActive('/judge') 
                   ? 'text-indigo-600 dark:text-indigo-400' 
@@ -221,7 +235,10 @@ export default function Navbar() {
 
             <Link
               to="/admin"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                handleAdminClick();
+                setIsOpen(false);
+              }}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 isActive('/admin') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
               }`}
@@ -231,7 +248,10 @@ export default function Navbar() {
 
             <Link
               to="/judge"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                handleJudgeClick();
+                setIsOpen(false);
+              }}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 isActive('/judge') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
               }`}

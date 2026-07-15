@@ -21,7 +21,8 @@ import {
   Maximize2,
   FileCheck,
   RefreshCw,
-  History
+  History,
+  Sparkles
 } from 'lucide-react';
 import StatsCharts from '../components/StatsCharts';
 

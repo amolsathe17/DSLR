@@ -158,7 +158,7 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
   }
 });
 
-// @desc    Delete an event
+// @desc    Archive event & generate PDF backup
 // @route   DELETE /api/events/:id
 // @access  Private/Admin
 router.delete('/:id', protect, authorize('Admin'), async (req, res) => {
@@ -193,10 +193,90 @@ router.delete('/:id', protect, authorize('Admin'), async (req, res) => {
       title: event.title,
       eventType: event.eventType,
       eventDate: event.eventDate || event.deadline,
-      backupPath: `/uploads/backups/${filename}`
+      backupPath: `/uploads/backups/${filename}`,
+      eventId: event._id.toString(),
+      downloaded: false
     });
 
-    // Cleanup participant photographs files (local disk and Cloudinary)
+    // Mark event as Archived
+    event.status = 'Archived';
+    await event.save();
+
+    await AuditLog.create({
+      userId: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Archive Event & Generate PDF',
+      details: `Archived event: "${event.title}" and generated archive PDF backup`,
+      ipAddress: req.ip
+    });
+
+    res.json({ success: true, message: 'Event successfully archived. PDF backup is ready for download.' });
+  } catch (error) {
+    console.error('Archive event backup error:', error);
+    res.status(500).json({ success: false, message: 'Server error during archive: ' + error.message });
+  }
+});
+
+// @desc    Get all event backups
+// @route   GET /api/events/backups/list
+// @access  Private/Admin
+router.get('/backups/list', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const EventBackup = require('../models/EventBackup');
+    const backups = await EventBackup.find({}).sort({ deletedAt: -1 });
+    res.json({ success: true, backups });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error retrieving backups' });
+  }
+});
+
+// @desc    Mark backup PDF as downloaded
+// @route   PUT /api/events/backups/:id/downloaded
+// @access  Private/Admin
+router.put('/backups/:id/downloaded', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const EventBackup = require('../models/EventBackup');
+    const backup = await EventBackup.findById(req.params.id);
+    if (!backup) {
+      return res.status(404).json({ success: false, message: 'Backup not found' });
+    }
+    backup.downloaded = true;
+    await backup.save();
+    res.json({ success: true, backup });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error marking downloaded' });
+  }
+});
+
+// @desc    Permanently purge event, submissions, payments, and files
+// @route   DELETE /api/events/backups/:id/purge
+// @access  Private/Admin
+router.delete('/backups/:id/purge', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const EventBackup = require('../models/EventBackup');
+    const Submission = require('../models/Submission');
+    const Payment = require('../models/Payment');
+    const path = require('path');
+    const fs = require('fs');
+
+    const backup = await EventBackup.findById(req.params.id);
+    if (!backup) {
+      return res.status(404).json({ success: false, message: 'Backup archive not found' });
+    }
+
+    if (!backup.downloaded) {
+      return res.status(400).json({ success: false, message: 'You must download the PDF backup file before permanently purging this contest event.' });
+    }
+
+    const eventId = backup.eventId;
+
+    // Retrieve all related submissions to delete photograph files
+    const submissions = await Submission.find({ eventId });
+
+    // Cleanup photograph files from local disk and Cloudinary
     submissions.forEach(sub => {
       if (sub.photographs && sub.photographs.length > 0) {
         sub.photographs.forEach(photo => {
@@ -229,38 +309,33 @@ router.delete('/:id', protect, authorize('Admin'), async (req, res) => {
       }
     });
 
-    // Perform cascade database deletions
-    await Submission.deleteMany({ eventId: event._id });
-    await Payment.deleteMany({ eventId: event._id });
-    await Event.deleteOne({ _id: event._id });
+    // Delete generated backup PDF from local disk
+    if (backup.backupPath && backup.backupPath.startsWith('/uploads/')) {
+      const pdfPath = path.join(__dirname, '..', backup.backupPath);
+      if (fs.existsSync(pdfPath)) {
+        try { fs.unlinkSync(pdfPath); } catch (err) { console.error('Unlink backup PDF error:', err.message); }
+      }
+    }
+
+    // Cascade database purging
+    await Submission.deleteMany({ eventId });
+    await Payment.deleteMany({ eventId });
+    await Event.deleteOne({ _id: eventId });
+    await EventBackup.deleteOne({ _id: backup._id });
 
     await AuditLog.create({
       userId: req.user._id,
       userName: req.user.name,
       userEmail: req.user.email,
-      action: 'Delete Event with PDF Backup',
-      details: `Deleted event: "${event.title}" and generated archive ledger PDF backup`,
+      action: 'Permanently Purge Event & Details',
+      details: `Permanently purged event: "${backup.title}", all related photographs, submissions, and payments`,
       ipAddress: req.ip
     });
 
-    res.json({ success: true, message: 'Event successfully archived & deleted' });
+    res.json({ success: true, message: 'Contest event and all associated details have been permanently deleted and purged from the portal.' });
   } catch (error) {
-    console.error('Delete event backup error:', error);
-    res.status(500).json({ success: false, message: 'Server error during delete: ' + error.message });
-  }
-});
-
-// @desc    Get all event backups
-// @route   GET /api/events/backups/list
-// @access  Private/Admin
-router.get('/backups/list', protect, authorize('Admin'), async (req, res) => {
-  try {
-    const EventBackup = require('../models/EventBackup');
-    const backups = await EventBackup.find({}).sort({ deletedAt: -1 });
-    res.json({ success: true, backups });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error retrieving backups' });
+    console.error('Purge event error:', error);
+    res.status(500).json({ success: false, message: 'Server error during purge: ' + error.message });
   }
 });
 

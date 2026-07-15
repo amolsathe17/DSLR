@@ -502,6 +502,41 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDownloadBackup = async (backup) => {
+    const fileUrl = backup.backupPath.startsWith('http') 
+      ? backup.backupPath 
+      : `${import.meta.env.VITE_API_URL || ''}${backup.backupPath}`;
+    window.open(fileUrl, '_blank');
+
+    try {
+      const data = await apiFetch(`/api/events/backups/${backup._id}/downloaded`, {
+        method: 'PUT'
+      });
+      if (data.success) {
+        fetchBackups();
+      }
+    } catch (err) {
+      console.error('Error marking backup downloaded:', err.message);
+    }
+  };
+
+  const handlePurgeBackup = async (backup) => {
+    if (!confirm(`Are you absolutely sure you want to PERMANENTLY PURGE "${backup.title}"? This will delete all submissions, payments, uploaded photographs, and judges evaluations from the database forever. This action CANNOT be undone.`)) return;
+
+    try {
+      const data = await apiFetch(`/api/events/backups/${backup._id}/purge`, {
+        method: 'DELETE'
+      });
+      if (data.success) {
+        triggerSuccessModal('Contest Purged', 'The contest event and all associated details have been permanently deleted and purged from the portal.');
+        fetchBackups();
+        fetchJudgesAndEvents();
+      }
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {
@@ -1767,16 +1802,25 @@ export default function AdminDashboard() {
                         Type: {b.eventType} • Deleted: {new Date(b.deletedAt || b.createdAt).toLocaleString()}
                       </p>
                     </div>
-                    <div>
-                      <a
-                        href={b.backupPath.startsWith('http') ? b.backupPath : `${import.meta.env.VITE_API_URL || ''}${b.backupPath}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1.5 px-3.5 rounded-lg cursor-pointer transition-all shadow-sm"
-                        download={`${b.title.replace(/\s+/g, '_')}_ledger.pdf`}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleDownloadBackup(b)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1.5 px-3.5 rounded-lg cursor-pointer transition-all shadow-sm"
                       >
                         Download PDF Backup
-                      </a>
+                      </button>
+                      <button
+                        onClick={() => handlePurgeBackup(b)}
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                          b.downloaded 
+                            ? 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/40' 
+                            : 'bg-slate-100 text-slate-350 cursor-not-allowed dark:bg-slate-800 dark:text-slate-650'
+                        }`}
+                        disabled={!b.downloaded}
+                        title={b.downloaded ? 'Permanently Purge from Database' : 'You must download the PDF backup before you can permanently purge this event'}
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
                 ))}

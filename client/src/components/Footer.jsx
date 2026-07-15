@@ -81,13 +81,6 @@ export default function Footer() {
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
               A first-of-its-kind artfest in Maharashtra, Sumba was created to celebrate art in its truest form. This year shines a light on fading tribal traditions, many kept alive by only a few families. By giving these artists a stage, we hope their stories travel farther and last longer.
             </p>
-            <div className="flex items-center gap-2 mt-1">
-              <img 
-                src="/sumbacontest.jpg" 
-                alt="SumbaContest Logo" 
-                className="h-8 w-auto object-contain rounded"
-              />
-            </div>
           </div>
 
           {/* Column 2: Guidelines */}

@@ -512,7 +512,7 @@ export default function AdminDashboard() {
 
     setUploadingBg(true);
     try {
-      const response = await fetch('/api/events/upload-bg', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/events/upload-bg`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

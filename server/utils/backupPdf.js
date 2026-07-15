@@ -1,9 +1,42 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const http = require('http');
+
+// Helper to fetch remote image buffers (e.g., from Cloudinary)
+const fetchImageBuffer = (url) => {
+  return new Promise((resolve) => {
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, { timeout: 8000 }, (res) => {
+      if (res.statusCode !== 200) {
+        resolve(null);
+        return;
+      }
+      const data = [];
+      res.on('data', (chunk) => data.push(chunk));
+      res.on('end', () => resolve(Buffer.concat(data)));
+      res.on('error', () => resolve(null));
+    }).on('error', () => resolve(null));
+  });
+};
+
+// Helper to resolve the correct image source for pdfkit
+const getPdfImageSource = async (fileUrl) => {
+  if (!fileUrl) return null;
+  if (fileUrl.startsWith('/uploads/')) {
+    const localPath = path.join(__dirname, '..', fileUrl);
+    if (fs.existsSync(localPath)) {
+      return localPath;
+    }
+  } else if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
+    return await fetchImageBuffer(fileUrl);
+  }
+  return null;
+};
 
 const generateBackupPdf = async (event, submissions, payments, outputPath) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const doc = new PDFDocument({ margin: 50, size: 'A4' });
       
@@ -116,13 +149,15 @@ const generateBackupPdf = async (event, submissions, payments, outputPath) => {
       doc.moveDown(0.5);
 
       if (submissions.length > 0) {
-        submissions.forEach((sub, subIdx) => {
+        let subIdx = 0;
+        for (const sub of submissions) {
           doc.fontSize(9).font('Helvetica-Bold').fillColor(primaryColor).text(`[Submission Folder #${subIdx + 1}] Entry: ${sub.entryNumber || 'N/A'} | Status: ${sub.entryStatus}`);
           doc.fontSize(8).font('Helvetica').fillColor(secondaryColor).text(`Participant: ${sub.userName} (${sub.userEmail}) | Package: ${sub.eventTitle || ''} - ${sub.photoLimit} uploads | Paid: ${sub.paymentStatus}`);
           doc.moveDown(0.3);
 
           if (sub.photographs && sub.photographs.length > 0) {
-            sub.photographs.forEach((photo, photoIdx) => {
+            let photoIdx = 0;
+            for (const photo of sub.photographs) {
               doc.fontSize(8).font('Helvetica-Bold').text(`   * Photo #${photoIdx + 1}: "${photo.title}" | Category: ${photo.category} | Status: ${photo.status}`);
               
               if (event.eventType === 'Photography') {
@@ -140,13 +175,31 @@ const generateBackupPdf = async (event, submissions, payments, outputPath) => {
               } else {
                 doc.fontSize(7).font('Helvetica').text('     Grading Status: Unrated / Pending evaluation');
               }
-              doc.moveDown(0.2);
-            });
+
+              // Embed image thumbnail (small size)
+              if (photo.fileUrl) {
+                try {
+                  const imgSource = await getPdfImageSource(photo.fileUrl);
+                  if (imgSource) {
+                    doc.moveDown(0.2);
+                    // Draw a small thumbnail (height/width: 60px)
+                    doc.image(imgSource, { width: 60 });
+                    doc.moveDown(0.2);
+                  }
+                } catch (imgErr) {
+                  console.error('Error rendering image in PDF:', imgErr.message);
+                }
+              }
+
+              doc.moveDown(0.4);
+              photoIdx++;
+            }
           } else {
             doc.fontSize(8).font('Helvetica').text('   * No media uploaded in this entry folder.');
           }
           doc.moveDown(0.5);
-        });
+          subIdx++;
+        }
       } else {
         doc.fontSize(9).font('Helvetica').text('No submissions folders found for this event.');
       }

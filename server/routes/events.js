@@ -317,24 +317,29 @@ router.delete('/backups/:id/purge', protect, authorize('Admin'), async (req, res
       }
     }
 
-    // Delete participants (User documents) if they are not associated with any other event
-    const User = require('../models/User');
-    const participantUserIds = [...new Set(submissions.map(s => s.userId).filter(Boolean))];
-    for (const pUserId of participantUserIds) {
-      const otherSubmissionsCount = await Submission.countDocuments({
-        userId: pUserId,
-        eventId: { $ne: eventId }
-      });
-      if (otherSubmissionsCount === 0) {
-        await User.deleteOne({ _id: pUserId, role: 'Participant' });
-      }
-    }
-
-    // Cascade database purging
+    // Cascade database purging of event items
     await Submission.deleteMany({ eventId });
     await Payment.deleteMany({ eventId });
     await Event.deleteOne({ _id: eventId });
     await EventBackup.deleteOne({ _id: backup._id });
+
+    // Delete standalone Photo collection documents for this event
+    const Photo = require('../models/Photo');
+    try {
+      await Photo.deleteMany({ eventId: eventId.toString() });
+    } catch (photoDelErr) {
+      console.error('Failed to clean up Photo collection:', photoDelErr.message);
+    }
+
+    // Delete participants (User documents) if they have no submissions left in the database
+    const User = require('../models/User');
+    const allParticipants = await User.find({ role: 'Participant' });
+    for (const part of allParticipants) {
+      const subCount = await Submission.countDocuments({ userId: part._id.toString() });
+      if (subCount === 0) {
+        await User.deleteOne({ _id: part._id });
+      }
+    }
 
     await AuditLog.create({
       userId: req.user._id,

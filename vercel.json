@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/((?!assets/|favicon.ico|uploads/|api/).*)",
-      "destination": "/index.html"
+      "destination": "/client/dist/index.html"
     }
   ]
 }

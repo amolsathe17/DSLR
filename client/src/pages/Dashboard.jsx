@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [event, setEvent] = useState(null);
   const [submission, setSubmission] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [selectedTypeTab, setSelectedTypeTab] = useState('Photography');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,17 +59,19 @@ export default function Dashboard() {
   const [selectedPkgId, setSelectedPkgId] = useState("");
   const [acceptedDeclaration, setAcceptedDeclaration] = useState(false);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (selectedTab = selectedTypeTab) => {
     try {
-      // 1. Fetch active event
+      // 1. Fetch active event matching selected category tab
       const eventData = await apiFetch("/api/events");
       let activeEvent = null;
       if (eventData.success && eventData.events.length > 0) {
-        activeEvent =
-          eventData.events.find((e) => e.status === "Active") ||
-          eventData.events[0];
-        setEvent(activeEvent);
-        setSelectedPkgId(activeEvent.packages[0].id);
+        activeEvent = eventData.events.find((e) => e.status === "Active" && e.eventType === selectedTab);
+        setEvent(activeEvent || null);
+        if (activeEvent) {
+          setSelectedPkgId(activeEvent.packages[0].id);
+        } else {
+          setSubmission(null);
+        }
       }
 
       // 2. Fetch categories
@@ -87,6 +90,8 @@ export default function Dashboard() {
         );
         if (subData.success) {
           setSubmission(subData.submission);
+        } else {
+          setSubmission(null);
         }
       }
     } catch (err) {
@@ -98,8 +103,8 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    fetchDashboardData(selectedTypeTab);
+  }, [selectedTypeTab]);
 
   const handleStartSubmission = async (e) => {
     e.preventDefault();
@@ -468,6 +473,25 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
+      
+      {/* Event Type Tabs */}
+      <div className="flex flex-wrap gap-2 justify-center mb-10 p-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl mx-auto">
+        {['Photography', 'Painting', 'Drawing', 'Paper Craft', 'Other'].map(type => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => setSelectedTypeTab(type)}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold font-display transition-all cursor-pointer ${
+              selectedTypeTab === type
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            {type} Contests
+          </button>
+        ))}
+      </div>
+
       {error && (
         <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-6">
           <AlertTriangle size={18} className="shrink-0 mt-0.5" />
@@ -475,11 +499,21 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* STEP 1: Not started yet */}
-      {!submission ? (
-        <div className="max-w-4xl mx-auto flex flex-col gap-8">
-          {/* Header */}
-          <div className="text-center flex flex-col gap-2">
+      {!event ? (
+        <div className="max-w-md mx-auto text-center py-16 flex flex-col items-center gap-4 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 p-8 rounded-3xl shadow-sm">
+          <Layers className="w-10 h-10 text-indigo-500 animate-pulse animate-in zoom-in-90 duration-200" />
+          <h2 className="font-display font-extrabold text-sm text-slate-900 dark:text-white mt-2">No Active {selectedTypeTab} Contests</h2>
+          <p className="text-[11px] text-slate-500">
+            There are currently no active {selectedTypeTab.toLowerCase()} competitions accepting submissions. Please check our other tabs or check back later!
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* STEP 1: Not started yet */}
+          {!submission ? (
+            <div className="max-w-4xl mx-auto flex flex-col gap-8">
+              {/* Header */}
+              <div className="text-center flex flex-col gap-2">
             <h1 className="font-display font-black text-3xl sm:text-4xl text-slate-900 dark:text-white">
               Join Competition
             </h1>
@@ -579,11 +613,12 @@ export default function Dashboard() {
                 <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-6 shadow-sm">
                   <div className="pb-4 border-b border-slate-100 dark:border-slate-800">
                     <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">
-                      Upload Photography Entry
+                      Upload {(event?.eventType || 'Photography') === 'Photography' ? 'Photography' : (event?.eventType || 'Contest')} Entry
                     </h3>
                     <p className="text-xs text-slate-500">
-                      Provide details and select files. We will parse EXIF
-                      metadata to auto-fill camera specifications.
+                      {(event?.eventType || 'Photography') === 'Photography' 
+                        ? 'Provide details and select files. We will parse EXIF metadata to auto-fill camera specifications.' 
+                        : 'Provide details, dimensions, medium and location specifications.'}
                     </p>
                   </div>
 
@@ -591,7 +626,7 @@ export default function Dashboard() {
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-col gap-1 text-[11px]">
                         <label className="font-semibold text-slate-400">
-                          Photo Title *
+                          {(event?.eventType || 'Photography') === 'Photography' ? 'Photo Title *' : 'Artwork Title *'}
                         </label>
                         <input
                           type="text"
@@ -624,21 +659,21 @@ export default function Dashboard() {
 
                       <div className="flex flex-col gap-1 text-[11px]">
                         <label className="font-semibold text-slate-400">
-                          Camera Brand & Model (Optional EXIF)
+                          {(event?.eventType || 'Photography') === 'Photography' ? 'Camera Brand & Model (Optional EXIF)' : 'Medium & Dimensions'}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           <input
                             type="text"
                             value={cameraBrand}
                             onChange={(e) => setCameraBrand(e.target.value)}
-                            placeholder="Canon"
+                            placeholder={(event?.eventType || 'Photography') === 'Photography' ? 'Canon' : 'Oil on Canvas'}
                             className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px]"
                           />
                           <input
                             type="text"
                             value={cameraModel}
                             onChange={(e) => setCameraModel(e.target.value)}
-                            placeholder="EOS R5"
+                            placeholder={(event?.eventType || 'Photography') === 'Photography' ? 'EOS R5' : '12x18 inches'}
                             className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px]"
                           />
                         </div>
@@ -646,14 +681,14 @@ export default function Dashboard() {
 
                       <div className="flex flex-col gap-1 text-[11px]">
                         <label className="font-semibold text-slate-400">
-                          Lens Used & Location (Optional)
+                          {(event?.eventType || 'Photography') === 'Photography' ? 'Lens Used & Location (Optional)' : 'Materials & Location'}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           <input
                             type="text"
                             value={lensUsed}
                             onChange={(e) => setLensUsed(e.target.value)}
-                            placeholder="24-70mm f2.8"
+                            placeholder={(event?.eventType || 'Photography') === 'Photography' ? '24-70mm f2.8' : 'Acrylic Paint'}
                             className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px]"
                           />
                           <input
@@ -1114,6 +1149,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

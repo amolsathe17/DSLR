@@ -630,7 +630,7 @@ export default function JudgeDashboard() {
                               onClick={() => handleOpenScoring(photo)}
                               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg flex items-center gap-0.5 cursor-pointer shadow-sm"
                             >
-                              {photo.graded ? 'Edit Grade' : 'Score Photo'}
+                              {hasConfirmed ? 'View Grade' : photo.graded ? 'Edit Grade' : 'Score Photo'}
                               <ChevronRight size={14} />
                             </button>
                           </div>
@@ -715,7 +715,7 @@ export default function JudgeDashboard() {
                             value={item.val}
                             onChange={(e) => item.set(Number(e.target.value))}
                             className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
-                            disabled={user?.role === 'Admin'}
+                            disabled={user?.role === 'Admin' || hasConfirmed}
                           />
                           <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
                         </div>
@@ -744,14 +744,14 @@ export default function JudgeDashboard() {
                           onChange={(e) => setRemarks(e.target.value)}
                           placeholder={user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
                           className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
-                          required={user?.role !== 'Admin'}
-                          disabled={user?.role === 'Admin'}
+                          required={user?.role !== 'Admin' && !hasConfirmed}
+                          disabled={user?.role === 'Admin' || hasConfirmed}
                         />
                       </div>
 
-                      {user?.role === 'Admin' ? (
+                      {user?.role === 'Admin' || hasConfirmed ? (
                         <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold py-2.5 rounded-xl text-center text-[10px]">
-                          Evaluation Read-Only (Admin Mode)
+                          {hasConfirmed ? 'Evaluation Read-Only (Signed Off)' : 'Evaluation Read-Only (Admin Mode)'}
                         </div>
                       ) : (
                         <button

@@ -2180,12 +2180,10 @@ export default function AdminDashboard() {
 
       {/* TAB 6: CATEGORIES CONFIGURATION */}
       {activeTab === 'categories_config' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-200">
+        <div className="flex flex-col gap-8 animate-in fade-in duration-200">
           
-          {/* Left Column: Contest Type and Category setup */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
-            
-            {/* Contest Type Manager Card */}
+          {/* 100% Width: Create Contest Type */}
+          <div className="w-full">
             <div className="glass-panel contest-type-form-container border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
               <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -2199,342 +2197,352 @@ export default function AdminDashboard() {
                 )}
               </h3>
 
-              {editingContestType ? (
-                <form onSubmit={handleUpdateContestType} className="flex flex-col gap-4 mt-4 text-left">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Contest Type Name</label>
-                    <input
-                      type="text"
-                      value={editContestTypeName}
-                      onChange={(e) => setEditContestTypeName(e.target.value)}
-                      placeholder="e.g. Dance"
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Description</label>
-                    <textarea
-                      value={editContestTypeDesc}
-                      onChange={(e) => setEditContestTypeDesc(e.target.value)}
-                      placeholder="Brief description..."
-                      rows={2}
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
-                    />
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingContestType(null);
-                        setEditContestTypeName('');
-                        setEditContestTypeDesc('');
-                      }}
-                      className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs py-2 rounded-xl cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <form onSubmit={handleCreateContestType} className="flex flex-col gap-4 mt-4 text-left">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Contest Type Name</label>
-                    <input
-                      type="text"
-                      value={newContestTypeName}
-                      onChange={(e) => setNewContestTypeName(e.target.value)}
-                      placeholder="e.g. Dance"
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Description</label>
-                    <textarea
-                      value={newContestTypeDesc}
-                      onChange={(e) => setNewContestTypeDesc(e.target.value)}
-                      placeholder="Brief description..."
-                      rows={2}
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
-                  >
-                    Create Contest Type
-                  </button>
-                </form>
-              )}
-
-              {/* Registered Contest Types List */}
-              <div className="flex flex-col gap-2 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-left">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Registered Contest Types</span>
-                <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px] pr-1">
-                  {contestTypes.map(ct => (
-                    <div key={ct._id} className="flex justify-between items-center text-xs p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-850">
-                      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                        <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{ct.name}</span>
-                        {ct.description && <p className="text-[10px] text-slate-400 truncate">{ct.description}</p>}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                {/* Form Column */}
+                <div>
+                  {editingContestType ? (
+                    <form onSubmit={handleUpdateContestType} className="flex flex-col gap-4 text-left">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs text-slate-500 font-semibold">Contest Type Name</label>
+                        <input
+                          type="text"
+                          value={editContestTypeName}
+                          onChange={(e) => setEditContestTypeName(e.target.value)}
+                          placeholder="e.g. Dance"
+                          className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                          required
+                        />
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs text-slate-500 font-semibold">Description</label>
+                        <textarea
+                          value={editContestTypeDesc}
+                          onChange={(e) => setEditContestTypeDesc(e.target.value)}
+                          placeholder="Brief description..."
+                          rows={2}
+                          className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
+                        />
+                      </div>
+
+                      <div className="flex gap-2">
                         <button
-                          onClick={() => handleEditContestTypeClick(ct)}
-                          className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/80 dark:text-indigo-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-indigo-100 dark:border-indigo-900/30"
-                          title="Edit Contest Type"
+                          type="button"
+                          onClick={() => {
+                            setEditingContestType(null);
+                            setEditContestTypeName('');
+                            setEditContestTypeDesc('');
+                          }}
+                          className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs py-2 rounded-xl cursor-pointer"
                         >
-                          <Edit2 size={12} />
+                          Cancel
                         </button>
                         <button
-                          onClick={() => handleDeleteContestType(ct._id, ct.name)}
-                          className="p-1.5 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-red-100/50 dark:border-red-950/30"
-                          title="Delete Contest Type"
+                          type="submit"
+                          className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
                         >
-                          <Trash2 size={12} />
+                          Save Changes
                         </button>
                       </div>
-                    </div>
-                  ))}
-                  {contestTypes.length === 0 && (
-                    <div className="text-center text-[10px] text-slate-400 py-6 italic">
-                      No contest types registered.
-                    </div>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleCreateContestType} className="flex flex-col gap-4 mt-4 text-left">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs text-slate-500 font-semibold">Contest Type Name</label>
+                        <input
+                          type="text"
+                          value={newContestTypeName}
+                          onChange={(e) => setNewContestTypeName(e.target.value)}
+                          placeholder="e.g. Dance"
+                          className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                          required
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs text-slate-500 font-semibold">Description</label>
+                        <textarea
+                          value={newContestTypeDesc}
+                          onChange={(e) => setNewContestTypeDesc(e.target.value)}
+                          placeholder="Brief description..."
+                          rows={2}
+                          className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
+                      >
+                        Create Contest Type
+                      </button>
+                    </form>
                   )}
                 </div>
+
+                {/* List Column */}
+                <div className="flex flex-col gap-2 text-left border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 pt-6 md:pt-0 md:pl-8">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Registered Contest Types</span>
+                  <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px] pr-1">
+                    {contestTypes.map(ct => (
+                      <div key={ct._id} className="flex justify-between items-center text-xs p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-850">
+                        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                          <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{ct.name}</span>
+                          {ct.description && <p className="text-[10px] text-slate-400 truncate">{ct.description}</p>}
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                          <button
+                            onClick={() => handleEditContestTypeClick(ct)}
+                            className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/80 dark:text-indigo-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-indigo-100 dark:border-indigo-900/30"
+                            title="Edit Contest Type"
+                          >
+                            <Edit2 size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteContestType(ct._id, ct.name)}
+                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-red-100/50 dark:border-red-950/30"
+                            title="Delete Contest Type"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {contestTypes.length === 0 && (
+                      <div className="text-center text-[10px] text-slate-400 py-6 italic">
+                        No contest types registered.
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* Create or Edit Category Card (displays second) */}
-            <div className="glass-panel category-form-container border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm mt-6">
-              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Layers size={18} className="text-indigo-600 dark:text-indigo-400" />
-                  {editingCategory ? 'Edit Category' : 'Create Category'}
-                </div>
-                {editingCategory && (
-                  <span className="text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full animate-pulse uppercase tracking-wider shrink-0">
-                    Editing Mode
-                  </span>
-                )}
-              </h3>
-
-              {editingCategory ? (
-                <form onSubmit={handleUpdateCategory} className="flex flex-col gap-4 mt-4 text-left">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Category Name</label>
-                    <input
-                      type="text"
-                      value={editCatName}
-                      onChange={(e) => setEditCatName(e.target.value)}
-                      placeholder="e.g. Wildlife"
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Description</label>
-                    <textarea
-                      value={editCatDesc}
-                      onChange={(e) => setEditCatDesc(e.target.value)}
-                      placeholder="Brief description..."
-                      rows={3}
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
-                    />
-                  </div>
-                  
-                  {/* Assigned Contest Types (Checkboxes) */}
-                  <div className="flex flex-col gap-1.5 text-[11px]">
-                    <label className="font-semibold text-slate-500">Assign to Contest Types</label>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      {contestTypes.map(ct => (
-                        <label key={ct._id} className="flex items-center gap-2 text-[10px] font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={editCatTypes.includes(ct.name)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setEditCatTypes([...editCatTypes, ct.name]);
-                              } else {
-                                setEditCatTypes(editCatTypes.filter(t => t !== ct.name));
-                              }
-                            }}
-                            className="w-3.5 h-3.5 text-indigo-600 rounded border-slate-350 dark:border-slate-800 focus:ring-indigo-500 cursor-pointer"
-                          />
-                          {ct.name}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingCategory(null);
-                        setEditCatName('');
-                        setEditCatDesc('');
-                        setEditCatTypes([]);
-                        setEditCatCustomTypes('');
-                      }}
-                      className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs py-2 rounded-xl cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <form onSubmit={handleCreateCategory} className="flex flex-col gap-4 mt-4 text-left">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Category Name</label>
-                    <input
-                      type="text"
-                      value={newCatName}
-                      onChange={(e) => setNewCatName(e.target.value)}
-                      placeholder="e.g. Wildlife"
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Description</label>
-                    <textarea
-                      value={newCatDesc}
-                      onChange={(e) => setNewCatDesc(e.target.value)}
-                      placeholder="Brief description..."
-                      rows={3}
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
-                    />
-                  </div>
-                  
-                  {/* Assigned Contest Types (Checkboxes) */}
-                  <div className="flex flex-col gap-1.5 text-[11px]">
-                    <label className="font-semibold text-slate-500">Assign to Contest Types</label>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      {contestTypes.map(ct => (
-                        <label key={ct._id} className="flex items-center gap-2 text-[10px] font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={newCatTypes.includes(ct.name)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setNewCatTypes([...newCatTypes, ct.name]);
-                              } else {
-                                setNewCatTypes(newCatTypes.filter(t => t !== ct.name));
-                              }
-                            }}
-                            className="w-3.5 h-3.5 text-indigo-600 rounded border-slate-350 dark:border-slate-800 focus:ring-indigo-500 cursor-pointer"
-                          />
-                          {ct.name}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
-                  >
-                    Create Category
-                  </button>
-                </form>
-              )}
-            </div>
-
           </div>
 
-          {/* Right Column: Categories Explorer by Contest Type */}
-          <div className="lg:col-span-8 flex flex-col gap-6">
+          {/* 2-Column Section: Create Category & Categories Ledger */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            {/* Contest Types Tabs Filter */}
-            <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col gap-4 text-left">
-              <div>
-                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Categories Ledger</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Filter and explore categories mapped to different contest platforms</p>
-              </div>
+            {/* Left Column: Create or Edit Category */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              <div className="glass-panel category-form-container border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Layers size={18} className="text-indigo-600 dark:text-indigo-400" />
+                    {editingCategory ? 'Edit Category' : 'Create Category'}
+                  </div>
+                  {editingCategory && (
+                    <span className="text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full animate-pulse uppercase tracking-wider shrink-0">
+                      Editing Mode
+                    </span>
+                  )}
+                </h3>
 
-              {/* Grid of Contest Types */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-2">
-                {contestTypes.map(ct => ct.name).map(typeTab => {
-                  const filteredCats = categories.filter(c => {
-                    const types = c.contestTypes || [];
-                    return types.includes(typeTab);
-                  });
-
-                  return (
-                    <div key={typeTab} className="bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-2xl p-4 flex flex-col gap-3">
-                      <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-850">
-                        <span className="font-bold text-slate-900 dark:text-white text-xs">{typeTab}</span>
-                        <span className="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 font-bold text-[10px] px-2 py-0.5 rounded-full">
-                          {filteredCats.length} Categories
-                        </span>
-                      </div>
-
-                      <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px] pr-1">
-                        {filteredCats.map(c => (
-                          <div key={c._id} className="flex justify-between items-start text-[11px] p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl hover:shadow-sm transition-shadow">
-                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                              <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{c.name}</span>
-                              {c.description && <span className="text-[9px] text-slate-400 truncate">{c.description}</span>}
-                              
-                              <div className="flex flex-wrap gap-0.5 mt-1">
-                                {(c.contestTypes || ['Photography']).map(t => (
-                                  <span key={t} className="px-1 py-0.2 rounded text-[7px] font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 uppercase tracking-wide">
-                                    {t}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                              <button
-                                onClick={() => handleEditCategoryClick(c)}
-                                className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/80 dark:text-indigo-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-indigo-100 dark:border-indigo-900/30"
-                                title="Edit Category"
-                              >
-                                <Edit2 size={12} />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setCatToDeleteId(c._id);
-                                  setCatToDeleteName(c.name);
-                                  setShowDeleteCatModal(true);
-                                }}
-                                className="p-1.5 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-red-100/50 dark:border-red-950/30"
-                                title="Delete Category"
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          </div>
+                {editingCategory ? (
+                  <form onSubmit={handleUpdateCategory} className="flex flex-col gap-4 mt-4 text-left">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-slate-500 font-semibold">Category Name</label>
+                      <input
+                        type="text"
+                        value={editCatName}
+                        onChange={(e) => setEditCatName(e.target.value)}
+                        placeholder="e.g. Wildlife"
+                        className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-slate-500 font-semibold">Description</label>
+                      <textarea
+                        value={editCatDesc}
+                        onChange={(e) => setEditCatDesc(e.target.value)}
+                        placeholder="Brief description..."
+                        rows={3}
+                        className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
+                      />
+                    </div>
+                    
+                    {/* Assigned Contest Types (Checkboxes) */}
+                    <div className="flex flex-col gap-1.5 text-[11px]">
+                      <label className="font-semibold text-slate-500">Assign to Contest Types</label>
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        {contestTypes.map(ct => (
+                          <label key={ct._id} className="flex items-center gap-2 text-[10px] font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={editCatTypes.includes(ct.name)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setEditCatTypes([...editCatTypes, ct.name]);
+                                } else {
+                                  setEditCatTypes(editCatTypes.filter(t => t !== ct.name));
+                                }
+                              }}
+                              className="w-3.5 h-3.5 text-indigo-600 rounded border-slate-350 dark:border-slate-800 focus:ring-indigo-500 cursor-pointer"
+                            />
+                            {ct.name}
+                          </label>
                         ))}
-
-                        {filteredCats.length === 0 && (
-                          <div className="text-center text-[10px] text-slate-400 py-6 italic">
-                            No categories assigned.
-                          </div>
-                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
 
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCategory(null);
+                          setEditCatName('');
+                          setEditCatDesc('');
+                          setEditCatTypes([]);
+                        }}
+                        className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs py-2 rounded-xl cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <form onSubmit={handleCreateCategory} className="flex flex-col gap-4 mt-4 text-left">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-slate-500 font-semibold">Category Name</label>
+                      <input
+                        type="text"
+                        value={newCatName}
+                        onChange={(e) => setNewCatName(e.target.value)}
+                        placeholder="e.g. Wildlife"
+                        className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-slate-500 font-semibold">Description</label>
+                      <textarea
+                        value={newCatDesc}
+                        onChange={(e) => setNewCatDesc(e.target.value)}
+                        placeholder="Brief description..."
+                        rows={3}
+                        className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
+                      />
+                    </div>
+                    
+                    {/* Assigned Contest Types (Checkboxes) */}
+                    <div className="flex flex-col gap-1.5 text-[11px]">
+                      <label className="font-semibold text-slate-500">Assign to Contest Types</label>
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        {contestTypes.map(ct => (
+                          <label key={ct._id} className="flex items-center gap-2 text-[10px] font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={newCatTypes.includes(ct.name)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setNewCatTypes([...newCatTypes, ct.name]);
+                                } else {
+                                  setNewCatTypes(newCatTypes.filter(t => t !== ct.name));
+                                }
+                              }}
+                              className="w-3.5 h-3.5 text-indigo-600 rounded border-slate-350 dark:border-slate-800 focus:ring-indigo-500 cursor-pointer"
+                            />
+                            {ct.name}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
+                    >
+                      Create Category
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
+
+            {/* Right Column: Categories Explorer by Contest Type */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              
+              {/* Contest Types Tabs Filter */}
+              <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col gap-4 text-left">
+                <div>
+                  <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Categories Ledger</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Filter and explore categories mapped to different contest platforms</p>
+                </div>
+
+                {/* Grid of Contest Types */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-2">
+                  {contestTypes.map(ct => ct.name).map(typeTab => {
+                    const filteredCats = categories.filter(c => {
+                      const types = c.contestTypes || [];
+                      return types.includes(typeTab);
+                    });
+
+                    return (
+                      <div key={typeTab} className="bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-2xl p-4 flex flex-col gap-3">
+                        <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-850">
+                          <span className="font-bold text-slate-900 dark:text-white text-xs">{typeTab}</span>
+                          <span className="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                            {filteredCats.length} Categories
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px] pr-1">
+                          {filteredCats.map(c => (
+                            <div key={c._id} className="flex justify-between items-start text-[11px] p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl hover:shadow-sm transition-shadow">
+                              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                                <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{c.name}</span>
+                                {c.description && <span className="text-[9px] text-slate-400 truncate">{c.description}</span>}
+                                
+                                <div className="flex flex-wrap gap-0.5 mt-1">
+                                  {(c.contestTypes || ['Photography']).map(t => (
+                                    <span key={t} className="px-1 py-0.2 rounded text-[7px] font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 uppercase tracking-wide">
+                                      {t}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                                <button
+                                  onClick={() => handleEditCategoryClick(c)}
+                                  className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/80 dark:text-indigo-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-indigo-100 dark:border-indigo-900/30"
+                                  title="Edit Category"
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setCatToDeleteId(c._id);
+                                    setCatToDeleteName(c.name);
+                                    setShowDeleteCatModal(true);
+                                  }}
+                                  className="p-1.5 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-red-100/50 dark:border-red-950/30"
+                                  title="Delete Category"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+
+                          {filteredCats.length === 0 && (
+                            <div className="text-center text-[10px] text-slate-400 py-6 italic">
+                              No categories assigned.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+            </div>
+
           </div>
 
         </div>

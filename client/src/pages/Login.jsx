@@ -251,28 +251,6 @@ export default function Login() {
                 ? 'Evaluate and score contest submissions'
                 : 'Upload images, manage submissions, and view results'}
             </p>
-            {event && (
-              <div className="mt-1 p-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-850 rounded-xl flex flex-col gap-1.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 w-full">
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center gap-1"><Clock size={11} className="text-indigo-500" /> Submission Deadline:</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-200">
-                    {new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center gap-1"><Calendar size={11} className="text-emerald-500" /> Exhibition Date:</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-200">
-                    {event.exhibitionFromDate ? (
-                      new Date(event.exhibitionFromDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                    ) : event.eventDate ? (
-                      new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                    ) : (
-                      'To Be Announced'
-                    )}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

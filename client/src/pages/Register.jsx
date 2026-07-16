@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, ShieldCheck, Key, Calendar, MapPin } from 'lucide-react';
+import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, ShieldCheck, Key, Calendar, MapPin, Clock } from 'lucide-react';
 
 export default function Register() {
   const { register, verifyOtp, requestMobileOtp, verifyMobileOtp, apiFetch } = useAuth();
@@ -386,33 +386,55 @@ export default function Register() {
         {/* Right Side: Exhibition Event Details in White Text */}
         {event && (
           <div className="hidden md:flex flex-col gap-6 text-white max-w-md bg-slate-950/45 p-8 rounded-3xl border border-white/10 backdrop-blur-sm shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300">
+            {/* Block 1: Submission Deadline */}
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-white/10 rounded-2xl text-white">
+                <Clock size={28} className="text-indigo-400" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">SUBMISSION DEADLINE</p>
+                <p className="text-sm font-black font-display text-white">
+                  {new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            </div>
+
+            {/* Block 2: Exhibition Date */}
             <div className="flex items-center gap-3">
               <div className="p-3 bg-white/10 rounded-2xl text-white">
                 <Calendar size={28} className="text-indigo-400" />
               </div>
               <div>
-                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">Exhibition Date</p>
-                <p className="text-xl font-black font-display text-white">
-                  {new Date(event.eventDate).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">EXHIBITION DATE</p>
+                <p className="text-sm font-black font-display text-white">
+                  {event.exhibitionFromDate ? (
+                    new Date(event.exhibitionFromDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                  ) : event.eventDate ? (
+                    new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                  ) : (
+                    new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                  )}
                 </p>
               </div>
             </div>
             
+            {/* Block 3: Exhibition Venue */}
             <div className="flex items-start gap-3">
               <div className="p-3 bg-white/10 rounded-2xl text-white mt-0.5">
                 <MapPin size={28} className="text-indigo-400" />
               </div>
               <div>
-                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">Exhibition Venue</p>
+                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">EXHIBITION VENUE</p>
                 <p className="text-sm font-semibold leading-relaxed text-white">
                   {event.venue || 'Bal-Gandharv Art Gallery, Jangali Maharaj Road, Pune 411030'}
                 </p>
               </div>
             </div>
 
+            {/* Divider and Event Title Only */}
             <div className="border-t border-white/10 pt-4 mt-2">
-              <p className="text-xs text-slate-300/80 leading-relaxed font-medium">
-                National DSLR Wildlife & Landscape Championship. Submissions are active until July 15, 2026.
+              <p className="text-xs text-slate-300/80 leading-relaxed font-semibold">
+                {event.title}.
               </p>
             </div>
           </div>

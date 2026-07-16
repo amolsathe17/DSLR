@@ -90,9 +90,16 @@ router.get('/:id', async (req, res) => {
 // @desc    Create a new event
 // @route   POST /api/events
 // @access  Private/Admin
+// @desc    Create a new event
+// @route   POST /api/events
+// @access  Private/Admin
 router.post('/', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { title, eventType, theme, description, rules, deadline, eventDate, prizes, faqs, terms, packages } = req.body;
+    const { title, eventType, theme, description, rules, deadline, eventDate, prizes, faqs, terms, packages, assignedCategories } = req.body;
+
+    if (!assignedCategories || !Array.isArray(assignedCategories) || assignedCategories.length === 0) {
+      return res.status(400).json({ success: false, message: 'At least one category must be assigned to this Contest Type' });
+    }
 
     const event = await Event.create({
       title,
@@ -109,6 +116,18 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
       status: 'Draft',
       assignedJudges: []
     });
+
+    const Category = require('../models/Category');
+    // Add eventType to checked categories
+    await Category.updateMany(
+      { name: { $in: assignedCategories } },
+      { $addToSet: { contestTypes: eventType || 'Photography' } }
+    );
+    // Remove eventType from unchecked categories
+    await Category.updateMany(
+      { name: { $nin: assignedCategories } },
+      { $pull: { contestTypes: eventType || 'Photography' } }
+    );
 
     await AuditLog.create({
       userId: req.user._id,
@@ -131,6 +150,7 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
 // @access  Private/Admin
 router.put('/:id', protect, authorize('Admin'), async (req, res) => {
   try {
+    const { assignedCategories, ...updateData } = req.body;
     let event = await Event.findById(req.params.id);
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
@@ -140,7 +160,35 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Completed contests cannot be modified' });
     }
 
-    event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (assignedCategories) {
+      if (!Array.isArray(assignedCategories) || assignedCategories.length === 0) {
+        return res.status(400).json({ success: false, message: 'At least one category must be assigned to this Contest Type' });
+      }
+
+      const eventType = updateData.eventType || event.eventType;
+      const Category = require('../models/Category');
+
+      // If eventType changes, clean up old eventType associations
+      if (updateData.eventType && updateData.eventType !== event.eventType) {
+        await Category.updateMany(
+          { contestTypes: event.eventType },
+          { $pull: { contestTypes: event.eventType } }
+        );
+      }
+
+      // Add new eventType to checked categories
+      await Category.updateMany(
+        { name: { $in: assignedCategories } },
+        { $addToSet: { contestTypes: eventType } }
+      );
+      // Remove new eventType from unchecked categories
+      await Category.updateMany(
+        { name: { $nin: assignedCategories } },
+        { $pull: { contestTypes: eventType } }
+      );
+    }
+
+    event = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
     await AuditLog.create({
       userId: req.user._id,

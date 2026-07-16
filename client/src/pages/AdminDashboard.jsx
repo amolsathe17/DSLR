@@ -100,6 +100,7 @@ export default function AdminDashboard() {
     { name: 'Amateur', price: 300, maxPhotos: 2 },
     { name: 'Pro', price: 400, maxPhotos: 5 }
   ]);
+  const [selectedEventCategories, setSelectedEventCategories] = useState([]);
 
   // Edit Event states
   const [showEditModal, setShowEditModal] = useState(false);
@@ -123,6 +124,7 @@ export default function AdminDashboard() {
     { name: 'Amateur', price: 300, maxPhotos: 2 },
     { name: 'Pro', price: 400, maxPhotos: 5 }
   ]);
+  const [editEventCategories, setEditEventCategories] = useState([]);
 
   // Purge confirmation modal states
   const [showPurgeConfirmModal, setShowPurgeConfirmModal] = useState(false);
@@ -183,6 +185,33 @@ export default function AdminDashboard() {
     setNewEventRules(defaultRules);
     setNewEventDescription(defaultDesc);
   }, [eventType, customEventType]);
+
+  // Auto-pre-check categories based on selected contest type (Create Event Form)
+  useEffect(() => {
+    const actualType = eventType === 'Other' ? customEventType : eventType;
+    if (actualType && categories.length > 0) {
+      const assigned = categories
+        .filter(c => c.contestTypes && c.contestTypes.includes(actualType))
+        .map(c => c.name);
+      setSelectedEventCategories(assigned);
+    } else {
+      setSelectedEventCategories([]);
+    }
+  }, [eventType, customEventType, categories]);
+
+  // Auto-pre-check categories based on selected contest type (Edit Event Form)
+  useEffect(() => {
+    if (!showEditModal) return;
+    const actualType = editEventType === 'Other' ? editCustomEventType : editEventType;
+    if (actualType && categories.length > 0) {
+      const assigned = categories
+        .filter(c => c.contestTypes && c.contestTypes.includes(actualType))
+        .map(c => c.name);
+      setEditEventCategories(assigned);
+    } else {
+      setEditEventCategories([]);
+    }
+  }, [editEventType, editCustomEventType, categories, showEditModal]);
 
   const [showEventSuccessModal, setShowEventSuccessModal] = useState(false);
   const [createdEventTitle, setCreatedEventTitle] = useState('');
@@ -649,10 +678,16 @@ export default function AdminDashboard() {
     try {
       const actualType = eventType === 'Other' ? customEventType : eventType;
       
+      if (!selectedEventCategories || selectedEventCategories.length === 0) {
+        alert('Please assign at least one category to this Contest Type.');
+        return;
+      }
+
       const data = await apiFetch('/api/events', {
         method: 'POST',
         body: JSON.stringify({
           title: newEventTitle,
+          assignedCategories: selectedEventCategories,
           eventType: actualType || 'Photography',
           theme: newEventTheme,
           description: newEventDescription,
@@ -768,10 +803,16 @@ export default function AdminDashboard() {
     try {
       const actualType = editEventType === 'Other' ? editCustomEventType : editEventType;
       
+      if (!editEventCategories || editEventCategories.length === 0) {
+        alert('Please assign at least one category to this Contest Type.');
+        return;
+      }
+
       const data = await apiFetch(`/api/events/${editingEventId}`, {
         method: 'PUT',
         body: JSON.stringify({
           title: editEventTitle,
+          assignedCategories: editEventCategories,
           eventType: actualType || 'Photography',
           theme: editEventTheme,
           description: editEventDescription,
@@ -920,7 +961,7 @@ export default function AdminDashboard() {
       });
   };
 
-  if (loading && !stats) {
+  if (loading || !stats || !charts) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">
         <Camera className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
@@ -1726,6 +1767,41 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
+                {/* Category Assignment Checkboxes */}
+                <div className="flex flex-col gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800/80 p-4 rounded-2xl text-left mt-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs text-slate-700 dark:text-slate-350 font-bold">
+                      Assign Categories to this Contest Type <span className="text-red-500">*</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      ({selectedEventCategories.length} selected - mandatory)
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                    {categories.map(cat => (
+                      <label key={cat._id} className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={selectedEventCategories.includes(cat.name)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedEventCategories([...selectedEventCategories, cat.name]);
+                            } else {
+                              setSelectedEventCategories(selectedEventCategories.filter(name => name !== cat.name));
+                            }
+                          }}
+                          className="w-4 h-4 text-indigo-600 rounded border-slate-350 dark:border-slate-800 focus:ring-indigo-500 cursor-pointer"
+                        />
+                        {cat.name}
+                      </label>
+                    ))}
+                    {categories.length === 0 && (
+                      <p className="text-xs text-amber-650 italic col-span-4">
+                        No categories configured. Please create a category first in the right sidebar.
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 gap-4">
                   <div className="flex flex-col gap-1">
@@ -2961,6 +3037,42 @@ export default function AdminDashboard() {
                   />
                 </div>
               )}
+
+              {/* Category Assignment Checkboxes */}
+              <div className="flex flex-col gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800/80 p-4 rounded-2xl text-left">
+                <div className="flex justify-between items-center">
+                  <label className="font-bold text-slate-700 dark:text-slate-350">
+                    Assign Categories to this Contest Type <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    ({editEventCategories.length} selected - mandatory)
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                  {categories.map(cat => (
+                    <label key={cat._id} className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={editEventCategories.includes(cat.name)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditEventCategories([...editEventCategories, cat.name]);
+                          } else {
+                            setEditEventCategories(editEventCategories.filter(name => name !== cat.name));
+                          }
+                        }}
+                        className="w-4 h-4 text-indigo-600 rounded border-slate-350 dark:border-slate-800 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      {cat.name}
+                    </label>
+                  ))}
+                  {categories.length === 0 && (
+                    <p className="text-xs text-amber-650 italic col-span-4">
+                      No categories configured. Please create a category first.
+                    </p>
+                  )}
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">

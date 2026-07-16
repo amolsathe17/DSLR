@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Camera, ShieldAlert, Award, Star, CheckCircle2, ChevronRight, X, Check, AlertTriangle } from 'lucide-react';
+import { Camera, ShieldAlert, Award, Star, CheckCircle2, ChevronRight, X, Check, AlertTriangle, Clock } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function JudgeDashboard() {
@@ -23,6 +23,8 @@ export default function JudgeDashboard() {
   const [remarks, setRemarks] = useState('');
 
   const [selectedSubmissionId, setSelectedSubmissionId] = useState('all');
+  const [evaluationMode, setEvaluationMode] = useState('online'); // 'online' or 'offline'
+  const [offlineScores, setOfflineScores] = useState({});
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successTitle, setSuccessTitle] = useState('');
@@ -90,6 +92,115 @@ export default function JudgeDashboard() {
       fetchJudgeData();
     }
   }, [user?.id]);
+
+  useEffect(() => {
+    if (photographs.length > 0) {
+      const initial = {};
+      photographs.forEach(p => {
+        initial[p.photoId] = {
+          creativity: p.score?.creativity ?? 5,
+          composition: p.score?.composition ?? 5,
+          technicalQuality: p.score?.technicalQuality ?? 5,
+          storytelling: p.score?.storytelling ?? 5,
+          overallImpact: p.score?.overallImpact ?? 5,
+          remarks: p.score?.remarks ?? ''
+        };
+      });
+      setOfflineScores(initial);
+    }
+  }, [photographs]);
+
+  const handleOfflineScoreChange = (photoId, field, value) => {
+    setOfflineScores(prev => ({
+      ...prev,
+      [photoId]: {
+        ...prev[photoId],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSaveSingleOfflineScore = async (photo) => {
+    if (user?.role === 'Admin') return;
+    setLoading(true);
+    setError('');
+    const scores = offlineScores[photo.photoId] || {
+      creativity: 5,
+      composition: 5,
+      technicalQuality: 5,
+      storytelling: 5,
+      overallImpact: 5,
+      remarks: ''
+    };
+    try {
+      const data = await apiFetch('/api/judges/score', {
+        method: 'POST',
+        body: JSON.stringify({
+          submissionId: photo.submissionId,
+          photoId: photo.photoId,
+          creativity: Number(scores.creativity),
+          composition: Number(scores.composition),
+          technicalQuality: Number(scores.technicalQuality),
+          storytelling: Number(scores.storytelling),
+          overallImpact: Number(scores.overallImpact),
+          remarks: scores.remarks
+        })
+      });
+      if (data.success) {
+        const photoData = await apiFetch(`/api/judges/assigned-photos/${event._id}`);
+        if (photoData.success) {
+          setPhotographs(photoData.photographs);
+        }
+        triggerSuccess('Score Saved', `Offline grades for "${photo.title}" saved successfully.`);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAllOfflineScores = async () => {
+    if (user?.role === 'Admin') return;
+    setLoading(true);
+    setError('');
+    try {
+      const promises = photographs.map(photo => {
+        const scores = offlineScores[photo.photoId] || {
+          creativity: 5,
+          composition: 5,
+          technicalQuality: 5,
+          storytelling: 5,
+          overallImpact: 5,
+          remarks: ''
+        };
+        return apiFetch('/api/judges/score', {
+          method: 'POST',
+          body: JSON.stringify({
+            submissionId: photo.submissionId,
+            photoId: photo.photoId,
+            creativity: Number(scores.creativity),
+            composition: Number(scores.composition),
+            technicalQuality: Number(scores.technicalQuality),
+            storytelling: Number(scores.storytelling),
+            overallImpact: Number(scores.overallImpact),
+            remarks: scores.remarks
+          })
+        });
+      });
+      await Promise.all(promises);
+      
+      const photoData = await apiFetch(`/api/judges/assigned-photos/${event._id}`);
+      if (photoData.success) {
+        setPhotographs(photoData.photographs);
+      }
+      triggerSuccess('All Scores Saved', 'All offline evaluations have been saved and submitted successfully.');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOpenScoring = (photo) => {
     setActivePhoto(photo);
@@ -275,236 +386,411 @@ export default function JudgeDashboard() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Photos grid */}
-          <div className="lg:col-span-8 flex flex-col gap-6">
-            
-            {/* Confirmation Sign-Off Banner */}
-            {user?.role !== 'Admin' && photographs.length > 0 && (
-              hasConfirmed ? (
-                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-800 dark:text-emerald-300">
-                  <div className="flex items-center gap-2 text-xs">
-                    <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
-                    <div>
-                      <p className="font-bold">Evaluation Signed Off</p>
-                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">You have confirmed your reviews for this event. Thank you!</p>
-                    </div>
-                  </div>
-                  <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg shrink-0">Confirmed</span>
-                </div>
-              ) : (
-                allGraded && (
-                  <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-850 dark:text-amber-300">
-                    <div className="flex items-start gap-2 text-xs">
-                      <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+        <>
+          {/* Evaluation Mode Tabs */}
+          <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6 bg-slate-100 dark:bg-slate-900/40 p-1 rounded-2xl w-fit">
+            <button
+              onClick={() => setEvaluationMode('online')}
+              className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
+                evaluationMode === 'online'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              Online Evaluation
+            </button>
+            <button
+              onClick={() => setEvaluationMode('offline')}
+              className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
+                evaluationMode === 'offline'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              Offline Evaluation
+            </button>
+          </div>
+
+          {evaluationMode === 'offline' ? (
+            <div className="flex flex-col gap-6 w-full animate-in fade-in duration-200">
+              {/* Confirmation Sign-Off Banner */}
+              {user?.role !== 'Admin' && photographs.length > 0 && (
+                hasConfirmed ? (
+                  <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-800 dark:text-emerald-300">
+                    <div className="flex items-center gap-2 text-xs">
+                      <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <div>
-                        <p className="font-bold">All Submissions Graded!</p>
-                        <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Please submit your final review confirmation to notify the administrator.</p>
+                        <p className="font-bold">Evaluation Signed Off</p>
+                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">You have confirmed your reviews for this event. Thank you!</p>
                       </div>
                     </div>
-                    <button
-                      onClick={handleConfirmGrading}
-                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-md cursor-pointer transition-colors shrink-0 text-center"
-                    >
-                      Confirm Review & Sign-Off
-                    </button>
-                  </div>
-                )
-              )
-            )}
-
-            <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Assigned Submissions ({displayedPhotos.length})</h3>
-            
-            {displayedPhotos.length === 0 ? (
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3 animate-pulse">
-                <Camera size={36} className="text-slate-300 mb-2" />
-                <p className="text-sm font-medium">No assigned photographs found.</p>
-                <p className="text-xs max-w-xs text-slate-500">There are no finalized contestant entry submissions uploaded for this participant yet.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {displayedPhotos.map((photo) => (
-                <div
-                  key={photo.photoId}
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"
-                >
-                  <WatermarkPreview src={photo.fileUrl} className="aspect-video w-full" />
-
-                  <div className="p-4 flex flex-col gap-3">
-                    <div className="flex justify-between items-start gap-2">
-                      <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
-                        {photo.title}
-                      </h4>
-                      <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-semibold text-slate-600 dark:text-slate-400">
-                        {photo.category}
-                      </span>
-                    </div>
-
-                    <div className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-100 dark:border-slate-850 text-[10px] text-slate-500 flex flex-col gap-1">
-                      <p>Camera: <span className="font-bold text-slate-800 dark:text-slate-200">{photo.cameraBrand} {photo.cameraModel}</span></p>
-                      <p>Lens: <span className="font-semibold text-slate-700 dark:text-slate-350 truncate block">{photo.lensUsed || 'N/A'}</span></p>
-                    </div>
-
-                    <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center">
-                      <div>
-                        {photo.graded ? (
-                          <span className="text-[9px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 border border-emerald-100">
-                            <CheckCircle2 size={10} />
-                            Graded ({photo.score.averageScore}/10)
-                          </span>
-                        ) : (
-                          <span className="text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold">
-                            Ungraded
-                          </span>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={() => handleOpenScoring(photo)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg flex items-center gap-0.5 cursor-pointer shadow-sm"
-                      >
-                        {photo.graded ? 'Edit Grade' : 'Score Photo'}
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-        </div>
-
-        {/* Right Column: Scoring Sheet Drawer */}
-        <div className="lg:col-span-4">
-          {activePhoto ? (
-            <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-md flex flex-col gap-6 animate-in slide-in-from-right-4 duration-200 sticky top-20">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div>
-                  <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Grading Sheet</h3>
-                  <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{activePhoto.title}"</span>
-                </div>
-                <button
-                  onClick={() => setActivePhoto(null)}
-                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <form onSubmit={handleScoreSubmit} className="flex flex-col gap-4 text-xs">
-                
-                {/* Admin judge reviews inspector */}
-                {user?.role === 'Admin' && activePhoto.allScores && activePhoto.allScores.length > 0 && (
-                  <div className="flex flex-col gap-2 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 rounded-2xl">
-                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-wider block">
-                      Judge Evaluations ({activePhoto.allScores.length})
-                    </span>
-                    <div className="flex flex-col gap-2 mt-1">
-                      {activePhoto.allScores.map((s, sIdx) => (
-                        <div 
-                          key={sIdx} 
-                          onClick={() => {
-                            setCreativity(s.creativity || 5);
-                            setComposition(s.composition || 5);
-                            setTechnicalQuality(s.technicalQuality || 5);
-                            setStorytelling(s.storytelling || 5);
-                            setOverallImpact(s.overallImpact || 5);
-                            setRemarks(s.remarks || '');
-                          }}
-                          className="flex justify-between items-center text-[10px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer hover:border-indigo-400 transition-colors"
-                          title="Click to view details in sliders"
-                        >
-                          <div className="text-left">
-                            <p className="font-bold text-slate-800 dark:text-white">{s.judgeName}</p>
-                            <p className="text-[8px] text-slate-400 truncate max-w-[150px]">"{s.remarks || 'No remarks'}"</p>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <span className="font-black text-indigo-600 dark:text-indigo-400">{s.averageScore}/10</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Scoring criteria sliders */}
-                {[
-                  { label: 'Creativity (1-10)', val: creativity, set: setCreativity, desc: 'Originality, artistic expression, and concept.' },
-                  { label: 'Composition (1-10)', val: composition, set: setComposition, desc: 'Rule of thirds, balance, visual framing.' },
-                  { label: 'Technical Quality (1-10)', val: technicalQuality, set: setTechnicalQuality, desc: 'Focus, exposure, lighting, noise control.' },
-                  { label: 'Storytelling (1-10)', val: storytelling, set: setStorytelling, desc: 'Narrative element, emotional evoke.' },
-                  { label: 'Overall Impact (1-10)', val: overallImpact, set: setOverallImpact, desc: 'First impression, visual stun factor.' }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex flex-col gap-1.5">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-slate-700 dark:text-slate-200">{item.label}</span>
-                      <span className="font-display font-black text-sm text-indigo-600 dark:text-indigo-400">{item.val}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={1}
-                      max={10}
-                      value={item.val}
-                      onChange={(e) => item.set(Number(e.target.value))}
-                      className="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
-                      disabled={user?.role === 'Admin'}
-                    />
-                    <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
-                  </div>
-                ))}
-
-                {/* Score summary */}
-                <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl flex justify-between items-center text-center mt-2">
-                  <div>
-                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Total Score</span>
-                    <p className="font-display font-black text-xl text-slate-800 dark:text-slate-100">{totalScore} <span className="text-slate-400 text-xs">/ 50</span></p>
-                  </div>
-                  <div className="w-px h-8 bg-slate-200 dark:bg-slate-850"></div>
-                  <div>
-                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Average Score</span>
-                    <p className="font-display font-black text-xl text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-0.5">
-                      <Star size={16} className="fill-current text-indigo-600 dark:text-indigo-400 shrink-0" />
-                      {averageScore}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-200">Judge Remarks / Critiques</label>
-                  <textarea
-                    value={remarks}
-                    onChange={(e) => setRemarks(e.target.value)}
-                    placeholder={user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
-                    required={user?.role !== 'Admin'}
-                    disabled={user?.role === 'Admin'}
-                  />
-                </div>
-
-                {user?.role === 'Admin' ? (
-                  <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold py-2.5 rounded-xl text-center text-[10px]">
-                    Evaluation Read-Only (Admin Mode)
+                    <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg shrink-0">Confirmed</span>
                   </div>
                 ) : (
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer transition-colors text-center"
-                  >
-                    Submit Grade Evaluation
-                  </button>
-                )}
-              </form>
+                  allGraded && (
+                    <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-850 dark:text-amber-300">
+                      <div className="flex items-start gap-2 text-xs">
+                        <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                        <div>
+                          <p className="font-bold">All Submissions Graded!</p>
+                          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Please submit your final review confirmation to notify the administrator.</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleConfirmGrading}
+                        className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-md cursor-pointer transition-colors shrink-0 text-center"
+                      >
+                        Confirm Review & Sign-Off
+                      </button>
+                    </div>
+                  )
+                )
+              )}
+
+              {displayedPhotos.length === 0 ? (
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3 animate-pulse">
+                  <Camera size={36} className="text-slate-300 mb-2" />
+                  <p className="text-sm font-medium">No assigned photographs found.</p>
+                  <p className="text-xs max-w-xs text-slate-500">There are no finalized contestant entry submissions uploaded for this participant yet.</p>
+                </div>
+              ) : (
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                          <th className="p-4">Photo</th>
+                          <th className="p-4">Title & Participant</th>
+                          <th className="p-4 text-center">Creativity</th>
+                          <th className="p-4 text-center">Composition</th>
+                          <th className="p-4 text-center">Technical</th>
+                          <th className="p-4 text-center">Storytelling</th>
+                          <th className="p-4 text-center">Impact</th>
+                          <th className="p-4 text-center font-bold">Avg</th>
+                          <th className="p-4">Remarks</th>
+                          <th className="p-4 text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {displayedPhotos.map(photo => {
+                          const scores = offlineScores[photo.photoId] || {
+                            creativity: 5,
+                            composition: 5,
+                            technicalQuality: 5,
+                            storytelling: 5,
+                            overallImpact: 5,
+                            remarks: ''
+                          };
+                          const rowAvg = ((Number(scores.creativity) + Number(scores.composition) + Number(scores.technicalQuality) + Number(scores.storytelling) + Number(scores.overallImpact)) / 5).toFixed(1);
+                          return (
+                            <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
+                              <td className="p-4">
+                                <div className="relative group w-12 h-12 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 shrink-0">
+                                  <img 
+                                    src={photo.fileUrl} 
+                                    alt={photo.title} 
+                                    className="w-full h-full object-cover"
+                                    crossOrigin="anonymous"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                </div>
+                              </td>
+                              <td className="p-4 min-w-[150px]">
+                                <p className="font-bold text-slate-900 dark:text-white line-clamp-1">{photo.title}</p>
+                                <p className="text-[10px] text-slate-400 mt-0.5">{photo.category}</p>
+                                <p className="text-[10px] text-slate-500 mt-0.5 font-medium">By {photo.participantName}</p>
+                              </td>
+                              {['creativity', 'composition', 'technicalQuality', 'storytelling', 'overallImpact'].map(field => (
+                                <td key={field} className="p-4 text-center">
+                                  <select
+                                    disabled={user?.role === 'Admin' || hasConfirmed}
+                                    value={scores[field]}
+                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, field, Number(e.target.value))}
+                                    className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-1 text-[10px] font-bold text-center focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                  >
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (
+                                      <option key={v} value={v}>{v}</option>
+                                    ))}
+                                  </select>
+                                </td>
+                              ))}
+                              <td className="p-4 text-center font-bold text-slate-900 dark:text-white">
+                                <span className="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 px-2 py-0.5 rounded">
+                                  {rowAvg}
+                                </span>
+                              </td>
+                              <td className="p-4 min-w-[150px]">
+                                <input
+                                  type="text"
+                                  disabled={user?.role === 'Admin' || hasConfirmed}
+                                  value={scores.remarks}
+                                  onChange={(e) => handleOfflineScoreChange(photo.photoId, 'remarks', e.target.value)}
+                                  placeholder="Add feedback..."
+                                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-805 rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                />
+                              </td>
+                              <td className="p-4 text-right">
+                                <button
+                                  disabled={user?.role === 'Admin' || hasConfirmed}
+                                  onClick={() => handleSaveSingleOfflineScore(photo)}
+                                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                >
+                                  Save
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {user?.role !== 'Admin' && !hasConfirmed && displayedPhotos.length > 0 && (
+                    <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+                      <button
+                        onClick={handleSaveAllOfflineScores}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all cursor-pointer"
+                      >
+                        Save All Grades
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
-            <div className="hidden lg:flex flex-col items-center justify-center text-center bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 h-80 text-slate-400">
-              <Star size={28} className="text-slate-300 animate-pulse mb-3" />
-              <p className="text-xs font-semibold">Select a photograph on the left to begin evaluation grading sheets.</p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full animate-in fade-in duration-200">
+              
+              {/* Photos grid */}
+              <div className="lg:col-span-8 flex flex-col gap-6">
+                
+                {/* Confirmation Sign-Off Banner */}
+                {user?.role !== 'Admin' && photographs.length > 0 && (
+                  hasConfirmed ? (
+                    <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-800 dark:text-emerald-300">
+                      <div className="flex items-center gap-2 text-xs">
+                        <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        <div>
+                          <p className="font-bold">Evaluation Signed Off</p>
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">You have confirmed your reviews for this event. Thank you!</p>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg shrink-0">Confirmed</span>
+                    </div>
+                  ) : (
+                    allGraded && (
+                      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-850 dark:text-amber-300">
+                        <div className="flex items-start gap-2 text-xs">
+                          <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                          <div>
+                            <p className="font-bold">All Submissions Graded!</p>
+                            <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Please submit your final review confirmation to notify the administrator.</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleConfirmGrading}
+                          className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-md cursor-pointer transition-colors shrink-0 text-center"
+                        >
+                          Confirm Review & Sign-Off
+                        </button>
+                      </div>
+                    )
+                  )
+                )}
+
+                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Assigned Submissions ({displayedPhotos.length})</h3>
+                
+                {displayedPhotos.length === 0 ? (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3 animate-pulse">
+                    <Camera size={36} className="text-slate-300 mb-2" />
+                    <p className="text-sm font-medium">No assigned photographs found.</p>
+                    <p className="text-xs max-w-xs text-slate-500">There are no finalized contestant entry submissions uploaded for this participant yet.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {displayedPhotos.map((photo) => (
+                      <div
+                        key={photo.photoId}
+                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"
+                      >
+                        <WatermarkPreview src={photo.fileUrl} className="aspect-video w-full" />
+
+                        <div className="p-4 flex flex-col gap-3">
+                          <div className="flex justify-between items-start gap-2">
+                            <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
+                              {photo.title}
+                            </h4>
+                            <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-semibold text-slate-600 dark:text-slate-400">
+                              {photo.category}
+                            </span>
+                          </div>
+
+                          <div className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-100 dark:border-slate-850 text-[10px] text-slate-500 flex flex-col gap-1">
+                            <p>Camera: <span className="font-bold text-slate-800 dark:text-slate-200">{photo.cameraBrand} {photo.cameraModel}</span></p>
+                            <p>Lens: <span className="font-semibold text-slate-700 dark:text-slate-350 truncate block">{photo.lensUsed || 'N/A'}</span></p>
+                          </div>
+
+                          <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center">
+                            <div>
+                              {photo.graded ? (
+                                <span className="text-[9px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 border border-emerald-100">
+                                  <CheckCircle2 size={10} />
+                                  Graded ({photo.score.averageScore}/10)
+                                </span>
+                              ) : (
+                                <span className="text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold">
+                                  Ungraded
+                                </span>
+                              )}
+                            </div>
+
+                            <button
+                              onClick={() => handleOpenScoring(photo)}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg flex items-center gap-0.5 cursor-pointer shadow-sm"
+                            >
+                              {photo.graded ? 'Edit Grade' : 'Score Photo'}
+                              <ChevronRight size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+              </div>
+
+              {/* Right Column: Scoring Sheet Drawer */}
+              <div className="lg:col-span-4">
+                {activePhoto ? (
+                  <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-md flex flex-col gap-6 animate-in slide-in-from-right-4 duration-200 sticky top-20">
+                    <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                      <div>
+                        <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Grading Sheet</h3>
+                        <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{activePhoto.title}"</span>
+                      </div>
+                      <button
+                        onClick={() => setActivePhoto(null)}
+                        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleScoreSubmit} className="flex flex-col gap-4 text-xs">
+                      
+                      {/* Admin judge reviews inspector */}
+                      {user?.role === 'Admin' && activePhoto.allScores && activePhoto.allScores.length > 0 && (
+                        <div className="flex flex-col gap-2 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 rounded-2xl">
+                          <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-wider block">
+                            Judge Evaluations ({activePhoto.allScores.length})
+                          </span>
+                          <div className="flex flex-col gap-2 mt-1">
+                            {activePhoto.allScores.map((s, sIdx) => (
+                              <div 
+                                key={sIdx} 
+                                onClick={() => {
+                                  setCreativity(s.creativity || 5);
+                                  setComposition(s.composition || 5);
+                                  setTechnicalQuality(s.technicalQuality || 5);
+                                  setStorytelling(s.storytelling || 5);
+                                  setOverallImpact(s.overallImpact || 5);
+                                  setRemarks(s.remarks || '');
+                                }}
+                                className="flex justify-between items-center text-[10px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer hover:border-indigo-400 transition-colors"
+                                title="Click to view details in sliders"
+                              >
+                                <div className="text-left">
+                                  <p className="font-bold text-slate-800 dark:text-white">{s.judgeName}</p>
+                                  <p className="text-[8px] text-slate-400 truncate max-w-[150px]">"{s.remarks || 'No remarks'}"</p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <span className="font-black text-indigo-600 dark:text-indigo-400">{s.averageScore}/10</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Scoring criteria sliders */}
+                      {[
+                        { label: 'Creativity (1-10)', val: creativity, set: setCreativity, desc: 'Originality, artistic expression, and concept.' },
+                        { label: 'Composition (1-10)', val: composition, set: setComposition, desc: 'Rule of thirds, balance, visual framing.' },
+                        { label: 'Technical Quality (1-10)', val: technicalQuality, set: setTechnicalQuality, desc: 'Focus, exposure, lighting, noise control.' },
+                        { label: 'Storytelling (1-10)', val: storytelling, set: setStorytelling, desc: 'Narrative element, emotional evoke.' },
+                        { label: 'Overall Impact (1-10)', val: overallImpact, set: setOverallImpact, desc: 'First impression, visual stun factor.' }
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex flex-col gap-1.5">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-slate-700 dark:text-slate-200">{item.label}</span>
+                            <span className="font-display font-black text-sm text-indigo-600 dark:text-indigo-400">{item.val}</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={1}
+                            max={10}
+                            value={item.val}
+                            onChange={(e) => item.set(Number(e.target.value))}
+                            className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
+                            disabled={user?.role === 'Admin'}
+                          />
+                          <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
+                        </div>
+                      ))}
+
+                      {/* Score summary */}
+                      <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl flex justify-between items-center text-center mt-2">
+                        <div>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Total Score</span>
+                          <p className="font-display font-black text-xl text-slate-800 dark:text-slate-100">{totalScore} <span className="text-slate-400 text-xs">/ 50</span></p>
+                        </div>
+                        <div className="w-px h-8 bg-slate-200 dark:bg-slate-850"></div>
+                        <div>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Average Score</span>
+                          <p className="font-display font-black text-xl text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-0.5">
+                            <Star size={16} className="fill-current text-indigo-600 dark:text-indigo-400 shrink-0" />
+                            {averageScore}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="font-bold text-slate-700 dark:text-slate-200">Judge Remarks / Critiques</label>
+                        <textarea
+                          value={remarks}
+                          onChange={(e) => setRemarks(e.target.value)}
+                          placeholder={user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
+                          required={user?.role !== 'Admin'}
+                          disabled={user?.role === 'Admin'}
+                        />
+                      </div>
+
+                      {user?.role === 'Admin' ? (
+                        <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold py-2.5 rounded-xl text-center text-[10px]">
+                          Evaluation Read-Only (Admin Mode)
+                        </div>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer transition-colors text-center"
+                        >
+                          Submit Grade Evaluation
+                        </button>
+                      )}
+                    </form>
+                  </div>
+                ) : (
+                  <div className="hidden lg:flex flex-col items-center justify-center text-center bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 h-80 text-slate-400">
+                    <Star size={28} className="text-slate-300 animate-pulse mb-3" />
+                    <p className="text-xs font-semibold">Select a photograph on the left to begin evaluation grading sheets.</p>
+                  </div>
+                )}
+              </div>
+
             </div>
           )}
-        </div>
-      </div>
+        </>
     )}
 
       {/* CONFIRM SIGN-OFF MODAL */}

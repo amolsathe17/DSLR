@@ -66,7 +66,7 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState([]);
   const [newCatName, setNewCatName] = useState('');
   const [newCatDesc, setNewCatDesc] = useState('');
-  const [newCatTypes, setNewCatTypes] = useState(['Photography']);
+  const [newCatTypes, setNewCatTypes] = useState([]);
   // Edit Category state
   const [editingCategory, setEditingCategory] = useState(null);
   const [editCatName, setEditCatName] = useState('');
@@ -515,6 +515,10 @@ export default function AdminDashboard() {
 
   const handleCreateCategory = async (e) => {
     e.preventDefault();
+    if (newCatTypes.length === 0) {
+      alert('Please assign the category to at least one Contest Type.');
+      return;
+    }
     try {
       const data = await apiFetch('/api/categories', {
         body: JSON.stringify({ 
@@ -528,7 +532,7 @@ export default function AdminDashboard() {
         const createdName = data.category?.name || newCatName;
         setNewCatName('');
         setNewCatDesc('');
-        setNewCatTypes(['Photography']);
+        setNewCatTypes([]);
         fetchJudgesAndEvents();
         triggerSuccessModal('Category Created', `The category "${createdName}" has been created successfully.`);
       }
@@ -540,6 +544,10 @@ export default function AdminDashboard() {
   const handleUpdateCategory = async (e) => {
     e.preventDefault();
     if (!editingCategory) return;
+    if (editCatTypes.length === 0) {
+      alert('Please assign the category to at least one Contest Type.');
+      return;
+    }
     try {
       const data = await apiFetch(`/api/categories/${editingCategory._id}`, {
         method: 'PUT',

@@ -15,6 +15,7 @@ const paymentRoutes = require("./routes/payments");
 const judgeRoutes = require("./routes/judges");
 const adminRoutes = require("./routes/admin");
 const reportRoutes = require("./routes/reports");
+const contestTypeRoutes = require("./routes/contestTypes");
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/judges", judgeRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/contest-types", contestTypeRoutes);
 
 // Health Check Route
 app.get("/api/health", (req, res) => {

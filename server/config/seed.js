@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Category = require('../models/Category');
 const Event = require('../models/Event');
+const ContestType = require('../models/ContestType');
 
 const seedData = async () => {
   try {
@@ -33,6 +34,19 @@ const seedData = async () => {
       });
 
       console.log('Seeded Users: admin@contest.com / judge@contest.com (passwords: adminpassword / judgepassword)');
+    }
+
+    // Seed Contest Types
+    const contestTypeCount = await ContestType.countDocuments({});
+    if (contestTypeCount === 0) {
+      const defaultTypes = [
+        { name: 'Photography', description: 'Photo contests, wildlife, landscape, macro, and architecture' },
+        { name: 'Painting', description: 'Water color, oil, acrylic, folk and traditional art paintings' },
+        { name: 'Drawing', description: 'Sketching, pastels, digital, calligraphy and folk art drawings' },
+        { name: 'Paper Craft', description: 'Origami, quilling, paper sculptures and papier-mâché' }
+      ];
+      await ContestType.create(defaultTypes);
+      console.log('Seeded default competition contest types.');
     }
 
     // 2. Seed Categories

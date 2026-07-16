@@ -2335,12 +2335,44 @@ export default function AdminDashboard() {
                 {editingCategory ? (
                   <form onSubmit={handleUpdateCategory} className="flex flex-col gap-4 mt-4 text-left">
                     <div className="flex flex-col gap-1">
+                      <label className="text-xs text-slate-500 font-semibold">Select Category to Modify</label>
+                      <div className="flex gap-2">
+                        <select
+                          value={editingCategory._id}
+                          onChange={(e) => {
+                            const cat = categories.find(c => c._id === e.target.value);
+                            if (cat) {
+                              handleEditCategoryClick(cat);
+                            }
+                          }}
+                          className="flex-1 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
+                        >
+                          {categories.map(cat => (
+                            <option key={cat._id} value={cat._id}>{cat.name}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCatToDeleteId(editingCategory._id);
+                            setCatToDeleteName(editingCategory.name);
+                            setShowDeleteCatModal(true);
+                          }}
+                          className="px-3 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-xl cursor-pointer transition-colors border border-red-100/50 dark:border-red-950/30 flex items-center justify-center"
+                          title="Delete Selected Category"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
                       <label className="text-xs text-slate-500 font-semibold">Category Name</label>
                       <input
                         type="text"
                         value={editCatName}
                         onChange={(e) => setEditCatName(e.target.value)}
-                        placeholder="e.g. Wildlife"
+                        placeholder="e.g. Sketching"
                         className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
                         required
                       />
@@ -2449,12 +2481,29 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <button
-                      type="submit"
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
-                    >
-                      Create Category
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer transition-colors"
+                      >
+                        Create Category
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (categories.length > 0) {
+                            handleEditCategoryClick(categories[0]);
+                          } else {
+                            alert('No categories registered to edit.');
+                          }
+                        }}
+                        className="px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs py-2 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800"
+                        title="Edit Existing Category"
+                      >
+                        <Edit2 size={12} />
+                        <span>Edit</span>
+                      </button>
+                    </div>
                   </form>
                 )}
               </div>

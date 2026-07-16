@@ -1779,7 +1779,7 @@ export default function AdminDashboard() {
                     </span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
-                    {categories.map(cat => (
+                    {categories.filter(c => c.contestTypes && c.contestTypes.includes(eventType === 'Other' ? customEventType : eventType)).map(cat => (
                       <label key={cat._id} className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                         <input
                           type="checkbox"
@@ -1796,9 +1796,9 @@ export default function AdminDashboard() {
                         {cat.name}
                       </label>
                     ))}
-                    {categories.length === 0 && (
-                      <p className="text-xs text-amber-650 italic col-span-4">
-                        No categories configured. Please create a category first in the right sidebar.
+                    {categories.filter(c => c.contestTypes && c.contestTypes.includes(eventType === 'Other' ? customEventType : eventType)).length === 0 && (
+                      <p className="text-xs text-amber-600 italic col-span-4 text-left">
+                        No categories are currently assigned to "{eventType === 'Other' ? (customEventType || 'this Custom Type') : eventType}". Please assign/create categories for this type in the "Categories" tab first.
                       </p>
                     )}
                   </div>
@@ -3089,7 +3089,7 @@ export default function AdminDashboard() {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
-                  {categories.map(cat => (
+                  {categories.filter(c => c.contestTypes && c.contestTypes.includes(editEventType === 'Other' ? editCustomEventType : editEventType)).map(cat => (
                     <label key={cat._id} className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                       <input
                         type="checkbox"
@@ -3106,9 +3106,9 @@ export default function AdminDashboard() {
                       {cat.name}
                     </label>
                   ))}
-                  {categories.length === 0 && (
-                    <p className="text-xs text-amber-650 italic col-span-4">
-                      No categories configured. Please create a category first.
+                  {categories.filter(c => c.contestTypes && c.contestTypes.includes(editEventType === 'Other' ? editCustomEventType : editEventType)).length === 0 && (
+                    <p className="text-xs text-amber-600 italic col-span-4 text-left">
+                      No categories are currently assigned to "{editEventType === 'Other' ? (editCustomEventType || 'this Custom Type') : editEventType}". Please assign/create categories for this type in the "Categories" tab first.
                     </p>
                   )}
                 </div>

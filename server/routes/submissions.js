@@ -559,7 +559,7 @@ router.get('/gallery', async (req, res) => {
 
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
-        if (photo.status === 'Approved') {
+        if (photo.status !== 'Rejected') {
           approvedPhotos.push({
             photoId: photo.id,
             title: photo.title,

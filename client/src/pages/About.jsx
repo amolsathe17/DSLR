@@ -3,7 +3,7 @@ import { Sparkles, Heart, Compass, Feather, Quote, Palette } from 'lucide-react'
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-200 py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       
       {/* Decorative blurred background shapes */}
       <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>

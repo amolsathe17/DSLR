@@ -23,12 +23,13 @@ import {
   FileCheck,
   RefreshCw,
   History,
-  Sparkles
+  Sparkles,
+  User
 } from 'lucide-react';
 import StatsCharts from '../components/StatsCharts';
 
 export default function AdminDashboard() {
-  const { apiFetch } = useAuth();
+  const { apiFetch, user, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Stats states
@@ -72,6 +73,15 @@ export default function AdminDashboard() {
   const [editCatName, setEditCatName] = useState('');
   const [editCatDesc, setEditCatDesc] = useState('');
   const [editCatTypes, setEditCatTypes] = useState([]);
+
+  // Profile settings states
+  const [profileName, setProfileName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profileMobile, setProfileMobile] = useState('');
+  const [profilePassword, setProfilePassword] = useState('');
+  const [profileConfirmPassword, setProfileConfirmPassword] = useState('');
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
+  const [profileError, setProfileError] = useState('');
 
   // Contest Type States
   const [contestTypes, setContestTypes] = useState([]);
@@ -238,6 +248,50 @@ export default function AdminDashboard() {
     setGeneralSuccessTitle(title);
     setGeneralSuccessMsg(message);
     setShowGeneralSuccessModal(true);
+  };
+
+  useEffect(() => {
+    if (user && activeTab === 'profile_settings') {
+      setProfileName(user.name || '');
+      setProfileEmail(user.email || '');
+      setProfileMobile(user.mobile || '');
+      setProfilePassword('');
+      setProfileConfirmPassword('');
+      setProfileError('');
+    }
+  }, [user, activeTab]);
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setProfileError('');
+    setProfileSubmitting(true);
+
+    if (profilePassword && profilePassword !== profileConfirmPassword) {
+      setProfileError('Passwords do not match');
+      setProfileSubmitting(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        name: profileName,
+        email: profileEmail,
+        mobile: profileMobile
+      };
+      if (profilePassword) {
+        payload.password = profilePassword;
+      }
+      const data = await updateProfile(payload);
+      if (data.success) {
+        setProfilePassword('');
+        setProfileConfirmPassword('');
+        triggerSuccessModal('Profile Updated', 'Your profile settings have been successfully updated.');
+      }
+    } catch (err) {
+      setProfileError(err.message || 'Failed to update profile settings');
+    } finally {
+      setProfileSubmitting(false);
+    }
   };
 
   // Event History States
@@ -1035,7 +1089,7 @@ export default function AdminDashboard() {
 
   if (loading || !stats || !charts) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center">
         <Camera className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
         <span className="text-sm text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
           Loading Admin Control Panel...
@@ -1073,7 +1127,8 @@ export default function AdminDashboard() {
           { id: 'photographs', label: 'Photographs', icon: Camera },
           { id: 'judges', label: 'Judges & Results', icon: Award },
           { id: 'events', label: 'Contests & Configuration', icon: Calendar },
-          { id: 'categories_config', label: 'Categories', icon: Layers }
+          { id: 'categories_config', label: 'Categories', icon: Layers },
+          { id: 'profile_settings', label: 'Profile Settings', icon: User }
         ].map(t => (
           <button
             key={t.id}
@@ -1305,32 +1360,12 @@ export default function AdminDashboard() {
               <select
                 value={photoCategory}
                 onChange={(e) => setPhotoCategory(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
               >
                 <option value="">All Categories</option>
                 {categories.map(c => (
                   <option key={c._id} value={c.name}>{c.name}</option>
                 ))}
-              </select>
-              <select
-                value={photoStatus}
-                onChange={(e) => setPhotoStatus(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-              >
-                <option value="">All Audit Statuses</option>
-                <option value="Pending">Pending Audit</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-              <select
-                value={photoDslrStatus}
-                onChange={(e) => setPhotoDslrStatus(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-              >
-                <option value="">All DSLR Statuses</option>
-                <option value="VERIFIED">Verified DSLR</option>
-                <option value="MANUAL_REVIEW">Manual Review EXIF</option>
-                <option value="REJECTED">Rejected Mobile</option>
               </select>
             </div>
           </div>
@@ -1379,91 +1414,7 @@ export default function AdminDashboard() {
                       <p>Capture Date: <span className="font-semibold text-slate-700 dark:text-slate-350">{photo.dateCaptured ? new Date(photo.dateCaptured).toLocaleDateString() : 'N/A'}</span></p>
                       <p>Raw File: <span className={`font-bold ${photo.rawFileUrl ? 'text-emerald-500' : 'text-slate-400'}`}>{photo.rawFileUrl ? 'Available (.RAW)' : 'None Provided'}</span></p>
                     </div>
-                  </div>
-
-                  {/* Assignments to Judges */}
-                  <div className="text-[10px] border-t border-slate-100 dark:border-slate-850 pt-2 flex flex-col gap-1.5">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-slate-400 uppercase tracking-wide">Assigned Judges</span>
-                      <button
-                        onClick={() => {
-                          setAssignJudgesPhoto(photo);
-                          setSelectedAssignJudges(photo.assignedJudges);
-                        }}
-                        className="text-indigo-600 dark:text-indigo-400 hover:underline font-bold"
-                      >
-                        Change Assigns
-                      </button>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {photo.assignedJudges.length > 0 ? (
-                        photo.assignedJudges.map(jId => {
-                          const j = judges.find(u => u._id === jId);
-                          return (
-                            <span key={jId} className="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 px-2 py-0.5 rounded font-semibold text-[9px]">
-                              {j ? j.name.split(' ')[0] : 'Judge'}
-                            </span>
-                          );
-                        })
-                      ) : (
-                        <span className="text-slate-400 italic">No judges assigned yet.</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions / Status badges */}
-                  <div className="border-t border-slate-100 dark:border-slate-850 pt-3 flex items-start justify-between gap-2">
-                    <div className="flex flex-col gap-2">
-                      <div>
-                        <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Audit State</span>
-                        {photo.status === 'Pending' ? (
-                          <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">Pending</span>
-                        ) : photo.status === 'Approved' ? (
-                          <span className="text-[10px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded font-bold">Approved</span>
-                        ) : (
-                          <div>
-                            <span className="text-[10px] bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 px-2 py-0.5 rounded font-bold">Rejected</span>
-                            <span className="block text-[9px] text-red-500 mt-1 line-clamp-1">"{photo.rejectReason}"</span>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">DSLR Validation</span>
-                        {photo.dslrValidationStatus === 'VERIFIED' ? (
-                          <span className="text-[10px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded font-bold">Verified DSLR</span>
-                        ) : photo.dslrValidationStatus === 'REJECTED' ? (
-                          <span className="text-[10px] bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 px-2 py-0.5 rounded font-bold">Rejected Mobile</span>
-                        ) : (
-                          <div>
-                            <span className="text-[10px] bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400 px-2 py-0.5 rounded font-bold">Manual Review</span>
-                            <span className="block text-[8px] text-slate-400 mt-0.5 line-clamp-1">{photo.validationReason}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {photo.status === 'Pending' && (
-                      <div className="flex gap-1.5">
-                        <button
-                          onClick={() => handlePhotoStatusUpdate(photo.submissionId, photo.photoId, 'Approved')}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white p-1.5 rounded-lg shadow-sm cursor-pointer"
-                          title="Approve"
-                        >
-                          <Check size={14} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedPhoto(photo);
-                            setShowRejectModal(true);
-                          }}
-                          className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg shadow-sm cursor-pointer"
-                          title="Reject"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                          {/* Action/Audit elements removed as responsibility belongs to Judges */}              </div>
                 </div>
               </div>
             ))}
@@ -1679,16 +1630,28 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         {e.status !== 'Completed' && (
-                          <button
-                            onClick={() => {
-                              setSelectedEventForJudges(e);
-                              setSelectedJudgesForEvent(e.assignedJudges || []);
-                              setShowAssignJudgesModal(true);
-                            }}
-                            className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/25 dark:hover:bg-indigo-950/40 text-[10px] py-1.5 px-2.5 rounded-lg cursor-pointer transition-all font-semibold"
-                          >
-                            Manage Event Judges
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setSelectedEventForJudges(e);
+                                setSelectedJudgesForEvent(e.assignedJudges || []);
+                                setShowAssignJudgesModal(true);
+                              }}
+                              className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/25 dark:hover:bg-indigo-950/40 text-[10px] py-1.5 px-2.5 rounded-lg cursor-pointer transition-all font-semibold"
+                            >
+                              Manage Event Judges
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedEventForJudges(e);
+                                setSelectedJudgesForEvent(e.assignedJudges || []);
+                                setShowAssignJudgesModal(true);
+                              }}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] py-1.5 px-3 rounded-lg cursor-pointer transition-all font-semibold shadow-sm"
+                            >
+                              Assign Judges
+                            </button>
+                          </div>
                         )}
                       </div>
 
@@ -2602,6 +2565,100 @@ export default function AdminDashboard() {
           </div>
       )}
 
+      {/* TAB 7: PROFILE SETTINGS */}
+      {activeTab === 'profile_settings' && (
+        <div className="max-w-2xl mx-auto animate-in fade-in duration-200 text-left">
+          <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+            <div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">Profile Settings</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Manage your administrator account credentials and personal details</p>
+            </div>
+
+            {profileError && (
+              <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-xs text-red-650 dark:text-red-400">
+                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+                <span>{profileError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateProfile} className="flex flex-col gap-5 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-bold text-slate-500">Administrator Name</label>
+                  <input
+                    type="text"
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    placeholder="Event Administrator"
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-bold text-slate-500">Mobile Number</label>
+                  <input
+                    type="tel"
+                    value={profileMobile}
+                    onChange={(e) => setProfileMobile(e.target.value)}
+                    placeholder="9876543210"
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="font-bold text-slate-500">Email Address</label>
+                <input
+                  type="email"
+                  value={profileEmail}
+                  onChange={(e) => setProfileEmail(e.target.value)}
+                  placeholder="admin@contest.com"
+                  className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-2">
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs mb-3">Change Password</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-bold text-slate-500">New Password</label>
+                    <input
+                      type="password"
+                      value={profilePassword}
+                      onChange={(e) => setProfilePassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none"
+                      minLength={6}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-bold text-slate-500">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={profileConfirmPassword}
+                      onChange={(e) => setProfileConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-2">Leave blank if you do not want to change your password.</p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={profileSubmitting}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 mt-4"
+              >
+                {profileSubmitting ? 'Saving Changes...' : 'Save Profile Changes'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* CREATE JUDGE MODAL */}
       {showJudgeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
@@ -3043,14 +3100,7 @@ export default function AdminDashboard() {
                 ) : (
                   <div className="text-center py-8 px-6 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-3">
                     <p className="text-xs text-slate-500 italic">No photographs uploaded yet.</p>
-                    <a 
-                      href="/dashboard" 
-                      className="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-md transition-all cursor-pointer text-xs"
-                    >
-                      <Camera size={14} />
-                      Go to Upload Photos
-                    </a>
-                  </div>
+                 </div>
                 )}
               </div>
             </div>
@@ -3105,7 +3155,7 @@ export default function AdminDashboard() {
                         >
                           <option value="">-- Choose Photograph --</option>
                           {photographs
-                            .filter(p => p.status === 'Approved' && p.scores?.length > 0 && p.paymentStatus === 'Paid')
+                            .filter(p => p.status !== 'Rejected' && p.scores?.length > 0 && p.paymentStatus === 'Paid')
                             .map(p => (
                               <option key={p.photoId} value={`${p.submissionId}:${p.photoId}`}>
                                 {p.title} - By {p.participantName} (Avg: {p.averageScore})

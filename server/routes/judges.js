@@ -42,7 +42,7 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), as
     const assignedPhotos = [];
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
-        if (photo.status !== 'Approved') return;
+        if (photo.status === 'Rejected') return;
         if (isAssignedToEvent || photo.assignedJudges.includes(judgeId)) {
           // If Admin, the "existingScore" can be the average score of all judges, or the first judge's score
           const existingScore = isAdmin 

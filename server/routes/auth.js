@@ -294,6 +294,14 @@ router.put('/profile', protect, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    if (req.body.email && req.body.email !== user.email) {
+      const emailExists = await User.findOne({ email: req.body.email });
+      if (emailExists) {
+        return res.status(400).json({ success: false, message: 'Email address is already in use' });
+      }
+      user.email = req.body.email;
+    }
+
     user.name = req.body.name || user.name;
     user.mobile = req.body.mobile || user.mobile;
     user.city = req.body.city || user.city;

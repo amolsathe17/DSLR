@@ -95,13 +95,13 @@ export default function Login() {
     try {
       const data = await login(email, password);
       if (data?.success) {
-        navigate(
-          data.user.role === 'Judge'
-            ? '/judge'
-            : (redirectPath === '/'
-                ? (data.user.role === 'Admin' ? '/admin' : '/dashboard')
-                : redirectPath)
-        );
+        if (data.user.role === 'Admin') {
+          navigate('/admin');
+        } else if (data.user.role === 'Judge') {
+          navigate('/judge');
+        } else {
+          navigate(redirectPath === '/' ? '/dashboard' : redirectPath);
+        }
       }
     } catch (err) {
       if (err.message.includes('verification') || err.message.includes('not verified')) {
@@ -173,13 +173,13 @@ export default function Login() {
       }
 
       if (data.success) {
-        navigate(
-          data.user.role === 'Judge'
-            ? '/judge'
-            : (redirectPath === '/'
-                ? (data.user.role === 'Admin' ? '/admin' : '/dashboard')
-                : redirectPath)
-        );
+        if (data.user.role === 'Admin') {
+          navigate('/admin');
+        } else if (data.user.role === 'Judge') {
+          navigate('/judge');
+        } else {
+          navigate(redirectPath === '/' ? '/dashboard' : redirectPath);
+        }
       }
     } catch (err) {
       setError(err.message || 'Invalid or expired OTP');
@@ -199,26 +199,57 @@ export default function Login() {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center md:items-end justify-center md:justify-between gap-12">
         <div className={`relative w-full max-w-md bg-white/85 dark:bg-slate-950/75 border rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 backdrop-blur-lg shrink-0 ${primaryBorderColor}`}>
         
-        {/* Brand */}
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h2 
-            onClick={() => {
-              if (loginRole === 'Participant') setLoginRole('Admin');
-              else if (loginRole === 'Admin') setLoginRole('Judge');
-              else setLoginRole('Participant');
-            }} 
-            className="font-display font-extrabold text-xl text-slate-900 dark:text-white cursor-pointer select-none hover:opacity-85 transition-opacity"
-            title="Click to cycle Login Portals"
-          >
-            {loginRole === 'Admin' ? 'Admin Login' : loginRole === 'Judge' ? 'Judge Login' : 'Contestant Login'}
-          </h2>
-          <p className="text-xs text-slate-500">
-            {loginRole === 'Admin' 
-              ? 'Access your administrator control panel' 
-              : loginRole === 'Judge' 
-                ? 'Access your scoring & evaluation portal' 
-                : 'Access your event participant dashboard'}
-          </p>
+        {/* Brand & Tabs */}
+        <div className="flex flex-col gap-4">
+          {/* Role Tabs */}
+          <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40">
+            <button
+              type="button"
+              onClick={() => { setLoginRole('Participant'); setError(''); }}
+              className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                loginRole === 'Participant'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              Contestant
+            </button>
+            <button
+              type="button"
+              onClick={() => { setLoginRole('Judge'); setError(''); }}
+              className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                loginRole === 'Judge'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              Judge
+            </button>
+            <button
+              type="button"
+              onClick={() => { setLoginRole('Admin'); setError(''); }}
+              className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                loginRole === 'Admin'
+                  ? 'bg-amber-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              Admin
+            </button>
+          </div>
+
+          <div className="flex flex-col items-center gap-1.5 text-center mt-1">
+            <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white select-none">
+              {loginRole === 'Admin' ? 'Admin Login' : loginRole === 'Judge' ? 'Judge Login' : 'Contestant Login'}
+            </h2>
+            <p className="text-xs text-slate-500">
+              {loginRole === 'Admin' 
+                ? 'Access your administrator control panel' 
+                : loginRole === 'Judge' 
+                  ? 'Access your scoring & evaluation portal' 
+                  : 'Access your event participant dashboard'}
+            </p>
+          </div>
         </div>
 
         {error && (
@@ -378,48 +409,18 @@ export default function Login() {
           </form>
         )}
 
-        <div className="text-center text-xs text-slate-400 mt-2">
-          Don't have an account?{' '}
-          <Link
-            to="/register"
-            className={`font-semibold hover:underline inline-flex items-center gap-0.5 ${primaryText}`}
-          >
-            Register here
-            <ArrowRight size={12} />
-          </Link>
-        </div>
-
-        <div className="text-center text-xs text-slate-400 mt-2 border-t border-slate-100 dark:border-slate-800/60 pt-3 flex flex-col gap-2">
-          <div className="flex justify-center gap-4 flex-wrap">
-            {loginRole !== 'Participant' && (
-              <button
-                type="button"
-                onClick={() => setLoginRole('Participant')}
-                className="text-indigo-650 dark:text-indigo-400 font-semibold hover:underline cursor-pointer"
-              >
-                Contestant Login
-              </button>
-            )}
-            {loginRole !== 'Admin' && (
-              <button
-                type="button"
-                onClick={() => setLoginRole('Admin')}
-                className="text-amber-600 dark:text-amber-500 font-semibold hover:underline cursor-pointer"
-              >
-                Admin Portal
-              </button>
-            )}
-            {loginRole !== 'Judge' && (
-              <button
-                type="button"
-                onClick={() => setLoginRole('Judge')}
-                className="text-emerald-600 dark:text-emerald-450 font-semibold hover:underline cursor-pointer"
-              >
-                Judges Portal
-              </button>
-            )}
+        {loginRole === 'Participant' && (
+          <div className="text-center text-xs text-slate-400 mt-2">
+            Don't have an account?{' '}
+            <Link
+              to="/register"
+              className={`font-semibold hover:underline inline-flex items-center gap-0.5 ${primaryText}`}
+            >
+              Register here
+              <ArrowRight size={12} />
+            </Link>
           </div>
-        </div>
+        )}
 
         </div>
 

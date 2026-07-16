@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Camera, LogIn, Mail, Lock, ShieldAlert, ArrowRight, Phone, Key, Calendar, MapPin } from 'lucide-react';
+import { Camera, LogIn, Mail, Lock, ShieldAlert, ArrowRight, Phone, Key, Calendar, MapPin, Clock } from 'lucide-react';
 
 export default function Login() {
   const { login, verifyOtp, requestMobileOtp, verifyMobileOtp, apiFetch } = useAuth();
@@ -248,9 +248,31 @@ export default function Login() {
               {loginRole === 'Admin' 
                 ? 'Access your administrator control panel' 
                 : loginRole === 'Judge' 
-                  ? 'Access your scoring & evaluation portal' 
-                  : 'Access your event participant dashboard'}
+                ? 'Evaluate and score contest submissions'
+                : 'Upload images, manage submissions, and view results'}
             </p>
+            {event && (
+              <div className="mt-1 p-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-850 rounded-xl flex flex-col gap-1.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 w-full">
+                <div className="flex justify-between items-center">
+                  <span className="flex items-center gap-1"><Clock size={11} className="text-indigo-500" /> Submission Deadline:</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-200">
+                    {new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="flex items-center gap-1"><Calendar size={11} className="text-emerald-500" /> Exhibition Date:</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-200">
+                    {event.exhibitionFromDate ? (
+                      new Date(event.exhibitionFromDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                    ) : event.eventDate ? (
+                      new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                    ) : (
+                      'To Be Announced'
+                    )}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -429,9 +451,27 @@ export default function Login() {
         {/* Right Side: Exhibition Event Details in White Text */}
         {event && (
           <div className="hidden md:flex flex-col gap-6 text-white max-w-md bg-slate-950/45 p-8 rounded-3xl border border-white/10 backdrop-blur-sm shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300">
-            <div className="flex items-center gap-3">
+            <div>
+              <span className="text-[10px] bg-indigo-600/60 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Event Details</span>
+              <h3 className="font-display font-black text-xl text-white mt-1 leading-snug">{event.title}</h3>
+              <p className="text-xs text-slate-350 mt-1 italic">"{event.theme}"</p>
+            </div>
+
+            <div className="flex items-start gap-3">
               <div className="p-3 bg-white/10 rounded-2xl text-white">
-                <Calendar size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
+                <Clock size={24} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">SUBMISSION DEADLINE</p>
+                <p className="text-sm font-black font-display text-white">
+                  {new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-3 bg-white/10 rounded-2xl text-white">
+                <Calendar size={24} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
               </div>
               <div>
                 <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">EXHIBITION DATE</p>
@@ -441,15 +481,15 @@ export default function Login() {
                   ) : event.eventDate ? (
                     new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
                   ) : (
-                    new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                    'To Be Announced'
                   )}
                 </p>
               </div>
             </div>
             
             <div className="flex items-start gap-3">
-              <div className="p-3 bg-white/10 rounded-2xl text-white mt-0.5">
-                <MapPin size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
+              <div className="p-3 bg-white/10 rounded-2xl text-white">
+                <MapPin size={24} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
               </div>
               <div>
                 <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">EXHIBITION VENUE</p>
@@ -457,12 +497,6 @@ export default function Login() {
                   {event.venue || 'Bal-Gandharv Art Gallery, Jangali Maharaj Road, Pune 411030'}
                 </p>
               </div>
-            </div>
-
-            <div className="border-t border-white/10 pt-4 mt-2">
-              <p className="text-xs text-slate-300/80 leading-relaxed font-medium">
-                {event.title}. Submissions are active until {new Date(event.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
-              </p>
             </div>
           </div>
         )}

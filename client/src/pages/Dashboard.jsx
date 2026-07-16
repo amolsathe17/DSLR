@@ -86,8 +86,8 @@ export default function Dashboard() {
         }
       }
 
-      // 2. Fetch categories
-      const categoryData = await apiFetch("/api/categories");
+      // 2. Fetch categories filtered by this event's type
+      const categoryData = await apiFetch(`/api/categories?contestType=${encodeURIComponent(activeEvent?.eventType || '')}`);
       if (categoryData.success) {
         setCategories(categoryData.categories);
         if (categoryData.categories.length > 0) {

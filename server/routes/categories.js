@@ -9,7 +9,18 @@ const { protect, authorize } = require('../middleware/auth');
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const categories = await Category.find({});
+    const { contestType } = req.query;
+    let filter = {};
+    if (contestType) {
+      filter = {
+        $or: [
+          { contestTypes: contestType },
+          { contestTypes: { $exists: false } },
+          { contestTypes: { $size: 0 } }
+        ]
+      };
+    }
+    const categories = await Category.find(filter);
     res.json({ success: true, categories });
   } catch (error) {
     console.error(error);
@@ -22,7 +33,7 @@ router.get('/', async (req, res) => {
 // @access  Private/Admin
 router.post('/', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, contestTypes } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: 'Category name is required' });
     }
@@ -32,7 +43,11 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Category already exists' });
     }
 
-    const category = await Category.create({ name, description });
+    const category = await Category.create({ 
+      name, 
+      description,
+      contestTypes: Array.isArray(contestTypes) ? contestTypes : ['Photography']
+    });
 
     await AuditLog.create({
       userId: req.user._id,
@@ -44,6 +59,58 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
     });
 
     res.status(201).json({ success: true, category });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Update a category
+// @route   PUT /api/categories/:id
+// @access  Private/Admin
+router.put('/:id', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const { name, description, contestTypes } = req.body;
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+
+    if (name && name !== category.name) {
+      const exists = await Category.findOne({ name });
+      if (exists) {
+        return res.status(400).json({ success: false, message: 'Category with this name already exists' });
+      }
+
+      // Cascade update to submissions
+      const Submission = require('../models/Submission');
+      const oldName = category.name;
+      category.name = name;
+
+      await Submission.updateMany(
+        { 'photographs.category': oldName },
+        { $set: { 'photographs.$[elem].category': name } },
+        { arrayFilters: [{ 'elem.category': oldName }] }
+      );
+    }
+
+    if (description !== undefined) category.description = description;
+    if (contestTypes !== undefined) {
+      category.contestTypes = Array.isArray(contestTypes) ? contestTypes : [contestTypes];
+    }
+
+    await category.save();
+
+    await AuditLog.create({
+      userId: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Update Category',
+      details: `Updated category: ${category.name}`,
+      ipAddress: req.ip
+    });
+
+    res.json({ success: true, category });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

@@ -858,7 +858,6 @@ export default function AdminDashboard() {
         setNewEventDeadline('');
         setNewEventRules('');
         setEventType('Photography');
-        setCustomEventType('');
         setNewEventDescription('');
         setNewEventVenue('Bal-Gandharv Art Gallery, Jangali Mharaj Road Pune 411030');
         setHasExhibition(false);
@@ -884,7 +883,6 @@ export default function AdminDashboard() {
     setEditingEventId(e._id);
     setEditEventTitle(e.title || '');
     setEditEventType(e.eventType || 'Photography');
-    setEditCustomEventType('');
     setEditEventTheme(e.theme || '');
     setEditEventDescription(e.description || '');
     setEditEventVenue(e.venue || '');

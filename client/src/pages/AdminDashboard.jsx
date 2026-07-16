@@ -1000,7 +1000,8 @@ export default function AdminDashboard() {
           { id: 'participants', label: 'Participants', icon: Users },
           { id: 'photographs', label: 'Photographs', icon: Camera },
           { id: 'judges', label: 'Judges & Results', icon: Award },
-          { id: 'events', label: 'Contests & Configuration', icon: Calendar }
+          { id: 'events', label: 'Contests & Configuration', icon: Calendar },
+          { id: 'categories_config', label: 'Categories', icon: Layers }
         ].map(t => (
           <button
             key={t.id}
@@ -1695,7 +1696,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-200">
           
           {/* Left Column: Create new contest & details list */}
-          <div className="lg:col-span-8 flex flex-col gap-6">
+          <div className="lg:col-span-12 flex flex-col gap-6">
             
             {/* Create Contest Form */}
             <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
@@ -2131,46 +2132,42 @@ export default function AdminDashboard() {
             </div>
 
           </div>
+      </div>
+    )}
 
-          {/* Right Column: Categories Manager */}
+      {/* TAB 6: CATEGORIES CONFIGURATION */}
+      {activeTab === 'categories_config' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-200">
+          
+          {/* Left Column: Create or Edit Category */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">
-                Categories Configuration
+              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                <Layers size={18} className="text-indigo-600 dark:text-indigo-400" />
+                {editingCategory ? 'Edit Category' : 'Create Category'}
               </h3>
 
-              {/* Create or Edit Category Form */}
               {editingCategory ? (
-                <form onSubmit={handleUpdateCategory} className="flex flex-col gap-3 mt-4 text-left">
-                  <div className="flex justify-between items-center pb-2 mb-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">Editing Category</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setEditingCategory(null)}
-                      className="text-[10px] text-slate-400 hover:text-slate-600 font-bold cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-1 text-[11px]">
-                    <label className="font-semibold text-slate-500">Category Name</label>
+                <form onSubmit={handleUpdateCategory} className="flex flex-col gap-4 mt-4 text-left">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Category Name</label>
                     <input
                       type="text"
                       value={editCatName}
                       onChange={(e) => setEditCatName(e.target.value)}
                       placeholder="e.g. Wildlife"
-                      className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 font-medium"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-105 font-medium"
                       required
                     />
                   </div>
-                  <div className="flex flex-col gap-1 text-[11px]">
-                    <label className="font-semibold text-slate-500">Description</label>
-                    <input
-                      type="text"
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Description</label>
+                    <textarea
                       value={editCatDesc}
                       onChange={(e) => setEditCatDesc(e.target.value)}
                       placeholder="Brief description..."
-                      className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 font-medium"
+                      rows={3}
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-105 resize-none"
                     />
                   </div>
                   
@@ -2199,14 +2196,14 @@ export default function AdminDashboard() {
                   </div>
                   
                   {/* Custom Contest Types */}
-                  <div className="flex flex-col gap-1 text-[11px]">
-                    <label className="font-semibold text-slate-500">Or Custom Type Name(s) <span className="text-[9px] text-slate-400 font-normal">(comma-separated)</span></label>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Or Custom Type Name(s) <span className="text-[10px] text-slate-400 font-normal">(comma-separated)</span></label>
                     <input
                       type="text"
                       value={editCatCustomTypes}
                       onChange={(e) => setEditCatCustomTypes(e.target.value)}
-                      placeholder="e.g. Nature Art, Landscape Art"
-                      className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 font-medium"
+                      placeholder="e.g. Sculpting, Writing"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-105"
                     />
                   </div>
 
@@ -2214,39 +2211,39 @@ export default function AdminDashboard() {
                     <button
                       type="button"
                       onClick={() => setEditingCategory(null)}
-                      className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs py-1.5 rounded-lg cursor-pointer"
+                      className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs py-2 rounded-xl cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 rounded-lg cursor-pointer"
+                      className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
                     >
                       Save Changes
                     </button>
                   </div>
                 </form>
               ) : (
-                <form onSubmit={handleCreateCategory} className="flex flex-col gap-3 mt-4 text-left">
-                  <div className="flex flex-col gap-1 text-[11px]">
-                    <label className="font-semibold text-slate-500">Category Name</label>
+                <form onSubmit={handleCreateCategory} className="flex flex-col gap-4 mt-4 text-left">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Category Name</label>
                     <input
                       type="text"
                       value={newCatName}
                       onChange={(e) => setNewCatName(e.target.value)}
                       placeholder="e.g. Wildlife"
-                      className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 font-medium"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-105 font-medium"
                       required
                     />
                   </div>
-                  <div className="flex flex-col gap-1 text-[11px]">
-                    <label className="font-semibold text-slate-500">Description</label>
-                    <input
-                      type="text"
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Description</label>
+                    <textarea
                       value={newCatDesc}
                       onChange={(e) => setNewCatDesc(e.target.value)}
                       placeholder="Brief description..."
-                      className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 font-medium"
+                      rows={3}
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-105 resize-none"
                     />
                   </div>
                   
@@ -2275,64 +2272,107 @@ export default function AdminDashboard() {
                   </div>
                   
                   {/* Custom Contest Types */}
-                  <div className="flex flex-col gap-1 text-[11px]">
-                    <label className="font-semibold text-slate-500">Or Custom Type Name(s) <span className="text-[9px] text-slate-400 font-normal">(comma-separated)</span></label>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Or Custom Type Name(s) <span className="text-[10px] text-slate-400 font-normal">(comma-separated)</span></label>
                     <input
                       type="text"
                       value={newCatCustomTypes}
                       onChange={(e) => setNewCatCustomTypes(e.target.value)}
-                      placeholder="e.g. Nature Art, Landscape Art"
-                      className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 font-medium"
+                      placeholder="e.g. Sculpting, Writing"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-105"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-1.5 rounded-lg cursor-pointer"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
                   >
                     Create Category
                   </button>
                 </form>
               )}
+            </div>
+          </div>
 
-              {/* Categories list */}
-              <div className="flex flex-col gap-2 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-left">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Active Categories</span>
-                {categories.map(c => (
-                  <div key={c._id} className="flex justify-between items-center text-xs p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-850">
-                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{c.name}</span>
-                      {c.description && <p className="text-[10px] text-slate-400 truncate">{c.description}</p>}
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {(c.contestTypes || ['Photography']).map(t => (
-                          <span key={t} className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/30 uppercase tracking-wide shrink-0">
-                            {t}
-                          </span>
+          {/* Right Column: Categories Explorer by Contest Type */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            
+            {/* Contest Types Tabs Filter */}
+            <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col gap-4 text-left">
+              <div>
+                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Categories Ledger</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Filter and explore categories mapped to different contest platforms</p>
+              </div>
+
+              {/* Grid of Contest Types */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-2">
+                {['Photography', 'Painting', 'Drawing', 'Paper Craft', 'Other / Custom'].map(typeTab => {
+                  const filteredCats = categories.filter(c => {
+                    const types = c.contestTypes || ['Photography'];
+                    if (typeTab === 'Other / Custom') {
+                      const standard = ['Photography', 'Painting', 'Drawing', 'Paper Craft'];
+                      return types.some(t => !standard.includes(t));
+                    }
+                    return types.includes(typeTab);
+                  });
+
+                  return (
+                    <div key={typeTab} className="bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-2xl p-4 flex flex-col gap-3">
+                      <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-850">
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">{typeTab}</span>
+                        <span className="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                          {filteredCats.length} Categories
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px] pr-1">
+                        {filteredCats.map(c => (
+                          <div key={c._id} className="flex justify-between items-start text-[11px] p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl hover:shadow-sm transition-shadow">
+                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                              <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{c.name}</span>
+                              {c.description && <span className="text-[9px] text-slate-400 truncate">{c.description}</span>}
+                              
+                              <div className="flex flex-wrap gap-0.5 mt-1">
+                                {(c.contestTypes || ['Photography']).map(t => (
+                                  <span key={t} className="px-1 py-0.2 rounded text-[7px] font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 uppercase tracking-wide">
+                                    {t}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-0.5 shrink-0 ml-1">
+                              <button
+                                onClick={() => handleEditCategoryClick(c)}
+                                className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer"
+                                title="Edit Category"
+                              >
+                                <Edit2 size={10} />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCatToDeleteId(c._id);
+                                  setCatToDeleteName(c.name);
+                                  setShowDeleteCatModal(true);
+                                }}
+                                className="p-1 text-slate-400 hover:text-red-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer"
+                                title="Delete Category"
+                              >
+                                <Trash2 size={10} />
+                              </button>
+                            </div>
+                          </div>
                         ))}
+
+                        {filteredCats.length === 0 && (
+                          <div className="text-center text-[10px] text-slate-400 py-6 italic">
+                            No categories assigned.
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 ml-2">
-                      <button
-                        onClick={() => handleEditCategoryClick(c)}
-                        className="p-1.5 hover:bg-indigo-100 text-indigo-600 dark:hover:bg-indigo-950/40 rounded-lg cursor-pointer"
-                        title="Edit Category Details"
-                      >
-                        <Edit2 size={12} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setCatToDeleteId(c._id);
-                          setCatToDeleteName(c.name);
-                          setShowDeleteCatModal(true);
-                        }}
-                        className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg cursor-pointer"
-                        title="Delete Category"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
             </div>

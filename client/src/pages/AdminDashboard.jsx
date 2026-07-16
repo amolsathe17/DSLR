@@ -11,6 +11,7 @@ import {
   Filter,
   Ban,
   Trash2,
+  Edit2,
   Check,
   X,
   Plus,

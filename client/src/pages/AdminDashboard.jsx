@@ -517,18 +517,20 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       const data = await apiFetch('/api/categories', {
-        method: 'POST',
         body: JSON.stringify({ 
           name: newCatName, 
           description: newCatDesc,
           contestTypes: newCatTypes
-        })
+        }),
+        method: 'POST'
       });
       if (data.success) {
+        const createdName = data.category?.name || newCatName;
         setNewCatName('');
         setNewCatDesc('');
         setNewCatTypes(['Photography']);
         fetchJudgesAndEvents();
+        triggerSuccessModal('Category Created', `The category "${createdName}" has been created successfully.`);
       }
     } catch (e) {
       alert(e.message);

@@ -1630,28 +1630,16 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         {e.status !== 'Completed' && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                setSelectedEventForJudges(e);
-                                setSelectedJudgesForEvent(e.assignedJudges || []);
-                                setShowAssignJudgesModal(true);
-                              }}
-                              className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/25 dark:hover:bg-indigo-950/40 text-[10px] py-1.5 px-2.5 rounded-lg cursor-pointer transition-all font-semibold"
-                            >
-                              Manage Event Judges
-                            </button>
-                            <button
-                              onClick={() => {
-                                setSelectedEventForJudges(e);
-                                setSelectedJudgesForEvent(e.assignedJudges || []);
-                                setShowAssignJudgesModal(true);
-                              }}
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] py-1.5 px-3 rounded-lg cursor-pointer transition-all font-semibold shadow-sm"
-                            >
-                              Assign Judges
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedEventForJudges(e);
+                              setSelectedJudgesForEvent(e.assignedJudges || []);
+                              setShowAssignJudgesModal(true);
+                            }}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] py-1.5 px-3 rounded-lg cursor-pointer transition-all font-semibold shadow-sm"
+                          >
+                            Assign Judges
+                          </button>
                         )}
                       </div>
 

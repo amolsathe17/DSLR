@@ -83,6 +83,7 @@ export default function Navbar() {
 
             <Link
               to="/admin"
+              state={{ forceAdmin: true }}
               onClick={handleAdminClick}
               className={`text-sm font-medium transition-colors ${
                 isActive('/admin') 
@@ -95,6 +96,7 @@ export default function Navbar() {
 
             <Link
               to="/judge"
+              state={{ forceJudge: true }}
               onClick={handleJudgeClick}
               className={`text-sm font-medium transition-colors ${
                 isActive('/judge') 
@@ -236,12 +238,13 @@ export default function Navbar() {
 
             <Link
               to="/admin"
+              state={{ forceAdmin: true }}
               onClick={() => {
                 handleAdminClick();
                 setIsOpen(false);
               }}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/admin') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                isActive('/admin') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-855'
               }`}
             >
               Admin Portal
@@ -249,12 +252,13 @@ export default function Navbar() {
 
             <Link
               to="/judge"
+              state={{ forceJudge: true }}
               onClick={() => {
                 handleJudgeClick();
                 setIsOpen(false);
               }}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/judge') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                isActive('/judge') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-855'
               }`}
             >
               Judges Portal

@@ -47,9 +47,9 @@ export default function Login() {
   useEffect(() => {
     if (location.state?.forceContestant) {
       setLoginRole('Participant');
-    } else if (redirectPath === '/admin') {
+    } else if (location.state?.forceAdmin || location.state?.from?.state?.forceAdmin || redirectPath === '/admin') {
       setLoginRole('Admin');
-    } else if (redirectPath === '/judge') {
+    } else if (location.state?.forceJudge || location.state?.from?.state?.forceJudge || redirectPath === '/judge') {
       setLoginRole('Judge');
     }
   }, [redirectPath, location.state]);

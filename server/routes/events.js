@@ -156,6 +156,12 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
+    if (updateData.assignedJudges && Array.isArray(updateData.assignedJudges) && updateData.assignedJudges.length > 0) {
+      if (event.status === 'Draft') {
+        updateData.status = 'Active';
+      }
+    }
+
     if (event.status === 'Completed') {
       return res.status(400).json({ success: false, message: 'Completed contests cannot be modified' });
     }

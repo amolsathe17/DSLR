@@ -97,12 +97,13 @@ export default function JudgeDashboard() {
     if (photographs.length > 0) {
       const initial = {};
       photographs.forEach(p => {
+        const val = p.score ? Math.round(p.score.averageScore) : 5;
         initial[p.photoId] = {
-          creativity: p.score?.creativity ?? 5,
-          composition: p.score?.composition ?? 5,
-          technicalQuality: p.score?.technicalQuality ?? 5,
-          storytelling: p.score?.storytelling ?? 5,
-          overallImpact: p.score?.overallImpact ?? 5,
+          creativity: val,
+          composition: val,
+          technicalQuality: val,
+          storytelling: val,
+          overallImpact: val,
           remarks: p.score?.remarks ?? ''
         };
       });
@@ -460,15 +461,10 @@ export default function JudgeDashboard() {
                       <thead>
                         <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                           <th className="p-4">Photo</th>
-                          <th className="p-4">Title & Participant</th>
-                          <th className="p-4 text-center">Creativity</th>
-                          <th className="p-4 text-center">Composition</th>
-                          <th className="p-4 text-center">Technical</th>
-                          <th className="p-4 text-center">Storytelling</th>
-                          <th className="p-4 text-center">Impact</th>
-                          <th className="p-4 text-center font-bold">Avg</th>
-                          <th className="p-4">Remarks</th>
-                          <th className="p-4 text-right">Action</th>
+                          <th className="p-4">Title</th>
+                          <th className="p-4">Participant Name</th>
+                          <th className="p-4">Category</th>
+                          <th className="p-4 text-center">Avg</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -481,7 +477,7 @@ export default function JudgeDashboard() {
                             overallImpact: 5,
                             remarks: ''
                           };
-                          const rowAvg = ((Number(scores.creativity) + Number(scores.composition) + Number(scores.technicalQuality) + Number(scores.storytelling) + Number(scores.overallImpact)) / 5).toFixed(1);
+                          const rowAvg = scores.creativity;
                           return (
                             <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
                               <td className="p-4">
@@ -495,48 +491,35 @@ export default function JudgeDashboard() {
                                   />
                                 </div>
                               </td>
-                              <td className="p-4 min-w-[150px]">
-                                <p className="font-bold text-slate-900 dark:text-white line-clamp-1">{photo.title}</p>
-                                <p className="text-[10px] text-slate-400 mt-0.5">{photo.category}</p>
-                                <p className="text-[10px] text-slate-500 mt-0.5 font-medium">By {photo.participantName}</p>
+                              <td className="p-4 min-w-[120px] font-bold text-slate-900 dark:text-white">
+                                {photo.title}
                               </td>
-                              {['creativity', 'composition', 'technicalQuality', 'storytelling', 'overallImpact'].map(field => (
-                                <td key={field} className="p-4 text-center">
-                                  <select
-                                    disabled={user?.role === 'Admin' || hasConfirmed}
-                                    value={scores[field]}
-                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, field, Number(e.target.value))}
-                                    className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-1 text-[10px] font-bold text-center focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                  >
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (
-                                      <option key={v} value={v}>{v}</option>
-                                    ))}
-                                  </select>
-                                </td>
-                              ))}
-                              <td className="p-4 text-center font-bold text-slate-900 dark:text-white">
-                                <span className="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 px-2 py-0.5 rounded">
-                                  {rowAvg}
+                              <td className="p-4 min-w-[120px] font-medium text-slate-700 dark:text-slate-350">
+                                {photo.participantName}
+                              </td>
+                              <td className="p-4">
+                                <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-semibold text-slate-600 dark:text-slate-400">
+                                  {photo.category}
                                 </span>
                               </td>
-                              <td className="p-4 min-w-[150px]">
-                                <input
-                                  type="text"
+                              <td className="p-4 text-center">
+                                <select
                                   disabled={user?.role === 'Admin' || hasConfirmed}
-                                  value={scores.remarks}
-                                  onChange={(e) => handleOfflineScoreChange(photo.photoId, 'remarks', e.target.value)}
-                                  placeholder="Add feedback..."
-                                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-805 rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                />
-                              </td>
-                              <td className="p-4 text-right">
-                                <button
-                                  disabled={user?.role === 'Admin' || hasConfirmed}
-                                  onClick={() => handleSaveSingleOfflineScore(photo)}
-                                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                  value={rowAvg}
+                                  onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    handleOfflineScoreChange(photo.photoId, 'creativity', val);
+                                    handleOfflineScoreChange(photo.photoId, 'composition', val);
+                                    handleOfflineScoreChange(photo.photoId, 'technicalQuality', val);
+                                    handleOfflineScoreChange(photo.photoId, 'storytelling', val);
+                                    handleOfflineScoreChange(photo.photoId, 'overallImpact', val);
+                                  }}
+                                  className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-1 text-[10px] font-bold text-center focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                                 >
-                                  Save
-                                </button>
+                                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (
+                                    <option key={v} value={v}>{v}</option>
+                                  ))}
+                                </select>
                               </td>
                             </tr>
                           );
@@ -548,9 +531,9 @@ export default function JudgeDashboard() {
                     <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-end">
                       <button
                         onClick={handleSaveAllOfflineScores}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all cursor-pointer"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2 rounded-xl shadow-md transition-all cursor-pointer"
                       >
-                        Save All Grades
+                        Save
                       </button>
                     </div>
                   )}

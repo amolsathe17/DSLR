@@ -429,6 +429,20 @@ export default function Login() {
         {/* Right Side: Exhibition Event Details in White Text */}
         {event && (
           <div className="hidden md:flex flex-col gap-6 text-white max-w-md bg-slate-950/45 p-8 rounded-3xl border border-white/10 backdrop-blur-sm shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300">
+            {/* Block 1: Submission Deadline */}
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-white/10 rounded-2xl text-white">
+                <Clock size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">SUBMISSION DEADLINE</p>
+                <p className="text-sm font-black font-display text-white">
+                  {new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            </div>
+
+            {/* Block 2: Exhibition Date */}
             <div className="flex items-center gap-3">
               <div className="p-3 bg-white/10 rounded-2xl text-white">
                 <Calendar size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
@@ -447,6 +461,7 @@ export default function Login() {
               </div>
             </div>
             
+            {/* Block 3: Exhibition Venue */}
             <div className="flex items-start gap-3">
               <div className="p-3 bg-white/10 rounded-2xl text-white mt-0.5">
                 <MapPin size={28} className={loginRole === 'Admin' ? 'text-amber-500' : loginRole === 'Judge' ? 'text-emerald-400' : 'text-indigo-400'} />
@@ -459,9 +474,10 @@ export default function Login() {
               </div>
             </div>
 
+            {/* Divider and Event Title Only */}
             <div className="border-t border-white/10 pt-4 mt-2">
-              <p className="text-xs text-slate-300/80 leading-relaxed font-medium">
-                {event.title}. Submissions are active until {new Date(event.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. Exhibition Date is {event.exhibitionFromDate ? new Date(event.exhibitionFromDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : event.eventDate ? new Date(event.eventDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : new Date(event.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
+              <p className="text-xs text-slate-300/80 leading-relaxed font-semibold">
+                {event.title}.
               </p>
             </div>
           </div>

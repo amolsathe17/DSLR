@@ -103,14 +103,14 @@ export default function Footer() {
             <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
               Support & Inquiries
             </h3>
-            <p>Email: <a href="mailto:support@dslrcontest.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support@dslrcontest.com</a></p>
+            <p>Email: <a href="mailto:support@sumbaranartsociety.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support@sumbaranartsociety.com</a></p>
             <p>Phone: +91 98765 43210 (Mon-Sat, 9AM - 6PM)</p>
-            <p>Address: DSLR Contest Association, BKC, Mumbai, India</p>
+            <p>Address: Sumbaran Art Society, BKC, Mumbai, India</p>
           </div>
         </div>
 
         <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-4 text-xs text-center">
-          <p>&copy; {new Date().getFullYear()} DSLR Contest Portal. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} sumbaran Art Society. All rights reserved.</p>
         </div>
       </div>
     </footer>

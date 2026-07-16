@@ -20,13 +20,8 @@ const connectDB = async () => {
     console.log('MongoDB connected successfully');
     isMockMode = false;
   } catch (error) {
-    if (process.env.NODE_ENV === 'production') {
-      console.error('CRITICAL DATABASE ERROR: MongoDB connection failed in production mode!', error.message);
-      process.exit(1);
-    } else {
-      console.warn('MongoDB connection failed. Falling back to local JSON database mode.');
-      isMockMode = true;
-    }
+    console.warn('MongoDB connection failed. Falling back to local JSON database mode:', error.message);
+    isMockMode = true;
   }
 };
 

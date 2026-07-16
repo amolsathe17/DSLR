@@ -78,7 +78,7 @@ export default function Navbar() {
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
               }`}
             >
-              Gallery
+              Gallery & Results
             </Link>
 
             <Link
@@ -240,7 +240,7 @@ export default function Navbar() {
                 isActive('/gallery') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white'
               }`}
             >
-              Gallery
+              Gallery & Results
             </Link>
 
             <Link

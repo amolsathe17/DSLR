@@ -2180,10 +2180,10 @@ export default function AdminDashboard() {
 
       {/* TAB 6: CATEGORIES CONFIGURATION */}
       {activeTab === 'categories_config' && (
-        <div className="flex flex-col gap-8 animate-in fade-in duration-200">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-200">
           
-          {/* 100% Width: Create Contest Type */}
-          <div className="w-full">
+          {/* Left Column: Contest Type and Category setup */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="glass-panel contest-type-form-container border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
               <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -2197,131 +2197,128 @@ export default function AdminDashboard() {
                 )}
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-                {/* Form Column */}
-                <div>
-                  {editingContestType ? (
-                    <form onSubmit={handleUpdateContestType} className="flex flex-col gap-4 text-left">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-xs text-slate-500 font-semibold">Contest Type Name</label>
-                        <input
-                          type="text"
-                          value={editContestTypeName}
-                          onChange={(e) => setEditContestTypeName(e.target.value)}
-                          placeholder="e.g. Dance"
-                          className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
-                          required
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-xs text-slate-500 font-semibold">Description</label>
-                        <textarea
-                          value={editContestTypeDesc}
-                          onChange={(e) => setEditContestTypeDesc(e.target.value)}
-                          placeholder="Brief description..."
-                          rows={2}
-                          className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
-                        />
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingContestType(null);
-                            setEditContestTypeName('');
-                            setEditContestTypeDesc('');
-                          }}
-                          className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs py-2 rounded-xl cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
-                        >
-                          Save Changes
-                        </button>
-                      </div>
-                    </form>
-                  ) : (
-                    <form onSubmit={handleCreateContestType} className="flex flex-col gap-4 mt-4 text-left">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-xs text-slate-500 font-semibold">Contest Type Name</label>
-                        <input
-                          type="text"
-                          value={newContestTypeName}
-                          onChange={(e) => setNewContestTypeName(e.target.value)}
-                          placeholder="e.g. Dance"
-                          className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
-                          required
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-xs text-slate-500 font-semibold">Description</label>
-                        <textarea
-                          value={newContestTypeDesc}
-                          onChange={(e) => setNewContestTypeDesc(e.target.value)}
-                          placeholder="Brief description..."
-                          rows={2}
-                          className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
+              {editingContestType ? (
+                <form onSubmit={handleUpdateContestType} className="flex flex-col gap-4 mt-4 text-left">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Select Contest Type to Modify</label>
+                    <div className="flex gap-2">
+                      <select
+                        value={editingContestType._id}
+                        onChange={(e) => {
+                          const ct = contestTypes.find(t => t._id === e.target.value);
+                          if (ct) {
+                            handleEditContestTypeClick(ct);
+                          }
+                        }}
+                        className="flex-1 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
                       >
-                        Create Contest Type
+                        {contestTypes.map(ct => (
+                          <option key={ct._id} value={ct._id}>{ct.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteContestType(editingContestType._id, editingContestType.name)}
+                        className="px-3 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-xl cursor-pointer transition-colors border border-red-100/50 dark:border-red-950/30 flex items-center justify-center"
+                        title="Delete Selected Contest Type"
+                      >
+                        <Trash2 size={14} />
                       </button>
-                    </form>
-                  )}
-                </div>
-
-                {/* List Column */}
-                <div className="flex flex-col gap-2 text-left border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 pt-6 md:pt-0 md:pl-8">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Registered Contest Types</span>
-                  <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px] pr-1">
-                    {contestTypes.map(ct => (
-                      <div key={ct._id} className="flex justify-between items-center text-xs p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-850">
-                        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                          <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{ct.name}</span>
-                          {ct.description && <p className="text-[10px] text-slate-400 truncate">{ct.description}</p>}
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                          <button
-                            onClick={() => handleEditContestTypeClick(ct)}
-                            className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/80 dark:text-indigo-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-indigo-100 dark:border-indigo-900/30"
-                            title="Edit Contest Type"
-                          >
-                            <Edit2 size={12} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteContestType(ct._id, ct.name)}
-                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-red-100/50 dark:border-red-950/30"
-                            title="Delete Contest Type"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {contestTypes.length === 0 && (
-                      <div className="text-center text-[10px] text-slate-400 py-6 italic">
-                        No contest types registered.
-                      </div>
-                    )}
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* 2-Column Section: Create Category & Categories Ledger */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            {/* Left Column: Create or Edit Category */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Contest Type Name</label>
+                    <input
+                      type="text"
+                      value={editContestTypeName}
+                      onChange={(e) => setEditContestTypeName(e.target.value)}
+                      placeholder="e.g. Dance"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Description</label>
+                    <textarea
+                      value={editContestTypeDesc}
+                      onChange={(e) => setEditContestTypeDesc(e.target.value)}
+                      placeholder="Brief description..."
+                      rows={2}
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingContestType(null);
+                        setEditContestTypeName('');
+                        setEditContestTypeDesc('');
+                      }}
+                      className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs py-2 rounded-xl cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleCreateContestType} className="flex flex-col gap-4 mt-4 text-left">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Contest Type Name</label>
+                    <input
+                      type="text"
+                      value={newContestTypeName}
+                      onChange={(e) => setNewContestTypeName(e.target.value)}
+                      placeholder="e.g. Dance"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">Description</label>
+                    <textarea
+                      value={newContestTypeDesc}
+                      onChange={(e) => setNewContestTypeDesc(e.target.value)}
+                      placeholder="Brief description..."
+                      rows={2}
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 resize-none"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-xl cursor-pointer transition-colors"
+                    >
+                      Create Contest Type
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (contestTypes.length > 0) {
+                          handleEditContestTypeClick(contestTypes[0]);
+                        } else {
+                          alert('No contest types registered to edit.');
+                        }
+                      }}
+                      className="px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs py-2 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800"
+                      title="Edit Existing Contest Type"
+                    >
+                      <Edit2 size={12} />
+                      <span>Edit</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
               <div className="glass-panel category-form-container border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
                 <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -2544,8 +2541,6 @@ export default function AdminDashboard() {
             </div>
 
           </div>
-
-        </div>
       )}
 
       {/* CREATE JUDGE MODAL */}

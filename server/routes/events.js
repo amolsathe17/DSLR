@@ -459,7 +459,7 @@ router.post('/:id/confirm-grading', protect, authorize('Judge'), async (req, res
 
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
-        const hasScore = photo.scores.some(s => s.judgeId === judgeId);
+        const hasScore = (photo.scores || []).some(s => s.judgeId === judgeId);
         if (!hasScore) {
           allGraded = false;
           pendingCount++;

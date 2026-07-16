@@ -447,8 +447,8 @@ router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
           fileSizeBytes: photo.fileSizeBytes,
           status: photo.status,
           rejectReason: photo.rejectReason,
-          assignedJudges: photo.assignedJudges,
-          scores: photo.scores,
+          assignedJudges: photo.assignedJudges || [],
+          scores: photo.scores || [],
           // Newly added fields
           cloudinaryPublicId: photo.cloudinaryPublicId,
           width: photo.width,
@@ -459,7 +459,7 @@ router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
           originalFilename: photo.originalFilename || '',
           uploadTimestamp: photo.uploadTimestamp || photo.createdAt,
           deletionStatus: photo.deletionStatus || false,
-          averageScore: photo.scores.length > 0
+          averageScore: (photo.scores && photo.scores.length > 0)
             ? parseFloat((photo.scores.reduce((acc, s) => acc + s.averageScore, 0) / photo.scores.length).toFixed(2))
             : 0
         });

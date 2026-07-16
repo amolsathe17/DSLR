@@ -71,8 +71,9 @@ router.get('/submissions', protect, authorize('Admin'), async (req, res) => {
     
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
-        const avgScore = photo.scores.length > 0
-          ? photo.scores.reduce((acc, s) => acc + s.averageScore, 0) / photo.scores.length
+        const scoresList = photo.scores || [];
+        const avgScore = scoresList.length > 0
+          ? scoresList.reduce((acc, s) => acc + s.averageScore, 0) / scoresList.length
           : 0;
         
         csv += `${escapeCSV(sub._id)},${escapeCSV(sub.userName)},${escapeCSV(sub.userEmail)},${escapeCSV(photo.id)},${escapeCSV(photo.title)},${escapeCSV(photo.category)},${escapeCSV(photo.cameraBrand)},${escapeCSV(photo.cameraModel)},${escapeCSV(photo.lensUsed)},${escapeCSV(photo.status)},${avgScore.toFixed(2)}\n`;

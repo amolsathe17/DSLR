@@ -43,11 +43,11 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), as
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
         if (photo.status === 'Rejected') return;
-        if (isAssignedToEvent || photo.assignedJudges.includes(judgeId)) {
+        if (isAssignedToEvent || (photo.assignedJudges && photo.assignedJudges.includes(judgeId))) {
           // If Admin, the "existingScore" can be the average score of all judges, or the first judge's score
           const existingScore = isAdmin 
             ? (photo.scores && photo.scores.length > 0 ? photo.scores[0] : null) 
-            : photo.scores.find(s => s.judgeId === judgeId);
+            : (photo.scores || []).find(s => s.judgeId === judgeId);
           
           assignedPhotos.push({
             submissionId: sub._id,
@@ -144,6 +144,10 @@ router.post('/score', protect, authorize('Judge'), async (req, res) => {
       remarks: remarks || '',
       gradedAt: new Date()
     };
+
+    if (!photo.scores) {
+      photo.scores = [];
+    }
 
     // Remove old score if exists and push new score
     const existingScoreIndex = photo.scores.findIndex(sc => sc.judgeId === judgeId);

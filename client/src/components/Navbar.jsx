@@ -37,7 +37,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/login" className="flex items-center gap-2 group">
+            <Link to="/login" state={{ forceContestant: true }} className="flex items-center gap-2 group">
               <img 
                 src="/sumbacontest.jpg" 
                 alt="SumbaContest Logo" 
@@ -167,6 +167,7 @@ export default function Navbar() {
               <div className="flex items-center gap-3">
                 <Link
                   to="/login"
+                  state={{ forceContestant: true }}
                   className="text-sm font-medium text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white px-3.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                 >
                   Login
@@ -306,6 +307,7 @@ export default function Navbar() {
                 <div className="grid grid-cols-2 gap-2 px-3">
                   <Link
                     to="/login"
+                    state={{ forceContestant: true }}
                     onClick={() => setIsOpen(false)}
                     className="text-center px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-md text-base font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50"
                   >

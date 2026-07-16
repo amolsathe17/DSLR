@@ -45,12 +45,14 @@ export default function Login() {
   const [loginRole, setLoginRole] = useState('Participant'); // 'Participant', 'Admin', 'Judge'
 
   useEffect(() => {
-    if (redirectPath === '/admin') {
+    if (location.state?.forceContestant) {
+      setLoginRole('Participant');
+    } else if (redirectPath === '/admin') {
       setLoginRole('Admin');
     } else if (redirectPath === '/judge') {
       setLoginRole('Judge');
     }
-  }, [redirectPath]);
+  }, [redirectPath, location.state]);
 
   const primaryBg = loginRole === 'Admin' 
     ? 'bg-amber-600' 

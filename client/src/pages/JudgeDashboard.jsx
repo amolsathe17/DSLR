@@ -19,8 +19,8 @@ export default function JudgeDashboard() {
   const [composition, setComposition] = useState(5);
   const [technicalQuality, setTechnicalQuality] = useState(5);
   const [storytelling, setStorytelling] = useState(5);
-  const [overallImpact, setOverallImpact] = useState(5);
   const [remarks, setRemarks] = useState('');
+  const [approvalStatus, setApprovalStatus] = useState('Approved');
 
   const [selectedSubmissionId, setSelectedSubmissionId] = useState('all');
   const [evaluationMode, setEvaluationMode] = useState('online'); // 'online' or 'offline'
@@ -104,7 +104,8 @@ export default function JudgeDashboard() {
           technicalQuality: val,
           storytelling: val,
           overallImpact: val,
-          remarks: p.score?.remarks ?? ''
+          remarks: p.score?.remarks ?? '',
+          approvalStatus: p.score?.approvalStatus ?? 'Approved'
         };
       });
       setOfflineScores(initial);
@@ -131,8 +132,14 @@ export default function JudgeDashboard() {
       technicalQuality: 5,
       storytelling: 5,
       overallImpact: 5,
-      remarks: ''
+      remarks: '',
+      approvalStatus: 'Approved'
     };
+    if (scores.approvalStatus === 'Disapproved' && (!scores.remarks || scores.remarks.trim() === '')) {
+      setError(`An explanation/remarks is required for the disapproved photograph: "${photo.title}".`);
+      setLoading(false);
+      return;
+    }
     try {
       const data = await apiFetch('/api/judges/score', {
         method: 'POST',
@@ -144,7 +151,8 @@ export default function JudgeDashboard() {
           technicalQuality: Number(scores.technicalQuality),
           storytelling: Number(scores.storytelling),
           overallImpact: Number(scores.overallImpact),
-          remarks: scores.remarks
+          remarks: scores.remarks,
+          approvalStatus: scores.approvalStatus || 'Approved'
         })
       });
       if (data.success) {
@@ -163,6 +171,24 @@ export default function JudgeDashboard() {
 
   const handleSaveAllOfflineScores = async () => {
     if (user?.role === 'Admin') return;
+    
+    // Check if any disapproved entry is missing remarks
+    for (const photo of photographs) {
+      const scores = offlineScores[photo.photoId] || {
+        creativity: 5,
+        composition: 5,
+        technicalQuality: 5,
+        storytelling: 5,
+        overallImpact: 5,
+        remarks: '',
+        approvalStatus: 'Approved'
+      };
+      if (scores.approvalStatus === 'Disapproved' && (!scores.remarks || scores.remarks.trim() === '')) {
+        setError(`An explanation/remarks is required for the disapproved photograph: "${photo.title}".`);
+        return;
+      }
+    }
+
     setLoading(true);
     setError('');
     try {
@@ -173,7 +199,8 @@ export default function JudgeDashboard() {
           technicalQuality: 5,
           storytelling: 5,
           overallImpact: 5,
-          remarks: ''
+          remarks: '',
+          approvalStatus: 'Approved'
         };
         return apiFetch('/api/judges/score', {
           method: 'POST',
@@ -185,7 +212,8 @@ export default function JudgeDashboard() {
             technicalQuality: Number(scores.technicalQuality),
             storytelling: Number(scores.storytelling),
             overallImpact: Number(scores.overallImpact),
-            remarks: scores.remarks
+            remarks: scores.remarks,
+            approvalStatus: scores.approvalStatus || 'Approved'
           })
         });
       });
@@ -212,6 +240,7 @@ export default function JudgeDashboard() {
       setStorytelling(photo.score.storytelling);
       setOverallImpact(photo.score.overallImpact);
       setRemarks(photo.score.remarks || '');
+      setApprovalStatus(photo.score.approvalStatus || 'Approved');
     } else {
       setCreativity(5);
       setComposition(5);
@@ -219,11 +248,16 @@ export default function JudgeDashboard() {
       setStorytelling(5);
       setOverallImpact(5);
       setRemarks('');
+      setApprovalStatus('Approved');
     }
   };
 
   const handleScoreSubmit = async (e) => {
     e.preventDefault();
+    if (approvalStatus === 'Disapproved' && (!remarks || remarks.trim() === '')) {
+      setError('An explanation/remarks is required when disapproving an entry.');
+      return;
+    }
     setLoading(true);
     setError('');
 
@@ -238,7 +272,8 @@ export default function JudgeDashboard() {
           technicalQuality,
           storytelling,
           overallImpact,
-          remarks
+          remarks,
+          approvalStatus
         })
       });
 
@@ -457,7 +492,7 @@ export default function JudgeDashboard() {
               ) : (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
+                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                           <th className="p-4">Photo</th>
@@ -465,6 +500,8 @@ export default function JudgeDashboard() {
                           <th className="p-4">Participant Name</th>
                           <th className="p-4">Category</th>
                           <th className="p-4 text-center">Avg</th>
+                          <th className="p-4">Approval</th>
+                          <th className="p-4">Explanation / Remarks</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -475,9 +512,11 @@ export default function JudgeDashboard() {
                             technicalQuality: 5,
                             storytelling: 5,
                             overallImpact: 5,
-                            remarks: ''
+                            remarks: '',
+                            approvalStatus: 'Approved'
                           };
                           const rowAvg = scores.creativity;
+                          const appStatus = scores.approvalStatus || 'Approved';
                           return (
                             <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
                               <td className="p-4">
@@ -520,6 +559,36 @@ export default function JudgeDashboard() {
                                     <option key={v} value={v}>{v}</option>
                                   ))}
                                 </select>
+                              </td>
+                              <td className="p-4">
+                                <select
+                                  disabled={user?.role === 'Admin' || hasConfirmed}
+                                  value={appStatus}
+                                  onChange={(e) => {
+                                    handleOfflineScoreChange(photo.photoId, 'approvalStatus', e.target.value);
+                                  }}
+                                  className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-1 text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                >
+                                  <option value="Approved">Approved</option>
+                                  <option value="Disapproved">Disapproved</option>
+                                </select>
+                              </td>
+                              <td className="p-4 min-w-[200px]">
+                                <input
+                                  type="text"
+                                  disabled={user?.role === 'Admin' || hasConfirmed}
+                                  value={scores.remarks || ''}
+                                  onChange={(e) => {
+                                    handleOfflineScoreChange(photo.photoId, 'remarks', e.target.value);
+                                  }}
+                                  placeholder={appStatus === 'Disapproved' ? 'Explanation required...' : 'Optional feedback...'}
+                                  required={appStatus === 'Disapproved'}
+                                  className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                                    appStatus === 'Disapproved' && (!scores.remarks || scores.remarks.trim() === '')
+                                      ? 'border-red-300 focus:ring-red-500 dark:border-red-900/45'
+                                      : 'border-slate-200 dark:border-slate-800'
+                                  }`}
+                                />
                               </td>
                             </tr>
                           );
@@ -738,13 +807,29 @@ export default function JudgeDashboard() {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="font-bold text-slate-700 dark:text-slate-200">Judge Remarks / Critiques</label>
+                        <label className="font-bold text-slate-700 dark:text-slate-200">Approval Status</label>
+                        <select
+                          value={approvalStatus}
+                          onChange={(e) => setApprovalStatus(e.target.value)}
+                          disabled={user?.role === 'Admin' || hasConfirmed}
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-[11px] font-semibold"
+                        >
+                          <option value="Approved">Approved</option>
+                          <option value="Disapproved">Disapproved</option>
+                        </select>
+                        {approvalStatus === 'Disapproved' && (
+                          <span className="text-[9px] text-red-500 font-semibold mt-0.5">⚠️ An explanation/remarks is required when disapproving.</span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="font-bold text-slate-700 dark:text-slate-200">Remarks / Explanation</label>
                         <textarea
                           value={remarks}
                           onChange={(e) => setRemarks(e.target.value)}
-                          placeholder={user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
+                          placeholder={approvalStatus === 'Disapproved' ? 'Please provide explanation for disapproval...' : user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
                           className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
-                          required={user?.role !== 'Admin' && !hasConfirmed}
+                          required={(user?.role !== 'Admin' && !hasConfirmed && approvalStatus === 'Disapproved') || (user?.role !== 'Admin' && !hasConfirmed)}
                           disabled={user?.role === 'Admin' || hasConfirmed}
                         />
                       </div>

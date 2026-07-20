@@ -560,19 +560,25 @@ router.get('/gallery', async (req, res) => {
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
         if (photo.status !== 'Rejected') {
-          approvedPhotos.push({
-            photoId: photo.id,
-            title: photo.title,
-            category: photo.category,
-            cameraBrand: photo.cameraBrand,
-            cameraModel: photo.cameraModel,
-            lensUsed: photo.lensUsed,
-            location: photo.location,
-            dateCaptured: photo.dateCaptured,
-            description: photo.description,
-            fileUrl: photo.fileUrl,
-            participantName: sub.userName
-          });
+          // Check if photo is approved by all evaluating judges
+          const hasScores = photo.scores && photo.scores.length > 0;
+          const allApproved = hasScores && photo.scores.every(s => s.approvalStatus === 'Approved');
+
+          if (allApproved) {
+            approvedPhotos.push({
+              photoId: photo.id,
+              title: photo.title,
+              category: photo.category,
+              cameraBrand: photo.cameraBrand,
+              cameraModel: photo.cameraModel,
+              lensUsed: photo.lensUsed,
+              location: photo.location,
+              dateCaptured: photo.dateCaptured,
+              description: photo.description,
+              fileUrl: photo.fileUrl,
+              participantName: sub.userName
+            });
+          }
         }
       });
     });

@@ -85,9 +85,13 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), as
 // @access  Private/Judge
 router.post('/score', protect, authorize('Judge'), async (req, res) => {
   try {
-    const { submissionId, photoId, creativity, composition, technicalQuality, storytelling, overallImpact, remarks } = req.body;
+    const { submissionId, photoId, creativity, composition, technicalQuality, storytelling, overallImpact, remarks, approvalStatus } = req.body;
     const judgeId = req.user._id.toString();
     const judgeName = req.user.name;
+
+    if (approvalStatus === 'Disapproved' && (!remarks || remarks.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Remarks/Explanation is required when disapproving an entry' });
+    }
 
     if (!submissionId || !photoId) {
       return res.status(400).json({ success: false, message: 'Submission ID and Photograph ID are required' });
@@ -142,6 +146,7 @@ router.post('/score', protect, authorize('Judge'), async (req, res) => {
       totalScore,
       averageScore,
       remarks: remarks || '',
+      approvalStatus: approvalStatus || 'Approved',
       gradedAt: new Date()
     };
 

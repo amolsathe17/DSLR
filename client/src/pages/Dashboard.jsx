@@ -971,6 +971,34 @@ export default function Dashboard() {
                           )}
                         </div>
 
+                        {/* Instant Disapproval / Explanation Feedback */}
+                        {photo.scores?.some(s => s.approvalStatus === 'Disapproved') && (
+                          <div className="mt-2 pt-2 border-t border-red-200/40 dark:border-red-900/20 text-[10px] bg-red-50/50 dark:bg-red-950/10 p-2.5 rounded-lg border border-red-100 dark:border-red-900/10">
+                            <span className="font-extrabold text-red-650 dark:text-red-450 flex items-center gap-1">
+                              ⚠️ Entry Disapproved by Judge
+                            </span>
+                            <div className="flex flex-col gap-1.5 mt-1 text-slate-600 dark:text-slate-400">
+                              {photo.scores
+                                .filter(s => s.approvalStatus === 'Disapproved')
+                                .map((s, idx) => (
+                                  <div key={idx} className="border-t border-red-100/30 dark:border-red-900/10 pt-1.5 first:border-0 first:pt-0">
+                                    <span className="font-bold text-[9px] text-slate-500 uppercase tracking-wider block">Explanation Remarks ({s.judgeName || 'Panel Judge'}):</span>
+                                    <p className="italic mt-0.5">"{s.remarks || 'No remarks provided.'}"</p>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Instant Approved Feedback */}
+                        {photo.scores?.length > 0 && photo.scores?.every(s => s.approvalStatus === 'Approved') && (
+                          <div className="mt-2 pt-2 border-t border-emerald-250/20 dark:border-emerald-900/20 text-[10px] bg-emerald-50/30 dark:bg-emerald-950/5 p-2 rounded-lg border border-emerald-100/50 dark:border-emerald-900/10">
+                            <span className="font-bold text-emerald-600 dark:text-emerald-450 flex items-center gap-1">
+                              ✓ Approved by Judge Panel
+                            </span>
+                          </div>
+                        )}
+
                         {/* Grading remarks if winner/judging completed */}
                         {event.winnersPublished && photo.scores?.length > 0 && (
                           <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-lg">

@@ -2923,6 +2923,27 @@ export default function AdminDashboard() {
                       )}
                     </div>
                   </div>
+
+                  {selectedPhoto.scores && selectedPhoto.scores.length > 0 && (
+                    <div className="flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                      <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Judge Evaluations ({selectedPhoto.scores.length})</span>
+                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                        {selectedPhoto.scores.map((score, sIdx) => (
+                          <div key={sIdx} className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-100 dark:border-slate-850 flex flex-col gap-1 text-[10px]">
+                            <div className="flex justify-between items-center font-bold">
+                              <span className="text-slate-800 dark:text-slate-200">{score.judgeName}</span>
+                              <span className={score.approvalStatus === 'Disapproved' ? 'text-red-500 font-extrabold' : 'text-emerald-500 font-extrabold'}>
+                                {score.approvalStatus || 'Approved'} ({score.averageScore}/10)
+                              </span>
+                            </div>
+                            {score.remarks && (
+                              <p className="italic text-slate-500 dark:text-slate-400 mt-0.5">"{score.remarks}"</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">

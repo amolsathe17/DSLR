@@ -29,6 +29,7 @@ const photographSchema = new mongoose.Schema({
     totalScore: { type: Number },      // sum (max 50)
     averageScore: { type: Number },    // avg (max 10)
     remarks: { type: String },
+    approvalStatus: { type: String, enum: ['Approved', 'Disapproved'], default: 'Approved' },
     gradedAt: { type: Date, default: Date.now }
   }],
   // Cloudinary and DSLR EXIF upgrades

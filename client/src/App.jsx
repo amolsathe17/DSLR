@@ -14,6 +14,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import JudgeDashboard from './pages/JudgeDashboard';
 import Gallery from './pages/Gallery';
 import About from './pages/About';
+import ScrollToTop from './components/ScrollToTop';
 
 // Route Guard for authenticated users
 function ProtectedRoute({ children }) {
@@ -57,6 +58,7 @@ function RoleRoute({ children, allowedRoles }) {
 function MainLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-300">
+      <ScrollToTop />
       <Navbar />
       <main className="flex-grow">
         <Routes>

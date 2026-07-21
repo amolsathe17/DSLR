@@ -4,8 +4,8 @@ import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, Hel
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function Gallery() {
-  const { apiFetch, user } = useAuth();
-  const [activeTab, setActiveTab] = useState('gallery'); // 'gallery' or 'winners'
+  const { apiFetch, user, loading: authLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState('winners'); // Default to winners for guests
   const [event, setEvent] = useState(null);
   const [photographs, setPhotographs] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -15,6 +15,13 @@ export default function Gallery() {
   
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Set default active tab based on user status when auth completes loading
+  useEffect(() => {
+    if (!authLoading) {
+      setActiveTab(user ? 'gallery' : 'winners');
+    }
+  }, [user, authLoading]);
 
   useEffect(() => {
     const fetchGalleryData = async () => {
@@ -89,17 +96,19 @@ export default function Gallery() {
 
         {/* Tab switchers */}
         <div className="flex justify-center border-b border-slate-200 dark:border-slate-800 max-w-xl mx-auto gap-8 mb-8">
-          <button
-            onClick={() => setActiveTab('gallery')}
-            className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'gallery'
-                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-          >
-            <Camera size={16} />
-            Approved Entries
-          </button>
+          {user && (
+            <button
+              onClick={() => setActiveTab('gallery')}
+              className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
+                activeTab === 'gallery'
+                  ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
+                  : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+              }`}
+            >
+              <Camera size={16} />
+              Approved Entries
+            </button>
+          )}
           {user && user.role === 'Admin' && (
             <button
               onClick={() => setActiveTab('disapproved')}
@@ -129,7 +138,7 @@ export default function Gallery() {
         </div>
 
         {/* TAB 1: APPROVED SUBMISSIONS */}
-        {activeTab === 'gallery' && (
+        {activeTab === 'gallery' && user && (
           <div className="flex flex-col gap-8 animate-in fade-in duration-200">
             {/* Filters Row */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">

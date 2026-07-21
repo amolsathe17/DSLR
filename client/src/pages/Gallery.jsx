@@ -100,17 +100,19 @@ export default function Gallery() {
             <Camera size={16} />
             Approved Entries
           </button>
-          <button
-            onClick={() => setActiveTab('disapproved')}
-            className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'disapproved'
-                ? 'border-red-500 text-red-650 dark:text-red-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-          >
-            <Flag size={16} className={activeTab === 'disapproved' ? 'text-red-500' : 'text-slate-400'} />
-            Disapproved Entries
-          </button>
+          {user && user.role === 'Admin' && (
+            <button
+              onClick={() => setActiveTab('disapproved')}
+              className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
+                activeTab === 'disapproved'
+                  ? 'border-red-500 text-red-650 dark:text-red-400 font-bold'
+                  : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+              }`}
+            >
+              <Flag size={16} className={activeTab === 'disapproved' ? 'text-red-500' : 'text-slate-400'} />
+              Disapproved Entries
+            </button>
+          )}
           {(!user || user.role !== 'Participant' || event?.winnersPublished) && (
             <button
               onClick={() => setActiveTab('winners')}
@@ -222,7 +224,7 @@ export default function Gallery() {
         )}
 
         {/* TAB 1.5: DISAPPROVED SUBMISSIONS */}
-        {activeTab === 'disapproved' && (
+        {activeTab === 'disapproved' && user && user.role === 'Admin' && (
           <div className="flex flex-col gap-8 animate-in fade-in duration-200">
             {/* Filters Row */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">

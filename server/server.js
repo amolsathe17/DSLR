@@ -66,6 +66,19 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/contest-types", contestTypeRoutes);
 
+// Favicon handler to prevent console 404 errors
+app.get("/favicon.ico", (req, res) => {
+  const distPath = path.join(__dirname, "..", "client", "dist", "favicon.ico");
+  if (fs.existsSync(distPath)) {
+    return res.sendFile(distPath);
+  }
+  const publicPath = path.join(__dirname, "..", "client", "public", "favicon.ico");
+  if (fs.existsSync(publicPath)) {
+    return res.sendFile(publicPath);
+  }
+  res.status(204).end();
+});
+
 // Health Check Route
 app.get("/api/health", (req, res) => {
   res.json({

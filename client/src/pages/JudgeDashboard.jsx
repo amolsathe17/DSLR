@@ -928,23 +928,9 @@ export default function JudgeDashboard() {
             </button>
 
             {/* Left Side: Photo Zoom Detailed View */}
-            <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden">
+            <div className="flex-1 bg-slate-950 flex flex-col justify-center p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden">
               <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
                 <WatermarkPreview src={offlineZoomPhoto.fileUrl} className="w-full h-[72vh] rounded-lg shadow-lg" enableZoom={true} />
-              </div>
-              
-              <div className="w-full mt-4 flex flex-col gap-1 text-xs text-slate-300 text-left pb-6">
-                <h4 className="font-display font-extrabold text-sm text-white">{offlineZoomPhoto.title}</h4>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-400">
-                  <span>Category: <span className="font-bold text-slate-350">{offlineZoomPhoto.category}</span></span>
-                  <span>•</span>
-                  <span>Photographer: <span className="font-bold text-slate-350">{offlineZoomPhoto.participantName}</span></span>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-400">
-                  <span>Camera: <span className="font-semibold text-slate-300">{offlineZoomPhoto.cameraBrand} {offlineZoomPhoto.cameraModel}</span></span>
-                  <span>•</span>
-                  <span>Lens: <span className="font-semibold text-slate-300">{offlineZoomPhoto.lensUsed || 'N/A'}</span></span>
-                </div>
               </div>
             </div>
 

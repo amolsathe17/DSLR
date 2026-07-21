@@ -109,7 +109,7 @@ export default function Gallery() {
               Approved Entries
             </button>
           )}
-          {user && user.role === 'Admin' && (
+          {user && (user.role === 'Admin' || user.role === 'Participant') && (
             <button
               onClick={() => setActiveTab('disapproved')}
               className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
@@ -233,7 +233,7 @@ export default function Gallery() {
         )}
 
         {/* TAB 1.5: DISAPPROVED SUBMISSIONS */}
-        {activeTab === 'disapproved' && user && user.role === 'Admin' && (
+        {activeTab === 'disapproved' && user && (user.role === 'Admin' || user.role === 'Participant') && (
           <div className="flex flex-col gap-8 animate-in fade-in duration-200">
             {/* Filters Row */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">

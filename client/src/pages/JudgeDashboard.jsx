@@ -904,7 +904,7 @@ export default function JudgeDashboard() {
       {/* OFFLINE EVALUATION: ZOOM MODE MODAL (NO GRADING SHEET) */}
       {offlineZoomPhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col p-6 my-8 max-h-[90vh]">
+          <div className="relative w-full max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col p-6 my-8 max-h-[90vh]">
             
             {/* Close button */}
             <button
@@ -915,9 +915,9 @@ export default function JudgeDashboard() {
             </button>
 
             {/* Photo Zoom Detailed View */}
-            <div className="bg-slate-950 flex flex-col justify-between p-6 rounded-2xl relative min-h-[400px] lg:min-h-[580px] w-full overflow-hidden">
+            <div className="bg-slate-950 flex flex-col justify-between p-6 rounded-2xl relative min-h-[400px] lg:min-h-[660px] w-full overflow-hidden">
               <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
-                <WatermarkPreview src={offlineZoomPhoto.fileUrl} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
+                <WatermarkPreview src={offlineZoomPhoto.fileUrl} className="w-full h-full max-h-[76vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
               </div>
               
               <div className="w-full mt-4 flex flex-col gap-1 text-xs text-slate-350 text-left">

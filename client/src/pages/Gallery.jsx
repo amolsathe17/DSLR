@@ -4,7 +4,7 @@ import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, Hel
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function Gallery() {
-  const { apiFetch } = useAuth();
+  const { apiFetch, user } = useAuth();
   const [activeTab, setActiveTab] = useState('gallery'); // 'gallery' or 'winners'
   const [event, setEvent] = useState(null);
   const [photographs, setPhotographs] = useState([]);
@@ -43,6 +43,12 @@ export default function Gallery() {
   }, []);
 
   const filteredPhotos = photographs.filter(p => {
+    // If logged in as Participant, only see own photos
+    if (user && user.role === 'Participant') {
+      const isOwnPhoto = p.userId === user._id || p.participantEmail === user.email;
+      if (!isOwnPhoto) return false;
+    }
+
     const matchesSearch = 
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.participantName.toLowerCase().includes(search.toLowerCase()) ||
@@ -105,17 +111,19 @@ export default function Gallery() {
             <Flag size={16} className={activeTab === 'disapproved' ? 'text-red-500' : 'text-slate-400'} />
             Disapproved Entries
           </button>
-          <button
-            onClick={() => setActiveTab('winners')}
-            className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'winners'
-                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-          >
-            <Award size={16} />
-            Winners Circle
-          </button>
+          {(!user || user.role !== 'Participant' || event?.winnersPublished) && (
+            <button
+              onClick={() => setActiveTab('winners')}
+              className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
+                activeTab === 'winners'
+                  ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
+                  : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+              }`}
+            >
+              <Award size={16} />
+              Winners Circle
+            </button>
+          )}
         </div>
 
         {/* TAB 1: APPROVED SUBMISSIONS */}

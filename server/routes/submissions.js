@@ -574,6 +574,8 @@ router.get('/gallery', async (req, res) => {
               description: photo.description,
               fileUrl: photo.fileUrl,
               participantName: sub.userName,
+              participantEmail: sub.userEmail,
+              userId: sub.userId ? sub.userId.toString() : '',
               scores: photo.scores || []
             });
           }

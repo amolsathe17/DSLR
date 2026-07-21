@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, HelpCircle, Flag, MessageSquare, AlertTriangle } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function Gallery() {
@@ -82,7 +82,7 @@ export default function Gallery() {
         </div>
 
         {/* Tab switchers */}
-        <div className="flex justify-center border-b border-slate-200 dark:border-slate-800 max-w-md mx-auto gap-8 mb-8">
+        <div className="flex justify-center border-b border-slate-200 dark:border-slate-800 max-w-xl mx-auto gap-8 mb-8">
           <button
             onClick={() => setActiveTab('gallery')}
             className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
@@ -93,6 +93,17 @@ export default function Gallery() {
           >
             <Camera size={16} />
             Approved Entries
+          </button>
+          <button
+            onClick={() => setActiveTab('disapproved')}
+            className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
+              activeTab === 'disapproved'
+                ? 'border-red-500 text-red-650 dark:text-red-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+            }`}
+          >
+            <Flag size={16} className={activeTab === 'disapproved' ? 'text-red-500' : 'text-slate-400'} />
+            Disapproved Entries
           </button>
           <button
             onClick={() => setActiveTab('winners')}
@@ -136,63 +147,188 @@ export default function Gallery() {
             </div>
 
             {/* Gallery Grid */}
-            {filteredPhotos.length === 0 ? (
-              <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">
-                <Camera size={36} className="mx-auto mb-2 text-slate-300" />
-                <p className="text-sm font-semibold">No photographs to display.</p>
-                <p className="text-xs text-slate-500 mt-1">Check back later once submissions are processed.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPhotos.map(photo => (
-                  <div
-                    key={photo.photoId}
-                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col group"
-                  >
-                    <div className="relative overflow-hidden aspect-video">
-                      <img
-                        src={photo.fileUrl}
-                        alt={photo.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <button
-                        onClick={() => setSelectedPhoto(photo)}
-                        className="absolute top-3 right-3 p-1.5 bg-slate-950/60 hover:bg-slate-950 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      >
-                        <Maximize2 size={14} />
-                      </button>
-                    </div>
-
-                    <div className="p-4 flex flex-col gap-3 justify-between flex-grow">
-                      <div>
-                        <div className="flex justify-between items-start gap-2">
-                          <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
-                            {photo.title}
-                          </h3>
-                          <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-bold text-slate-500">
-                            {photo.category}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-semibold mt-1">
-                          By {photo.participantName}
-                        </p>
-                      </div>
-
-                      {/* Exif details footer */}
-                      <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center text-[9px] text-slate-450 uppercase tracking-wider font-bold">
-                        <span>{photo.cameraBrand} {photo.cameraModel}</span>
+            {(() => {
+              const approvedPhotos = filteredPhotos.filter(p => !p.scores || p.scores.every(s => s.approvalStatus === 'Approved'));
+              if (approvedPhotos.length === 0) {
+                return (
+                  <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">
+                    <Camera size={36} className="mx-auto mb-2 text-slate-300" />
+                    <p className="text-sm font-semibold">No approved photographs to display.</p>
+                    <p className="text-xs text-slate-500 mt-1">Check back later once submissions are processed.</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {approvedPhotos.map(photo => (
+                    <div
+                      key={photo.photoId}
+                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col group"
+                    >
+                      <div className="relative overflow-hidden aspect-video">
+                        <img
+                          src={photo.fileUrl}
+                          alt={photo.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
                         <button
                           onClick={() => setSelectedPhoto(photo)}
-                          className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                          className="absolute top-3 right-3 p-1.5 bg-slate-950/60 hover:bg-slate-950 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         >
-                          View Details
+                          <Maximize2 size={14} />
                         </button>
                       </div>
+
+                      <div className="p-4 flex flex-col gap-3 justify-between flex-grow">
+                        <div>
+                          <div className="flex justify-between items-start gap-2">
+                            <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
+                              {photo.title}
+                            </h3>
+                            <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-bold text-slate-500">
+                              {photo.category}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-400 font-semibold mt-1">
+                            By {photo.participantName}
+                          </p>
+                        </div>
+
+                        {/* Exif details footer */}
+                        <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center text-[9px] text-slate-450 uppercase tracking-wider font-bold">
+                          <span>{photo.cameraBrand} {photo.cameraModel}</span>
+                          <button
+                            onClick={() => setSelectedPhoto(photo)}
+                            className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* TAB 1.5: DISAPPROVED SUBMISSIONS */}
+        {activeTab === 'disapproved' && (
+          <div className="flex flex-col gap-8 animate-in fade-in duration-200">
+            {/* Filters Row */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+              <div className="relative w-full sm:max-w-xs">
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search title, camera, photographer..."
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                />
               </div>
-            )}
+
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full sm:w-auto px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-semibold"
+              >
+                <option value="">All Categories</option>
+                {categories.map(c => (
+                  <option key={c._id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Gallery Grid */}
+            {(() => {
+              const disapprovedPhotos = filteredPhotos.filter(p => p.scores && p.scores.some(s => s.approvalStatus === 'Disapproved'));
+              if (disapprovedPhotos.length === 0) {
+                return (
+                  <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">
+                    <Flag size={36} className="mx-auto mb-2 text-slate-350" />
+                    <p className="text-sm font-semibold">No disapproved photographs to display.</p>
+                    <p className="text-xs text-slate-500 mt-1">Excellent! No entries have been disapproved by judges.</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {disapprovedPhotos.map(photo => {
+                    const disapprovals = photo.scores.filter(s => s.approvalStatus === 'Disapproved');
+                    return (
+                      <div
+                        key={photo.photoId}
+                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col group justify-between"
+                      >
+                        <div className="relative overflow-hidden aspect-video">
+                          <img
+                            src={photo.fileUrl}
+                            alt={photo.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
+                          />
+                          <span className="absolute top-3 left-3 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                            <Flag size={9} className="fill-white" /> Disapproved
+                          </span>
+                          <button
+                            onClick={() => setSelectedPhoto(photo)}
+                            className="absolute top-3 right-3 p-1.5 bg-slate-950/60 hover:bg-slate-950 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                          >
+                            <Maximize2 size={14} />
+                          </button>
+                        </div>
+
+                        <div className="p-4 flex flex-col gap-3 justify-between flex-grow">
+                          <div>
+                            <div className="flex justify-between items-start gap-2">
+                              <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
+                                {photo.title}
+                              </h3>
+                              <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-bold text-slate-500">
+                                {photo.category}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-semibold mt-1">
+                              By {photo.participantName}
+                            </p>
+
+                            {/* Disapproval reasons */}
+                            <div className="mt-3 flex flex-col gap-1.5 border border-red-200/50 dark:border-red-900/30 rounded-xl p-2.5 bg-red-50/40 dark:bg-red-950/10">
+                              <span className="text-[9px] font-bold text-red-655 dark:text-red-400 uppercase tracking-wide flex items-center gap-1">
+                                <AlertTriangle size={10} className="text-red-500 shrink-0" />
+                                <span>Judge Remarks:</span>
+                              </span>
+                              {disapprovals.map((s, i) => (
+                                <div key={i} className="text-[9px] border-t border-red-150/40 dark:border-red-900/20 pt-1.5 first:border-0 first:pt-0">
+                                  <span className="font-bold text-red-600">✗ {s.judgeName || 'Judge'}:</span>
+                                  {s.remarks ? (
+                                    <p className="italic text-red-500 dark:text-red-300 mt-0.5 leading-snug">"{s.remarks}"</p>
+                                  ) : (
+                                    <p className="italic text-red-450 dark:text-red-350 mt-0.5">No comments left.</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Exif details footer */}
+                          <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center text-[9px] text-slate-450 uppercase tracking-wider font-bold">
+                            <span>{photo.cameraBrand} {photo.cameraModel}</span>
+                            <button
+                              onClick={() => setSelectedPhoto(photo)}
+                              className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                            >
+                              View Details
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         )}
 

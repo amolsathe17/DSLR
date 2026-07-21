@@ -555,17 +555,14 @@ router.get('/gallery', async (req, res) => {
         { eventId: { $in: completedEventIds } }
       ]
     });
-    const approvedPhotos = [];
+    const photos = [];
 
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
         if (photo.status !== 'Rejected') {
-          // Check if photo is approved by all evaluating judges
           const hasScores = photo.scores && photo.scores.length > 0;
-          const allApproved = hasScores && photo.scores.every(s => s.approvalStatus === 'Approved');
-
-          if (allApproved) {
-            approvedPhotos.push({
+          if (hasScores) {
+            photos.push({
               photoId: photo.id,
               title: photo.title,
               category: photo.category,
@@ -576,14 +573,15 @@ router.get('/gallery', async (req, res) => {
               dateCaptured: photo.dateCaptured,
               description: photo.description,
               fileUrl: photo.fileUrl,
-              participantName: sub.userName
+              participantName: sub.userName,
+              scores: photo.scores || []
             });
           }
         }
       });
     });
 
-    res.json({ success: true, photographs: approvedPhotos });
+    res.json({ success: true, photographs: photos });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

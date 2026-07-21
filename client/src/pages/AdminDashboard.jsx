@@ -1560,6 +1560,11 @@ export default function AdminDashboard() {
                     crossOrigin="anonymous"
                     referrerPolicy="no-referrer"
                   />
+                  {photo.scores && photo.scores.some(s => s.approvalStatus === 'Disapproved') && (
+                    <span className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm animate-pulse">
+                      <Flag size={9} className="fill-white" /> Disapproved
+                    </span>
+                  )}
                   <button
                     onClick={() => setSelectedPhoto(photo)}
                     className="absolute top-2 right-2 p-1.5 bg-slate-950/60 hover:bg-slate-950 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1589,7 +1594,29 @@ export default function AdminDashboard() {
                       <p>Capture Date: <span className="font-semibold text-slate-700 dark:text-slate-350">{photo.dateCaptured ? new Date(photo.dateCaptured).toLocaleDateString() : 'N/A'}</span></p>
                       <p>Raw File: <span className={`font-bold ${photo.rawFileUrl ? 'text-emerald-500' : 'text-slate-400'}`}>{photo.rawFileUrl ? 'Available (.RAW)' : 'None Provided'}</span></p>
                     </div>
-                          {/* Action/Audit elements removed as responsibility belongs to Judges */}              </div>
+
+                    {/* Judge Disapproval Remarks section */}
+                    {photo.scores && photo.scores.some(s => s.approvalStatus === 'Disapproved') && (
+                      <div className="mt-2.5 flex flex-col gap-1.5 border border-red-200/50 dark:border-red-900/30 rounded-xl p-2.5 bg-red-50/40 dark:bg-red-950/10">
+                        <span className="text-[10px] font-bold text-red-650 dark:text-red-400 uppercase tracking-wide flex items-center gap-1">
+                          <AlertTriangle size={10} className="text-red-500 shrink-0" />
+                          <span>Judge Disapproval Remarks:</span>
+                        </span>
+                        {photo.scores
+                          .filter(s => s.approvalStatus === 'Disapproved')
+                          .map((s, i) => (
+                            <div key={i} className="text-[9px] border-t border-red-150/40 dark:border-red-900/20 pt-1.5 first:border-0 first:pt-0">
+                              <span className="font-bold text-red-600">✗ {s.judgeName || 'Judge'}:</span>
+                              {s.remarks ? (
+                                <p className="italic text-red-500 mt-0.5">"{s.remarks}"</p>
+                              ) : (
+                                <p className="italic text-red-450 mt-0.5">No comments left.</p>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

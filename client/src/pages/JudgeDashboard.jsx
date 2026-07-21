@@ -741,7 +741,7 @@ export default function JudgeDashboard() {
                           <WatermarkPreview src={activePhoto.fileUrl} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
                         </div>
                         
-                        <div className="w-full mt-4 flex flex-col gap-1 text-xs text-slate-300 text-left">
+                        <div className="w-full mt-4 flex flex-col gap-1 text-xs text-slate-300 text-left pb-6">
                           <h4 className="font-display font-extrabold text-sm text-white">{activePhoto.title}</h4>
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-400">
                             <span>Category: <span className="font-bold text-slate-350">{activePhoto.category}</span></span>
@@ -761,6 +761,16 @@ export default function JudgeDashboard() {
                         <div>
                           <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Grading Sheet</h3>
                           <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{activePhoto.title}"</span>
+                        </div>
+
+                        {/* Photo Description Section */}
+                        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col gap-2 shadow-sm">
+                          <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
+                            Photo Description
+                          </span>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed font-medium italic">
+                            "{activePhoto.description || 'No description provided by the photographer.'}"
+                          </p>
                         </div>
 
                         <form onSubmit={handleScoreSubmit} className="flex flex-col gap-4 text-xs">
@@ -901,10 +911,10 @@ export default function JudgeDashboard() {
         </>
     )}
 
-      {/* OFFLINE EVALUATION: ZOOM MODE MODAL (NO GRADING SHEET) */}
+      {/* OFFLINE EVALUATION: ZOOM MODE MODAL WITH DETAILS SIDEBAR */}
       {offlineZoomPhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col p-6 my-8 max-h-[90vh]">
+          <div className="relative w-full max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col lg:flex-row my-8 max-h-[90vh]">
             
             {/* Close button */}
             <button
@@ -914,13 +924,13 @@ export default function JudgeDashboard() {
               <X size={20} />
             </button>
 
-            {/* Photo Zoom Detailed View */}
-            <div className="bg-slate-950 flex flex-col justify-between p-6 rounded-2xl relative min-h-[400px] lg:min-h-[660px] w-full overflow-hidden">
+            {/* Left Side: Photo Zoom Detailed View */}
+            <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden">
               <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
                 <WatermarkPreview src={offlineZoomPhoto.fileUrl} className="w-full h-[72vh] rounded-lg shadow-lg" enableZoom={true} />
               </div>
               
-              <div className="w-full mt-4 flex flex-col gap-1 text-xs text-slate-350 text-left">
+              <div className="w-full mt-4 flex flex-col gap-1 text-xs text-slate-305 text-left pb-6">
                 <h4 className="font-display font-extrabold text-sm text-white">{offlineZoomPhoto.title}</h4>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-400">
                   <span>Category: <span className="font-bold text-slate-300">{offlineZoomPhoto.category}</span></span>
@@ -934,6 +944,50 @@ export default function JudgeDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* Right Side: Details & Description Panel (same width w-[380px]) */}
+            <div className="w-full lg:w-[380px] shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 p-6 overflow-y-auto max-h-[90vh] text-left flex flex-col gap-5 bg-slate-50/30 dark:bg-slate-900/30">
+              <div>
+                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Photo Details</h3>
+                <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{offlineZoomPhoto.title}"</span>
+              </div>
+
+              {/* Photo Description Section */}
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col gap-2 shadow-sm">
+                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
+                  Photo Description
+                </span>
+                <p className="text-[11px] text-slate-655 dark:text-slate-300 leading-relaxed font-medium italic">
+                  "{offlineZoomPhoto.description || 'No description provided by the photographer.'}"
+                </p>
+              </div>
+
+              {/* Photo Metadata Info */}
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col gap-2.5 shadow-sm text-[11px]">
+                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider block">
+                  Submission Details
+                </span>
+                <div className="flex flex-col gap-2 mt-1">
+                  <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/40 pb-1.5">
+                    <span className="text-slate-400">Category</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{offlineZoomPhoto.category}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/40 pb-1.5">
+                    <span className="text-slate-400">Photographer</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{offlineZoomPhoto.participantName}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/40 pb-1.5">
+                    <span className="text-slate-400">Camera</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{offlineZoomPhoto.cameraBrand} {offlineZoomPhoto.cameraModel}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Lens</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-200 truncate max-w-[180px]">{offlineZoomPhoto.lensUsed || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       )}

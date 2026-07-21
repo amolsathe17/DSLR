@@ -259,6 +259,10 @@ export default function AdminDashboard() {
   const [suspendTargetName, setSuspendTargetName] = useState('');
   const [suspendRemarks, setSuspendRemarks] = useState('');
 
+  // Edit background image states
+  const [editLoginBgUrl, setEditLoginBgUrl] = useState('');
+  const [uploadingEditBg, setUploadingEditBg] = useState(false);
+
   const triggerSuccessModal = (title, message) => {
     setGeneralSuccessTitle(title);
     setGeneralSuccessMsg(message);
@@ -831,6 +835,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleEditLoginBgUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('loginBg', file);
+
+    setUploadingEditBg(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}/api/events/upload-bg`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+      const data = await response.json();
+      if (data.success) {
+        setEditLoginBgUrl(data.fileUrl);
+      } else {
+        alert(data.message || 'Upload failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error uploading login background image');
+    } finally {
+      setUploadingEditBg(false);
+    }
+  };
+
   const handleDownloadBackup = async (backup) => {
     const fileUrl = backup.backupPath.startsWith('http') 
       ? backup.backupPath 
@@ -971,6 +1005,7 @@ export default function AdminDashboard() {
     
     const toD = e.exhibitionToDate ? new Date(e.exhibitionToDate).toISOString().split('T')[0] : '';
     setEditExhibitionToDate(toD);
+    setEditLoginBgUrl(e.loginBgUrl || '');
     
     const p1 = e.prizes && e.prizes.find(p => p.rank === '1st Prize');
     setEditPrize1Reward(p1 ? p1.reward : '');
@@ -1023,6 +1058,7 @@ export default function AdminDashboard() {
           hasExhibition: editHasExhibition,
           exhibitionFromDate: editHasExhibition && editExhibitionFromDate ? new Date(editExhibitionFromDate) : null,
           exhibitionToDate: editHasExhibition && editExhibitionToDate ? new Date(editExhibitionToDate) : null,
+          loginBgUrl: editLoginBgUrl || null,
           prizes: [
             { rank: '1st Prize', reward: editPrize1Reward, description: 'Winner of the Championship Title' },
             { rank: '2nd Prize', reward: editPrize2Reward, description: 'Runner-up of the Championship' },
@@ -3662,6 +3698,33 @@ export default function AdminDashboard() {
                       <option key={ct._id} value={ct.name}>{ct.name}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">Login Page Background Image</label>
+                <div className="flex items-center gap-2">
+                  <label className="flex-1 flex items-center justify-center px-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-350 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
+                    <span className="text-[11px] text-slate-500 truncate">
+                      {uploadingEditBg ? 'Uploading...' : editLoginBgUrl ? 'Image Uploaded ✓' : 'Upload Image (PNG/JPG)'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditLoginBgUpload}
+                      className="hidden"
+                      disabled={uploadingEditBg}
+                    />
+                  </label>
+                  {editLoginBgUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setEditLoginBgUrl('')}
+                      className="text-[10px] text-red-500 hover:underline cursor-pointer font-semibold shrink-0"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
               </div>
 

@@ -248,7 +248,19 @@ router.get('/participants', protect, authorize('Admin'), async (req, res) => {
     // Fetch submission packages and payment statuses for each participant
     const detailedParticipants = await Promise.all(participants.map(async (p) => {
       const submission = await Submission.findOne({ userId: p._id.toString() });
-      const payment = await Payment.findOne({ userId: p._id.toString(), status: 'Success' });
+      const payment = await Payment.findOne({ userId: p._id.toString() }).sort({ createdAt: -1 });
+      
+      let computedPaymentStatus = 'Unpaid';
+      if (submission && submission.paymentStatus) {
+        computedPaymentStatus = submission.paymentStatus;
+      } else if (payment) {
+        if (payment.status === 'Success') computedPaymentStatus = 'Paid';
+        else if (payment.status === 'Refunded') computedPaymentStatus = 'Refunded';
+        else if (payment.status === 'Failed') computedPaymentStatus = 'Failed';
+      } else if (submission?.paymentId) {
+        computedPaymentStatus = 'Pending';
+      }
+
       return {
         _id: p._id,
         name: p.name,
@@ -262,7 +274,7 @@ router.get('/participants', protect, authorize('Admin'), async (req, res) => {
         lastLogin: p.lastLogin,
         packageId: submission ? submission.packageId : 'None',
         isFinalSubmitted: submission ? submission.isFinalSubmitted : false,
-        paymentStatus: payment ? 'Paid' : (submission?.paymentId ? 'Pending' : 'Unpaid'),
+        paymentStatus: computedPaymentStatus,
         photosCount: submission ? submission.photographs.length : 0,
         // Entry metadata
         entryNumber: submission ? submission.entryNumber : 'N/A',

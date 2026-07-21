@@ -313,21 +313,18 @@ export default function Gallery() {
                             </p>
 
                             {/* Disapproval reasons */}
-                            <div className="mt-3 flex flex-col gap-1.5 border border-red-200/50 dark:border-red-900/30 rounded-xl p-2.5 bg-red-50/40 dark:bg-red-950/10">
-                              <span className="text-[9px] font-bold text-red-655 dark:text-red-400 uppercase tracking-wide flex items-center gap-1">
-                                <AlertTriangle size={10} className="text-red-500 shrink-0" />
-                                <span>Judge Remarks:</span>
+                            <div className="mt-2 pt-2 border-t border-red-200/40 dark:border-red-900/20 text-[10px] bg-red-50/50 dark:bg-red-950/10 p-2.5 rounded-lg border border-red-100 dark:border-red-900/10">
+                              <span className="font-extrabold text-red-650 dark:text-red-455 flex items-center gap-1">
+                                ⚠️ Entry Disapproved by Judge
                               </span>
-                              {disapprovals.map((s, i) => (
-                                <div key={i} className="text-[9px] border-t border-red-150/40 dark:border-red-900/20 pt-1.5 first:border-0 first:pt-0">
-                                  <span className="font-bold text-red-600">✗ {s.judgeName || 'Judge'}:</span>
-                                  {s.remarks ? (
-                                    <p className="italic text-red-500 dark:text-red-300 mt-0.5 leading-snug">"{s.remarks}"</p>
-                                  ) : (
-                                    <p className="italic text-red-450 dark:text-red-350 mt-0.5">No comments left.</p>
-                                  )}
-                                </div>
-                              ))}
+                              <div className="flex flex-col gap-1.5 mt-1 text-slate-650 dark:text-slate-400">
+                                {disapprovals.map((s, idx) => (
+                                  <div key={idx} className="border-t border-red-100/30 dark:border-red-900/10 pt-1.5 first:border-0 first:pt-0">
+                                    <span className="font-bold text-[9px] text-slate-500 uppercase tracking-wider block">Explanation Remarks ({s.judgeName || 'Panel Judge'}):</span>
+                                    <p className="italic mt-0.5">"{s.remarks || 'No remarks provided.'}"</p>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
 

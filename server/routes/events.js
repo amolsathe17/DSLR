@@ -458,7 +458,11 @@ router.post('/:id/confirm-grading', protect, authorize('Judge'), async (req, res
 
     // Double check that all finalized entries have been graded by this judge
     const Submission = require('../models/Submission');
-    const submissions = await Submission.find({ eventId: event._id.toString(), isFinalSubmitted: true });
+    const submissions = await Submission.find({ 
+      eventId: event._id.toString(), 
+      isFinalSubmitted: true,
+      paymentStatus: 'Paid'
+    });
     
     let allGraded = true;
     let pendingCount = 0;

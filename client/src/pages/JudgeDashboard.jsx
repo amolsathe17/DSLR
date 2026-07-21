@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Camera, ShieldAlert, Award, Star, CheckCircle2, ChevronRight, X, Check, AlertTriangle, Clock } from 'lucide-react';
+import { Camera, ShieldAlert, Award, Star, CheckCircle2, ChevronRight, X, Check, AlertTriangle, Clock, XCircle } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function JudgeDashboard() {
@@ -686,10 +686,17 @@ export default function JudgeDashboard() {
                           <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center">
                             <div>
                               {photo.graded ? (
-                                <span className="text-[9px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 border border-emerald-100">
-                                  <CheckCircle2 size={10} />
-                                  Graded ({photo.score.averageScore}/10)
-                                </span>
+                                photo.score?.approvalStatus === 'Disapproved' ? (
+                                  <span className="text-[9px] bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-450 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 border border-rose-100">
+                                    <XCircle size={10} className="text-rose-500" />
+                                    Disapproved
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 border border-emerald-100">
+                                    <CheckCircle2 size={10} />
+                                    Graded ({photo.score.averageScore}/10)
+                                  </span>
+                                )
                               ) : (
                                 <span className="text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold">
                                   Ungraded
@@ -701,7 +708,7 @@ export default function JudgeDashboard() {
                               onClick={() => handleOpenScoring(photo)}
                               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg flex items-center gap-0.5 cursor-pointer shadow-sm"
                             >
-                              {hasConfirmed ? 'View Grade' : photo.graded ? 'Edit Grade' : 'Score Photo'}
+                              {hasConfirmed || photo.score?.approvalStatus === 'Disapproved' ? 'View Grade' : photo.graded ? 'Edit Grade' : 'Score Photo'}
                               <ChevronRight size={14} />
                             </button>
                           </div>
@@ -710,147 +717,156 @@ export default function JudgeDashboard() {
                     ))}
                   </div>
                 )}
-
               </div>
 
               {/* Right Column: Scoring Sheet Drawer */}
               <div className="lg:col-span-4">
-                {activePhoto ? (
-                  <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-md flex flex-col gap-6 animate-in slide-in-from-right-4 duration-200 sticky top-20">
-                    <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-                      <div>
-                        <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Grading Sheet</h3>
-                        <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{activePhoto.title}"</span>
-                      </div>
-                      <button
-                        onClick={() => setActivePhoto(null)}
-                        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-
-                    <form onSubmit={handleScoreSubmit} className="flex flex-col gap-4 text-xs">
-                      
-                      {/* Admin judge reviews inspector */}
-                      {user?.role === 'Admin' && activePhoto.allScores && activePhoto.allScores.length > 0 && (
-                        <div className="flex flex-col gap-2 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 rounded-2xl">
-                          <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-wider block">
-                            Judge Evaluations ({activePhoto.allScores.length})
-                          </span>
-                          <div className="flex flex-col gap-2 mt-1">
-                            {activePhoto.allScores.map((s, sIdx) => (
-                              <div 
-                                key={sIdx} 
-                                onClick={() => {
-                                  setCreativity(s.creativity || 5);
-                                  setComposition(s.composition || 5);
-                                  setTechnicalQuality(s.technicalQuality || 5);
-                                  setStorytelling(s.storytelling || 5);
-                                  setOverallImpact(s.overallImpact || 5);
-                                  setRemarks(s.remarks || '');
-                                }}
-                                className="flex justify-between items-center text-[10px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer hover:border-indigo-400 transition-colors"
-                                title="Click to view details in sliders"
-                              >
-                                <div className="text-left">
-                                  <p className="font-bold text-slate-800 dark:text-white">{s.judgeName}</p>
-                                  <p className="text-[8px] text-slate-400 truncate max-w-[150px]">"{s.remarks || 'No remarks'}"</p>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <span className="font-black text-indigo-600 dark:text-indigo-400">{s.averageScore}/10</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Scoring criteria sliders */}
-                      {[
-                        { label: 'Creativity (1-10)', val: creativity, set: setCreativity, desc: 'Originality, artistic expression, and concept.' },
-                        { label: 'Composition (1-10)', val: composition, set: setComposition, desc: 'Rule of thirds, balance, visual framing.' },
-                        { label: 'Technical Quality (1-10)', val: technicalQuality, set: setTechnicalQuality, desc: 'Focus, exposure, lighting, noise control.' },
-                        { label: 'Storytelling (1-10)', val: storytelling, set: setStorytelling, desc: 'Narrative element, emotional evoke.' },
-                        { label: 'Overall Impact (1-10)', val: overallImpact, set: setOverallImpact, desc: 'First impression, visual stun factor.' }
-                      ].map((item, idx) => (
-                        <div key={idx} className="flex flex-col gap-1.5">
-                          <div className="flex justify-between items-center">
-                            <span className="font-bold text-slate-700 dark:text-slate-200">{item.label}</span>
-                            <span className="font-display font-black text-sm text-indigo-600 dark:text-indigo-400">{item.val}</span>
-                          </div>
-                          <input
-                            type="range"
-                            min={1}
-                            max={10}
-                            value={item.val}
-                            onChange={(e) => item.set(Number(e.target.value))}
-                            className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
-                            disabled={user?.role === 'Admin' || hasConfirmed}
-                          />
-                          <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
-                        </div>
-                      ))}
-
-                      {/* Score summary */}
-                      <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl flex justify-between items-center text-center mt-2">
+                {activePhoto ? (() => {
+                  const isReadOnly = user?.role === 'Admin' || hasConfirmed || activePhoto.score?.approvalStatus === 'Disapproved';
+                  return (
+                    <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-md flex flex-col gap-6 animate-in slide-in-from-right-4 duration-200 sticky top-20">
+                      <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
                         <div>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Total Score</span>
-                          <p className="font-display font-black text-xl text-slate-800 dark:text-slate-100">{totalScore} <span className="text-slate-400 text-xs">/ 50</span></p>
+                          <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Grading Sheet</h3>
+                          <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{activePhoto.title}"</span>
                         </div>
-                        <div className="w-px h-8 bg-slate-200 dark:bg-slate-850"></div>
-                        <div>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Average Score</span>
-                          <p className="font-display font-black text-xl text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-0.5">
-                            <Star size={16} className="fill-current text-indigo-600 dark:text-indigo-400 shrink-0" />
-                            {averageScore}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="font-bold text-slate-700 dark:text-slate-200">Approval Status</label>
-                        <select
-                          value={approvalStatus}
-                          onChange={(e) => setApprovalStatus(e.target.value)}
-                          disabled={user?.role === 'Admin' || hasConfirmed}
-                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-[11px] font-semibold"
-                        >
-                          <option value="Approved">Approved</option>
-                          <option value="Disapproved">Disapproved</option>
-                        </select>
-                        {approvalStatus === 'Disapproved' && (
-                          <span className="text-[9px] text-red-500 font-semibold mt-0.5">⚠️ An explanation/remarks is required when disapproving.</span>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="font-bold text-slate-700 dark:text-slate-200">Remarks / Explanation</label>
-                        <textarea
-                          value={remarks}
-                          onChange={(e) => setRemarks(e.target.value)}
-                          placeholder={approvalStatus === 'Disapproved' ? 'Please provide explanation for disapproval...' : user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
-                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
-                          required={(user?.role !== 'Admin' && !hasConfirmed && approvalStatus === 'Disapproved') || (user?.role !== 'Admin' && !hasConfirmed)}
-                          disabled={user?.role === 'Admin' || hasConfirmed}
-                        />
-                      </div>
-
-                      {user?.role === 'Admin' || hasConfirmed ? (
-                        <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold py-2.5 rounded-xl text-center text-[10px]">
-                          {hasConfirmed ? 'Evaluation Read-Only (Signed Off)' : 'Evaluation Read-Only (Admin Mode)'}
-                        </div>
-                      ) : (
                         <button
-                          type="submit"
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer transition-colors text-center"
+                          onClick={() => setActivePhoto(null)}
+                          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
                         >
-                          Submit Grade Evaluation
+                          <X size={18} />
                         </button>
-                      )}
-                    </form>
-                  </div>
-                ) : (
+                      </div>
+
+                      <form onSubmit={handleScoreSubmit} className="flex flex-col gap-4 text-xs">
+                        
+                        {/* Admin judge reviews inspector */}
+                        {user?.role === 'Admin' && activePhoto.allScores && activePhoto.allScores.length > 0 && (
+                          <div className="flex flex-col gap-2 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 rounded-2xl">
+                            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-wider block">
+                              Judge Evaluations ({activePhoto.allScores.length})
+                            </span>
+                            <div className="flex flex-col gap-2 mt-1">
+                              {activePhoto.allScores.map((s, sIdx) => (
+                                <div 
+                                  key={sIdx} 
+                                  onClick={() => {
+                                    setCreativity(s.creativity || 5);
+                                    setComposition(s.composition || 5);
+                                    setTechnicalQuality(s.technicalQuality || 5);
+                                    setStorytelling(s.storytelling || 5);
+                                    setOverallImpact(s.overallImpact || 5);
+                                    setRemarks(s.remarks || '');
+                                  }}
+                                  className="flex justify-between items-center text-[10px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer hover:border-indigo-400 transition-colors"
+                                  title="Click to view details in sliders"
+                                >
+                                  <div className="text-left">
+                                    <p className="font-bold text-slate-800 dark:text-white">{s.judgeName}</p>
+                                    <p className="text-[8px] text-slate-400 truncate max-w-[150px]">"{s.remarks || 'No remarks'}"</p>
+                                  </div>
+                                  <span className="text-[8px] bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">★ {s.averageScore?.toFixed(1)}/10</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Scoring criteria sliders */}
+                        {[
+                          { label: 'Creativity (1-10)', val: creativity, set: setCreativity, desc: 'Originality, artistic expression, and concept.' },
+                          { label: 'Composition (1-10)', val: composition, set: setComposition, desc: 'Rule of thirds, balance, visual framing.' },
+                          { label: 'Technical Quality (1-10)', val: technicalQuality, set: setTechnicalQuality, desc: 'Focus, exposure, lighting, noise control.' },
+                          { label: 'Storytelling (1-10)', val: storytelling, set: setStorytelling, desc: 'Narrative element, emotional evoke.' },
+                          { label: 'Overall Impact (1-10)', val: overallImpact, set: setOverallImpact, desc: 'First impression, visual stun factor.' }
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex flex-col gap-1.5">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-slate-700 dark:text-slate-200">{item.label}</span>
+                              <span className="font-display font-black text-sm text-indigo-600 dark:text-indigo-400">{item.val}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={1}
+                              max={10}
+                              value={item.val}
+                              onChange={(e) => item.set(Number(e.target.value))}
+                              className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
+                              disabled={isReadOnly}
+                            />
+                            <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
+                          </div>
+                        ))}
+
+                        {/* Score summary */}
+                        <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl flex justify-between items-center text-center mt-2">
+                          <div>
+                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Total Score</span>
+                            <p className="font-display font-black text-xl text-slate-800 dark:text-slate-100">{totalScore} <span className="text-slate-400 text-xs">/ 50</span></p>
+                          </div>
+                          <div className="w-px h-8 bg-slate-200 dark:bg-slate-850"></div>
+                          <div>
+                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Average Score</span>
+                            <p className="font-display font-black text-xl text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-0.5">
+                              <Star size={16} className="fill-current text-indigo-600 dark:text-indigo-400 shrink-0" />
+                              {averageScore}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="font-bold text-slate-700 dark:text-slate-200">Approval Status</label>
+                          <select
+                            value={approvalStatus}
+                            onChange={(e) => setApprovalStatus(e.target.value)}
+                            disabled={isReadOnly}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-[11px] font-semibold"
+                          >
+                            <option value="Approved">Approved</option>
+                            <option value="Disapproved">Disapproved</option>
+                          </select>
+                          {approvalStatus === 'Disapproved' && (
+                            <span className="text-[9px] text-red-500 font-semibold mt-0.5">⚠️ An explanation/remarks is required when disapproving.</span>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="font-bold text-slate-700 dark:text-slate-200">Remarks / Explanation</label>
+                          <textarea
+                            value={remarks}
+                            onChange={(e) => setRemarks(e.target.value)}
+                            placeholder={approvalStatus === 'Disapproved' ? 'Please provide explanation for disapproval...' : user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
+                            required={(user?.role !== 'Admin' && !hasConfirmed && approvalStatus === 'Disapproved') || (user?.role !== 'Admin' && !hasConfirmed)}
+                            disabled={isReadOnly}
+                          />
+                        </div>
+
+                        {isReadOnly ? (
+                          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold py-2.5 rounded-xl text-center text-[10px] flex flex-col gap-1 items-center justify-center">
+                            {activePhoto.score?.approvalStatus === 'Disapproved' && (
+                              <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider mb-0.5">Disapproved Entry</span>
+                            )}
+                            <span>
+                              {hasConfirmed 
+                                ? 'Evaluation Read-Only (Signed Off)' 
+                                : activePhoto.score?.approvalStatus === 'Disapproved'
+                                  ? 'Evaluation Read-Only (Disapproved)'
+                                  : 'Evaluation Read-Only (Admin Mode)'}
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            type="submit"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer transition-colors text-center"
+                          >
+                            Submit Grade Evaluation
+                          </button>
+                        )}
+                      </form>
+                    </div>
+                  );
+                })() : (
                   <div className="hidden lg:flex flex-col items-center justify-center text-center bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 h-80 text-slate-400">
                     <Star size={28} className="text-slate-300 animate-pulse mb-3" />
                     <p className="text-xs font-semibold">Select a photograph on the left to begin evaluation grading sheets.</p>

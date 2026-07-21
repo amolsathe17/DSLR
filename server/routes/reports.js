@@ -72,7 +72,8 @@ router.get('/submissions', protect, authorize('Admin'), async (req, res) => {
     submissions.forEach(sub => {
       sub.photographs.forEach(photo => {
         const scoresList = photo.scores || [];
-        const avgScore = scoresList.length > 0
+        const isDisapprovedByAny = scoresList.some(s => s.approvalStatus === 'Disapproved');
+        const avgScore = (scoresList.length > 0 && !isDisapprovedByAny)
           ? scoresList.reduce((acc, s) => acc + s.averageScore, 0) / scoresList.length
           : 0;
         

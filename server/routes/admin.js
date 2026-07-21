@@ -481,7 +481,7 @@ router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
           originalFilename: photo.originalFilename || '',
           uploadTimestamp: photo.uploadTimestamp || photo.createdAt,
           deletionStatus: photo.deletionStatus || false,
-          averageScore: (photo.scores && photo.scores.length > 0)
+          averageScore: (photo.scores && photo.scores.length > 0 && !photo.scores.some(s => s.approvalStatus === 'Disapproved'))
             ? parseFloat((photo.scores.reduce((acc, s) => acc + s.averageScore, 0) / photo.scores.length).toFixed(2))
             : 0
         });

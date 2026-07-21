@@ -132,8 +132,9 @@ router.post('/score', protect, authorize('Judge'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'All scores must be between 1 and 10' });
     }
 
-    const totalScore = c + co + t + s + o;
-    const averageScore = parseFloat((totalScore / 5).toFixed(2));
+    const isDisapproved = (approvalStatus === 'Disapproved');
+    const totalScore = isDisapproved ? 0 : (c + co + t + s + o);
+    const averageScore = isDisapproved ? 0 : parseFloat((totalScore / 5).toFixed(2));
 
     const scoreData = {
       judgeId,

@@ -320,8 +320,9 @@ export default function JudgeDashboard() {
   };
 
   // Dynamic calculations
-  const totalScore = creativity + composition + technicalQuality + storytelling + overallImpact;
-  const averageScore = (totalScore / 5).toFixed(1);
+  const isFormDisapproved = approvalStatus === 'Disapproved';
+  const totalScore = isFormDisapproved ? 0 : (creativity + composition + technicalQuality + storytelling + overallImpact);
+  const averageScore = isFormDisapproved ? '0.0' : ((creativity + composition + technicalQuality + storytelling + overallImpact) / 5).toFixed(1);
   const allGraded = photographs.length > 0 && photographs.every(p => p.graded);
   const hasConfirmed = event?.confirmedJudges?.includes(user?.id);
 
@@ -516,8 +517,8 @@ export default function JudgeDashboard() {
                             remarks: photo.score?.remarks || '',
                             approvalStatus: photo.score?.approvalStatus || 'Approved'
                           };
-                          const rowAvg = Number(scores.creativity) || 5;
                           const appStatus = scores.approvalStatus || 'Approved';
+                          const rowAvg = appStatus === 'Disapproved' ? 0 : (Number(scores.creativity) || 5);
                           return (
                             <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
                               <td className="p-4">

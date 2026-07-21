@@ -15,6 +15,7 @@ import JudgeDashboard from './pages/JudgeDashboard';
 import Gallery from './pages/Gallery';
 import About from './pages/About';
 import ScrollToTop from './components/ScrollToTop';
+import GlobalTooltip from './components/GlobalTooltip';
 
 // Route Guard for authenticated users
 function ProtectedRoute({ children }) {
@@ -59,6 +60,7 @@ function MainLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-300">
       <ScrollToTop />
+      <GlobalTooltip />
       <Navbar />
       <main className="flex-grow">
         <Routes>

@@ -1527,7 +1527,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => setSelectedParticipant(p)}
                           className="p-1.5 bg-indigo-50 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/20 rounded-lg cursor-pointer"
-                          title="Audit Profile Details"
+                          data-tooltip="Audit Profile Details"
                         >
                           <FileCheck size={14} />
                         </button>
@@ -1538,7 +1538,7 @@ export default function AdminDashboard() {
                               ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
                               : 'bg-amber-50 border-amber-200 text-amber-600 dark:bg-amber-950/20'
                           }`}
-                          title={p.isSuspended ? 'Activate User' : 'Suspend User'}
+                          data-tooltip={p.isSuspended ? 'Activate User' : 'Suspend User'}
                         >
                           <Ban size={14} />
                         </button>
@@ -1546,7 +1546,7 @@ export default function AdminDashboard() {
                           <button
                             onClick={() => handleRefundParticipant(p._id, p.name)}
                             className="p-1.5 bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-950/20 rounded-lg cursor-pointer"
-                            title="Refund & Credit Payment"
+                            data-tooltip="Refund & Credit Payment"
                           >
                             <RotateCcw size={14} />
                           </button>
@@ -1558,7 +1558,7 @@ export default function AdminDashboard() {
                             setShowDeleteParticipantModal(true);
                           }}
                           className="p-1.5 bg-red-50 border border-red-200 text-red-600 dark:bg-red-950/20 rounded-lg cursor-pointer"
-                          title="Delete User & Submissions"
+                          data-tooltip="Delete User & Submissions"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -1630,7 +1630,7 @@ export default function AdminDashboard() {
                   <button
                     onClick={() => setSelectedPhoto(photo)}
                     className="absolute top-2 right-2 p-1.5 bg-slate-950/60 hover:bg-slate-950 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Zoom Details"
+                    data-tooltip="Zoom Details"
                   >
                     <Maximize2 size={14} />
                   </button>
@@ -1724,7 +1724,7 @@ export default function AdminDashboard() {
                         setShowDeleteJudgeModal(true);
                       }}
                       className="p-1 text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg cursor-pointer transition-colors"
-                      title="Delete Judge permanently"
+                      data-tooltip="Delete Judge permanently"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -1772,7 +1772,7 @@ export default function AdminDashboard() {
                   type="button"
                   onClick={handleRefreshAll}
                   className="p-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold"
-                  title="Refresh Leaderboard & Progress"
+                  data-tooltip="Refresh Leaderboard & Progress"
                 >
                   <RefreshCw size={12} className="shrink-0" />
                   Refresh
@@ -2325,7 +2325,7 @@ export default function AdminDashboard() {
                               setNewEventPackages(updated);
                             }}
                             className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
-                            title="Remove Package"
+                            data-tooltip="Remove Package"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -2398,7 +2398,7 @@ export default function AdminDashboard() {
                           setShowDeleteEventModal(true);
                         }}
                         className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
-                        title="Delete & Archive Contest"
+                        data-tooltip="Delete & Archive Contest"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -2435,7 +2435,7 @@ export default function AdminDashboard() {
                             : 'bg-slate-100 text-slate-350 cursor-not-allowed dark:bg-slate-800 dark:text-slate-650'
                         }`}
                         disabled={!b.downloaded}
-                        title={b.downloaded ? 'Permanently Purge from Database' : 'You must download the PDF backup before you can permanently purge this event'}
+                        data-tooltip={b.downloaded ? 'Permanently Purge from Database' : 'You must download the PDF backup before you can permanently purge this event'}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -2497,7 +2497,7 @@ export default function AdminDashboard() {
                         type="button"
                         onClick={() => handleDeleteContestType(editingContestType._id, editingContestType.name)}
                         className="px-3 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-xl cursor-pointer transition-colors border border-red-100/50 dark:border-red-950/30 flex items-center justify-center"
-                        title="Delete Selected Contest Type"
+                        data-tooltip="Delete Selected Contest Type"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -2587,7 +2587,7 @@ export default function AdminDashboard() {
                         }
                       }}
                       className="px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs py-2 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800"
-                      title="Edit Existing Contest Type"
+                      data-tooltip="Edit Existing Contest Type"
                     >
                       <Edit2 size={12} />
                       <span>Edit</span>
@@ -2636,7 +2636,7 @@ export default function AdminDashboard() {
                             setShowDeleteCatModal(true);
                           }}
                           className="px-3 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-xl cursor-pointer transition-colors border border-red-100/50 dark:border-red-950/30 flex items-center justify-center"
-                          title="Delete Selected Category"
+                          data-tooltip="Delete Selected Category"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -2775,7 +2775,7 @@ export default function AdminDashboard() {
                           }
                         }}
                         className="px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs py-2 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800"
-                        title="Edit Existing Category"
+                        data-tooltip="Edit Existing Category"
                       >
                         <Edit2 size={12} />
                         <span>Edit</span>
@@ -2833,7 +2833,7 @@ export default function AdminDashboard() {
                                 <button
                                   onClick={() => handleEditCategoryClick(c)}
                                   className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/80 dark:text-indigo-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-indigo-100 dark:border-indigo-900/30"
-                                  title="Edit Category"
+                                  data-tooltip="Edit Category"
                                 >
                                   <Edit2 size={12} />
                                 </button>
@@ -2844,7 +2844,7 @@ export default function AdminDashboard() {
                                     setShowDeleteCatModal(true);
                                   }}
                                   className="p-1.5 bg-red-50 hover:bg-red-100 text-red-550 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-lg cursor-pointer transition-colors shadow-2xs border border-red-100/50 dark:border-red-950/30"
-                                  title="Delete Category"
+                                  data-tooltip="Delete Category"
                                 >
                                   <Trash2 size={12} />
                                 </button>
@@ -3965,7 +3965,7 @@ export default function AdminDashboard() {
                             setEditEventPackages(newPkgs);
                           }}
                           className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
-                          title="Remove Package"
+                          data-tooltip="Remove Package"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -4380,7 +4380,7 @@ export default function AdminDashboard() {
                             setShowHistoryModal(false);
                           }}
                           className="p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 rounded-lg cursor-pointer transition-colors"
-                          title="Archive & Delete Contest"
+                          data-tooltip="Archive & Delete Contest"
                         >
                           <Trash2 size={14} />
                         </button>

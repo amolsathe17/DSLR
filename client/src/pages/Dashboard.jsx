@@ -1036,14 +1036,14 @@ export default function Dashboard() {
                               <button
                                 onClick={() => handleEditPhotoClick(photo)}
                                 className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 rounded-lg transition-colors cursor-pointer"
-                                title="Edit Details"
+                                data-tooltip="Edit Details"
                               >
                                 <Edit2 size={15} />
                               </button>
                               <button
                                 onClick={() => handleDeletePhoto(photo.id)}
                                 className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors cursor-pointer"
-                                title="Delete Photo"
+                                data-tooltip="Delete Photo"
                               >
                                 <Trash2 size={16} />
                               </button>

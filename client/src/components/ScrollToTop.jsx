@@ -44,7 +44,7 @@ export default function ScrollToTop() {
           type="button"
           className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-white/90 dark:bg-slate-900/90 text-indigo-600 dark:text-indigo-400 border border-slate-200/60 dark:border-slate-800/80 shadow-xl backdrop-blur-md hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 dark:hover:text-white transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 animate-in fade-in zoom-in-75 duration-200 cursor-pointer"
           aria-label="Scroll to top"
-          title="Scroll to top"
+          data-tooltip="Scroll to top"
         >
           <ArrowUp size={20} className="stroke-[2.5]" />
         </button>

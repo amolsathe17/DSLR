@@ -166,7 +166,7 @@ export default function DragDropUpload({ onUpload, isUploading, allowedTypes = [
                 <ImageIcon size={20} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate animate-in fade-in duration-200" title={photoFile.name}>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate animate-in fade-in duration-200" data-tooltip={photoFile.name}>
                   {photoFile.name}
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -216,7 +216,7 @@ export default function DragDropUpload({ onUpload, isUploading, allowedTypes = [
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 block truncate" title={rawFile.name}>
+                    <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 block truncate" data-tooltip={rawFile.name}>
                       {rawFile.name}
                     </span>
                     <span className="text-[10px] text-emerald-600 dark:text-emerald-500">

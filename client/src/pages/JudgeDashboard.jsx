@@ -759,7 +759,7 @@ export default function JudgeDashboard() {
                                     setRemarks(s.remarks || '');
                                   }}
                                   className="flex justify-between items-center text-[10px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer hover:border-indigo-400 transition-colors"
-                                  title="Click to view details in sliders"
+                                  data-tooltip="Click to view details in sliders"
                                 >
                                   <div className="text-left">
                                     <p className="font-bold text-slate-800 dark:text-white">{s.judgeName}</p>

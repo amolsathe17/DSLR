@@ -252,6 +252,12 @@ export default function AdminDashboard() {
   const [showGeneralSuccessModal, setShowGeneralSuccessModal] = useState(false);
   const [generalSuccessTitle, setGeneralSuccessTitle] = useState('');
   const [generalSuccessMsg, setGeneralSuccessMsg] = useState('');
+  
+  // Suspend participant modal states
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [suspendTargetId, setSuspendTargetId] = useState(null);
+  const [suspendTargetName, setSuspendTargetName] = useState('');
+  const [suspendRemarks, setSuspendRemarks] = useState('');
 
   const triggerSuccessModal = (title, message) => {
     setGeneralSuccessTitle(title);
@@ -454,28 +460,48 @@ export default function AdminDashboard() {
   }, [photoSearch, photoCategory, photoStatus, photoDslrStatus]);
 
   // Actions
-  const handleSuspendParticipant = async (id, isSuspended) => {
-    let suspensionReason = '';
+  const handleSuspendParticipant = async (id, isSuspended, name = '') => {
     if (isSuspended) {
-      const reason = prompt("Enter suspension explanation / remarks (Required):");
-      if (reason === null) return; // User cancelled
-      if (!reason.trim()) {
-        alert("Suspension explanation / remarks is required.");
-        return;
-      }
-      suspensionReason = reason.trim();
+      setSuspendTargetId(id);
+      setSuspendTargetName(name);
+      setSuspendRemarks('');
+      setShowSuspendModal(true);
+      return;
     }
+
+    // Direct unsuspension execution
     try {
       const data = await apiFetch(`/api/admin/participants/${id}/suspend`, {
         method: 'PUT',
-        body: JSON.stringify({ isSuspended, suspensionReason })
+        body: JSON.stringify({ isSuspended: false, suspensionReason: '' })
       });
       if (data.success) {
         fetchParticipants();
-        triggerSuccessModal(
-          isSuspended ? 'Participant Suspended' : 'Participant Activated',
-          `The participant account has been successfully ${isSuspended ? 'suspended' : 'activated'}.`
-        );
+        triggerSuccessModal('Participant Activated', 'The participant account has been successfully activated.');
+      }
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  const executeSuspendParticipant = async () => {
+    if (!suspendTargetId) return;
+    if (!suspendRemarks.trim()) {
+      alert('Remarks are required to suspend.');
+      return;
+    }
+    try {
+      const data = await apiFetch(`/api/admin/participants/${suspendTargetId}/suspend`, {
+        method: 'PUT',
+        body: JSON.stringify({ isSuspended: true, suspensionReason: suspendRemarks.trim() })
+      });
+      if (data.success) {
+        setShowSuspendModal(false);
+        setSuspendTargetId(null);
+        setSuspendTargetName('');
+        setSuspendRemarks('');
+        fetchParticipants();
+        triggerSuccessModal('Participant Suspended', 'The participant account has been successfully suspended.');
       }
     } catch (e) {
       alert(e.message);
@@ -1470,7 +1496,7 @@ export default function AdminDashboard() {
                           <FileCheck size={14} />
                         </button>
                         <button
-                          onClick={() => handleSuspendParticipant(p._id, !p.isSuspended)}
+                          onClick={() => handleSuspendParticipant(p._id, !p.isSuspended, p.name)}
                           className={`p-1.5 rounded-lg border cursor-pointer ${
                             p.isSuspended 
                               ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
@@ -4454,6 +4480,65 @@ export default function AdminDashboard() {
 
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* SUSPEND PARTICIPANT MODAL */}
+      {showSuspendModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-2xl mb-2 animate-bounce">
+                <Ban size={28} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Suspend Participant Account
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                You are about to suspend the participant account of <strong>"{suspendTargetName}"</strong>. They will no longer be able to submit photos or pay, and their account will be set to read-only.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-slate-500 font-semibold dark:text-slate-400">
+                Suspension Explanation / Remarks (Required)
+              </label>
+              <textarea
+                value={suspendRemarks}
+                onChange={(e) => setSuspendRemarks(e.target.value)}
+                placeholder="Explain the reason for suspending this participant..."
+                rows={4}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 dark:text-white leading-relaxed resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSuspendModal(false);
+                  setSuspendTargetId(null);
+                  setSuspendTargetName('');
+                  setSuspendRemarks('');
+                }}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!suspendRemarks.trim()}
+                onClick={executeSuspendParticipant}
+                className={`flex-1 font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center ${
+                  suspendRemarks.trim()
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-slate-200 text-slate-400 dark:bg-slate-850 dark:text-slate-600 cursor-not-allowed shadow-none'
+                }`}
+              >
+                Confirm Suspension
+              </button>
+            </div>
           </div>
         </div>
       )}

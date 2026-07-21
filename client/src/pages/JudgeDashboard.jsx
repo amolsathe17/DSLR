@@ -720,7 +720,7 @@ export default function JudgeDashboard() {
                 const isReadOnly = user?.role === 'Admin' || hasConfirmed || activePhoto.score?.approvalStatus === 'Disapproved';
                 return (
                   <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-                    <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col lg:flex-row my-8 max-h-[90vh]">
+                    <div className="relative w-full max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col lg:flex-row my-8 max-h-[90vh]">
                       
                       {/* Close button */}
                       <button
@@ -731,9 +731,9 @@ export default function JudgeDashboard() {
                       </button>
 
                       {/* Left Side: Photo Zoom Detailed View */}
-                      <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[500px]">
+                      <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px]">
                         <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
-                          <WatermarkPreview src={activePhoto.fileUrl} className="max-w-full max-h-[55vh] object-contain rounded-lg shadow-lg" />
+                          <WatermarkPreview src={activePhoto.fileUrl} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" />
                         </div>
                         
                         <div className="w-full mt-4 flex flex-col gap-1 text-xs text-slate-300 text-left">

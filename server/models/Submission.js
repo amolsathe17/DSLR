@@ -62,7 +62,7 @@ const submissionSchema = new mongoose.Schema({
   amount: { type: Number, default: 0 },
   photoLimit: { type: Number, default: 0 },
   activePhotosCount: { type: Number, default: 0 },
-  paymentStatus: { type: String, enum: ['Unpaid', 'Paid'], default: 'Unpaid' },
+  paymentStatus: { type: String, enum: ['Unpaid', 'Paid', 'Refunded'], default: 'Unpaid' },
   entryStatus: { type: String, enum: ['Draft', 'Finalized'], default: 'Draft' }
 }, { timestamps: true });
 

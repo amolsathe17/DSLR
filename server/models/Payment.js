@@ -11,7 +11,7 @@ const paymentSchema = new mongoose.Schema({
   packageName: { type: String, required: true },
   amount: { type: Number, required: true },
   transactionId: { type: String, required: true, unique: true },
-  status: { type: String, enum: ['Pending', 'Success', 'Failed'], default: 'Pending' },
+  status: { type: String, enum: ['Pending', 'Success', 'Failed', 'Refunded'], default: 'Pending' },
   paymentMethod: { type: String },
   invoiceNumber: { type: String },
   qrContent: { type: String },

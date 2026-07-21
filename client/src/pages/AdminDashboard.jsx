@@ -22,9 +22,15 @@ import {
   Maximize2,
   FileCheck,
   RefreshCw,
+  RotateCcw,
   History,
   Sparkles,
-  User
+  User,
+  ThumbsUp,
+  ThumbsDown,
+  Flag,
+  Star,
+  MessageSquare
 } from 'lucide-react';
 import StatsCharts from '../components/StatsCharts';
 
@@ -237,6 +243,9 @@ export default function AdminDashboard() {
   const [showDeleteParticipantModal, setShowDeleteParticipantModal] = useState(false);
   const [participantToDeleteId, setParticipantToDeleteId] = useState(null);
   const [participantToDeleteName, setParticipantToDeleteName] = useState('');
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [participantToRefundId, setParticipantToRefundId] = useState(null);
+  const [participantToRefundName, setParticipantToRefundName] = useState('');
   const [showDeleteJudgeModal, setShowDeleteJudgeModal] = useState(false);
   const [judgeToDeleteId, setJudgeToDeleteId] = useState(null);
   const [judgeToDeleteName, setJudgeToDeleteName] = useState('');
@@ -446,16 +455,55 @@ export default function AdminDashboard() {
 
   // Actions
   const handleSuspendParticipant = async (id, isSuspended) => {
+    let suspensionReason = '';
+    if (isSuspended) {
+      const reason = prompt("Enter suspension explanation / remarks (Required):");
+      if (reason === null) return; // User cancelled
+      if (!reason.trim()) {
+        alert("Suspension explanation / remarks is required.");
+        return;
+      }
+      suspensionReason = reason.trim();
+    }
     try {
       const data = await apiFetch(`/api/admin/participants/${id}/suspend`, {
         method: 'PUT',
-        body: JSON.stringify({ isSuspended })
+        body: JSON.stringify({ isSuspended, suspensionReason })
       });
       if (data.success) {
         fetchParticipants();
+        triggerSuccessModal(
+          isSuspended ? 'Participant Suspended' : 'Participant Activated',
+          `The participant account has been successfully ${isSuspended ? 'suspended' : 'activated'}.`
+        );
       }
     } catch (e) {
       alert(e.message);
+    }
+  };
+
+  const handleRefundParticipant = async (id, name) => {
+    setParticipantToRefundId(id);
+    setParticipantToRefundName(name);
+    setShowRefundModal(true);
+  };
+
+  const executeRefundParticipant = async () => {
+    if (!participantToRefundId) return;
+    setShowRefundModal(false);
+    try {
+      const data = await apiFetch(`/api/admin/participants/${participantToRefundId}/refund`, {
+        method: 'POST'
+      });
+      if (data.success) {
+        fetchParticipants();
+        triggerSuccessModal('Payment Refunded', 'The participant payment has been successfully refunded and marked in the system.');
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setParticipantToRefundId(null);
+      setParticipantToRefundName('');
     }
   };
 
@@ -1169,6 +1217,124 @@ export default function AdminDashboard() {
             categoryStats={charts.categoryStats} 
           />
 
+          {/* ── Judge Photo Review Cards ── */}
+          {(() => {
+            const judgedPhotos = photographs.filter(p => p.scores && p.scores.length > 0);
+            const approvedPhotos = judgedPhotos.filter(p => p.scores.every(s => s.approvalStatus === 'Approved'));
+            const disapprovedPhotos = judgedPhotos.filter(p => p.scores.some(s => s.approvalStatus === 'Disapproved'));
+
+            return (
+              <div className="flex flex-col gap-6">
+                {/* Summary bar */}
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/30 rounded-2xl px-4 py-3 flex-1 min-w-[160px]">
+                    <ThumbsUp size={18} className="text-emerald-500 shrink-0" />
+                    <div>
+                      <p className="font-black text-2xl text-emerald-600">{approvedPhotos.length}</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600/70">Approved by Judges</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/30 rounded-2xl px-4 py-3 flex-1 min-w-[160px]">
+                    <ThumbsDown size={18} className="text-red-500 shrink-0" />
+                    <div>
+                      <p className="font-black text-2xl text-red-500">{disapprovedPhotos.length}</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-500/70">Disapproved by Judges</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 flex-1 min-w-[160px]">
+                    <Camera size={18} className="text-slate-400 shrink-0" />
+                    <div>
+                      <p className="font-black text-2xl text-slate-700 dark:text-slate-200">{judgedPhotos.length}</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Evaluated</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Approved Cards */}
+                {approvedPhotos.length > 0 && (
+                  <div className="glass-panel border border-emerald-200/60 dark:border-emerald-900/30 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-emerald-100 dark:border-emerald-900/30">
+                      <ThumbsUp size={15} className="text-emerald-500" />
+                      <h3 className="font-display font-bold text-emerald-700 dark:text-emerald-400 text-sm">Approved by Judges ({approvedPhotos.length})</h3>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                      {approvedPhotos.map(photo => {
+                        const avgScore = photo.scores.length > 0
+                          ? (photo.scores.reduce((a, s) => a + (s.averageScore || 0), 0) / photo.scores.length).toFixed(1)
+                          : '—';
+                        return (
+                          <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-emerald-200/50 dark:border-emerald-900/20 rounded-xl overflow-hidden flex flex-col shadow-sm">
+                            <div className="relative">
+                              <img src={photo.fileUrl} alt={photo.title} className="w-full aspect-video object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                              <span className="absolute top-1.5 right-1.5 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                                <Star size={8} fill="white" /> {avgScore}/10
+                              </span>
+                            </div>
+                            <div className="p-2 flex flex-col gap-0.5">
+                              <p className="text-[10px] font-bold text-slate-800 dark:text-white truncate">{photo.title}</p>
+                              <p className="text-[9px] text-slate-400 truncate">{photo.participantName}</p>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {photo.scores.map((s, i) => (
+                                  <span key={i} className="text-[8px] bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 px-1.5 py-0.5 rounded font-semibold">✓ {s.judgeName}</span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Disapproved Cards */}
+                {disapprovedPhotos.length > 0 && (
+                  <div className="glass-panel border border-red-200/60 dark:border-red-900/30 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-red-100 dark:border-red-900/30">
+                      <Flag size={15} className="text-red-500" />
+                      <h3 className="font-display font-bold text-red-600 dark:text-red-400 text-sm">Disapproved by Judges ({disapprovedPhotos.length})</h3>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                      {disapprovedPhotos.map(photo => {
+                        const disapprovals = photo.scores.filter(s => s.approvalStatus === 'Disapproved');
+                        return (
+                          <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-red-200/60 dark:border-red-900/30 rounded-xl overflow-hidden flex flex-col shadow-sm">
+                            <div className="relative">
+                              <img src={photo.fileUrl} alt={photo.title} className="w-full aspect-video object-cover opacity-80" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                              <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                                <Flag size={8} /> Disapproved
+                              </span>
+                            </div>
+                            <div className="p-2 flex flex-col gap-1">
+                              <p className="text-[10px] font-bold text-slate-800 dark:text-white truncate">{photo.title}</p>
+                              <p className="text-[9px] text-slate-400 truncate">{photo.participantName}</p>
+                              {disapprovals.map((s, i) => (
+                                <div key={i} className="bg-red-50 dark:bg-red-950/30 rounded-lg p-1.5 flex flex-col gap-0.5">
+                                  <span className="text-[9px] font-bold text-red-600">✗ {s.judgeName}</span>
+                                  {s.remarks && (
+                                    <div className="flex items-start gap-1">
+                                      <MessageSquare size={8} className="text-red-400 shrink-0 mt-0.5" />
+                                      <p className="text-[9px] italic text-red-500 leading-snug">"{s.remarks}"</p>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {judgedPhotos.length === 0 && (
+                  <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-sm italic">
+                    No photographs have been evaluated by judges yet.
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {/* Downloadable Reports Panel */}
           <div className="glass-panel border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
             <div>
@@ -1280,11 +1446,13 @@ export default function AdminDashboard() {
                     <td className="py-3.5 px-4 text-center font-bold">{p.photosCount}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
-                        p.paymentStatus === 'Paid' 
-                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' 
-                          : p.paymentStatus === 'Pending' 
-                            ? 'bg-amber-50 text-amber-600' 
-                            : 'bg-red-50 text-red-600 dark:bg-red-950/20'
+                        p.paymentStatus === 'Paid'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20'
+                          : p.paymentStatus === 'Refunded'
+                            ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20'
+                            : p.paymentStatus === 'Pending'
+                              ? 'bg-amber-50 text-amber-600'
+                              : 'bg-red-50 text-red-600 dark:bg-red-950/20'
                       }`}>
                         {p.paymentStatus}
                       </span>
@@ -1312,6 +1480,15 @@ export default function AdminDashboard() {
                         >
                           <Ban size={14} />
                         </button>
+                        {p.paymentStatus === 'Paid' && (
+                          <button
+                            onClick={() => handleRefundParticipant(p._id, p.name)}
+                            className="p-1.5 bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-950/20 rounded-lg cursor-pointer"
+                            title="Refund & Credit Payment"
+                          >
+                            <RotateCcw size={14} />
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             setParticipantToDeleteId(p._id);
@@ -1701,6 +1878,58 @@ export default function AdminDashboard() {
                           <p className="text-xs text-slate-400 italic">No score reviews submitted by judges yet.</p>
                         )}
                       </div>
+
+                      {/* ── Disapproved Photos Flag Section ── */}
+                      {(() => {
+                        const eventDisapproved = eventPhotos.filter(p =>
+                          p.scores && p.scores.some(s => s.approvalStatus === 'Disapproved')
+                        );
+                        if (eventDisapproved.length === 0) return null;
+                        return (
+                          <div className="flex flex-col gap-3 mt-2 border border-red-200/60 dark:border-red-900/30 rounded-2xl p-4 bg-red-50/40 dark:bg-red-950/10">
+                            <div className="flex items-center gap-2">
+                              <Flag size={13} className="text-red-500" />
+                              <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wide">
+                                Disapproved by Judges ({eventDisapproved.length})
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {eventDisapproved.map(photo => {
+                                const disapprovals = photo.scores.filter(s => s.approvalStatus === 'Disapproved');
+                                return (
+                                  <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-red-200/50 dark:border-red-900/30 rounded-xl overflow-hidden flex gap-3 p-2 shadow-sm">
+                                    <img
+                                      src={photo.fileUrl}
+                                      alt={photo.title}
+                                      className="w-14 h-14 object-cover rounded-lg shrink-0 opacity-75"
+                                      crossOrigin="anonymous"
+                                      referrerPolicy="no-referrer"
+                                    />
+                                    <div className="flex flex-col gap-1 min-w-0 flex-1">
+                                      <div className="flex items-center gap-1.5">
+                                        <Flag size={10} className="text-red-500 shrink-0" />
+                                        <p className="text-[10px] font-bold text-slate-800 dark:text-white truncate">{photo.title}</p>
+                                      </div>
+                                      <p className="text-[9px] text-slate-400 truncate">{photo.participantName}</p>
+                                      {disapprovals.map((s, i) => (
+                                        <div key={i} className="bg-red-50 dark:bg-red-950/30 rounded-lg p-1.5 flex flex-col gap-0.5">
+                                          <span className="text-[9px] font-bold text-red-600">✗ {s.judgeName}</span>
+                                          {s.remarks && (
+                                            <div className="flex items-start gap-1">
+                                              <MessageSquare size={8} className="text-red-400 shrink-0 mt-0.5" />
+                                              <p className="text-[9px] italic text-red-500 dark:text-red-300 leading-snug">"{s.remarks}"</p>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })}
@@ -3011,6 +3240,21 @@ export default function AdminDashboard() {
                     <p>City: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.city}</span></p>
                     <p>Registered: <span className="font-semibold text-slate-700 dark:text-slate-300">{new Date(selectedParticipant.createdAt).toLocaleString()}</span></p>
                     <p>Last Login: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.lastLogin ? new Date(selectedParticipant.lastLogin).toLocaleString() : 'Never'}</span></p>
+                    <p>Account Status:
+                      <span className={`ml-1 px-2 py-0.5 rounded text-[10px] font-bold ${
+                        selectedParticipant.isSuspended
+                          ? 'bg-red-50 text-red-600 dark:bg-red-950/20'
+                          : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20'
+                      }`}>
+                        {selectedParticipant.isSuspended ? 'Suspended' : 'Active'}
+                      </span>
+                    </p>
+                    {selectedParticipant.isSuspended && selectedParticipant.suspensionReason && (
+                      <div className="mt-1 p-2.5 bg-red-50/80 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 rounded-xl text-[10px] text-red-700 dark:text-red-300">
+                        <span className="font-bold uppercase tracking-wider block mb-1">Suspension Reason:</span>
+                        <p className="italic">"{selectedParticipant.suspensionReason}"</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -3042,13 +3286,15 @@ export default function AdminDashboard() {
                 <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 flex flex-col gap-2">
                   <h4 className="font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider text-[10px]">Razorpay Gateway Audit</h4>
                   <div className="flex flex-col gap-1 text-slate-500">
-                    <p>Payment Status: 
+                    <p>Payment Status:
                       <span className={`ml-1 px-2 py-0.5 rounded text-[10px] font-bold ${
-                        selectedParticipant.paymentStatus === 'Paid' 
-                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' 
-                          : selectedParticipant.paymentStatus === 'Pending' 
-                            ? 'bg-amber-50 text-amber-650' 
-                            : 'bg-red-50 text-red-600 dark:bg-red-950/20'
+                        selectedParticipant.paymentStatus === 'Paid'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20'
+                          : selectedParticipant.paymentStatus === 'Refunded'
+                            ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20'
+                            : selectedParticipant.paymentStatus === 'Pending'
+                              ? 'bg-amber-50 text-amber-600'
+                              : 'bg-red-50 text-red-600 dark:bg-red-950/20'
                       }`}>
                         {selectedParticipant.paymentStatus}
                       </span>
@@ -3100,6 +3346,32 @@ export default function AdminDashboard() {
                               EXIF: {photo.dslrValidationStatus}
                             </span>
                           </div>
+
+                          {/* Judge Evaluation – Admin Read-Only */}
+                          {photo.scores && photo.scores.length > 0 && (
+                            <div className="mt-2 flex flex-col gap-1.5">
+                              <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400">Judge Evaluations</span>
+                              {photo.scores.map((s, idx) => (
+                                <div key={idx} className={`rounded-lg p-2 flex flex-col gap-1 border ${
+                                  s.approvalStatus === 'Disapproved'
+                                    ? 'bg-red-50/80 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/20'
+                                    : 'bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-200/40 dark:border-emerald-900/20'
+                                }`}>
+                                  <div className="flex items-center justify-between gap-1">
+                                    <span className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">{s.judgeName}</span>
+                                    {s.approvalStatus === 'Disapproved' ? (
+                                      <span className="text-[8px] bg-red-100 dark:bg-red-950/30 text-red-600 font-bold px-1.5 py-0.5 rounded-full">✗ Disapproved</span>
+                                    ) : (
+                                      <span className="text-[8px] bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">★ {s.averageScore?.toFixed(1)}/10</span>
+                                    )}
+                                  </div>
+                                  {s.approvalStatus === 'Disapproved' && s.remarks && (
+                                    <p className="text-[9px] italic text-red-600 dark:text-red-300 leading-snug bg-red-100/50 dark:bg-red-950/30 rounded p-1.5">"{s.remarks}"</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -3751,6 +4023,52 @@ export default function AdminDashboard() {
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
               >
                 Delete Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* REFUND PAYMENT CONFIRMATION MODAL */}
+      {showRefundModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-2 items-center">
+              <div className="p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl mb-2">
+                <RotateCcw size={30} />
+              </div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Confirm Refund Payment
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to refund the payment for participant <strong>"{participantToRefundName}"</strong>?
+              </p>
+              <div className="mt-1 w-full bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/30 rounded-2xl p-4 text-left flex flex-col gap-1.5">
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 font-semibold flex items-start gap-2">
+                  <span className="text-amber-500 mt-0.5">⚠</span>
+                  This will mark their entry as <strong>Refunded / Unpaid</strong> and credit back the amount to their respective bank account.
+                </p>
+                <p className="text-[10px] text-amber-700/80 dark:text-amber-400/70 pl-5">
+                  This action is recorded in the audit log and cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => { setShowRefundModal(false); setParticipantToRefundId(null); setParticipantToRefundName(''); }}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeRefundParticipant}
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
+              >
+                <RotateCcw size={13} />
+                Yes, Refund Payment
               </button>
             </div>
           </div>

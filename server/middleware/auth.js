@@ -15,7 +15,12 @@ const protect = async (req, res, next) => {
       }
 
       if (user.isSuspended) {
-        return res.status(403).json({ success: false, message: 'User account suspended' });
+        if (req.method === 'GET') {
+          req.user = user;
+          return next();
+        } else {
+          return res.status(403).json({ success: false, message: 'Account is suspended. Write operations are disabled.' });
+        }
       }
 
       req.user = user;

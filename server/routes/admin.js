@@ -257,6 +257,7 @@ router.get('/participants', protect, authorize('Admin'), async (req, res) => {
         city: p.city,
         isVerified: p.isVerified,
         isSuspended: p.isSuspended,
+        suspensionReason: p.suspensionReason,
         createdAt: p.createdAt,
         lastLogin: p.lastLogin,
         packageId: submission ? submission.packageId : 'None',
@@ -298,7 +299,16 @@ router.put('/participants/:id/suspend', protect, authorize('Admin'), async (req,
       return res.status(404).json({ success: false, message: 'Participant not found' });
     }
 
+    if (req.body.isSuspended && (!req.body.suspensionReason || req.body.suspensionReason.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Suspension explanation/remarks is required.' });
+    }
+
     user.isSuspended = req.body.isSuspended;
+    if (user.isSuspended) {
+      user.suspensionReason = req.body.suspensionReason;
+    } else {
+      user.suspensionReason = undefined;
+    }
     await user.save();
 
     await AuditLog.create({
@@ -640,6 +650,50 @@ router.get('/transactions', protect, authorize('Admin'), async (req, res) => {
   try {
     const transactions = await Payment.find({}).sort({ createdAt: -1 });
     res.json({ success: true, transactions });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Refund a participant's payment
+// @route   POST /api/admin/participants/:id/refund
+// @access  Private/Admin
+router.post('/participants/:id/refund', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Participant not found' });
+    }
+
+    // Find active success payments for the user
+    const payment = await Payment.findOne({ userId: userId.toString(), status: 'Success' });
+    if (!payment) {
+      return res.status(400).json({ success: false, message: 'No successful payment found for this participant' });
+    }
+
+    // Update payment status to Refunded
+    payment.status = 'Refunded';
+    await payment.save();
+
+    // Update all matching user submissions' paymentStatus to Refunded
+    await Submission.updateMany(
+      { userId: userId.toString() },
+      { $set: { paymentStatus: 'Refunded' } }
+    );
+
+    // Create Audit Log
+    await AuditLog.create({
+      userId: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Refund Payment',
+      details: `Refunded payment transaction ${payment.transactionId} for participant ${user.email} of amount ₹${payment.amount}`,
+      ipAddress: req.ip
+    });
+
+    res.json({ success: true, message: 'Payment successfully marked as Refunded and credited back.' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

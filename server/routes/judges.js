@@ -102,8 +102,8 @@ router.post('/score', protect, authorize('Judge'), async (req, res) => {
       return res.status(404).json({ success: false, message: 'Submission not found' });
     }
 
-    if (submission.paymentStatus !== 'Paid') {
-      return res.status(400).json({ success: false, message: 'This entry is unpaid and cannot be scored' });
+    if (submission.paymentStatus === 'Unpaid') {
+      return res.status(400).json({ success: false, message: 'This entry has not been paid and cannot be scored' });
     }
 
     const photoIndex = submission.photographs.findIndex(p => p.id === photoId);

@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   otp: { type: String },
   otpExpires: { type: Date },
   isSuspended: { type: Boolean, default: false },
+  suspensionReason: { type: String },
   lastLogin: { type: Date }
 }, { timestamps: true });
 

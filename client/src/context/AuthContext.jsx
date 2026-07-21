@@ -36,11 +36,6 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (!response.ok) {
-        if (response.status === 403 && (data.message?.toLowerCase().includes("suspended") || data.message?.toLowerCase().includes("suspend"))) {
-          localStorage.removeItem("token");
-          setUser(null);
-          setToken(null);
-        }
         throw new Error(data.message || `Server Error (${response.status})`);
       }
 

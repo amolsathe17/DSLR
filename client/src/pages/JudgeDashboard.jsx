@@ -19,6 +19,7 @@ export default function JudgeDashboard() {
   const [composition, setComposition] = useState(5);
   const [technicalQuality, setTechnicalQuality] = useState(5);
   const [storytelling, setStorytelling] = useState(5);
+  const [overallImpact, setOverallImpact] = useState(5);
   const [remarks, setRemarks] = useState('');
   const [approvalStatus, setApprovalStatus] = useState('Approved');
 
@@ -127,13 +128,13 @@ export default function JudgeDashboard() {
     setLoading(true);
     setError('');
     const scores = offlineScores[photo.photoId] || {
-      creativity: 5,
-      composition: 5,
-      technicalQuality: 5,
-      storytelling: 5,
-      overallImpact: 5,
-      remarks: '',
-      approvalStatus: 'Approved'
+      creativity: photo.score?.creativity || 5,
+      composition: photo.score?.composition || 5,
+      technicalQuality: photo.score?.technicalQuality || 5,
+      storytelling: photo.score?.storytelling || 5,
+      overallImpact: photo.score?.overallImpact || 5,
+      remarks: photo.score?.remarks || '',
+      approvalStatus: photo.score?.approvalStatus || 'Approved'
     };
     if (scores.approvalStatus === 'Disapproved' && (!scores.remarks || scores.remarks.trim() === '')) {
       setError(`An explanation/remarks is required for the disapproved photograph: "${photo.title}".`);
@@ -146,12 +147,12 @@ export default function JudgeDashboard() {
         body: JSON.stringify({
           submissionId: photo.submissionId,
           photoId: photo.photoId,
-          creativity: Number(scores.creativity),
-          composition: Number(scores.composition),
-          technicalQuality: Number(scores.technicalQuality),
-          storytelling: Number(scores.storytelling),
-          overallImpact: Number(scores.overallImpact),
-          remarks: scores.remarks,
+          creativity: Math.min(10, Math.max(1, Number(scores.creativity) || 5)),
+          composition: Math.min(10, Math.max(1, Number(scores.composition) || 5)),
+          technicalQuality: Math.min(10, Math.max(1, Number(scores.technicalQuality) || 5)),
+          storytelling: Math.min(10, Math.max(1, Number(scores.storytelling) || 5)),
+          overallImpact: Math.min(10, Math.max(1, Number(scores.overallImpact) || 5)),
+          remarks: scores.remarks || '',
           approvalStatus: scores.approvalStatus || 'Approved'
         })
       });
@@ -207,12 +208,12 @@ export default function JudgeDashboard() {
           body: JSON.stringify({
             submissionId: photo.submissionId,
             photoId: photo.photoId,
-            creativity: Number(scores.creativity),
-            composition: Number(scores.composition),
-            technicalQuality: Number(scores.technicalQuality),
-            storytelling: Number(scores.storytelling),
-            overallImpact: Number(scores.overallImpact),
-            remarks: scores.remarks,
+            creativity: Math.min(10, Math.max(1, Number(scores.creativity) || 5)),
+            composition: Math.min(10, Math.max(1, Number(scores.composition) || 5)),
+            technicalQuality: Math.min(10, Math.max(1, Number(scores.technicalQuality) || 5)),
+            storytelling: Math.min(10, Math.max(1, Number(scores.storytelling) || 5)),
+            overallImpact: Math.min(10, Math.max(1, Number(scores.overallImpact) || 5)),
+            remarks: scores.remarks || '',
             approvalStatus: scores.approvalStatus || 'Approved'
           })
         });
@@ -507,15 +508,15 @@ export default function JudgeDashboard() {
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {displayedPhotos.map(photo => {
                           const scores = offlineScores[photo.photoId] || {
-                            creativity: 5,
-                            composition: 5,
-                            technicalQuality: 5,
-                            storytelling: 5,
-                            overallImpact: 5,
-                            remarks: '',
-                            approvalStatus: 'Approved'
+                            creativity: photo.score?.creativity || 5,
+                            composition: photo.score?.composition || 5,
+                            technicalQuality: photo.score?.technicalQuality || 5,
+                            storytelling: photo.score?.storytelling || 5,
+                            overallImpact: photo.score?.overallImpact || 5,
+                            remarks: photo.score?.remarks || '',
+                            approvalStatus: photo.score?.approvalStatus || 'Approved'
                           };
-                          const rowAvg = scores.creativity;
+                          const rowAvg = Number(scores.creativity) || 5;
                           const appStatus = scores.approvalStatus || 'Approved';
                           return (
                             <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">

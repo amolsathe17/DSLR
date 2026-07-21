@@ -134,10 +134,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    if (user.isSuspended) {
-      return res.status(403).json({ success: false, message: 'Your account has been suspended. Contact support.' });
-    }
-
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {

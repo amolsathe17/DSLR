@@ -19,6 +19,10 @@ import {
   ShieldCheck,
   Calendar,
   Layers,
+  Star,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import DragDropUpload from "../components/DragDropUpload";
 import WatermarkPreview from "../components/WatermarkPreview";
@@ -552,8 +556,8 @@ export default function Dashboard() {
   const selectedPackage = event?.packages.find(
     (p) => p.id === submission?.packageId,
   );
-  const isPaid = !!submission?.paymentId;
-  const isFinalized = !!submission?.isFinalSubmitted;
+  const isPaid = !!submission?.paymentId && submission?.paymentStatus !== 'Refunded';
+  const isFinalized = !!submission?.isFinalSubmitted || user?.isSuspended;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
@@ -575,6 +579,40 @@ export default function Dashboard() {
           </button>
         ))}
       </div>
+
+      {submission?.paymentStatus === 'Refunded' && (
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 p-5 rounded-2xl text-amber-800 dark:text-amber-300 mb-8 animate-in slide-in-from-top-4 duration-200">
+          <div className="flex items-start gap-3">
+            <RotateCcw size={24} className="shrink-0 text-amber-600 dark:text-amber-400 mt-1 md:mt-0" />
+            <div>
+              <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">Entry Payment Refunded</h4>
+              <p className="text-[11px] text-amber-700 dark:text-amber-450 mt-1">
+                Your entry submission payment has been refunded and credited back to your bank account by the administrator. All photo slots have been reset to unpaid status.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {user?.isSuspended && (
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 p-5 rounded-2xl text-red-750 dark:text-red-400 mb-8 animate-in slide-in-from-top-4 duration-200">
+          <div className="flex items-start gap-3">
+            <ShieldCheck size={24} className="shrink-0 text-red-650 dark:text-red-400 mt-1 md:mt-0" />
+            <div>
+              <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">Account Suspended</h4>
+              <p className="text-[11px] text-red-650 dark:text-red-400/80 mt-1">
+                An administrator has suspended your participant account. You can view your current submissions in read-only mode, but all modifications, payments, and new uploads are disabled.
+              </p>
+              {user.suspensionReason && (
+                <div className="mt-2.5 bg-red-100/50 dark:bg-red-950/40 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-[10px] text-red-800 dark:text-red-300">
+                  <span className="font-bold uppercase tracking-wider block mb-1">Reason / Explanation:</span>
+                  <p className="italic">"{user.suspensionReason}"</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-6">
@@ -680,9 +718,10 @@ export default function Dashboard() {
 
             <button
               type="submit"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base py-3 px-8 rounded-xl shadow-lg hover:shadow-xl self-center transition-all cursor-pointer"
+              disabled={user?.isSuspended}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base py-3 px-8 rounded-xl shadow-lg hover:shadow-xl self-center transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Start Entry Submission
+              {user?.isSuspended ? 'Account Suspended' : 'Start Entry Submission'}
             </button>
           </form>
         </div>
@@ -950,6 +989,47 @@ export default function Dashboard() {
                               </span>
                             )}
                           </div>
+
+                          {/* ── Judge Evaluation Results (Read-Only) ── */}
+                          {photo.scores && photo.scores.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+                              <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold flex items-center gap-1">
+                                <Star size={9} /> Judge Evaluation
+                              </span>
+                              {photo.scores.map((s, idx) => (
+                                <div key={idx} className={`rounded-xl p-2.5 flex flex-col gap-1.5 border ${
+                                  s.approvalStatus === 'Disapproved'
+                                    ? 'bg-red-50/70 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/20'
+                                    : 'bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-200/40 dark:border-emerald-900/20'
+                                }`}>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                      {s.approvalStatus === 'Disapproved'
+                                        ? <ThumbsDown size={11} className="text-red-500" />
+                                        : <ThumbsUp size={11} className="text-emerald-500" />}
+                                      {s.judgeName}
+                                    </span>
+                                    {s.approvalStatus === 'Disapproved' ? (
+                                      <span className="text-[9px] bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 font-bold px-2 py-0.5 rounded-full border border-red-200/50">
+                                        Disapproved
+                                      </span>
+                                    ) : (
+                                      <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-200/50 flex items-center gap-1">
+                                        <Star size={8} fill="currentColor" />
+                                        {s.averageScore?.toFixed(1)} / 10
+                                      </span>
+                                    )}
+                                  </div>
+                                  {s.approvalStatus === 'Disapproved' && s.remarks && (
+                                    <div className="flex items-start gap-1.5 bg-red-100/60 dark:bg-red-950/30 rounded-lg p-2 mt-0.5">
+                                      <MessageSquare size={10} className="text-red-400 shrink-0 mt-0.5" />
+                                      <p className="text-[10px] text-red-700 dark:text-red-300 italic leading-snug">"{s.remarks}"</p>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
 
                           {!isFinalized && (
                             <div className="flex gap-2 items-center">

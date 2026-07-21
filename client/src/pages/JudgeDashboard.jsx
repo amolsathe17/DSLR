@@ -15,6 +15,7 @@ export default function JudgeDashboard() {
 
   // Grading Form State
   const [activePhoto, setActivePhoto] = useState(null);
+  const [offlineZoomPhoto, setOfflineZoomPhoto] = useState(null);
   const [creativity, setCreativity] = useState(5);
   const [composition, setComposition] = useState(5);
   const [technicalQuality, setTechnicalQuality] = useState(5);
@@ -522,7 +523,11 @@ export default function JudgeDashboard() {
                           return (
                             <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
                               <td className="p-4">
-                                <div className="relative group w-12 h-12 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 shrink-0">
+                                <div 
+                                  onClick={() => setOfflineZoomPhoto(photo)}
+                                  className="relative group w-12 h-12 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                                  data-tooltip="Click to zoom / view full photograph"
+                                >
                                   <img 
                                     src={photo.fileUrl} 
                                     alt={photo.title} 
@@ -895,6 +900,43 @@ export default function JudgeDashboard() {
           )}
         </>
     )}
+
+      {/* OFFLINE EVALUATION: ZOOM MODE MODAL (NO GRADING SHEET) */}
+      {offlineZoomPhoto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col p-6 my-8 max-h-[90vh]">
+            
+            {/* Close button */}
+            <button
+              onClick={() => setOfflineZoomPhoto(null)}
+              className="absolute top-4 right-4 z-10 p-2 bg-slate-950/60 hover:bg-slate-950 text-white rounded-full cursor-pointer transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Photo Zoom Detailed View */}
+            <div className="bg-slate-950 flex flex-col justify-between p-6 rounded-2xl relative min-h-[400px] lg:min-h-[580px] w-full overflow-hidden">
+              <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
+                <WatermarkPreview src={offlineZoomPhoto.fileUrl} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
+              </div>
+              
+              <div className="w-full mt-4 flex flex-col gap-1 text-xs text-slate-350 text-left">
+                <h4 className="font-display font-extrabold text-sm text-white">{offlineZoomPhoto.title}</h4>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-400">
+                  <span>Category: <span className="font-bold text-slate-300">{offlineZoomPhoto.category}</span></span>
+                  <span>•</span>
+                  <span>Photographer: <span className="font-bold text-slate-300">{offlineZoomPhoto.participantName}</span></span>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-400">
+                  <span>Camera: <span className="font-semibold text-slate-300">{offlineZoomPhoto.cameraBrand} {offlineZoomPhoto.cameraModel}</span></span>
+                  <span>•</span>
+                  <span>Lens: <span className="font-semibold text-slate-300">{offlineZoomPhoto.lensUsed || 'N/A'}</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CONFIRM SIGN-OFF MODAL */}
       {showSignOffModal && (

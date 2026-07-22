@@ -125,10 +125,18 @@ export default function Dashboard() {
       let activeEvent = null;
       if (eventData.success && eventData.events.length > 0) {
         setEventsList(eventData.events);
-        activeEvent = eventData.events.find((e) => e.status === "Active" && e.eventType === selectedTab);
-        setEvent(activeEvent || null);
-        if (activeEvent) {
-          setSelectedPkgId(activeEvent.packages[0].id);
+        const activeEvents = eventData.events.filter((e) => e.status === "Active");
+        if (activeEvents.length > 0) {
+          const ae = activeEvents[0];
+          setExpandedActiveEvents((prev) => {
+            if (Object.keys(prev).length === 0) {
+              return { [ae._id]: true };
+            }
+            return prev;
+          });
+          activeEvent = ae;
+          setEvent(ae);
+          setSelectedPkgId(ae.packages[0].id);
         } else {
           setSubmission(null);
         }

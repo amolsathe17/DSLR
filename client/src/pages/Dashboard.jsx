@@ -34,7 +34,8 @@ import Certificate from "../components/Certificate";
 
 export default function Dashboard() {
   const { apiFetch, user, token } = useAuth();
-  const [dashboardTab, setDashboardTab] = useState("overview");
+  const [dashboardTab, setDashboardTab] = useState("entries");
+  const [confirmModal, setConfirmModal] = useState(null);
   const [allSubmissions, setAllSubmissions] = useState([]);
   const [eventsList, setEventsList] = useState([]);
   const [event, setEvent] = useState(null);
@@ -348,32 +349,30 @@ export default function Dashboard() {
     }
   };
 
-  const handleDeletePhoto = async (photoId) => {
-    if (
-      !confirm(
-        "Are you sure you want to remove this photograph from your entry?",
-      )
-    )
-      return;
-    setError("");
-
-    try {
-      const data = await apiFetch(
-        `/api/submissions/photo/${event._id}/${photoId}`,
-        {
-          method: "DELETE",
-        },
-      );
-      if (data.success) {
-        setSubmission(data.submission);
-        const allSubsData = await apiFetch("/api/submissions/my-submissions");
-        if (allSubsData.success) {
-          setAllSubmissions(allSubsData.submissions);
+  const handleDeletePhoto = (photoId) => {
+    setConfirmModal({
+      message: "Are you sure you want to remove this photograph from your entry?",
+      onConfirm: async () => {
+        setError("");
+        try {
+          const data = await apiFetch(
+            `/api/submissions/photo/${event._id}/${photoId}`,
+            {
+              method: "DELETE",
+            },
+          );
+          if (data.success) {
+            setSubmission(data.submission);
+            const allSubsData = await apiFetch("/api/submissions/my-submissions");
+            if (allSubsData.success) {
+              setAllSubmissions(allSubsData.submissions);
+            }
+          }
+        } catch (err) {
+          setError(err.message);
         }
       }
-    } catch (err) {
-      setError(err.message);
-    }
+    });
   };
 
   const loadRazorpayScript = () => {
@@ -1418,7 +1417,10 @@ export default function Dashboard() {
                                               <DragDropUpload
                                                 onUpload={async (photo, raw) => {
                                                   if (!title || !category) {
-                                                    alert("Please fill in the Photo Title and Category first.");
+                                                    setConfirmModal({
+                                                      message: "Please fill in the Photo Title and Category first.",
+                                                      isAlert: true
+                                                    });
                                                     throw new Error("Title and Category are required.");
                                                   }
                                                   await handleFileAnalyze(photo);
@@ -1559,9 +1561,15 @@ export default function Dashboard() {
                                               <Clock size={18} className="text-indigo-500 shrink-0 mt-0.5" />
                                               <p>Provide all photo attachments. When complete, click the Lock folder button to submit to the panel.</p>
                                             </div>
+                                            {submission.photographs.length < selectedPackage?.maxPhotos && (
+                                              <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200/50 p-3.5 rounded-2xl flex items-start gap-2 text-[11px] text-amber-700 dark:text-amber-400 font-semibold leading-relaxed">
+                                                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                                                <span>You must upload exactly {selectedPackage?.maxPhotos} photo{selectedPackage?.maxPhotos > 1 ? 's' : ''} for your selected package tier before you can finalize and lock your entry folder. (Currently {submission.photographs.length} uploaded)</span>
+                                              </div>
+                                            )}
                                             <button
                                               onClick={handleFinalSubmit}
-                                              disabled={submission.photographs.length === 0}
+                                              disabled={submission.photographs.length !== selectedPackage?.maxPhotos}
                                               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-bold"
                                             >
                                               Finalize & Lock Entry
@@ -1983,6 +1991,61 @@ export default function Dashboard() {
               >
                 Yes, Finalize Entry
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Custom Alert/Confirm Modal Popup Centered on Page */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 text-center items-center">
+            <div className={`p-3 rounded-2xl ${confirmModal.isAlert ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-500' : 'bg-red-50 dark:bg-red-950/20 text-red-500'}`}>
+              <AlertTriangle size={24} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
+                {confirmModal.isAlert ? "Attention Required" : "Confirm Action"}
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                {confirmModal.message}
+              </p>
+            </div>
+            <div className="flex gap-3 w-full">
+              {confirmModal.isAlert ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirmModal.onConfirm) confirmModal.onConfirm();
+                    setConfirmModal(null);
+                  }}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer text-xs font-bold"
+                >
+                  OK
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirmModal.onCancel) confirmModal.onCancel();
+                      setConfirmModal(null);
+                    }}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-xl cursor-pointer text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      confirmModal.onConfirm();
+                      setConfirmModal(null);
+                    }}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl shadow-md cursor-pointer text-xs font-bold"
+                  >
+                    Confirm
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

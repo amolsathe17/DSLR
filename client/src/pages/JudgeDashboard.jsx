@@ -839,7 +839,15 @@ export default function JudgeDashboard() {
                           <button
                             type="button"
                             onClick={() => handleOpenScoring(photo)}
-                            className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                              user?.role === 'Admin' 
+                                ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
+                                : !photo.graded 
+                                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                                  : photo.score?.approvalStatus === 'Disapproved'
+                                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            }`}
                           >
                             {user?.role === 'Admin' ? 'Review Scoring' : photo.graded ? 'Edit Evaluation' : 'Evaluate photograph'}
                             <ChevronRight size={14} />
@@ -962,7 +970,7 @@ export default function JudgeDashboard() {
                                     <div className="flex border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden w-fit">
                                       <button
                                         type="button"
-                                        disabled={isSuspendedUser}
+                                        disabled={user?.role !== 'Judge' || user?.isSuspended}
                                         onClick={() => handleOfflineScoreChange(photo.photoId, 'approvalStatus', 'Approved')}
                                         className={`px-2.5 py-1 text-[10px] font-extrabold uppercase transition-colors cursor-pointer ${
                                           !isDisapproved ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-600'
@@ -972,7 +980,7 @@ export default function JudgeDashboard() {
                                       </button>
                                       <button
                                         type="button"
-                                        disabled={isSuspendedUser}
+                                        disabled={user?.role !== 'Judge' || user?.isSuspended}
                                         onClick={() => handleOfflineScoreChange(photo.photoId, 'approvalStatus', 'Disapproved')}
                                         className={`px-2.5 py-1 text-[10px] font-extrabold uppercase transition-colors cursor-pointer ${
                                           isDisapproved ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-600'
@@ -1129,7 +1137,7 @@ export default function JudgeDashboard() {
                   <div className="flex border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
                     <button
                       type="button"
-                      disabled={user?.role === 'Admin'}
+                      disabled={user?.role !== 'Judge' || user?.isSuspended}
                       onClick={() => setApprovalStatus('Approved')}
                       className={`flex-1 py-2 font-display font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
                         approvalStatus === 'Approved' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-600'
@@ -1139,7 +1147,7 @@ export default function JudgeDashboard() {
                     </button>
                     <button
                       type="button"
-                      disabled={user?.role === 'Admin'}
+                      disabled={user?.role !== 'Judge' || user?.isSuspended}
                       onClick={() => setApprovalStatus('Disapproved')}
                       className={`flex-1 py-2 font-display font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
                         approvalStatus === 'Disapproved' ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-600'

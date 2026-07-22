@@ -1054,7 +1054,8 @@ export default function JudgeDashboard() {
                 <div className="relative w-full h-full flex items-center justify-center group cursor-zoom-in">
                   <WatermarkPreview
                     src={activePhoto.fileUrl}
-                    className="max-h-full max-w-full object-contain rounded transition-all duration-300 group-hover:scale-105"
+                    className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg"
+                    enableZoom={true}
                   />
                 </div>
               </div>
@@ -1313,7 +1314,8 @@ export default function JudgeDashboard() {
               <div className="relative w-full h-full flex items-center justify-center overflow-hidden group cursor-zoom-in">
                 <WatermarkPreview
                   src={offlineZoomPhoto.fileUrl}
-                  className="max-h-full max-w-full object-contain rounded transition-all duration-300 group-hover:scale-105"
+                  className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg"
+                  enableZoom={true}
                 />
               </div>
             </div>

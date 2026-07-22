@@ -1844,6 +1844,88 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* UPI/CREDIT CARD MOCK PAYMENT GATEWAY DRAWER */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 text-left">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center flex flex-col gap-1 items-center">
+              <CreditCard size={28} className="text-indigo-600" />
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
+                Secure Checkout Gateway
+              </h3>
+              <p className="text-xs text-slate-400">
+                Select simulated payment option to complete booking
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl flex justify-between items-center border border-slate-100 dark:border-slate-800">
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">
+                    Selected Package
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                    {selectedPackage?.name}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">
+                    Total Fee
+                  </span>
+                  <p className="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                    ₹{selectedPackage?.price}.00
+                  </p>
+                </div>
+              </div>
+
+              {/* Test Mode Help Alert */}
+              <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200/50 dark:border-amber-900/50 p-3.5 rounded-2xl flex flex-col gap-1 text-[11px] text-amber-700 dark:text-amber-300 text-left">
+                <span className="font-bold flex items-center gap-1">
+                  <AlertTriangle size={13} className="shrink-0" />
+                  Razorpay Test Mode Info
+                </span>
+                <p className="leading-relaxed">
+                  This portal is in <strong>Test Mode</strong>. You will not receive a real OTP on your phone. To complete the payment:
+                </p>
+                <ul className="list-disc pl-4 mt-1 flex flex-col gap-1">
+                  <li>Use any 6-digit number (e.g., <strong>123456</strong>) on the OTP screen and click <strong>Continue</strong>.</li>
+                  <li>Or click the <strong>"Pay on bank's page"</strong> link on the OTP screen and click <strong>"Success"</strong>.</li>
+                </ul>
+              </div>
+
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={handlePayment}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
+              >
+                <CreditCard size={14} />
+                Pay via Razorpay (UPI, Cards, Netbanking)
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDummyPayment}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
+              >
+                <ShieldCheck size={14} />
+                Simulate Dummy Payment (Instant Bypass)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowPaymentModal(false)}
+                className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
+              >
+                Cancel Checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* QR Invoice Modal */}
       {showQRInvoice && (
         <QRInvoice

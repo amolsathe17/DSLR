@@ -70,6 +70,19 @@ const validateDSLR = (exif) => {
   };
 };
 
+// @desc    Get all submissions for the logged-in participant
+// @route   GET /api/submissions/my-submissions
+// @access  Private
+router.get('/my-submissions', protect, async (req, res) => {
+  try {
+    const submissions = await Submission.find({ userId: req.user._id.toString() });
+    res.json({ success: true, submissions });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @desc    Get participant's current submission
 // @route   GET /api/submissions/my-submission/:eventId
 // @access  Private

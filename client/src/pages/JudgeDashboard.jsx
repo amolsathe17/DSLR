@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Camera, ShieldAlert, Award, Star, CheckCircle2, ChevronRight, X, Check, AlertTriangle, Clock, XCircle } from 'lucide-react';
+import { Camera, ShieldAlert, Award, Star, Star as StarIcon, CheckCircle2, ChevronRight, X, Check, AlertTriangle, Clock, XCircle, ListChecks, Layers, BarChart2 } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function JudgeDashboard() {
@@ -27,6 +27,8 @@ export default function JudgeDashboard() {
   const [selectedSubmissionId, setSelectedSubmissionId] = useState('all');
   const [evaluationMode, setEvaluationMode] = useState('online'); // 'online' or 'offline'
   const [offlineScores, setOfflineScores] = useState({});
+  const [judgeDashboardTab, setJudgeDashboardTab] = useState('overview');
+  const [allPhotographsByEvent, setAllPhotographsByEvent] = useState({});
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successTitle, setSuccessTitle] = useState('');
@@ -365,635 +367,1056 @@ export default function JudgeDashboard() {
       )}
       
       {error && (
-        <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-6">
+        <div className="flex items-start gap-2 bg-red-50 dark:bg-red-955/20 border border-red-205/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-6">
           <ShieldAlert size={18} className="shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
-            Judge Evaluation Portal
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Evaluating submissions assigned to your profile
-          </p>
-        </div>
+      {/* Dashboard Sub-navigation Tabs */}
+      <div className="flex border-b border-slate-200 dark:border-slate-800 mb-8 gap-6 justify-center sm:justify-start">
+        <button
+          onClick={() => setJudgeDashboardTab("overview")}
+          className={`pb-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+            judgeDashboardTab === "overview"
+              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          }`}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setJudgeDashboardTab("portal")}
+          className={`pb-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+            judgeDashboardTab === "portal"
+              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          }`}
+        >
+          Evaluation Portal Workspace
+        </button>
+      </div>
 
-        {events.length > 0 && (
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500">Contest:</span>
-              <select
-                value={event?._id || ''}
-                onChange={(e) => handleEventChange(e.target.value)}
-                className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+      {judgeDashboardTab === "overview" && (
+        <div className="flex flex-col gap-8 animate-in fade-in duration-200">
+          {/* Welcome header */}
+          <div className="bg-gradient-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col gap-2 text-left">
+              <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">
+                Jury Panel Dashboard
+              </span>
+              <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
+                Welcome back, Judge {user?.name || "Jury Member"}!
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Review assigned DSLR uploads, grade photography composition benchmarks, and submit final signed-off scores.
+              </p>
+            </div>
+            <div className="flex gap-2 self-start md:self-center">
+              <button
+                onClick={() => setJudgeDashboardTab("portal")}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-2xl text-xs shadow-sm hover:shadow transition-all cursor-pointer flex items-center gap-1.5"
               >
-                {events.map(e => (
-                  <option key={e._id} value={e._id}>{e.title}</option>
-                ))}
-              </select>
+                <Camera size={14} /> Open Evaluation Portal
+              </button>
+            </div>
+          </div>
+
+          {/* Stats Widgets */}
+          {(() => {
+            const totalEvents = events.length;
+            const allPhotos = Object.values(allPhotographsByEvent).reduce((acc, arr) => [...acc, ...(arr || [])], []);
+            const totalPhotos = allPhotos.length;
+            const gradedCount = allPhotos.filter(p => p.graded).length;
+            const pendingCount = totalPhotos - gradedCount;
+
+            return (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
+                    <span className="text-[10px] text-slate-505 font-extrabold uppercase tracking-wider">Assigned Contests</span>
+                    <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalEvents}</h3>
+                    <span className="text-[10px] text-slate-400">Total events panel seat</span>
+                  </div>
+                  
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Assigned Photographs</span>
+                    <h3 className="font-display font-extrabold text-2xl text-amber-600 dark:text-amber-400">{totalPhotos}</h3>
+                    <span className="text-[10px] text-slate-400">Assigned photo frames</span>
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
+                    <span className="text-[10px] text-slate-505 font-extrabold uppercase tracking-wider">Graded Photos</span>
+                    <h3 className="font-display font-extrabold text-2xl text-emerald-600 dark:text-emerald-400">{gradedCount}</h3>
+                    <span className="text-[10px] text-slate-400">Completed assessments</span>
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Ungraded Photos</span>
+                    <h3 className="font-display font-extrabold text-2xl text-red-600 dark:text-red-400">{pendingCount}</h3>
+                    <span className="text-[10px] text-slate-400">Assessments remaining</span>
+                  </div>
+                </div>
+
+                {/* SVG Progress charts */}
+                {totalPhotos > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    {/* Donut Progress chart */}
+                    {(() => {
+                      const gradedPct = totalPhotos ? (gradedCount / totalPhotos) : 0;
+                      const radius = 50;
+                      const circumference = 2 * Math.PI * radius;
+                      const strokeDashoffset = circumference - (circumference * gradedPct);
+
+                      return (
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
+                          <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Grading Completion Progress</h3>
+                          <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
+                            <div className="relative w-32 h-32">
+                              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
+                                <circle cx="70" cy="70" r={radius} fill="transparent" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="12" />
+                                <circle
+                                  cx="70"
+                                  cy="70"
+                                  r={radius}
+                                  fill="transparent"
+                                  stroke="#4f46e5"
+                                  strokeWidth="12"
+                                  strokeDasharray={circumference}
+                                  strokeDashoffset={strokeDashoffset}
+                                  strokeLinecap="round"
+                                  className="transition-all duration-1000 ease-out"
+                                />
+                              </svg>
+                              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="font-display font-black text-2xl text-slate-900 dark:text-white">
+                                  {Math.round(gradedPct * 100)}%
+                                </span>
+                                <span className="text-[8px] text-slate-400 font-extrabold uppercase">Done</span>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2.5 text-[11px]">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0" />
+                                <span className="font-semibold text-slate-500 dark:text-slate-400">Graded: <strong className="text-slate-900 dark:text-white">{gradedCount}</strong></span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                                <span className="font-semibold text-slate-500 dark:text-slate-400">Ungraded: <strong className="text-slate-900 dark:text-white">{pendingCount}</strong></span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Category Distribution Bar Chart */}
+                    {(() => {
+                      const categoriesMap = {};
+                      allPhotos.forEach(p => {
+                        const cat = p.category || 'Other';
+                        categoriesMap[cat] = (categoriesMap[cat] || 0) + 1;
+                      });
+                      const catData = Object.entries(categoriesMap).map(([name, count]) => ({ name, count }));
+                      const maxCount = Math.max(...catData.map(c => c.count), 1);
+
+                      return (
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
+                          <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Assigned Categories Distribution</h3>
+                          <div className="flex flex-col gap-3 py-1">
+                            {catData.map(({ name, count }) => {
+                              const widthPct = (count / maxCount) * 100;
+                              return (
+                                <div key={name} className="flex flex-col gap-1">
+                                  <div className="flex justify-between text-[11px] font-bold">
+                                    <span className="text-slate-600 dark:text-slate-300">{name}</span>
+                                    <span className="text-slate-500">{count} {count === 1 ? 'photo' : 'photos'}</span>
+                                  </div>
+                                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                                    <div
+                                      style={{ width: `${widthPct}%` }}
+                                      className="bg-amber-600 h-full rounded-full transition-all duration-1000 ease-out"
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                  </div>
+                )}
+
+                {/* Approved/Disapproved list by event, and history */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-left">
+                  
+                  {/* Event wise approvals / disapproval tracking */}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm">
+                    <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Events Breakdown Tracking</h3>
+                    <div className="flex flex-col gap-4 overflow-y-auto max-h-[350px] pr-2">
+                      {events.map((e, idx) => {
+                        const eventPhotos = allPhotographsByEvent[e._id] || [];
+                        const total = eventPhotos.length;
+                        const approved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Approved').length;
+                        const disapproved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Disapproved').length;
+                        const evaluated = eventPhotos.filter(p => p.graded).length;
+
+                        return (
+                          <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-2.5 text-xs">
+                            <div className="flex justify-between items-center">
+                              <span className="font-extrabold text-slate-900 dark:text-white">{e.title}</span>
+                              <span className={`px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full ${
+                                evaluated === total && total > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                              }`}>
+                                {evaluated} / {total} Graded
+                              </span>
+                            </div>
+                            
+                            {/* Visual Progress bar */}
+                            <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                              <div
+                                style={{ width: `${total ? (evaluated / total) * 100 : 0}%` }}
+                                className="bg-indigo-600 h-full rounded-full"
+                              />
+                            </div>
+
+                            <div className="flex justify-between text-[10px] text-slate-450 mt-1 border-t border-slate-100 dark:border-slate-800/40 pt-2">
+                              <span>Approved: <strong className="text-emerald-600 dark:text-emerald-400">{approved}</strong></span>
+                              <span>Disapproved: <strong className="text-red-600 dark:text-red-400">{disapproved}</strong></span>
+                              <span>Pending: <strong className="text-slate-655 dark:text-slate-300">{total - evaluated}</strong></span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Right side: Evaluation history timeline */}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm">
+                    <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Past Evaluation History Log</h3>
+                    
+                    {(() => {
+                      const historyList = [];
+                      events.forEach(e => {
+                        const eventPhotos = allPhotographsByEvent[e._id] || [];
+                        eventPhotos.forEach(p => {
+                          if (p.graded && p.score) {
+                            historyList.push({
+                              ...p,
+                              eventTitle: e.title
+                            });
+                          }
+                        });
+                      });
+
+                      // Sort by grading update date
+                      historyList.sort((a, b) => new Date(b.score.updatedAt || b.score.createdAt) - new Date(a.score.updatedAt || a.score.createdAt));
+
+                      if (historyList.length === 0) {
+                        return (
+                          <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-[220px]">
+                            <span>No graded photographs found. Get started in the workspace tab!</span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="flex flex-col gap-4 overflow-y-auto max-h-[350px] pr-2 pl-4 border-l border-slate-105 dark:border-slate-800">
+                          {historyList.map((item, idx) => (
+                            <div key={idx} className="relative flex flex-col gap-1.5 text-xs text-left">
+                              <span className="absolute -left-[22px] top-1 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-500" />
+                              <span className="text-[10px] text-slate-400 font-semibold">
+                                {new Date(item.score.updatedAt || item.score.createdAt).toLocaleDateString()}
+                              </span>
+                              <div className="flex justify-between items-start gap-2">
+                                <h4 className="font-extrabold text-slate-900 dark:text-white leading-tight">
+                                  {item.title}
+                                </h4>
+                                <span className={`shrink-0 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
+                                  item.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                                }`}>
+                                  {item.score.approvalStatus}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 leading-none">
+                                Event: {item.eventTitle} | Average: <strong className="text-indigo-600 dark:text-indigo-400">{item.score.averageScore}</strong>
+                              </p>
+                              {item.score.remarks && (
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-100 dark:border-slate-800/40 leading-relaxed mt-1">
+                                  "${item.score.remarks}"
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
+
+      {judgeDashboardTab === "portal" && (
+        <>
+          {/* Header */}
+          <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div>
+              <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
+                Judge Evaluation Portal
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">
+                Evaluating submissions assigned to your profile
+              </p>
             </div>
 
-            {participants.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-500">Participant:</span>
-                <select
-                  value={selectedSubmissionId}
-                  onChange={(e) => setSelectedSubmissionId(e.target.value)}
-                  className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                >
-                  <option value="all">All Participants ({participants.length})</option>
-                  {participants.map(p => (
-                    <option key={p.submissionId} value={p.submissionId}>{p.name}</option>
-                  ))}
-                </select>
+            {events.length > 0 && (
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-500">Contest:</span>
+                  <select
+                    value={event?._id || ''}
+                    onChange={(e) => handleEventChange(e.target.value)}
+                    className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    {events.map(e => (
+                      <option key={e._id} value={e._id}>{e.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {participants.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-500">Participant:</span>
+                    <select
+                      value={selectedSubmissionId}
+                      onChange={(e) => setSelectedSubmissionId(e.target.value)}
+                      className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="all">All Participants ({participants.length})</option>
+                      {participants.map(p => (
+                        <option key={p.submissionId} value={p.submissionId}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
 
-      {events.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
-          <Award size={48} className="text-indigo-600 dark:text-indigo-400 mb-2 animate-bounce" />
-          <h2 className="text-base font-extrabold text-slate-900 dark:text-white">No Assigned Contests</h2>
-          <p className="text-xs max-w-sm text-slate-500">
-            You are not currently assigned as a panel judge for any active events. Once the administrator assigns you to an event, you will see the photographs here for grading.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Evaluation Mode Tabs */}
-          <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6 bg-slate-100 dark:bg-slate-900/40 p-1 rounded-2xl w-fit">
-            <button
-              onClick={() => setEvaluationMode('online')}
-              className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
-                evaluationMode === 'online'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              Online Evaluation
-            </button>
-            <button
-              onClick={() => setEvaluationMode('offline')}
-              className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
-                evaluationMode === 'offline'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              Offline Evaluation
-            </button>
-          </div>
-
-          {evaluationMode === 'offline' ? (
-            <div className="flex flex-col gap-6 w-full animate-in fade-in duration-200">
-              {/* Confirmation Sign-Off Banner */}
-              {user?.role !== 'Admin' && photographs.length > 0 && (
-                hasConfirmed ? (
-                  <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-800 dark:text-emerald-300">
-                    <div className="flex items-center gap-2 text-xs">
-                      <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
-                      <div>
-                        <p className="font-bold">Evaluation Signed Off</p>
-                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">You have confirmed your reviews for this event. Thank you!</p>
-                      </div>
-                    </div>
-                    <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg shrink-0">Confirmed</span>
-                  </div>
-                ) : (
-                  allGraded && (
-                    <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-850 dark:text-amber-300">
-                      <div className="flex items-start gap-2 text-xs">
-                        <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
-                        <div>
-                          <p className="font-bold">All Submissions Graded!</p>
-                          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Please submit your final review confirmation to notify the administrator.</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleConfirmGrading}
-                        className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-md cursor-pointer transition-colors shrink-0 text-center"
-                      >
-                        Confirm Review & Sign-Off
-                      </button>
-                    </div>
-                  )
-                )
-              )}
-
-              {displayedPhotos.length === 0 ? (
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3 animate-pulse">
-                  <Camera size={36} className="text-slate-300 mb-2" />
-                  <p className="text-sm font-medium">No assigned photographs found.</p>
-                  <p className="text-xs max-w-xs text-slate-500">There are no finalized contestant entry submissions uploaded for this participant yet.</p>
-                </div>
-              ) : (
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
-                     <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                          <th className="p-4">Photo</th>
-                          <th className="p-4">Title</th>
-                          <th className="p-4">Participant Name</th>
-                          <th className="p-4">Category</th>
-                          <th className="p-4 text-center">Avg</th>
-                          <th className="p-4">Approval</th>
-                          <th className="p-4">Explanation / Remarks</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {displayedPhotos.map(photo => {
-                          const scores = offlineScores[photo.photoId] || {
-                            creativity: photo.score?.creativity || 5,
-                            composition: photo.score?.composition || 5,
-                            technicalQuality: photo.score?.technicalQuality || 5,
-                            storytelling: photo.score?.storytelling || 5,
-                            overallImpact: photo.score?.overallImpact || 5,
-                            remarks: photo.score?.remarks || '',
-                            approvalStatus: photo.score?.approvalStatus || 'Approved'
-                          };
-                          const appStatus = scores.approvalStatus || 'Approved';
-                          const rowAvg = appStatus === 'Disapproved' ? 0 : (Number(scores.creativity) || 5);
-                          return (
-                            <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
-                              <td className="p-4">
-                                <div 
-                                  onClick={() => setOfflineZoomPhoto(photo)}
-                                  className="relative group w-12 h-12 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                                  data-tooltip="Click to zoom / view full photograph"
-                                >
-                                  <img 
-                                    src={photo.fileUrl} 
-                                    alt={photo.title} 
-                                    className="w-full h-full object-cover"
-                                    crossOrigin="anonymous"
-                                    referrerPolicy="no-referrer"
-                                  />
-                                </div>
-                              </td>
-                              <td className="p-4 min-w-[120px] font-bold text-slate-900 dark:text-white">
-                                {photo.title}
-                              </td>
-                              <td className="p-4 min-w-[120px] font-medium text-slate-700 dark:text-slate-350">
-                                {photo.participantName}
-                              </td>
-                              <td className="p-4">
-                                <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-semibold text-slate-600 dark:text-slate-400">
-                                  {photo.category}
-                                </span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <select
-                                  disabled={user?.role === 'Admin' || hasConfirmed}
-                                  value={rowAvg}
-                                  onChange={(e) => {
-                                    const val = Number(e.target.value);
-                                    handleOfflineScoreChange(photo.photoId, 'creativity', val);
-                                    handleOfflineScoreChange(photo.photoId, 'composition', val);
-                                    handleOfflineScoreChange(photo.photoId, 'technicalQuality', val);
-                                    handleOfflineScoreChange(photo.photoId, 'storytelling', val);
-                                    handleOfflineScoreChange(photo.photoId, 'overallImpact', val);
-                                  }}
-                                  className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-1 text-[10px] font-bold text-center focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                >
-                                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (
-                                    <option key={v} value={v}>{v}</option>
-                                  ))}
-                                </select>
-                              </td>
-                              <td className="p-4">
-                                <select
-                                  disabled={user?.role === 'Admin' || hasConfirmed}
-                                  value={appStatus}
-                                  onChange={(e) => {
-                                    handleOfflineScoreChange(photo.photoId, 'approvalStatus', e.target.value);
-                                  }}
-                                  className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-1 text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                >
-                                  <option value="Approved">Approved</option>
-                                  <option value="Disapproved">Disapproved</option>
-                                </select>
-                              </td>
-                              <td className="p-4 min-w-[200px]">
-                                <input
-                                  type="text"
-                                  disabled={user?.role === 'Admin' || hasConfirmed}
-                                  value={scores.remarks || ''}
-                                  onChange={(e) => {
-                                    handleOfflineScoreChange(photo.photoId, 'remarks', e.target.value);
-                                  }}
-                                  placeholder={appStatus === 'Disapproved' ? 'Explanation required...' : 'Optional feedback...'}
-                                  required={appStatus === 'Disapproved'}
-                                  className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
-                                    appStatus === 'Disapproved' && (!scores.remarks || scores.remarks.trim() === '')
-                                      ? 'border-red-300 focus:ring-red-500 dark:border-red-900/45'
-                                      : 'border-slate-200 dark:border-slate-800'
-                                  }`}
-                                />
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  {user?.role !== 'Admin' && !hasConfirmed && displayedPhotos.length > 0 && (
-                    <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-                      <button
-                        onClick={handleSaveAllOfflineScores}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2 rounded-xl shadow-md transition-all cursor-pointer"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+          {events.length === 0 ? (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+              <Award size={48} className="text-indigo-600 dark:text-indigo-400 mb-2 animate-bounce" />
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white">No Assigned Contests</h2>
+              <p className="text-xs max-w-sm text-slate-500 font-medium leading-relaxed">
+                You are not currently assigned as a panel judge for any active events. Once the administrator assigns you to an event, you will see the photographs here for grading.
+              </p>
             </div>
           ) : (
-            <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200">
-              
-              {/* Confirmation Sign-Off Banner */}
-              {user?.role !== 'Admin' && photographs.length > 0 && (
-                hasConfirmed ? (
-                  <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-800 dark:text-emerald-300">
-                    <div className="flex items-center gap-2 text-xs">
-                      <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
-                      <div>
-                        <p className="font-bold">Evaluation Signed Off</p>
-                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">You have confirmed your reviews for this event. Thank you!</p>
-                      </div>
-                    </div>
-                    <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg shrink-0">Confirmed</span>
+            <>
+              {/* Evaluation Mode Tabs */}
+              <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6 bg-slate-100 dark:bg-slate-900/40 p-1 rounded-2xl w-fit">
+                <button
+                  onClick={() => setEvaluationMode('online')}
+                  className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
+                    evaluationMode === 'online'
+                      ? 'bg-indigo-650 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Online Evaluation
+                </button>
+                <button
+                  onClick={() => setEvaluationMode('offline')}
+                  className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
+                    evaluationMode === 'offline'
+                      ? 'bg-indigo-655 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Offline Evaluation
+                </button>
+              </div>
+
+              {/* Status Header Bar */}
+              <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 text-left shadow-sm">
+                <div>
+                  <h2 className="font-display font-black text-lg text-slate-900 dark:text-white">
+                    {event?.title}
+                  </h2>
+                  <span className="text-[10px] text-slate-400 block font-semibold mt-0.5">
+                    Mode: {event?.scoringType} Scoring | Category limits: {event?.photoLimit} photo slots
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-500">Grading Progress:</span>
+                    <span className="text-sm font-black text-indigo-600 dark:text-indigo-400 font-bold">
+                      {photographs.filter(p => p.graded).length} / {photographs.length}
+                    </span>
                   </div>
-                ) : (
-                  allGraded && (
-                    <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-850 dark:text-amber-300">
-                      <div className="flex items-start gap-2 text-xs">
-                        <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
-                        <div>
-                          <p className="font-bold">All Submissions Graded!</p>
-                          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Please submit your final review confirmation to notify the administrator.</p>
-                        </div>
-                      </div>
+
+                  {user?.role !== 'Admin' && (
+                    hasConfirmed ? (
+                      <span className="bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 border border-emerald-200/50 py-2.5 px-5 rounded-2xl text-xs font-extrabold uppercase flex items-center gap-1.5">
+                        <CheckCircle2 size={14} /> Signed Off
+                      </span>
+                    ) : allGraded ? (
                       <button
                         onClick={handleConfirmGrading}
-                        className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-md cursor-pointer transition-colors shrink-0 text-center"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-2xl text-xs shadow-md hover:shadow transition-all cursor-pointer flex items-center gap-1.5"
                       >
-                        Confirm Review & Sign-Off
+                        <Award size={14} /> Sign Off Event
                       </button>
-                    </div>
-                  )
-                )
-              )}
+                    ) : (
+                      <span className="bg-slate-100 dark:bg-slate-805 text-slate-400 py-2.5 px-5 rounded-2xl text-xs font-bold uppercase flex items-center gap-1.5">
+                        <Clock size={14} /> Finish Grading to Sign Off
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
 
-              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Assigned Submissions ({displayedPhotos.length})</h3>
-              
+              {/* Display Photos Grid */}
               {displayedPhotos.length === 0 ? (
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3 animate-pulse">
-                  <Camera size={36} className="text-slate-300 mb-2" />
-                  <p className="text-sm font-medium">No assigned photographs found.</p>
-                  <p className="text-xs max-w-xs text-slate-500">There are no finalized contestant entry submissions uploaded for this participant yet.</p>
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-400">
+                  No submissions match filter criteria.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {displayedPhotos.map((photo) => (
-                    <div
-                      key={photo.photoId}
-                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"
-                    >
-                      <WatermarkPreview src={photo.fileUrl} className="aspect-video w-full" />
-
-                      <div className="p-4 flex flex-col gap-3">
-                        <div className="flex justify-between items-start gap-2">
-                          <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
-                            {photo.title}
-                          </h4>
-                          <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-semibold text-slate-600 dark:text-slate-400">
-                            {photo.category}
+                evaluationMode === 'online' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+                    {displayedPhotos.map((photo) => (
+                      <div
+                        key={photo.photoId}
+                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow transition-all flex flex-col justify-between"
+                      >
+                        <div className="w-full h-48 bg-slate-950 relative overflow-hidden flex items-center justify-center">
+                          <WatermarkPreview
+                            src={photo.fileUrl}
+                            className="w-full h-full object-contain"
+                          />
+                          <span className={`absolute top-3 left-3 px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full shadow-sm ${
+                            photo.graded ? 'bg-indigo-600 text-white' : 'bg-slate-500 text-white'
+                          }`}>
+                            {photo.graded ? 'Graded' : 'Not Graded'}
                           </span>
                         </div>
 
-                        <div className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-100 dark:border-slate-850 text-[10px] text-slate-500 flex flex-col gap-1">
-                          <p>Camera: <span className="font-bold text-slate-800 dark:text-slate-200">{photo.cameraBrand} {photo.cameraModel}</span></p>
-                          <p>Lens: <span className="font-semibold text-slate-700 dark:text-slate-350 truncate block">{photo.lensUsed || 'N/A'}</span></p>
-                        </div>
-
-                        <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center">
-                          <div>
-                            {photo.graded ? (
-                              photo.score?.approvalStatus === 'Disapproved' ? (
-                                <span className="text-[9px] bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-450 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 border border-rose-100">
-                                  <XCircle size={10} className="text-rose-500" />
-                                  Disapproved
+                        <div className="p-4 flex flex-col gap-3.5 flex-grow justify-between">
+                          <div className="flex flex-col gap-1">
+                            <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white truncate font-black">
+                              {photo.title}
+                            </h4>
+                            <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider block">
+                              {photo.category}
+                            </span>
+                            <span className="text-[10px] text-slate-500 font-bold block">
+                              By: {photo.participantName}
+                            </span>
+                            {photo.score && (
+                              <div className="mt-2 flex items-center gap-1">
+                                <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
+                                  photo.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                                }`}>
+                                  {photo.score.approvalStatus}
                                 </span>
-                              ) : (
-                                <span className="text-[9px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 border border-emerald-100">
-                                  <CheckCircle2 size={10} />
-                                  Graded ({photo.score.averageScore}/10)
-                                </span>
-                              )
-                            ) : (
-                              <span className="text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold">
-                                Ungraded
-                              </span>
+                                {photo.score.approvalStatus !== 'Disapproved' && (
+                                  <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                    Grade: {photo.score.averageScore}
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </div>
 
                           <button
+                            type="button"
                             onClick={() => handleOpenScoring(photo)}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg flex items-center gap-0.5 cursor-pointer shadow-sm"
+                            className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                           >
-                            {hasConfirmed || photo.score?.approvalStatus === 'Disapproved' ? 'View Grade' : photo.graded ? 'Edit Grade' : 'Score Photo'}
+                            {user?.role === 'Admin' ? 'Review Scoring' : photo.graded ? 'Edit Evaluation' : 'Evaluate photograph'}
                             <ChevronRight size={14} />
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Online Evaluation Modal Overlay (Zoom Mode + Grading Sheet Card side-by-side) */}
-              {activePhoto && (() => {
-                const isReadOnly = user?.role === 'Admin' || hasConfirmed || activePhoto.score?.approvalStatus === 'Disapproved';
-                return (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-                    <div className="relative w-full max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col lg:flex-row my-8 max-h-[90vh]">
-                      
-                      {/* Close button */}
-                      <button
-                        onClick={() => setActivePhoto(null)}
-                        className="absolute top-4 right-4 z-10 p-2 bg-slate-950/60 hover:bg-slate-950 text-white rounded-full cursor-pointer transition-colors"
-                      >
-                        <X size={20} />
-                      </button>
-
-                      {/* Left Side: Photo Zoom Detailed View */}
-                      <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px]">
-                        <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
-                          <WatermarkPreview src={activePhoto.fileUrl} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
-                        </div>
-                        
-                        <div className="w-full mt-4 flex flex-col md:flex-row justify-between items-start gap-6 text-xs text-slate-300 pb-6 pr-2">
-                          {/* Left: Metadata details */}
-                          <div className="flex flex-col gap-1 text-left">
-                            <h4 className="font-display font-extrabold text-sm text-white">{activePhoto.title}</h4>
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-400">
-                              <span>Category: <span className="font-bold text-slate-350">{activePhoto.category}</span></span>
-                              <span>•</span>
-                              <span>Photographer: <span className="font-bold text-slate-350">{activePhoto.participantName}</span></span>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-400">
-                              <span>Camera: <span className="font-semibold text-slate-350">{activePhoto.cameraBrand} {activePhoto.cameraModel}</span></span>
-                              <span>•</span>
-                              <span>Lens: <span className="font-semibold text-slate-350">{activePhoto.lensUsed || 'N/A'}</span></span>
-                            </div>
-                          </div>
-
-                          {/* Right: Description */}
-                          <div className="max-w-[320px] lg:max-w-[420px] text-left md:text-right flex flex-col gap-1 md:items-end shrink-0">
-                            <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
-                              Photo Description
-                            </span>
-                            <p className="text-[11px] text-slate-350 leading-relaxed font-medium italic">
-                              "{activePhoto.description || 'No description shared.'}"
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right Side: Grading Sheet Card (same width w-[380px]) */}
-                      <div className="w-full lg:w-[380px] shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 p-6 overflow-y-auto max-h-[90vh] text-left flex flex-col gap-5 bg-slate-50/30 dark:bg-slate-900/30">
-                        <div>
-                          <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Grading Sheet</h3>
-                          <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{activePhoto.title}"</span>
-                        </div>
-
-                        <form onSubmit={handleScoreSubmit} className="flex flex-col gap-4 text-xs">
-                          
-                          {/* Admin judge reviews inspector */}
-                          {user?.role === 'Admin' && activePhoto.allScores && activePhoto.allScores.length > 0 && (
-                            <div className="flex flex-col gap-2 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 rounded-2xl">
-                              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-wider block">
-                                Judge Evaluations ({activePhoto.allScores.length})
-                              </span>
-                              <div className="flex flex-col gap-2 mt-1">
-                                {activePhoto.allScores.map((s, sIdx) => (
-                                  <div 
-                                    key={sIdx} 
-                                    onClick={() => {
-                                      setCreativity(s.creativity || 5);
-                                      setComposition(s.composition || 5);
-                                      setTechnicalQuality(s.technicalQuality || 5);
-                                      setStorytelling(s.storytelling || 5);
-                                      setOverallImpact(s.overallImpact || 5);
-                                      setRemarks(s.remarks || '');
-                                    }}
-                                    className="flex justify-between items-center text-[10px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer hover:border-indigo-400 transition-colors"
-                                    data-tooltip="Click to view details in sliders"
-                                  >
-                                    <div className="text-left">
-                                      <p className="font-bold text-slate-800 dark:text-white">{s.judgeName}</p>
-                                      <p className="text-[8px] text-slate-400 truncate max-w-[150px]">"{s.remarks || 'No remarks'}"</p>
-                                    </div>
-                                    <span className="text-[8px] bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">★ {s.averageScore?.toFixed(1)}/10</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Scoring criteria sliders */}
-                          {[
-                            { label: 'Creativity (1-10)', val: creativity, set: setCreativity, desc: 'Originality, artistic expression, and concept.' },
-                            { label: 'Composition (1-10)', val: composition, set: setComposition, desc: 'Rule of thirds, balance, visual framing.' },
-                            { label: 'Technical Quality (1-10)', val: technicalQuality, set: setTechnicalQuality, desc: 'Focus, exposure, lighting, noise control.' },
-                            { label: 'Storytelling (1-10)', val: storytelling, set: setStorytelling, desc: 'Narrative element, emotional evoke.' },
-                            { label: 'Overall Impact (1-10)', val: overallImpact, set: setOverallImpact, desc: 'First impression, visual stun factor.' }
-                          ].map((item, idx) => (
-                            <div key={idx} className="flex flex-col gap-1.5">
-                              <div className="flex justify-between items-center">
-                                <span className="font-bold text-slate-700 dark:text-slate-200">{item.label}</span>
-                                <span className="font-display font-black text-sm text-indigo-600 dark:text-indigo-400">{item.val}</span>
-                              </div>
-                              <input
-                                type="range"
-                                min={1}
-                                max={10}
-                                value={item.val}
-                                onChange={(e) => item.set(Number(e.target.value))}
-                                className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
-                                disabled={isReadOnly}
-                              />
-                              <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
-                            </div>
-                          ))}
-
-                          {/* Score summary */}
-                          <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl flex justify-between items-center text-center mt-2">
-                            <div>
-                              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Total Score</span>
-                              <p className="font-display font-black text-xl text-slate-800 dark:text-slate-100">{totalScore} <span className="text-slate-400 text-xs">/ 50</span></p>
-                            </div>
-                            <div className="w-px h-8 bg-slate-200 dark:bg-slate-850"></div>
-                            <div>
-                              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Average Score</span>
-                              <p className="font-display font-black text-xl text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-0.5">
-                                <Star size={16} className="fill-current text-indigo-600 dark:text-indigo-400 shrink-0" />
-                                {averageScore}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-1">
-                            <label className="font-bold text-slate-700 dark:text-slate-200">Approval Status</label>
-                            <select
-                              value={approvalStatus}
-                              onChange={(e) => setApprovalStatus(e.target.value)}
-                              disabled={isReadOnly}
-                              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-[11px] font-semibold"
-                            >
-                              <option value="Approved">Approved</option>
-                              <option value="Disapproved">Disapproved</option>
-                            </select>
-                            {approvalStatus === 'Disapproved' && (
-                              <span className="text-[9px] text-red-500 font-semibold mt-0.5">⚠️ An explanation/remarks is required when disapproving.</span>
-                            )}
-                          </div>
-
-                          <div className="flex flex-col gap-1">
-                            <label className="font-bold text-slate-700 dark:text-slate-200">Remarks / Explanation</label>
-                            <textarea
-                              value={remarks}
-                              onChange={(e) => setRemarks(e.target.value)}
-                              placeholder={approvalStatus === 'Disapproved' ? 'Please provide explanation for disapproval...' : user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
-                              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
-                              required={(user?.role !== 'Admin' && !hasConfirmed && approvalStatus === 'Disapproved') || (user?.role !== 'Admin' && !hasConfirmed)}
-                              disabled={isReadOnly}
-                            />
-                          </div>
-
-                          {isReadOnly ? (
-                            <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold py-2.5 rounded-xl text-center text-[10px] flex flex-col gap-1 items-center justify-center">
-                              {activePhoto.score?.approvalStatus === 'Disapproved' && (
-                                <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider mb-0.5">Disapproved Entry</span>
-                              )}
-                              <span>
-                                {hasConfirmed 
-                                  ? 'Evaluation Read-Only (Signed Off)' 
-                                  : activePhoto.score?.approvalStatus === 'Disapproved'
-                                    ? 'Evaluation Read-Only (Disapproved)'
-                                    : 'Evaluation Read-Only (Admin Mode)'}
-                              </span>
-                            </div>
-                          ) : (
-                            <button
-                              type="submit"
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer transition-colors text-center"
-                            >
-                              Submit Grade Evaluation
-                            </button>
-                          )}
-                        </form>
-                      </div>
-
-                    </div>
+                    ))}
                   </div>
-                );
-              })()}
+                ) : (
+                  /* Offline Score sheets */
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-3xl overflow-hidden shadow-sm text-left">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs text-left">
+                        <thead>
+                          <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider font-bold">
+                            <th className="px-5 py-4 w-28">Preview</th>
+                            <th className="px-5 py-4 w-40">Photo details</th>
+                            <th className="px-5 py-4">Creativity</th>
+                            <th className="px-5 py-4">Comp</th>
+                            <th className="px-5 py-4">Tech</th>
+                            <th className="px-5 py-4">Story</th>
+                            <th className="px-5 py-4">Impact</th>
+                            <th className="px-5 py-4 w-40">Status & Remarks</th>
+                            <th className="px-5 py-4 text-center font-bold">Save</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                          {displayedPhotos.map((photo) => {
+                            const scores = offlineScores[photo.photoId] || {
+                              creativity: 5,
+                              composition: 5,
+                              technicalQuality: 5,
+                              storytelling: 5,
+                              overallImpact: 5,
+                              remarks: '',
+                              approvalStatus: 'Approved'
+                            };
 
-            </div>
+                            const isSuspendedUser = user?.isSuspended || user?.role === 'Admin';
+                            const isDisapproved = scores.approvalStatus === 'Disapproved';
+
+                            return (
+                              <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20">
+                                <td className="px-5 py-4">
+                                  <div
+                                    onClick={() => setOfflineZoomPhoto(photo)}
+                                    className="w-20 h-14 bg-slate-905 rounded-lg overflow-hidden flex items-center justify-center cursor-zoom-in relative border border-slate-100 dark:border-slate-800"
+                                  >
+                                    <WatermarkPreview src={photo.fileUrl} className="w-full h-full object-cover" />
+                                  </div>
+                                </td>
+                                <td className="px-5 py-4 flex flex-col gap-0.5 justify-center h-20 min-w-[150px]">
+                                  <span className="font-extrabold text-slate-900 dark:text-white line-clamp-1">{photo.title}</span>
+                                  <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">{photo.category}</span>
+                                  <span className="text-[9px] text-indigo-505 font-semibold">{photo.participantName}</span>
+                                </td>
+                                {/* Creativity */}
+                                <td className="px-5 py-4">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    disabled={isSuspendedUser || isDisapproved}
+                                    value={isDisapproved ? 0 : scores.creativity}
+                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'creativity', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
+                                  />
+                                </td>
+                                {/* Composition */}
+                                <td className="px-5 py-4">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    disabled={isSuspendedUser || isDisapproved}
+                                    value={isDisapproved ? 0 : scores.composition}
+                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'composition', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
+                                  />
+                                </td>
+                                {/* Tech Quality */}
+                                <td className="px-5 py-4">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    disabled={isSuspendedUser || isDisapproved}
+                                    value={isDisapproved ? 0 : scores.technicalQuality}
+                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'technicalQuality', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
+                                  />
+                                </td>
+                                {/* Storytelling */}
+                                <td className="px-5 py-4">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    disabled={isSuspendedUser || isDisapproved}
+                                    value={isDisapproved ? 0 : scores.storytelling}
+                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'storytelling', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
+                                  />
+                                </td>
+                                {/* Overall Impact */}
+                                <td className="px-5 py-4">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    disabled={isSuspendedUser || isDisapproved}
+                                    value={isDisapproved ? 0 : scores.overallImpact}
+                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'overallImpact', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
+                                  />
+                                </td>
+                                {/* Status & Remarks */}
+                                <td className="px-5 py-4 min-w-[200px]">
+                                  <div className="flex flex-col gap-2">
+                                    <div className="flex border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden w-fit">
+                                      <button
+                                        type="button"
+                                        disabled={isSuspendedUser}
+                                        onClick={() => handleOfflineScoreChange(photo.photoId, 'approvalStatus', 'Approved')}
+                                        className={`px-2.5 py-1 text-[10px] font-extrabold uppercase transition-colors cursor-pointer ${
+                                          !isDisapproved ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-655'
+                                        }`}
+                                      >
+                                        Approve
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={isSuspendedUser}
+                                        onClick={() => handleOfflineScoreChange(photo.photoId, 'approvalStatus', 'Disapproved')}
+                                        className={`px-2.5 py-1 text-[10px] font-extrabold uppercase transition-colors cursor-pointer ${
+                                          isDisapproved ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-655'
+                                        }`}
+                                      >
+                                        Reject
+                                      </button>
+                                    </div>
+                                    <textarea
+                                      disabled={isSuspendedUser}
+                                      value={scores.remarks}
+                                      onChange={(e) => handleOfflineScoreChange(photo.photoId, 'remarks', e.target.value)}
+                                      placeholder={isDisapproved ? "Explanation required *" : "Remarks (Optional)..."}
+                                      className={`bg-slate-55 dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-lg px-2 py-1 outline-none text-[11px] leading-relaxed resize-none h-12 w-full ${
+                                        isDisapproved && (!scores.remarks || scores.remarks.trim() === '') ? 'border-red-505 focus:ring-red-500' : 'focus:ring-indigo-500'
+                                      }`}
+                                    />
+                                  </div>
+                                </td>
+                                {/* Actions */}
+                                <td className="px-5 py-4 text-center">
+                                  <button
+                                    type="button"
+                                    disabled={isSuspendedUser || loading}
+                                    onClick={() => handleSaveSingleOfflineScore(photo)}
+                                    className="bg-indigo-600 hover:bg-indigo-750 text-white rounded-lg p-2 transition-all cursor-pointer inline-flex items-center justify-center"
+                                    title="Save scoring sheet for this row"
+                                  >
+                                    <Check size={14} strokeWidth={2.5} />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Offline batch triggers */}
+                    {user?.role !== 'Admin' && (
+                      <div className="bg-slate-55 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 p-5 flex justify-end gap-3 font-bold">
+                        <button
+                          type="button"
+                          disabled={loading}
+                          onClick={handleSaveAllOfflineScores}
+                          className="bg-indigo-600 hover:bg-indigo-750 text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow-sm hover:shadow transition-all cursor-pointer"
+                        >
+                          {loading ? 'Submitting evaluations...' : 'Save All Scoring Sheets'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              )}
+            </>
           )}
         </>
-    )}
+      )}
 
-      {/* OFFLINE EVALUATION: ZOOM MODE MODAL WITH DETAILS SIDEBAR */}
-      {offlineZoomPhoto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col lg:flex-row my-8 max-h-[90vh]">
+      {/* Online Evaluation Grade Sheet / Modal popup */}
+      {activePhoto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-[90vh]">
             
-            {/* Close button */}
-            <button
-              onClick={() => setOfflineZoomPhoto(null)}
-              className="absolute top-4 right-4 z-10 p-2 bg-slate-950/60 hover:bg-slate-950 text-white rounded-full cursor-pointer transition-colors"
-            >
-              <X size={20} />
-            </button>
-
-            {/* Left Side: Photo Zoom Detailed View */}
-            <div className="flex-1 bg-slate-950 flex flex-col justify-center p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden">
-              <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
-                <WatermarkPreview src={offlineZoomPhoto.fileUrl} className="w-full h-[72vh] rounded-lg shadow-lg" enableZoom={true} />
-              </div>
-            </div>
-
-            {/* Right Side: Details & Description Panel (same width w-[380px]) */}
-            <div className="w-full lg:w-[380px] shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 p-6 overflow-y-auto max-h-[90vh] text-left flex flex-col gap-5 bg-slate-50/30 dark:bg-slate-900/30">
-              <div>
-                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Photo Details</h3>
-                <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{offlineZoomPhoto.title}"</span>
-              </div>
-
-              {/* Photo Description Section */}
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col gap-2 shadow-sm">
-                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
-                  Photo Description
+            {/* Left Column: Watermarked Zoom Preview */}
+            <div className="flex-1 bg-slate-950 relative overflow-hidden flex flex-col justify-between border-r border-slate-100 dark:border-slate-800">
+              <div className="absolute top-4 left-4 z-10 flex gap-2">
+                <span className="bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
+                  Online Zoom Mode
                 </span>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed font-medium italic">
-                  "{offlineZoomPhoto.description || 'No description provided by the photographer.'}"
-                </p>
+                <span className={`bg-slate-900/85 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm ${
+                  activePhoto.graded ? 'text-emerald-450' : 'text-amber-500'
+                }`}>
+                  {activePhoto.graded ? 'Assessment Completed' : 'Pending Review'}
+                </span>
               </div>
 
-              {/* Photo Metadata Info */}
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col gap-2.5 shadow-sm text-[11px]">
-                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider block">
-                  Submission Details
-                </span>
-                <div className="flex flex-col gap-2 mt-1">
-                  <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/40 pb-1.5">
-                    <span className="text-slate-400">Category</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-200">{offlineZoomPhoto.category}</span>
+              <div className="flex-grow flex items-center justify-center p-4 overflow-hidden">
+                <div className="relative w-full h-full flex items-center justify-center group cursor-zoom-in">
+                  <WatermarkPreview
+                    src={activePhoto.fileUrl}
+                    className="max-h-full max-w-full object-contain rounded transition-all duration-300 group-hover:scale-105"
+                  />
+                </div>
+              </div>
+
+              {/* Photo parameters / EXIF overlay at bottom */}
+              <div className="bg-slate-900/90 backdrop-blur border-t border-white/5 p-4 sm:p-5 flex flex-col gap-3 text-white">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex flex-col gap-0.5">
+                    <h3 className="font-display font-extrabold text-sm tracking-wide">{activePhoto.title}</h3>
+                    <span className="text-[10px] text-indigo-400 font-extrabold uppercase tracking-wider">{activePhoto.category}</span>
                   </div>
-                  <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/40 pb-1.5">
-                    <span className="text-slate-400">Photographer</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-200">{offlineZoomPhoto.participantName}</span>
+                  <div className="text-[9px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded uppercase shrink-0">
+                    By: {activePhoto.participantName}
                   </div>
-                  <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/40 pb-1.5">
-                    <span className="text-slate-400">Camera</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-200">{offlineZoomPhoto.cameraBrand} {offlineZoomPhoto.cameraModel}</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px]">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-slate-500 uppercase text-[8px] font-bold">Camera brand</span>
+                    <span className="font-extrabold truncate">{activePhoto.cameraBrand || 'N/A'}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Lens</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-200 truncate max-w-[180px]">{offlineZoomPhoto.lensUsed || 'N/A'}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-slate-500 uppercase text-[8px] font-bold">Camera model</span>
+                    <span className="font-extrabold truncate">{activePhoto.cameraModel || 'N/A'}</span>
                   </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-slate-505 uppercase text-[8px] font-bold">Lens configuration</span>
+                    <span className="font-semibold truncate">{activePhoto.lensUsed || 'N/A'}</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-slate-500 uppercase text-[8px] font-bold">Date captured</span>
+                    <span className="font-semibold text-slate-300">
+                      {activePhoto.dateCaptured ? new Date(activePhoto.dateCaptured).toLocaleDateString() : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Photo Description Box at bottom */}
+                <div className="bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px] flex flex-col gap-1">
+                  <span className="text-slate-500 uppercase text-[8px] font-bold">Photo Description</span>
+                  <p className="text-slate-350 leading-relaxed max-h-[60px] overflow-y-auto pr-1">
+                    {activePhoto.description || 'No description shared.'}
+                  </p>
                 </div>
               </div>
             </div>
 
+            {/* Right Column: Scoring parameters sheet */}
+            <div className="w-full md:w-[380px] bg-white dark:bg-slate-900 flex flex-col justify-between overflow-y-auto">
+              
+              {/* Grading Form header */}
+              <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
+                <div>
+                  <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Scoring Assessment</h3>
+                  <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">DSLR verification checklist</span>
+                </div>
+                <button
+                  onClick={() => setActivePhoto(null)}
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-655 dark:hover:text-white rounded-lg cursor-pointer transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Assessment inputs */}
+              <form onSubmit={handleScoreSubmit} className="p-6 flex-grow flex flex-col gap-5 text-xs">
+                
+                {/* ApprovalStatus switcher */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-extrabold text-slate-500 uppercase text-[9px] tracking-wider">Evaluation Status</label>
+                  <div className="flex border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                    <button
+                      type="button"
+                      disabled={user?.role === 'Admin'}
+                      onClick={() => setApprovalStatus('Approved')}
+                      className={`flex-1 py-2 font-display font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
+                        approvalStatus === 'Approved' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-655'
+                      }`}
+                    >
+                      Approve Frame
+                    </button>
+                    <button
+                      type="button"
+                      disabled={user?.role === 'Admin'}
+                      onClick={() => setApprovalStatus('Disapproved')}
+                      className={`flex-1 py-2 font-display font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
+                        approvalStatus === 'Disapproved' ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-655'
+                      }`}
+                    >
+                      Reject Frame
+                    </button>
+                  </div>
+                </div>
+
+                {!isFormDisapproved ? (
+                  <div className="flex flex-col gap-4">
+                    {/* Creativity Slider */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between font-bold text-[11px]">
+                        <span className="text-slate-600 dark:text-slate-350">1. Originality & Creativity</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{creativity} / 10</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        disabled={user?.role === 'Admin'}
+                        value={creativity}
+                        onChange={(e) => setCreativity(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Composition Slider */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between font-bold text-[11px]">
+                        <span className="text-slate-600 dark:text-slate-350">2. Layout & Composition</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{composition} / 10</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        disabled={user?.role === 'Admin'}
+                        value={composition}
+                        onChange={(e) => setComposition(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Technical Quality Slider */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between font-bold text-[11px]">
+                        <span className="text-slate-600 dark:text-slate-350">3. Technical Execution</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{technicalQuality} / 10</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        disabled={user?.role === 'Admin'}
+                        value={technicalQuality}
+                        onChange={(e) => setTechnicalQuality(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Storytelling Slider */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between font-bold text-[11px]">
+                        <span className="text-slate-600 dark:text-slate-350">4. Storytelling & Context</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{storytelling} / 10</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        disabled={user?.role === 'Admin'}
+                        value={storytelling}
+                        onChange={(e) => setStorytelling(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Overall Impact Slider */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between font-bold text-[11px]">
+                        <span className="text-slate-600 dark:text-slate-350">5. Overall Impact & WOW factor</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{overallImpact} / 10</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        disabled={user?.role === 'Admin'}
+                        value={overallImpact}
+                        onChange={(e) => setOverallImpact(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-red-50 dark:bg-red-955/20 border border-red-200/50 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-red-755 dark:text-red-400 leading-relaxed font-semibold">
+                    <ShieldAlert className="shrink-0 mt-0.5 text-red-600" size={16} />
+                    <p>Frame will be scored as 0. An explanation / justification remarks is required below to submit the rejection.</p>
+                  </div>
+                )}
+
+                {/* Remarks textarea */}
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="modalRemarks" className="font-extrabold text-slate-550 uppercase text-[9px] tracking-wider">
+                    Scoring explanation & feedback
+                  </label>
+                  <textarea
+                    id="modalRemarks"
+                    rows={3}
+                    disabled={user?.role === 'Admin'}
+                    required={isFormDisapproved}
+                    value={remarks}
+                    onChange={(e) => setRemarks(e.target.value)}
+                    placeholder={isFormDisapproved ? "Explain why this photograph is disapproved (e.g. mobile capture, watermark present, low res)..." : "Add comments or jury feedback..."}
+                    className={`bg-slate-50 dark:bg-slate-950 border rounded-xl px-3 py-2.5 outline-none resize-none font-semibold text-slate-700 dark:text-slate-300 leading-relaxed text-xs ${
+                      isFormDisapproved && (!remarks || remarks.trim() === '') ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 dark:border-slate-800 focus:ring-1 focus:ring-indigo-500'
+                    }`}
+                  />
+                </div>
+
+                {/* Scoring aggregate summary */}
+                <div className="bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800/40 p-4 flex items-center justify-between text-slate-800 dark:text-slate-200 mt-2 font-bold">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] text-slate-400 font-extrabold uppercase">Aggregate score</span>
+                    <span className="text-[9px] text-slate-400">Sum of parameters out of 50</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-display font-black text-2xl text-indigo-600 dark:text-indigo-400">{totalScore}</span>
+                    <span className="text-xs text-slate-500 font-bold"> / 50</span>
+                    <span className="text-[10px] text-slate-400 block font-bold">AVG: {averageScore}</span>
+                  </div>
+                </div>
+
+                {/* Form submit */}
+                {user?.role !== 'Admin' && (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer mt-auto"
+                  >
+                    {loading ? 'Saving grades...' : 'Save Evaluation sheet'}
+                  </button>
+                )}
+              </form>
+            </div>
           </div>
         </div>
       )}
 
-      {/* CONFIRM SIGN-OFF MODAL */}
+      {/* Offline Zoom Modal */}
+      {offlineZoomPhoto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-205 dark:border-slate-805 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-[90vh]">
+            
+            {/* Left Column: Photograph (takes up full height and width, zooms on hover) */}
+            <div className="flex-grow bg-slate-950 relative overflow-hidden flex items-center justify-center p-4">
+              <div className="absolute top-4 left-4 z-10 flex gap-2">
+                <span className="bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
+                  Offline Zoom Mode
+                </span>
+                <span className={`bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm ${
+                  offlineZoomPhoto.graded ? 'text-emerald-450' : 'text-amber-500'
+                }`}>
+                  {offlineZoomPhoto.graded ? 'Assessment Completed' : 'Pending Review'}
+                </span>
+              </div>
+
+              {/* Hover Zoom preview container */}
+              <div className="relative w-full h-full flex items-center justify-center overflow-hidden group cursor-zoom-in">
+                <WatermarkPreview
+                  src={offlineZoomPhoto.fileUrl}
+                  className="max-h-full max-w-full object-contain rounded transition-all duration-300 group-hover:scale-105"
+                />
+              </div>
+            </div>
+
+            {/* Right Column: Metadata details / sidebar */}
+            <div className="w-full md:w-[380px] bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
+              
+              {/* Header */}
+              <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
+                <div>
+                  <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Photograph Details</h3>
+                  <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">Assigned entry metadata</span>
+                </div>
+                <button
+                  onClick={() => setOfflineZoomPhoto(null)}
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-655 dark:hover:text-white rounded-lg cursor-pointer transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Metadata content */}
+              <div className="p-6 flex-grow flex flex-col gap-5 text-xs">
+                
+                {/* Title and Category */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Title & Category</span>
+                  <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white leading-snug">
+                    {offlineZoomPhoto.title}
+                  </h4>
+                  <span className="text-[10px] text-indigo-505 font-extrabold uppercase mt-0.5 block">
+                    {offlineZoomPhoto.category}
+                  </span>
+                </div>
+
+                {/* Photographer name */}
+                <div className="flex flex-col gap-1 border-t border-slate-200/60 dark:border-slate-805/60 pt-3">
+                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Photographer</span>
+                  <p className="font-extrabold text-slate-700 dark:text-slate-350">{offlineZoomPhoto.participantName}</p>
+                </div>
+
+                {/* Camera configuration parameters */}
+                <div className="flex flex-col gap-2 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
+                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Camera Parameters</span>
+                  <div className="bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl p-4 flex flex-col gap-2 leading-relaxed">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Camera Brand:</span>
+                      <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{offlineZoomPhoto.cameraBrand || 'N/A'}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Camera Model:</span>
+                      <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{offlineZoomPhoto.cameraModel || 'N/A'}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Lens Model:</span>
+                      <strong className="text-slate-800 dark:text-slate-200 font-semibold truncate max-w-[150px]" title={offlineZoomPhoto.lensUsed}>{offlineZoomPhoto.lensUsed || 'N/A'}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-450">Date Captured:</span>
+                      <strong className="text-slate-800 dark:text-slate-200 font-semibold">
+                        {offlineZoomPhoto.dateCaptured ? new Date(offlineZoomPhoto.dateCaptured).toLocaleDateString() : 'N/A'}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description & Story */}
+                <div className="flex flex-col gap-1.5 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
+                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Photo Description & Story</span>
+                  <p className="text-slate-600 dark:text-slate-350 leading-relaxed italic bg-white dark:bg-slate-950 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 max-h-[140px] overflow-y-auto">
+                    "{offlineZoomPhoto.description || 'No description shared.'}"
+                  </p>
+                </div>
+              </div>
+
+              {/* Footer action to close */}
+              <div className="p-6 border-t border-slate-200 dark:border-slate-800 shrink-0 font-bold">
+                <button
+                  type="button"
+                  onClick={() => setOfflineZoomPhoto(null)}
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+                >
+                  Close Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SIGN OFF CONFIRMATION MODAL */}
       {showSignOffModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
-              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 rounded-2xl mb-2 animate-bounce">
+              <div className="p-3 bg-amber-50 dark:bg-amber-955/20 text-amber-550 rounded-2xl mb-2">
                 <AlertTriangle size={28} />
               </div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
-                Finalize Evaluations Sign-Off
+                Final Sign Off Confirmation
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Are you sure you want to finalize and submit your final grading evaluations for this event? Once confirmed, you will sign off on your reviews for the administrator.
+                SIGN OFF: This will finalize all your scores for this event. You cannot change your grades after signing off. Proceed?
               </p>
             </div>
 
@@ -1020,7 +1443,7 @@ export default function JudgeDashboard() {
       {/* SUCCESS MESSAGE MODAL */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-2xl mb-2">
                 <CheckCircle2 size={28} />
@@ -1047,3 +1470,4 @@ export default function JudgeDashboard() {
     </div>
   );
 }
+

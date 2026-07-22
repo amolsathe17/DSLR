@@ -121,7 +121,7 @@ export default function Navbar() {
                 }`}
               >
                 <LayoutDashboard size={16} />
-                My Entries
+                Dashboard
               </Link>
             )}
 
@@ -135,7 +135,7 @@ export default function Navbar() {
                 }`}
               >
                 <LayoutDashboard size={16} />
-                Judge Scoring
+                Dashboard
               </Link>
             )}
 
@@ -287,7 +287,7 @@ export default function Navbar() {
                   isActive('/dashboard') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
-                My Entries
+                Dashboard
               </Link>
             )}
 
@@ -299,7 +299,7 @@ export default function Navbar() {
                   isActive('/judge') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
-                Judge Scoring
+                Dashboard
               </Link>
             )}
 

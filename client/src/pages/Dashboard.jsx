@@ -24,6 +24,8 @@ import {
   ThumbsUp,
   ThumbsDown,
   Clock,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import DragDropUpload from "../components/DragDropUpload";
 import WatermarkPreview from "../components/WatermarkPreview";
@@ -78,6 +80,43 @@ export default function Dashboard() {
   // Package & Declaration selection
   const [selectedPkgId, setSelectedPkgId] = useState("");
   const [acceptedDeclaration, setAcceptedDeclaration] = useState(false);
+  const [expandedActiveEvents, setExpandedActiveEvents] = useState({});
+  const [historyExpanded, setHistoryExpanded] = useState(false);
+  const [loadingEventWorkspace, setLoadingEventWorkspace] = useState(false);
+
+  const toggleActiveEvent = async (e) => {
+    const isExpanding = !expandedActiveEvents[e._id];
+    setExpandedActiveEvents({
+      [e._id]: isExpanding
+    });
+    
+    if (isExpanding) {
+      setLoadingEventWorkspace(true);
+      setEvent(e);
+      try {
+        const categoryData = await apiFetch(`/api/categories?contestType=${encodeURIComponent(e.eventType || '')}`);
+        if (categoryData.success) {
+          setCategories(categoryData.categories);
+          if (categoryData.categories.length > 0) {
+            setCategory(categoryData.categories[0].name);
+          }
+        }
+        const subData = await apiFetch(`/api/submissions/my-submission/${e._id}`);
+        if (subData.success) {
+          setSubmission(subData.submission);
+        } else {
+          setSubmission(null);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingEventWorkspace(false);
+      }
+    } else {
+      setEvent(null);
+      setSubmission(null);
+    }
+  };
 
   const fetchDashboardData = async (selectedTab = selectedTypeTab) => {
     try {
@@ -172,6 +211,10 @@ export default function Dashboard() {
 
       if (data.success) {
         setSubmission(data.submission);
+        const allSubsData = await apiFetch("/api/submissions/my-submissions");
+        if (allSubsData.success) {
+          setAllSubmissions(allSubsData.submissions);
+        }
       }
     } catch (err) {
       setError(err.message);
@@ -267,6 +310,10 @@ export default function Dashboard() {
 
       if (data.success) {
         setSubmission(data.submission);
+        const allSubsData = await apiFetch("/api/submissions/my-submissions");
+        if (allSubsData.success) {
+          setAllSubmissions(allSubsData.submissions);
+        }
 
         setTitle("");
         setCameraBrand("");
@@ -311,6 +358,10 @@ export default function Dashboard() {
       );
       if (data.success) {
         setSubmission(data.submission);
+        const allSubsData = await apiFetch("/api/submissions/my-submissions");
+        if (allSubsData.success) {
+          setAllSubmissions(allSubsData.submissions);
+        }
       }
     } catch (err) {
       setError(err.message);
@@ -395,6 +446,10 @@ export default function Dashboard() {
               );
               if (subData.success) {
                 setSubmission(subData.submission);
+              }
+              const allSubsData = await apiFetch("/api/submissions/my-submissions");
+              if (allSubsData.success) {
+                setAllSubmissions(allSubsData.submissions);
               }
             } else {
               setError(verifyData.message || "Payment verification failed.");
@@ -516,6 +571,10 @@ export default function Dashboard() {
         if (subData.success) {
           setSubmission(subData.submission);
         }
+        const allSubsData = await apiFetch("/api/submissions/my-submissions");
+        if (allSubsData.success) {
+          setAllSubmissions(allSubsData.submissions);
+        }
       } else {
         throw new Error(data.message || "Simulated payment failed.");
       }
@@ -622,14 +681,7 @@ export default function Dashboard() {
                 Manage your contest submissions, track payment invoices, view performance stats, and download certificates.
               </p>
             </div>
-            <div className="flex gap-2 self-start md:self-center">
-              <button
-                onClick={() => setDashboardTab("entries")}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-2xl text-xs shadow-sm hover:shadow transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <Plus size={14} /> Submit New Photo
-              </button>
-            </div>
+            
           </div>
 
           {/* Stats Widgets */}
@@ -1006,10 +1058,14 @@ export default function Dashboard() {
                             setSubmission(sub);
                             setShowCertificate(true);
                           }}
-                          className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full mt-2"
+                          className={`text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full mt-2 ${
+                            isWinner 
+                              ? 'bg-amber-600 hover:bg-amber-700 shadow-md' 
+                              : 'bg-indigo-600 hover:bg-indigo-700 shadow-md'
+                          }`}
                         >
                           <Award size={14} />
-                          View & Download Certificate
+                          {isWinner ? 'View & Download Winner Certificate' : 'View & Download Participation Certificate'}
                         </button>
                       ) : (
                         <div className="bg-slate-55 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/40 p-3 rounded-xl text-[10px] text-slate-400 mt-2 flex items-center gap-2">
@@ -1027,655 +1083,599 @@ export default function Dashboard() {
       )}
 
       {dashboardTab === "entries" && (
-        !event ? (
-          <div className="max-w-md mx-auto text-center py-16 flex flex-col items-center gap-4 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 p-8 rounded-3xl shadow-sm">
-            <Layers className="w-10 h-10 text-indigo-500 animate-pulse animate-in zoom-in-90 duration-200" />
-            <h2 className="font-display font-extrabold text-sm text-slate-900 dark:text-white mt-2">No Active {selectedTypeTab} Contests</h2>
-            <p className="text-[11px] text-slate-500">
-              There are currently no active {selectedTypeTab.toLowerCase()} competitions accepting submissions. Please check our other tabs or check back later!
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200 text-left">
+          
+          {/* Header */}
+          <div>
+            <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">My Contest Entries</h2>
+            <p className="text-xs text-slate-500 mt-1">
+              View and manage your active contest entries, upload DSLR photographs, and review historical enrollment details.
             </p>
           </div>
-        ) : (
-          <>
-            {/* Event Type Tabs */}
-            <div className="flex flex-wrap gap-2 justify-center mb-10 p-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl mx-auto">
-              {['Photography', 'Painting', 'Drawing', 'Paper Craft', 'Other'].map(type => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setSelectedTypeTab(type)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold font-display transition-all cursor-pointer ${
-                    selectedTypeTab === type
-                      ? 'bg-indigo-600 text-white shadow-md'
-                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
-                >
-                  {type} Contests
-                </button>
-              ))}
+
+          {error && (
+            <div className="flex items-start gap-2 bg-red-50 dark:bg-red-955/20 border border-red-205/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-650 dark:text-red-400 mb-2">
+              <AlertTriangle size={18} className="shrink-0 mt-0.5" />
+              <span>{error}</span>
             </div>
+          )}
 
-            {submission?.paymentStatus === 'Refunded' && (
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-amber-50 dark:bg-amber-955/20 border border-amber-205/50 dark:border-amber-900/30 p-5 rounded-2xl text-amber-800 dark:text-amber-300 mb-8 animate-in slide-in-from-top-4 duration-200">
-                <div className="flex items-start gap-3">
-                  <RotateCcw size={24} className="shrink-0 text-amber-600 dark:text-amber-400 mt-1 md:mt-0" />
-                  <div>
-                    <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">Entry Payment Refunded</h4>
-                    <p className="text-[11px] text-amber-707 dark:text-amber-450 mt-1">
-                      Your entry submission payment has been refunded and credited back to your bank account by the administrator. All photo slots have been reset to unpaid status.
-                    </p>
+          {/* Active Contests Collapsible Panels */}
+          <div className="flex flex-col gap-4">
+            <h3 className="font-display font-bold text-sm text-slate-905 dark:text-white">Active Competitions</h3>
+            {(() => {
+              const activeEvents = eventsList.filter(e => e.status === 'Active');
+              if (activeEvents.length === 0) {
+                return (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center text-slate-400 text-xs">
+                    No active competitions are running currently. Check back later!
                   </div>
-                </div>
-              </div>
-            )}
+                );
+              }
 
-            {user?.isSuspended && (
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 p-5 rounded-2xl text-red-750 dark:text-red-400 mb-8 animate-in slide-in-from-top-4 duration-200">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck size={24} className="shrink-0 text-red-650 dark:text-red-400 mt-1 md:mt-0" />
-                  <div>
-                    <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">Account Suspended</h4>
-                    <p className="text-[11px] text-red-650 dark:text-red-400/80 mt-1">
-                      An administrator has suspended your participant account. You can view your current submissions in read-only mode, but all modifications, payments, and new uploads are disabled.
-                    </p>
-                    {user.suspensionReason && (
-                      <div className="mt-2.5 bg-red-100/50 dark:bg-red-955/40 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-[10px] text-red-800 dark:text-red-300">
-                        <span className="font-bold uppercase tracking-wider block mb-1">Reason / Explanation:</span>
-                        <p className="italic">"${user.suspensionReason}"</p>
+              return activeEvents.map((e) => {
+                const isExpanded = !!expandedActiveEvents[e._id];
+                const activeSub = allSubmissions.find(s => s.eventId === e._id);
+                const hasPaid = activeSub && activeSub.paymentStatus === 'Paid';
+                const hasFinalized = activeSub && activeSub.isFinalSubmitted;
+
+                return (
+                  <div key={e._id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm flex flex-col transition-all duration-300">
+                    {/* Accordion Header */}
+                    <div
+                      onClick={() => toggleActiveEvent(e)}
+                      className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors select-none"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                        <span className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
+                          {e.title}
+                        </span>
+                        <span className="text-[10px] text-indigo-500 font-extrabold uppercase bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-full w-fit">
+                          {e.eventType} Contest
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        {activeSub ? (
+                          <div className="flex gap-1.5 items-center">
+                            {hasFinalized ? (
+                              <span className="bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 border border-emerald-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                                Finalized
+                              </span>
+                            ) : hasPaid ? (
+                              <span className="bg-blue-105 dark:bg-blue-955/20 text-blue-600 dark:text-blue-450 border border-blue-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                                Paid (Uploading)
+                              </span>
+                            ) : (
+                              <span className="bg-amber-100 dark:bg-amber-955/20 text-amber-600 dark:text-amber-450 border border-amber-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                                Unpaid
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold text-slate-400">
+                              ({activeSub.photographs?.length || 0} / {activeSub.photoLimit} Uploaded)
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase">
+                            Not Enrolled
+                          </span>
+                        )}
+                        {isExpanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                      </div>
+                    </div>
+
+                    {/* Accordion Body */}
+                    {isExpanded && (
+                      <div className="border-t border-slate-100 dark:border-slate-800 p-6 flex flex-col gap-6 bg-slate-50/20 dark:bg-slate-950/5">
+                        {loadingEventWorkspace ? (
+                          <div className="flex items-center justify-center py-10 gap-2.5">
+                            <Camera className="w-5 h-5 text-indigo-600 animate-spin" />
+                            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                              Loading Entry Folder...
+                            </span>
+                          </div>
+                        ) : (
+                          <>
+                            {submission?.paymentStatus === 'Refunded' && (
+                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-amber-50 dark:bg-amber-955/20 border border-amber-205/50 dark:border-amber-900/30 p-5 rounded-2xl text-amber-800 dark:text-amber-300 mb-2 animate-in slide-in-from-top-4 duration-200">
+                                <div className="flex items-start gap-3">
+                                  <RotateCcw size={24} className="shrink-0 text-amber-600 dark:text-amber-400 mt-1 md:mt-0" />
+                                  <div>
+                                    <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">Entry Payment Refunded</h4>
+                                    <p className="text-[11px] text-amber-707 dark:text-amber-450 mt-1">
+                                      Your entry submission payment has been refunded and credited back to your bank account by the administrator. All photo slots have been reset to unpaid status.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {user?.isSuspended && (
+                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 p-5 rounded-2xl text-red-750 dark:text-red-400 mb-2 animate-in slide-in-from-top-4 duration-200">
+                                <div className="flex items-start gap-3">
+                                  <ShieldCheck size={24} className="shrink-0 text-red-650 dark:text-red-450 mt-1 md:mt-0" />
+                                  <div>
+                                    <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">Account Suspended</h4>
+                                    <p className="text-[11px] text-red-650 dark:text-red-400/80 mt-1">
+                                      An administrator has suspended your participant account. You can view your current submissions in read-only mode, but all modifications, payments, and new uploads are disabled.
+                                    </p>
+                                    {user.suspensionReason && (
+                                      <div className="mt-2.5 bg-red-100/50 dark:bg-red-955/40 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-[10px] text-red-800 dark:text-red-300">
+                                        <span className="font-bold uppercase tracking-wider block mb-1">Reason / Explanation:</span>
+                                        <p className="italic">"{user.suspensionReason}"</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* STEP 1: Not started yet */}
+                            {!submission ? (
+                              <div className="max-w-4xl mx-auto flex flex-col gap-6 py-2">
+                                <div className="text-center flex flex-col gap-1.5">
+                                  <h1 className="font-display font-black text-2xl text-slate-900 dark:text-white">
+                                    Join Competition
+                                  </h1>
+                                  <p className="text-xs text-slate-500 max-w-lg mx-auto leading-relaxed">
+                                    Ready to submit your {e.eventType.toLowerCase()} frames? Choose your package, confirm you follow our terms, and initiate your entry folder.
+                                  </p>
+                                </div>
+
+                                <form onSubmit={handleStartSubmission} className="flex flex-col gap-6">
+                                  {/* Packages Selector */}
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {e.packages.map((pkg) => (
+                                      <label
+                                        key={pkg.id}
+                                        onClick={() => setSelectedPkgId(pkg.id)}
+                                        className={`glass-panel border-2 rounded-2xl p-5 flex flex-col gap-3 text-center cursor-pointer transition-all ${
+                                          selectedPkgId === pkg.id
+                                            ? "border-indigo-600 ring-2 ring-indigo-600/20"
+                                            : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                                        }`}
+                                      >
+                                        <input
+                                          type="radio"
+                                          name="packageSelect"
+                                          checked={selectedPkgId === pkg.id}
+                                          onChange={() => setSelectedPkgId(pkg.id)}
+                                          className="sr-only"
+                                        />
+                                        <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedPkgId === pkg.id ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400"}`}>
+                                          {pkg.name}
+                                        </span>
+                                        <span className="font-display font-extrabold text-2xl text-slate-900 dark:text-white">
+                                          ₹{pkg.price}
+                                        </span>
+                                        <span className="text-[11px] font-semibold text-slate-705 dark:text-slate-300">
+                                          Max Uploads: {pkg.maxPhotos} {e.eventType === 'Photography' ? 'Photo' : 'Artwork'}{pkg.maxPhotos > 1 ? "s" : ""}
+                                        </span>
+                                      </label>
+                                    ))}
+                                  </div>
+
+                                  {/* DSLR eligibility declaration */}
+                                  <div className="glass-panel border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 flex flex-col gap-3.5">
+                                    <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                                      <ShieldCheck size={18} className="text-indigo-600 dark:text-indigo-400" />
+                                      <h3 className="font-display font-bold text-slate-900 dark:text-white text-xs">
+                                        Eligibility Declaration
+                                      </h3>
+                                    </div>
+                                    <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                                      {e.eventType === 'Photography' 
+                                        ? 'In order to maintain a fair, high-caliber standard for photographic craftsmanship, we restrict uploads strictly to cameras with physical interchangeable lenses.'
+                                        : 'Confirm that all submitted artwork entries are original creations made exclusively by you.'}
+                                    </p>
+
+                                    <label className="flex items-start gap-3 cursor-pointer select-none bg-indigo-50/30 dark:bg-indigo-955/20 border border-indigo-100/30 dark:border-indigo-900/20 p-3.5 rounded-xl">
+                                      <input
+                                        type="checkbox"
+                                        checked={acceptedDeclaration}
+                                        onChange={(e) => setAcceptedDeclaration(e.target.checked)}
+                                        className="w-4 h-4 mt-0.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
+                                      />
+                                      <span className="text-[11px] text-indigo-950 dark:text-indigo-300 font-semibold leading-relaxed">
+                                        {e.eventType === 'Photography'
+                                          ? '"I confirm that all submitted photographs are captured using a DSLR or Mirrorless Camera. Mobile Photography is not allowed. Any violation may result in immediate disqualification."'
+                                          : '"I confirm that all submitted works are original artwork created solely by myself. Plagiarism or copyright violations will result in disqualification."'}
+                                      </span>
+                                    </label>
+                                  </div>
+
+                                  <button
+                                    type="submit"
+                                    disabled={user?.isSuspended}
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl shadow-md self-center transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    {user?.isSuspended ? 'Account Suspended' : 'Start Entry Submission'}
+                                  </button>
+                                </form>
+                              </div>
+                            ) : (
+                              /* STEP 2: Submission Folder is Active */
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left animate-in fade-in duration-200">
+                                {/* Left panel: Submissions Upload Wizard */}
+                                <div className="lg:col-span-8 flex flex-col gap-6">
+                                  {/* Upload form - display only if not finalized and package limit not met */}
+                                  {!isFinalized &&
+                                    submission.photographs.length < selectedPackage?.maxPhotos && (
+                                      <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-5 flex flex-col gap-5 shadow-sm">
+                                        <div className="pb-3 border-b border-slate-105 dark:border-slate-800">
+                                          <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm">
+                                            Upload {e.eventType} Entry Photo
+                                          </h3>
+                                          <p className="text-[11px] text-slate-455 mt-0.5">
+                                            {e.eventType === 'Photography' 
+                                              ? 'Provide details and select files. We will parse EXIF metadata to auto-fill camera specifications.' 
+                                              : 'Provide details, dimensions, medium and location specifications.'}
+                                          </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          <div className="flex flex-col gap-4">
+                                            <div className="flex flex-col gap-1 text-[11px]">
+                                              <label htmlFor="photoTitle" className="font-semibold text-slate-400">Photo Title *</label>
+                                              <input
+                                                id="photoTitle"
+                                                type="text"
+                                                value={title}
+                                                onChange={(e) => setTitle(e.target.value)}
+                                                placeholder="Sunrise in Sumba"
+                                                className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-xs font-semibold text-slate-700 dark:text-slate-200"
+                                              />
+                                            </div>
+
+                                            <div className="flex flex-col gap-1 text-[11px]">
+                                              <label htmlFor="photoCategory" className="font-semibold text-slate-400">Category *</label>
+                                              <select
+                                                id="photoCategory"
+                                                value={category}
+                                                onChange={(e) => setCategory(e.target.value)}
+                                                className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+                                              >
+                                                <option value="">Select Category</option>
+                                                {categories.map((cat) => (
+                                                  <option key={cat._id} value={cat.name}>
+                                                    {cat.name}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                            </div>
+
+                                            <div className="flex flex-col gap-1 text-[11px]">
+                                              <label className="font-semibold text-slate-400">
+                                                {e.eventType === 'Photography' ? 'Camera Brand & Model (Optional EXIF)' : 'Medium & Dimensions'}
+                                              </label>
+                                              <div className="grid grid-cols-2 gap-2">
+                                                <input
+                                                  type="text"
+                                                  value={cameraBrand}
+                                                  onChange={(e) => setCameraBrand(e.target.value)}
+                                                  placeholder={e.eventType === 'Photography' ? 'Canon' : 'Oil on Canvas'}
+                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
+                                                />
+                                                <input
+                                                  type="text"
+                                                  value={cameraModel}
+                                                  onChange={(e) => setCameraModel(e.target.value)}
+                                                  placeholder={e.eventType === 'Photography' ? 'EOS R5' : '12x18 inches'}
+                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
+                                                />
+                                              </div>
+                                            </div>
+
+                                            <div className="flex flex-col gap-1 text-[11px]">
+                                              <label className="font-semibold text-slate-400">
+                                                {e.eventType === 'Photography' ? 'Lens Used & Location (Optional)' : 'Materials & Location'}
+                                              </label>
+                                              <div className="grid grid-cols-2 gap-2">
+                                                <input
+                                                  type="text"
+                                                  value={lensUsed}
+                                                  onChange={(e) => setLensUsed(e.target.value)}
+                                                  placeholder={e.eventType === 'Photography' ? '24-70mm f2.8' : 'Acrylic Paint'}
+                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
+                                                />
+                                                <input
+                                                  type="text"
+                                                  value={location}
+                                                  onChange={(e) => setLocation(e.target.value)}
+                                                  placeholder="Sumba, Indonesia"
+                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
+                                                />
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="flex flex-col gap-4">
+                                            <div className="flex flex-col gap-1 text-[11px]">
+                                              <label htmlFor="photoDescription" className="font-semibold text-slate-400">Description (Optional)</label>
+                                              <textarea
+                                                id="photoDescription"
+                                                rows={2}
+                                                value={description}
+                                                onChange={(e) => setDescription(e.target.value)}
+                                                placeholder="Tell us about your work..."
+                                                className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 resize-none text-[11px] font-semibold text-slate-700 dark:text-slate-200"
+                                              />
+                                            </div>
+
+                                            {/* Photo Upload Zone */}
+                                            <div className="flex flex-col gap-1 text-[11px]">
+                                              <label className="font-semibold text-slate-400">
+                                                DSLR Photograph File (Max 10MB) *
+                                              </label>
+                                              <DragDropUpload
+                                                onUpload={async (photo, raw) => {
+                                                  if (!title || !category) {
+                                                    alert("Please fill in the Photo Title and Category first.");
+                                                    throw new Error("Title and Category are required.");
+                                                  }
+                                                  await handleFileAnalyze(photo);
+                                                  await handleUploadPhoto(photo, raw);
+                                                }}
+                                                isUploading={uploading}
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                  {/* List of uploaded photographs */}
+                                  <div className="flex flex-col gap-4">
+                                    <h3 className="font-display font-black text-slate-905 dark:text-white text-xs">
+                                      Uploaded Contest Entries ({submission.photographs.length})
+                                    </h3>
+
+                                    {submission.photographs.length === 0 ? (
+                                      <div className="glass-panel border border-slate-150 dark:border-slate-850 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 bg-slate-50/50 dark:bg-slate-900/10">
+                                        <ImageIcon size={32} className="text-slate-300" />
+                                        <p className="font-bold text-slate-700 dark:text-slate-300 text-xs">
+                                          No photos uploaded in this entry folder yet.
+                                        </p>
+                                        <p className="text-xs max-w-xs text-slate-505">
+                                          Use the entry form above to upload photographs corresponding to your selected package tier.
+                                        </p>
+                                      </div>
+                                    ) : (
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {submission.photographs.map((photo) => (
+                                          <div key={photo.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-sm">
+                                            <WatermarkPreview src={photo.fileUrl} className="aspect-video w-full" />
+                                            <div className="p-4 flex flex-col gap-3 grow justify-between">
+                                              <div>
+                                                <div className="flex justify-between items-start gap-2">
+                                                  <h4 className="font-display font-extrabold text-xs text-slate-905 dark:text-white line-clamp-1">
+                                                    {photo.title}
+                                                  </h4>
+                                                  <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase shrink-0 ${
+                                                    photo.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-450' :
+                                                    photo.status === 'Rejected' ? 'bg-red-100 text-red-700 dark:bg-red-955/20 dark:text-red-400' :
+                                                    'bg-amber-100 text-amber-700 dark:bg-amber-955/20 dark:text-amber-400'
+                                                  }`}>
+                                                    {photo.status}
+                                                  </span>
+                                                </div>
+                                                <span className="text-[9px] text-indigo-505 font-bold uppercase tracking-wider block mt-0.5">
+                                                  {photo.category}
+                                                </span>
+                                                {photo.cameraBrand && (
+                                                  <p className="text-[10px] text-slate-400 mt-1">
+                                                    EXIF: {photo.cameraBrand} {photo.cameraModel} | {photo.lensUsed || 'Standard Lens'}
+                                                  </p>
+                                                )}
+                                              </div>
+
+                                              {!isFinalized && (
+                                                <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-805/40">
+                                                  <button
+                                                    onClick={() => handleEditPhotoClick(photo)}
+                                                    className="flex-1 text-[10px] font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-350 text-center py-1 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-800 rounded-lg border border-slate-205 dark:border-slate-805 transition-colors"
+                                                  >
+                                                    Edit Details
+                                                  </button>
+                                                  <button
+                                                    onClick={() => handleDeletePhoto(photo.id)}
+                                                    className="text-[10px] font-semibold text-red-650 hover:text-red-750 text-center py-1 px-3 bg-red-50 hover:bg-red-100 dark:bg-red-955/20 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200/40 dark:border-red-900/10"
+                                                  >
+                                                    Delete
+                                                  </button>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Right panel: Submission info card, payment, finalize actions */}
+                                <div className="lg:col-span-4 flex flex-col gap-6">
+                                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
+                                    <div className="flex justify-between items-center pb-3 border-b border-slate-105 dark:border-slate-800">
+                                      <span className="text-[10px] text-slate-400 font-extrabold uppercase">Folder Config</span>
+                                      <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${isPaid ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                                        {isPaid ? 'Paid' : 'Awaiting Payment'}
+                                      </span>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2.5 text-xs text-left">
+                                      <div className="flex justify-between">
+                                        <span className="text-slate-400">Contest Limit:</span>
+                                        <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{selectedPackage?.maxPhotos} photo frames</strong>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-slate-400">Total Uploads:</span>
+                                        <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{submission.photographs.length} uploaded</strong>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-slate-400">Toll Fee (Paid):</span>
+                                        <strong className="text-slate-800 dark:text-slate-200 font-extrabold">₹{submission.amount}</strong>
+                                      </div>
+                                    </div>
+
+                                    {/* Unpaid payment box */}
+                                    {!isPaid && (
+                                      <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 p-4 rounded-2xl flex flex-col gap-3 mt-1.5 text-xs">
+                                        <div className="flex items-start gap-2.5">
+                                          <CreditCard size={18} className="text-indigo-600 shrink-0 mt-0.5" />
+                                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
+                                            A registration invoice of <strong>₹{submission.amount}</strong> is pending for this submission slot. Pay now to initiate uploads.
+                                          </p>
+                                        </div>
+                                        <button
+                                          onClick={() => setShowPaymentModal(true)}
+                                          className="w-full bg-indigo-650 hover:bg-indigo-755 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer font-bold"
+                                        >
+                                          Pay Registration Fee
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    {/* Finalize submit actions */}
+                                    {isPaid && (
+                                      <div className="mt-2 flex flex-col gap-2.5">
+                                        {isFinalized ? (
+                                          <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-emerald-700 dark:text-emerald-450 leading-relaxed font-semibold">
+                                            <ShieldCheck size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                                            <p>This folder is sealed and submitted. Your DSLR EXIF specs are locked for jury panel grading. Best of luck!</p>
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <div className="bg-slate-50 dark:bg-slate-950 border border-slate-105 dark:border-slate-800/40 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-semibold">
+                                              <Clock size={18} className="text-indigo-505 shrink-0 mt-0.5" />
+                                              <p>Provide all photo attachments. When complete, click the Lock folder button to submit to the panel.</p>
+                                            </div>
+                                            <button
+                                              onClick={handleFinalSubmit}
+                                              disabled={submission.photographs.length === 0}
+                                              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+                                            >
+                                              Finalize & Lock Entry
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-            )}
+                );
+              });
+            })()}
+          </div>
 
-            {error && (
-              <div className="flex items-start gap-2 bg-red-50 dark:bg-red-955/20 border border-red-205/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-6">
-                <AlertTriangle size={18} className="shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            )}
+          {/* History Collapsible Panel */}
+          {(() => {
+            const pastSubmissions = allSubmissions.filter(sub => {
+              const ev = eventsList.find(e => e._id === sub.eventId);
+              return !ev || ev.status !== 'Active';
+            });
 
-            {/* STEP 1: Not started yet */}
-            {!submission ? (
-              <div className="max-w-4xl mx-auto flex flex-col gap-8">
-                {/* Header */}
-                <div className="text-center flex flex-col gap-2">
-                  <h1 className="font-display font-black text-3xl sm:text-4xl text-slate-900 dark:text-white">
-                    Join Competition
-                  </h1>
-                  <p className="text-sm text-slate-500 max-w-xl mx-auto">
-                    Ready to submit your DSLR frames? Choose your package, confirm you
-                    follow our DSLR-only camera terms, and initiate your entry folder.
-                  </p>
-                </div>
+            if (pastSubmissions.length === 0) return null;
 
-                <form
-                  onSubmit={handleStartSubmission}
-                  className="flex flex-col gap-8"
+            return (
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm flex flex-col transition-all duration-300 mt-4 text-left">
+                {/* Accordion Header */}
+                <div
+                  onClick={() => setHistoryExpanded(!historyExpanded)}
+                  className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors select-none"
                 >
-                  {/* Grid layout for packages */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-                    {event.packages.map((pkg) => (
-                      <label
-                        key={pkg.id || pkg._id}
-                        className={`glass-panel border-2 rounded-3xl p-6 flex flex-col gap-4 cursor-pointer relative transition-all ${
-                          selectedPkgId === pkg.id
-                            ? "border-indigo-600 bg-indigo-50/10 dark:bg-indigo-950/10"
-                            : "border-slate-200 dark:border-slate-805 hover:border-slate-305"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="packageId"
-                          value={pkg.id}
-                          checked={selectedPkgId === pkg.id}
-                          onChange={(e) => setSelectedPkgId(e.target.value)}
-                          className="sr-only"
-                        />
-                        {selectedPkgId === pkg.id && (
-                          <span className="absolute top-4 right-4 bg-indigo-600 text-white rounded-full p-1 shadow-sm">
-                            <Check size={12} strokeWidth={3} />
-                          </span>
-                        )}
-                        <div>
-                          <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
-                            {pkg.name}
-                          </h3>
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">
-                            {pkg.maxPhotos} Photo {pkg.maxPhotos === 1 ? 'Slot' : 'Slots'}
-                          </p>
-                        </div>
-                        <div className="mt-4 flex items-baseline gap-1">
-                          <span className="font-display font-black text-3xl text-slate-900 dark:text-white">
-                            INR {pkg.price}
-                          </span>
-                          <span className="text-[10px] text-slate-500 font-bold">
-                            / registration
-                          </span>
-                        </div>
-                      </label>
-                    ))}
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-indigo-600" />
+                    <span className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
+                      Historical Enrollments & Past Entries ({pastSubmissions.length})
+                    </span>
                   </div>
+                  {historyExpanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                </div>
 
-                  {/* Declaration Terms Check */}
-                  <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-left max-w-xl mx-auto">
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        id="acceptedDeclaration"
-                        checked={acceptedDeclaration}
-                        onChange={(e) => setAcceptedDeclaration(e.target.checked)}
-                        className="mt-1 border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 rounded cursor-pointer"
-                      />
-                      <label
-                        htmlFor="acceptedDeclaration"
-                        className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed cursor-pointer select-none"
-                      >
-                        I declare that all uploaded photographs will be taken with
-                        a dedicated <strong>DSLR / Mirrorless camera</strong>. I
-                        understand that AI-generated imagery and mobile phone
-                        photographs are strictly prohibited and will be
-                        disqualified immediately upon backend EXIF inspections.
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Button */}
-                  <div className="text-center">
-                    <button
-                      type="submit"
-                      disabled={!acceptedDeclaration || loading}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-8 rounded-2xl text-xs shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      {loading ? "Initiating..." : "Initiate Entry Folder"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            ) : (
-              /* STEP 2 & 3: Workspace */
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                {/* Left Columns (Photo Grid / Upload Area) */}
-                <div className="lg:col-span-2 flex flex-col gap-6">
-                  
-                  {/* Photo Slots Counter */}
-                  <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-5 flex items-center justify-between gap-4 text-left">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 rounded-xl">
-                        <ImageIcon size={20} />
-                      </div>
-                      <div>
-                        <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
-                          Entries Directory
-                        </h3>
-                        <p className="text-[10px] text-slate-550 font-semibold">
-                          Registered: {selectedPackage?.name} ({submission.photoLimit} photo slots)
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-display font-black text-lg text-slate-900 dark:text-white">
-                        {submission.photographs.length} / {submission.photoLimit}
-                      </span>
-                      <span className="text-[10px] text-slate-500 block font-bold uppercase tracking-wider">
-                        Slots Filled
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Upload photo workspace (Only if slots available and unpaid/draft) */}
-                  {!isPaid && !isFinalized && submission.photographs.length < submission.photoLimit && (
-                    <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-6 text-left">
-                      <div>
-                        <h4 className="font-display font-bold text-slate-900 dark:text-white text-base">
-                          Add Photograph
-                        </h4>
-                        <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
-                          Load high-res JPG frames and fill metadata parameters below
-                        </span>
-                      </div>
-
-                      <form onSubmit={handleUploadPhoto} className="flex flex-col gap-5">
-                        
-                        {/* Drag and drop zone */}
-                        <div className="flex flex-col gap-1.5 text-xs text-slate-400">
-                          <label className="font-extrabold text-slate-500 uppercase text-[9px] tracking-wider">Photograph File * (Max 800 KB)</label>
-                          <DragDropUpload
-                            id="photoFile"
-                            accept="image/jpeg"
-                            onChange={handlePhotoFileChange}
-                          />
-                        </div>
-
-                        {/* Optional raw/original file link */}
-                        <div className="flex flex-col gap-1.5 text-xs text-slate-400">
-                          <label className="font-extrabold text-slate-500 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                            Optional RAW / Original High-Res File (ZIP/NEF/CR3/RAW)
-                            <span className="text-[8px] bg-slate-100 dark:bg-slate-850 px-1 rounded-md text-slate-500 lowercase">verification bonus</span>
-                          </label>
-                          <DragDropUpload
-                            id="rawFile"
-                            accept=".zip,.nef,.cr2,.cr3,.arw,.dng"
-                            onChange={handleRawFileChange}
-                            placeholder="Upload ZIP of camera original / original RAW file (Optional)"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                          
-                          {/* Title */}
-                          <div className="flex flex-col gap-1.5 text-xs">
-                            <label htmlFor="photoTitle" className="font-extrabold text-slate-500 dark:text-slate-500 uppercase text-[9px] tracking-wider">
-                              Photograph Title *
-                            </label>
-                            <input
-                              type="text"
-                              id="photoTitle"
-                              required
-                              value={title}
-                              onChange={(e) => setTitle(e.target.value)}
-                              placeholder="e.g. Whispers of Winter"
-                              className="bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                            />
-                          </div>
-
-                          {/* Category selector */}
-                          <div className="flex flex-col gap-1.5 text-xs">
-                            <label htmlFor="photoCategory" className="font-extrabold text-slate-500 dark:text-slate-500 uppercase text-[9px] tracking-wider">
-                              Contest Category *
-                            </label>
-                            <select
-                              id="photoCategory"
-                              value={category}
-                              onChange={(e) => setCategory(e.target.value)}
-                              className="bg-slate-55 dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                            >
-                              {categories.map((c) => (
-                                <option key={c._id} value={c.name}>
-                                  {c.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          {/* Camera Brand */}
-                          <div className="flex flex-col gap-1.5 text-xs">
-                            <label htmlFor="cameraBrand" className="font-extrabold text-slate-500 dark:text-slate-550 uppercase text-[9px] tracking-wider">
-                              Camera Brand (Auto-fill on load)
-                            </label>
-                            <input
-                              type="text"
-                              id="cameraBrand"
-                              value={cameraBrand}
-                              onChange={(e) => setCameraBrand(e.target.value)}
-                              placeholder="e.g. Canon"
-                              className="bg-slate-55 dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                            />
-                          </div>
-
-                          {/* Camera Model */}
-                          <div className="flex flex-col gap-1.5 text-xs">
-                            <label htmlFor="cameraModel" className="font-extrabold text-slate-500 dark:text-slate-550 uppercase text-[9px] tracking-wider">
-                              Camera Model (Auto-fill on load)
-                            </label>
-                            <input
-                              type="text"
-                              id="cameraModel"
-                              value={cameraModel}
-                              onChange={(e) => setCameraModel(e.target.value)}
-                              placeholder="e.g. EOS R5"
-                              className="bg-slate-55 dark:bg-slate-955 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                            />
-                          </div>
-
-                          {/* Lens Used */}
-                          <div className="flex flex-col gap-1.5 text-xs">
-                            <label htmlFor="lensUsed" className="font-extrabold text-slate-550 dark:text-slate-550 uppercase text-[9px] tracking-wider">
-                              Lens Model Used
-                            </label>
-                            <input
-                              type="text"
-                              id="lensUsed"
-                              value={lensUsed}
-                              onChange={(e) => setLensUsed(e.target.value)}
-                              placeholder="e.g. RF 24-70mm f/2.8L IS USM"
-                              className="bg-slate-50 dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                            />
-                          </div>
-
-                          {/* Location Captured */}
-                          <div className="flex flex-col gap-1.5 text-xs">
-                            <label htmlFor="locationCaptured" className="font-extrabold text-slate-550 dark:text-slate-550 uppercase text-[9px] tracking-wider">
-                              Location Captured
-                            </label>
-                            <input
-                              type="text"
-                              id="locationCaptured"
-                              value={location}
-                              onChange={(e) => setLocation(e.target.value)}
-                              placeholder="e.g. Ladakh, India"
-                              className="bg-slate-50 dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                            />
-                          </div>
-
-                          {/* Date Captured */}
-                          <div className="flex flex-col gap-1.5 text-xs md:col-span-2">
-                            <label htmlFor="dateCaptured" className="font-extrabold text-slate-550 dark:text-slate-555 uppercase text-[9px] tracking-wider">
-                              Date Captured
-                            </label>
-                            <input
-                              type="date"
-                              id="dateCaptured"
-                              value={dateCaptured}
-                              onChange={(e) => setDateCaptured(e.target.value)}
-                              className="bg-slate-50 dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                            />
-                          </div>
-
-                          {/* Description */}
-                          <div className="flex flex-col gap-1.5 text-xs md:col-span-2">
-                            <label htmlFor="photoDescription" className="font-extrabold text-slate-450 dark:text-slate-500 uppercase text-[9px] tracking-wider">
-                              Photo Description & Background Details *
-                            </label>
-                            <textarea
-                              id="photoDescription"
-                              required
-                              rows={3}
-                              value={description}
-                              onChange={(e) => setDescription(e.target.value)}
-                              placeholder="Share details about the camera setup, composition settings, exif stories, or subject background info..."
-                              className="bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 resize-none font-medium text-slate-700 dark:text-slate-350 leading-relaxed text-xs"
-                            />
-                          </div>
-
-                        </div>
-
-                        {/* Submit Button */}
-                        <div className="text-right">
-                          <button
-                            type="submit"
-                            disabled={uploading}
-                            className="bg-indigo-650 hover:bg-indigo-750 text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow-sm hover:shadow transition-all disabled:opacity-50 cursor-pointer"
-                          >
-                            {uploading ? "Uploading & Analyzing EXIF..." : "Upload Photograph"}
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  )}
-
-                  {/* Photo Grid List */}
-                  {submission.photographs.length === 0 ? (
-                    <div className="glass-panel border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-10 text-center flex flex-col items-center gap-3">
-                      <Camera size={36} className="text-slate-300 dark:text-slate-700" />
-                      <h4 className="font-display font-bold text-sm text-slate-600">No uploads in directory</h4>
-                      <p className="text-[10px] text-slate-500 max-w-xs">
-                        Initiated entries folder is empty. Upload your first photograph under the contest package above to start your submission.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
-                      {submission.photographs.map((photo) => (
-                        <div
-                          key={photo.id || photo._id}
-                          className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow transition-all flex flex-col justify-between"
-                        >
-                          {/* Image preview with watermark preview */}
-                          <div className="w-full h-44 bg-slate-950 relative overflow-hidden flex items-center justify-center">
-                            <WatermarkPreview
-                              src={photo.fileUrl}
-                              className="w-full h-full object-contain"
-                            />
-                            
-                            {/* EXIF status badge */}
-                            <span className={`absolute top-3 left-3 px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full shadow-sm ${
-                              photo.status === 'Approved' ? 'bg-emerald-500 text-white' :
-                              photo.status === 'Rejected' ? 'bg-red-500 text-white' : 'bg-amber-500 text-white'
-                            }`}>
-                              EXIF {photo.status}
-                            </span>
-                          </div>
-
-                          {/* Photo content */}
-                          <div className="p-4 flex flex-col gap-3 flex-grow justify-between">
-                            <div className="flex flex-col gap-1">
-                              <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white line-clamp-1">
-                                {photo.title}
-                              </h4>
-                              <span className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider block">
-                                {photo.category}
+                {/* Accordion Body */}
+                {historyExpanded && (
+                  <div className="border-t border-slate-100 dark:border-slate-800 p-6 flex flex-col gap-6 bg-slate-50/20 dark:bg-slate-955/5">
+                    <div className="grid grid-cols-1 gap-6">
+                      {pastSubmissions.map((sub, idx) => {
+                        const ev = eventsList.find(e => e._id === sub.eventId);
+                        return (
+                          <div key={idx} className="bg-white dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-2xl p-5 shadow-sm">
+                            <div className="flex justify-between items-start border-b border-slate-101 dark:border-slate-800 pb-3 mb-4">
+                              <div>
+                                <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
+                                  {sub.eventTitle}
+                                </h4>
+                                <span className="text-[9px] text-slate-400 block mt-0.5">
+                                  Event Date: {ev ? new Date(ev.eventDate).toLocaleDateString() : 'N/A'} | Category: {ev?.eventType} Contest
+                                </span>
+                              </div>
+                              <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase">
+                                Ended
                               </span>
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
-                                {photo.description || 'No description shared.'}
-                              </p>
                             </div>
 
-                            {/* Camera EXIF Tags Details */}
-                            <div className="bg-slate-50 dark:bg-slate-955 p-3 rounded-2xl border border-slate-105 dark:border-slate-800/40 text-[10px] flex flex-col gap-1">
-                              <div className="flex justify-between">
-                                <span className="text-slate-400">Camera</span>
-                                <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[130px]">
-                                  {photo.cameraBrand || 'N/A'} {photo.cameraModel || ''}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-slate-400">Lens</span>
-                                <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[130px]">
-                                  {photo.lensUsed || 'N/A'}
-                                </span>
-                              </div>
-                              <div className="flex justify-between border-t border-slate-105 dark:border-slate-800/40 pt-1 mt-1">
-                                <span className="text-slate-400">Date</span>
-                                <span className="text-slate-500">
-                                  {photo.dateCaptured ? new Date(photo.dateCaptured).toLocaleDateString() : 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Actions (Only if draft & unpaid) */}
-                            {!isPaid && !isFinalized && (
-                              <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                                <button
-                                  type="button"
-                                  onClick={() => handleEditPhotoClick(photo)}
-                                  className="flex-1 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-655 dark:text-slate-300 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
-                                >
-                                  <Edit2 size={10} /> Edit Info
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeletePhoto(photo.id || photo._id)}
-                                  className="flex-1 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-955/40 text-red-655 dark:text-red-400 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
-                                >
-                                  <Trash2 size={10} /> Delete
-                                </button>
+                            {/* Photographs Grid for this historical entry */}
+                            {sub.photographs?.length === 0 ? (
+                              <p className="text-[11px] text-slate-400">No photos were uploaded for this historical entry.</p>
+                            ) : (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                {sub.photographs.map((photo) => {
+                                  return (
+                                    <div key={photo.id} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
+                                      <WatermarkPreview src={photo.fileUrl} className="aspect-video w-full" />
+                                      <div className="p-3.5 flex flex-col gap-2.5">
+                                        <div>
+                                          <h5 className="font-bold text-xs text-slate-905 dark:text-white line-clamp-1">{photo.title}</h5>
+                                          <span className="text-[9px] text-indigo-505 font-extrabold uppercase mt-0.5 block">{photo.category}</span>
+                                        </div>
+                                        {photo.cameraBrand && (
+                                          <p className="text-[10px] text-slate-400">
+                                            EXIF: {photo.cameraBrand} {photo.cameraModel}
+                                          </p>
+                                        )}
+                                        {/* Ratings and Jury comments if available */}
+                                        {photo.score ? (
+                                          <div className="mt-1 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 p-2.5 rounded-lg text-[10px] leading-relaxed">
+                                            <div className="flex justify-between font-bold text-indigo-955 dark:text-indigo-300">
+                                              <span>Jury Rating:</span>
+                                              <span>{photo.score.averageScore} / 10</span>
+                                            </div>
+                                            {photo.score.remarks && (
+                                              <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-1 italic leading-snug">
+                                                "${photo.score.remarks}"
+                                              </p>
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <div className="mt-1 bg-slate-100 dark:bg-slate-950 p-2 rounded-lg text-[10px] text-slate-400 italic">
+                                            No scores available.
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                </div>
-
-                {/* Right Columns (Checkout & Actions panel) */}
-                <div className="flex flex-col gap-6">
-                  
-                  {/* Step Status summary */}
-                  <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm bg-slate-50/20 dark:bg-slate-900/10">
-                    <div>
-                      <h4 className="font-display font-extrabold text-slate-900 dark:text-white text-sm">
-                        Submission Status Checklist
-                      </h4>
-                      <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
-                        Track progress of your entry validation
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-4 mt-2">
-                      {/* Step 1: Upload slots filled */}
-                      <div className="flex items-start gap-2.5 text-xs">
-                        {submission.photographs.length === submission.photoLimit ? (
-                          <CheckCircle className="text-emerald-500 mt-0.5 shrink-0" size={16} />
-                        ) : (
-                          <span className="w-4 h-4 rounded-full border border-slate-350 dark:border-slate-700 flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5">1</span>
-                        )}
-                        <div>
-                          <span className={`font-extrabold ${submission.photographs.length === submission.photoLimit ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
-                            Upload Photographs
-                          </span>
-                          <span className="text-[10px] text-slate-450 block">
-                            Fill all {submission.photoLimit} registered package slots ({submission.photographs.length} filled)
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Step 2: Payment invoice */}
-                      <div className="flex items-start gap-2.5 text-xs">
-                        {isPaid ? (
-                          <CheckCircle className="text-emerald-500 mt-0.5 shrink-0" size={16} />
-                        ) : (
-                          <span className="w-4 h-4 rounded-full border border-slate-350 dark:border-slate-700 flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5">2</span>
-                        )}
-                        <div>
-                          <span className={`font-extrabold ${isPaid ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
-                            Checkout package fee
-                          </span>
-                          <span className="text-[10px] text-slate-450 block">
-                            INR {submission.amount} package registration checkout
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Step 3: Final lock submit */}
-                      <div className="flex items-start gap-2.5 text-xs">
-                        {isFinalized ? (
-                          <CheckCircle className="text-emerald-500 mt-0.5 shrink-0" size={16} />
-                        ) : (
-                          <span className="w-4 h-4 rounded-full border border-slate-350 dark:border-slate-700 flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5">3</span>
-                        )}
-                        <div>
-                          <span className={`font-extrabold ${isFinalized ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
-                            Lock Submissions
-                          </span>
-                          <span className="text-[10px] text-slate-450 block">
-                            Sign off and finalize photographs for jury scoring
-                          </span>
-                        </div>
-                      </div>
+                        );
+                      })}
                     </div>
                   </div>
-
-                  {/* Checkout trigger box (If unpaid) */}
-                  {!isPaid && !isFinalized && (
-                    <div className="glass-panel border border-slate-200 dark:border-slate-805 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm bg-indigo-50/10 dark:bg-indigo-950/5">
-                      <div>
-                        <h4 className="font-display font-extrabold text-slate-900 dark:text-white text-sm">
-                          Payment Checkout
-                        </h4>
-                        <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
-                          Purchase contest slots to authorize final submissions
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-baseline mt-2">
-                        <span className="text-xs text-slate-500">Package amount:</span>
-                        <span className="font-display font-black text-2xl text-slate-900 dark:text-white">
-                          INR {submission.amount}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowPaymentModal(true)}
-                        className="w-full bg-indigo-600 hover:bg-indigo-750 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer mt-2"
-                      >
-                        <CreditCard size={14} /> Checkout Package Fee
-                      </button>
-                    </div>
-                  )}
-
-                  {/* QR Invoice display (If paid) */}
-                  {isPaid && submission.paymentDetails && (
-                    <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-5 text-left flex flex-col gap-3 shadow-sm bg-emerald-500/5">
-                      <div className="flex items-center gap-2 text-emerald-650 dark:text-emerald-500 font-display font-extrabold text-sm">
-                        <CheckCircle size={18} />
-                        Payment Confirmed
-                      </div>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
-                        INR {submission.amount} paid successfully. Razorpay ID: {submission.paymentId}. Reference invoice signed.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setShowQRInvoice(submission.paymentDetails)}
-                        className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-755 dark:text-slate-200 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                      >
-                        <Download size={12} /> View Payment Invoice / QR
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Lock Submissions trigger (If paid and not finalized and slots full) */}
-                  {isPaid && !isFinalized && (
-                    <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm bg-amber-500/5">
-                      <div>
-                        <h4 className="font-display font-extrabold text-slate-900 dark:text-white text-sm">
-                          Finalize Entry Folder
-                        </h4>
-                        <span className="text-[10px] text-slate-450 block font-semibold mt-0.5">
-                          Lock uploaded photographs to trigger judge assignment and scoring
-                        </span>
-                      </div>
-
-                      {submission.photographs.length < submission.photoLimit ? (
-                        <div className="bg-amber-100/50 dark:bg-amber-950/20 border border-amber-200/50 p-3 rounded-2xl text-[10px] text-amber-700 dark:text-amber-455 leading-relaxed">
-                          Fill remaining {submission.photoLimit - submission.photographs.length} photographic slots to enable final lock submissions.
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setShowFinalSubmitModal(true)}
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer mt-2"
-                        >
-                          <FileCheck size={14} /> Finalize Submissions
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Finalized summary (If finalized) */}
-                  {isFinalized && (
-                    <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-5 text-left flex flex-col gap-3.5 shadow-sm bg-indigo-500/5">
-                      <div className="flex items-center gap-2 text-indigo-650 dark:text-indigo-400 font-display font-extrabold text-sm">
-                        <Lock size={18} />
-                        Submission Locked
-                      </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
-                        Your DSLR photograph list is locked for grading review. Judges are scoring composition, storytelling, and quality benchmarks.
-                      </p>
-
-                      {/* DSLR Declaration Lock */}
-                      <div className="border border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex items-start gap-2.5 bg-slate-50/50 dark:bg-slate-900/20 text-[10px] text-slate-400 leading-relaxed font-semibold">
-                        <ShieldCheck
-                          size={16}
-                          className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5"
-                        />
-                        <p>
-                          Eligibility accepted. Digital file signatures are locked. All uploads must match DSLR/Mirrorless EXIF properties.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-
+                )}
               </div>
-            )}
-          </>
-        )
+            );
+          })()}
+
+        </div>
       )}
 
       {/* Edit Photo Modal */}

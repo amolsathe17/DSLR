@@ -367,7 +367,7 @@ export default function JudgeDashboard() {
       )}
       
       {error && (
-        <div className="flex items-start gap-2 bg-red-50 dark:bg-red-955/20 border border-red-205/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-6">
+        <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-6">
           <ShieldAlert size={18} className="shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
@@ -434,7 +434,7 @@ export default function JudgeDashboard() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[10px] text-slate-505 font-extrabold uppercase tracking-wider">Assigned Contests</span>
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Assigned Contests</span>
                     <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalEvents}</h3>
                     <span className="text-[10px] text-slate-400">Total events panel seat</span>
                   </div>
@@ -446,7 +446,7 @@ export default function JudgeDashboard() {
                   </div>
 
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[10px] text-slate-505 font-extrabold uppercase tracking-wider">Graded Photos</span>
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Graded Photos</span>
                     <h3 className="font-display font-extrabold text-2xl text-emerald-600 dark:text-emerald-400">{gradedCount}</h3>
                     <span className="text-[10px] text-slate-400">Completed assessments</span>
                   </div>
@@ -584,10 +584,10 @@ export default function JudgeDashboard() {
                               />
                             </div>
 
-                            <div className="flex justify-between text-[10px] text-slate-450 mt-1 border-t border-slate-100 dark:border-slate-800/40 pt-2">
+                            <div className="flex justify-between text-[10px] text-slate-400 mt-1 border-t border-slate-100 dark:border-slate-800/40 pt-2">
                               <span>Approved: <strong className="text-emerald-600 dark:text-emerald-400">{approved}</strong></span>
                               <span>Disapproved: <strong className="text-red-600 dark:text-red-400">{disapproved}</strong></span>
-                              <span>Pending: <strong className="text-slate-655 dark:text-slate-300">{total - evaluated}</strong></span>
+                              <span>Pending: <strong className="text-slate-600 dark:text-slate-300">{total - evaluated}</strong></span>
                             </div>
                           </div>
                         );
@@ -625,7 +625,7 @@ export default function JudgeDashboard() {
                       }
 
                       return (
-                        <div className="flex flex-col gap-4 overflow-y-auto max-h-[350px] pr-2 pl-4 border-l border-slate-105 dark:border-slate-800">
+                        <div className="flex flex-col gap-4 overflow-y-auto max-h-[350px] pr-2 pl-4 border-l border-slate-100 dark:border-slate-800">
                           {historyList.map((item, idx) => (
                             <div key={idx} className="relative flex flex-col gap-1.5 text-xs text-left">
                               <span className="absolute -left-[22px] top-1 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-500" />
@@ -727,7 +727,7 @@ export default function JudgeDashboard() {
                   onClick={() => setEvaluationMode('online')}
                   className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
                     evaluationMode === 'online'
-                      ? 'bg-indigo-650 text-white shadow-md'
+                      ? 'bg-indigo-600 text-white shadow-md'
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                   }`}
                 >
@@ -737,7 +737,7 @@ export default function JudgeDashboard() {
                   onClick={() => setEvaluationMode('offline')}
                   className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
                     evaluationMode === 'offline'
-                      ? 'bg-indigo-655 text-white shadow-md'
+                      ? 'bg-indigo-600 text-white shadow-md'
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                   }`}
                 >
@@ -765,7 +765,7 @@ export default function JudgeDashboard() {
 
                   {user?.role !== 'Admin' && (
                     hasConfirmed ? (
-                      <span className="bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 border border-emerald-200/50 py-2.5 px-5 rounded-2xl text-xs font-extrabold uppercase flex items-center gap-1.5">
+                      <span className="bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500 border border-emerald-200/50 py-2.5 px-5 rounded-2xl text-xs font-extrabold uppercase flex items-center gap-1.5">
                         <CheckCircle2 size={14} /> Signed Off
                       </span>
                     ) : allGraded ? (
@@ -776,7 +776,7 @@ export default function JudgeDashboard() {
                         <Award size={14} /> Sign Off Event
                       </button>
                     ) : (
-                      <span className="bg-slate-100 dark:bg-slate-805 text-slate-400 py-2.5 px-5 rounded-2xl text-xs font-bold uppercase flex items-center gap-1.5">
+                      <span className="bg-slate-100 dark:bg-slate-800 text-slate-400 py-2.5 px-5 rounded-2xl text-xs font-bold uppercase flex items-center gap-1.5">
                         <Clock size={14} /> Finish Grading to Sign Off
                       </span>
                     )
@@ -850,7 +850,7 @@ export default function JudgeDashboard() {
                   </div>
                 ) : (
                   /* Offline Score sheets */
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-3xl overflow-hidden shadow-sm text-left">
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm text-left">
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs text-left">
                         <thead>
@@ -886,7 +886,7 @@ export default function JudgeDashboard() {
                                 <td className="px-5 py-4">
                                   <div
                                     onClick={() => setOfflineZoomPhoto(photo)}
-                                    className="w-20 h-14 bg-slate-905 rounded-lg overflow-hidden flex items-center justify-center cursor-zoom-in relative border border-slate-100 dark:border-slate-800"
+                                    className="w-20 h-14 bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center cursor-zoom-in relative border border-slate-100 dark:border-slate-800"
                                   >
                                     <WatermarkPreview src={photo.fileUrl} className="w-full h-full object-cover" />
                                   </div>
@@ -894,7 +894,7 @@ export default function JudgeDashboard() {
                                 <td className="px-5 py-4 flex flex-col gap-0.5 justify-center h-20 min-w-[150px]">
                                   <span className="font-extrabold text-slate-900 dark:text-white line-clamp-1">{photo.title}</span>
                                   <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">{photo.category}</span>
-                                  <span className="text-[9px] text-indigo-505 font-semibold">{photo.participantName}</span>
+                                  <span className="text-[9px] text-indigo-500 font-semibold">{photo.participantName}</span>
                                 </td>
                                 {/* Creativity */}
                                 <td className="px-5 py-4">
@@ -965,7 +965,7 @@ export default function JudgeDashboard() {
                                         disabled={isSuspendedUser}
                                         onClick={() => handleOfflineScoreChange(photo.photoId, 'approvalStatus', 'Approved')}
                                         className={`px-2.5 py-1 text-[10px] font-extrabold uppercase transition-colors cursor-pointer ${
-                                          !isDisapproved ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-655'
+                                          !isDisapproved ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-600'
                                         }`}
                                       >
                                         Approve
@@ -975,7 +975,7 @@ export default function JudgeDashboard() {
                                         disabled={isSuspendedUser}
                                         onClick={() => handleOfflineScoreChange(photo.photoId, 'approvalStatus', 'Disapproved')}
                                         className={`px-2.5 py-1 text-[10px] font-extrabold uppercase transition-colors cursor-pointer ${
-                                          isDisapproved ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-655'
+                                          isDisapproved ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-600'
                                         }`}
                                       >
                                         Reject
@@ -986,8 +986,8 @@ export default function JudgeDashboard() {
                                       value={scores.remarks}
                                       onChange={(e) => handleOfflineScoreChange(photo.photoId, 'remarks', e.target.value)}
                                       placeholder={isDisapproved ? "Explanation required *" : "Remarks (Optional)..."}
-                                      className={`bg-slate-55 dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-lg px-2 py-1 outline-none text-[11px] leading-relaxed resize-none h-12 w-full ${
-                                        isDisapproved && (!scores.remarks || scores.remarks.trim() === '') ? 'border-red-505 focus:ring-red-500' : 'focus:ring-indigo-500'
+                                      className={`bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1 outline-none text-[11px] leading-relaxed resize-none h-12 w-full ${
+                                        isDisapproved && (!scores.remarks || scores.remarks.trim() === '') ? 'border-red-500 focus:ring-red-500' : 'focus:ring-indigo-500'
                                       }`}
                                     />
                                   </div>
@@ -998,7 +998,7 @@ export default function JudgeDashboard() {
                                     type="button"
                                     disabled={isSuspendedUser || loading}
                                     onClick={() => handleSaveSingleOfflineScore(photo)}
-                                    className="bg-indigo-600 hover:bg-indigo-750 text-white rounded-lg p-2 transition-all cursor-pointer inline-flex items-center justify-center"
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2 transition-all cursor-pointer inline-flex items-center justify-center"
                                     title="Save scoring sheet for this row"
                                   >
                                     <Check size={14} strokeWidth={2.5} />
@@ -1013,12 +1013,12 @@ export default function JudgeDashboard() {
 
                     {/* Offline batch triggers */}
                     {user?.role !== 'Admin' && (
-                      <div className="bg-slate-55 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 p-5 flex justify-end gap-3 font-bold">
+                      <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 p-5 flex justify-end gap-3 font-bold">
                         <button
                           type="button"
                           disabled={loading}
                           onClick={handleSaveAllOfflineScores}
-                          className="bg-indigo-600 hover:bg-indigo-750 text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow-sm hover:shadow transition-all cursor-pointer"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow-sm hover:shadow transition-all cursor-pointer"
                         >
                           {loading ? 'Submitting evaluations...' : 'Save All Scoring Sheets'}
                         </button>
@@ -1044,7 +1044,7 @@ export default function JudgeDashboard() {
                   Online Zoom Mode
                 </span>
                 <span className={`bg-slate-900/85 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm ${
-                  activePhoto.graded ? 'text-emerald-450' : 'text-amber-500'
+                  activePhoto.graded ? 'text-emerald-500' : 'text-amber-500'
                 }`}>
                   {activePhoto.graded ? 'Assessment Completed' : 'Pending Review'}
                 </span>
@@ -1081,7 +1081,7 @@ export default function JudgeDashboard() {
                     <span className="font-extrabold truncate">{activePhoto.cameraModel || 'N/A'}</span>
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-slate-505 uppercase text-[8px] font-bold">Lens configuration</span>
+                    <span className="text-slate-500 uppercase text-[8px] font-bold">Lens configuration</span>
                     <span className="font-semibold truncate">{activePhoto.lensUsed || 'N/A'}</span>
                   </div>
                   <div className="flex flex-col gap-0.5">
@@ -1095,7 +1095,7 @@ export default function JudgeDashboard() {
                 {/* Photo Description Box at bottom */}
                 <div className="bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px] flex flex-col gap-1">
                   <span className="text-slate-500 uppercase text-[8px] font-bold">Photo Description</span>
-                  <p className="text-slate-350 leading-relaxed max-h-[60px] overflow-y-auto pr-1">
+                  <p className="text-slate-300 leading-relaxed max-h-[60px] overflow-y-auto pr-1">
                     {activePhoto.description || 'No description shared.'}
                   </p>
                 </div>
@@ -1113,7 +1113,7 @@ export default function JudgeDashboard() {
                 </div>
                 <button
                   onClick={() => setActivePhoto(null)}
-                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-655 dark:hover:text-white rounded-lg cursor-pointer transition-colors"
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg cursor-pointer transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -1131,7 +1131,7 @@ export default function JudgeDashboard() {
                       disabled={user?.role === 'Admin'}
                       onClick={() => setApprovalStatus('Approved')}
                       className={`flex-1 py-2 font-display font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
-                        approvalStatus === 'Approved' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-655'
+                        approvalStatus === 'Approved' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-600'
                       }`}
                     >
                       Approve Frame
@@ -1141,7 +1141,7 @@ export default function JudgeDashboard() {
                       disabled={user?.role === 'Admin'}
                       onClick={() => setApprovalStatus('Disapproved')}
                       className={`flex-1 py-2 font-display font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
-                        approvalStatus === 'Disapproved' ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-655'
+                        approvalStatus === 'Disapproved' ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-600'
                       }`}
                     >
                       Reject Frame
@@ -1154,7 +1154,7 @@ export default function JudgeDashboard() {
                     {/* Creativity Slider */}
                     <div className="flex flex-col gap-1">
                       <div className="flex justify-between font-bold text-[11px]">
-                        <span className="text-slate-600 dark:text-slate-350">1. Originality & Creativity</span>
+                        <span className="text-slate-600 dark:text-slate-300">1. Originality & Creativity</span>
                         <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{creativity} / 10</span>
                       </div>
                       <input
@@ -1171,7 +1171,7 @@ export default function JudgeDashboard() {
                     {/* Composition Slider */}
                     <div className="flex flex-col gap-1">
                       <div className="flex justify-between font-bold text-[11px]">
-                        <span className="text-slate-600 dark:text-slate-350">2. Layout & Composition</span>
+                        <span className="text-slate-600 dark:text-slate-300">2. Layout & Composition</span>
                         <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{composition} / 10</span>
                       </div>
                       <input
@@ -1188,7 +1188,7 @@ export default function JudgeDashboard() {
                     {/* Technical Quality Slider */}
                     <div className="flex flex-col gap-1">
                       <div className="flex justify-between font-bold text-[11px]">
-                        <span className="text-slate-600 dark:text-slate-350">3. Technical Execution</span>
+                        <span className="text-slate-600 dark:text-slate-300">3. Technical Execution</span>
                         <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{technicalQuality} / 10</span>
                       </div>
                       <input
@@ -1205,7 +1205,7 @@ export default function JudgeDashboard() {
                     {/* Storytelling Slider */}
                     <div className="flex flex-col gap-1">
                       <div className="flex justify-between font-bold text-[11px]">
-                        <span className="text-slate-600 dark:text-slate-350">4. Storytelling & Context</span>
+                        <span className="text-slate-600 dark:text-slate-300">4. Storytelling & Context</span>
                         <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{storytelling} / 10</span>
                       </div>
                       <input
@@ -1222,7 +1222,7 @@ export default function JudgeDashboard() {
                     {/* Overall Impact Slider */}
                     <div className="flex flex-col gap-1">
                       <div className="flex justify-between font-bold text-[11px]">
-                        <span className="text-slate-600 dark:text-slate-350">5. Overall Impact & WOW factor</span>
+                        <span className="text-slate-600 dark:text-slate-300">5. Overall Impact & WOW factor</span>
                         <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{overallImpact} / 10</span>
                       </div>
                       <input
@@ -1237,7 +1237,7 @@ export default function JudgeDashboard() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-red-50 dark:bg-red-955/20 border border-red-200/50 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-red-755 dark:text-red-400 leading-relaxed font-semibold">
+                  <div className="bg-red-50 dark:bg-red-950/20 border border-red-200/50 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-red-700 dark:text-red-400 leading-relaxed font-semibold">
                     <ShieldAlert className="shrink-0 mt-0.5 text-red-600" size={16} />
                     <p>Frame will be scored as 0. An explanation / justification remarks is required below to submit the rejection.</p>
                   </div>
@@ -1245,7 +1245,7 @@ export default function JudgeDashboard() {
 
                 {/* Remarks textarea */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="modalRemarks" className="font-extrabold text-slate-550 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="modalRemarks" className="font-extrabold text-slate-500 uppercase text-[9px] tracking-wider">
                     Scoring explanation & feedback
                   </label>
                   <textarea
@@ -1294,7 +1294,7 @@ export default function JudgeDashboard() {
       {/* Offline Zoom Modal */}
       {offlineZoomPhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-205 dark:border-slate-805 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-[90vh]">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-[90vh]">
             
             {/* Left Column: Photograph (takes up full height and width, zooms on hover) */}
             <div className="flex-grow bg-slate-950 relative overflow-hidden flex items-center justify-center p-4">
@@ -1303,7 +1303,7 @@ export default function JudgeDashboard() {
                   Offline Zoom Mode
                 </span>
                 <span className={`bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm ${
-                  offlineZoomPhoto.graded ? 'text-emerald-450' : 'text-amber-500'
+                  offlineZoomPhoto.graded ? 'text-emerald-500' : 'text-amber-500'
                 }`}>
                   {offlineZoomPhoto.graded ? 'Assessment Completed' : 'Pending Review'}
                 </span>
@@ -1329,7 +1329,7 @@ export default function JudgeDashboard() {
                 </div>
                 <button
                   onClick={() => setOfflineZoomPhoto(null)}
-                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-655 dark:hover:text-white rounded-lg cursor-pointer transition-colors"
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg cursor-pointer transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -1344,15 +1344,15 @@ export default function JudgeDashboard() {
                   <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white leading-snug">
                     {offlineZoomPhoto.title}
                   </h4>
-                  <span className="text-[10px] text-indigo-505 font-extrabold uppercase mt-0.5 block">
+                  <span className="text-[10px] text-indigo-500 font-extrabold uppercase mt-0.5 block">
                     {offlineZoomPhoto.category}
                   </span>
                 </div>
 
                 {/* Photographer name */}
-                <div className="flex flex-col gap-1 border-t border-slate-200/60 dark:border-slate-805/60 pt-3">
+                <div className="flex flex-col gap-1 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
                   <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Photographer</span>
-                  <p className="font-extrabold text-slate-700 dark:text-slate-350">{offlineZoomPhoto.participantName}</p>
+                  <p className="font-extrabold text-slate-700 dark:text-slate-300">{offlineZoomPhoto.participantName}</p>
                 </div>
 
                 {/* Camera configuration parameters */}
@@ -1372,7 +1372,7 @@ export default function JudgeDashboard() {
                       <strong className="text-slate-800 dark:text-slate-200 font-semibold truncate max-w-[150px]" title={offlineZoomPhoto.lensUsed}>{offlineZoomPhoto.lensUsed || 'N/A'}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-450">Date Captured:</span>
+                      <span className="text-slate-400">Date Captured:</span>
                       <strong className="text-slate-800 dark:text-slate-200 font-semibold">
                         {offlineZoomPhoto.dateCaptured ? new Date(offlineZoomPhoto.dateCaptured).toLocaleDateString() : 'N/A'}
                       </strong>
@@ -1383,7 +1383,7 @@ export default function JudgeDashboard() {
                 {/* Description & Story */}
                 <div className="flex flex-col gap-1.5 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
                   <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Photo Description & Story</span>
-                  <p className="text-slate-600 dark:text-slate-350 leading-relaxed italic bg-white dark:bg-slate-950 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 max-h-[140px] overflow-y-auto">
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed italic bg-white dark:bg-slate-950 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 max-h-[140px] overflow-y-auto">
                     "{offlineZoomPhoto.description || 'No description shared.'}"
                   </p>
                 </div>
@@ -1409,7 +1409,7 @@ export default function JudgeDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
-              <div className="p-3 bg-amber-50 dark:bg-amber-955/20 text-amber-550 rounded-2xl mb-2">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-2xl mb-2">
                 <AlertTriangle size={28} />
               </div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
@@ -1443,7 +1443,7 @@ export default function JudgeDashboard() {
       {/* SUCCESS MESSAGE MODAL */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-2xl mb-2">
                 <CheckCircle2 size={28} />

@@ -671,7 +671,7 @@ export default function Dashboard() {
           {/* Welcome profile header */}
           <div className="bg-gradient-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex flex-col gap-2 text-left">
-              <span className="text-[10px] text-indigo-505 font-extrabold uppercase tracking-widest">
+              <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">
                 Participant Dashboard
               </span>
               <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
@@ -864,7 +864,7 @@ export default function Dashboard() {
                         return (
                           <div key={name} className="flex flex-col gap-1">
                             <div className="flex justify-between text-[11px] font-bold">
-                              <span className="text-slate-650 dark:text-slate-300">{name}</span>
+                              <span className="text-slate-600 dark:text-slate-300">{name}</span>
                               <span className="text-slate-500">{count} {count === 1 ? 'photo' : 'photos'}</span>
                             </div>
                             <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
@@ -948,11 +948,11 @@ export default function Dashboard() {
                     {timelineEvents.slice(0, 8).map((evt, idx) => (
                       <div key={idx} className="relative flex flex-col gap-1 text-xs">
                         {/* Circle dot marker */}
-                        <span className="absolute -left-[22px] top-1 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-505" />
+                        <span className="absolute -left-[22px] top-1 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-500" />
                         <span className="text-[10px] text-slate-400 font-semibold">
                           {evt.date.toLocaleDateString()} {evt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
-                        <h4 className="font-extrabold text-slate-955 dark:text-white leading-none">{evt.title}</h4>
+                        <h4 className="font-extrabold text-slate-900 dark:text-white leading-none">{evt.title}</h4>
                         <p className="text-slate-500 text-[11px] leading-relaxed mt-0.5">{evt.desc}</p>
                       </div>
                     ))}
@@ -977,7 +977,7 @@ export default function Dashboard() {
                 return (
                   <div className="flex flex-col gap-3 overflow-y-auto max-h-[320px] pr-2">
                     {refundedSubs.map((sub, idx) => (
-                      <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-955 border border-slate-200/50 dark:border-slate-800 rounded-2xl flex flex-col gap-2 text-xs">
+                      <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl flex flex-col gap-2 text-xs">
                         <div className="flex justify-between items-center">
                           <span className="font-extrabold text-slate-900 dark:text-white">{sub.eventTitle}</span>
                           <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase bg-amber-500/10 text-amber-500 rounded-full">
@@ -986,7 +986,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex justify-between text-[11px] text-slate-400">
                           <span>Entry ID: {sub.entryNumber}</span>
-                          <span>Refunded Amount: <strong className="text-indigo-650 dark:text-indigo-400">INR {sub.amount}</strong></span>
+                          <span>Refunded Amount: <strong className="text-indigo-600 dark:text-indigo-400">INR {sub.amount}</strong></span>
                         </div>
                         <div className="text-[10px] text-slate-400 italic mt-0.5">
                           Status: The registration fees have been reverted. Photo upload limits reset to unpaid.
@@ -1016,8 +1016,8 @@ export default function Dashboard() {
             
             if (eligibleSubs.length === 0) {
               return (
-                <div className="max-w-md mx-auto text-center py-16 flex flex-col items-center gap-4 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 p-8 rounded-3xl shadow-sm w-full">
-                  <Award className="w-10 h-10 text-indigo-505 animate-bounce" />
+                <div className="max-w-md mx-auto text-center py-16 flex flex-col items-center gap-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-3xl shadow-sm w-full">
+                  <Award className="w-10 h-10 text-indigo-500 animate-bounce" />
                   <h2 className="font-display font-bold text-sm text-slate-900 dark:text-white">No Finalized Entries Found</h2>
                   <p className="text-[11px] text-slate-500">
                     You haven't finalized any contest submissions yet. Once you complete the upload, pay, and finalized under the "My Entries" tab, you'll be able to claim your certificate here once grading finishes!
@@ -1068,7 +1068,7 @@ export default function Dashboard() {
                           {isWinner ? 'View & Download Winner Certificate' : 'View & Download Participation Certificate'}
                         </button>
                       ) : (
-                        <div className="bg-slate-55 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/40 p-3 rounded-xl text-[10px] text-slate-400 mt-2 flex items-center gap-2">
+                        <div className="bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/40 p-3 rounded-xl text-[10px] text-slate-400 mt-2 flex items-center gap-2">
                           <Clock size={14} className="shrink-0" />
                           <span>Jury panel is compiling results. Certificate unlocks immediately upon publishing.</span>
                         </div>
@@ -1094,7 +1094,7 @@ export default function Dashboard() {
           </div>
 
           {error && (
-            <div className="flex items-start gap-2 bg-red-50 dark:bg-red-955/20 border border-red-205/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-650 dark:text-red-400 mb-2">
+            <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-4 rounded-2xl text-sm text-red-600 dark:text-red-400 mb-2">
               <AlertTriangle size={18} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
@@ -1102,7 +1102,7 @@ export default function Dashboard() {
 
           {/* Active Contests Collapsible Panels */}
           <div className="flex flex-col gap-4">
-            <h3 className="font-display font-bold text-sm text-slate-905 dark:text-white">Active Competitions</h3>
+            <h3 className="font-display font-bold text-sm text-slate-900 dark:text-white">Active Competitions</h3>
             {(() => {
               const activeEvents = eventsList.filter(e => e.status === 'Active');
               if (activeEvents.length === 0) {
@@ -1139,15 +1139,15 @@ export default function Dashboard() {
                         {activeSub ? (
                           <div className="flex gap-1.5 items-center">
                             {hasFinalized ? (
-                              <span className="bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 border border-emerald-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                              <span className="bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500 border border-emerald-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
                                 Finalized
                               </span>
                             ) : hasPaid ? (
-                              <span className="bg-blue-105 dark:bg-blue-955/20 text-blue-600 dark:text-blue-450 border border-blue-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                              <span className="bg-blue-100 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
                                 Paid (Uploading)
                               </span>
                             ) : (
-                              <span className="bg-amber-100 dark:bg-amber-955/20 text-amber-600 dark:text-amber-450 border border-amber-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                              <span className="bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
                                 Unpaid
                               </span>
                             )}
@@ -1177,12 +1177,12 @@ export default function Dashboard() {
                         ) : (
                           <>
                             {submission?.paymentStatus === 'Refunded' && (
-                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-amber-50 dark:bg-amber-955/20 border border-amber-205/50 dark:border-amber-900/30 p-5 rounded-2xl text-amber-800 dark:text-amber-300 mb-2 animate-in slide-in-from-top-4 duration-200">
+                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 p-5 rounded-2xl text-amber-800 dark:text-amber-300 mb-2 animate-in slide-in-from-top-4 duration-200">
                                 <div className="flex items-start gap-3">
                                   <RotateCcw size={24} className="shrink-0 text-amber-600 dark:text-amber-400 mt-1 md:mt-0" />
                                   <div>
                                     <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">Entry Payment Refunded</h4>
-                                    <p className="text-[11px] text-amber-707 dark:text-amber-450 mt-1">
+                                    <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-1">
                                       Your entry submission payment has been refunded and credited back to your bank account by the administrator. All photo slots have been reset to unpaid status.
                                     </p>
                                   </div>
@@ -1191,16 +1191,16 @@ export default function Dashboard() {
                             )}
 
                             {user?.isSuspended && (
-                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 p-5 rounded-2xl text-red-750 dark:text-red-400 mb-2 animate-in slide-in-from-top-4 duration-200">
+                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 p-5 rounded-2xl text-red-700 dark:text-red-400 mb-2 animate-in slide-in-from-top-4 duration-200">
                                 <div className="flex items-start gap-3">
-                                  <ShieldCheck size={24} className="shrink-0 text-red-650 dark:text-red-450 mt-1 md:mt-0" />
+                                  <ShieldCheck size={24} className="shrink-0 text-red-600 dark:text-red-400 mt-1 md:mt-0" />
                                   <div>
                                     <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">Account Suspended</h4>
-                                    <p className="text-[11px] text-red-650 dark:text-red-400/80 mt-1">
+                                    <p className="text-[11px] text-red-600 dark:text-red-400/80 mt-1">
                                       An administrator has suspended your participant account. You can view your current submissions in read-only mode, but all modifications, payments, and new uploads are disabled.
                                     </p>
                                     {user.suspensionReason && (
-                                      <div className="mt-2.5 bg-red-100/50 dark:bg-red-955/40 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-[10px] text-red-800 dark:text-red-300">
+                                      <div className="mt-2.5 bg-red-100/50 dark:bg-red-950/40 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-[10px] text-red-800 dark:text-red-300">
                                         <span className="font-bold uppercase tracking-wider block mb-1">Reason / Explanation:</span>
                                         <p className="italic">"{user.suspensionReason}"</p>
                                       </div>
@@ -1248,7 +1248,7 @@ export default function Dashboard() {
                                         <span className="font-display font-extrabold text-2xl text-slate-900 dark:text-white">
                                           ₹{pkg.price}
                                         </span>
-                                        <span className="text-[11px] font-semibold text-slate-705 dark:text-slate-300">
+                                        <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                                           Max Uploads: {pkg.maxPhotos} {e.eventType === 'Photography' ? 'Photo' : 'Artwork'}{pkg.maxPhotos > 1 ? "s" : ""}
                                         </span>
                                       </label>
@@ -1269,7 +1269,7 @@ export default function Dashboard() {
                                         : 'Confirm that all submitted artwork entries are original creations made exclusively by you.'}
                                     </p>
 
-                                    <label className="flex items-start gap-3 cursor-pointer select-none bg-indigo-50/30 dark:bg-indigo-955/20 border border-indigo-100/30 dark:border-indigo-900/20 p-3.5 rounded-xl">
+                                    <label className="flex items-start gap-3 cursor-pointer select-none bg-indigo-50/30 dark:bg-indigo-950/20 border border-indigo-100/30 dark:border-indigo-900/20 p-3.5 rounded-xl">
                                       <input
                                         type="checkbox"
                                         checked={acceptedDeclaration}
@@ -1302,11 +1302,11 @@ export default function Dashboard() {
                                   {!isFinalized &&
                                     submission.photographs.length < selectedPackage?.maxPhotos && (
                                       <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-5 flex flex-col gap-5 shadow-sm">
-                                        <div className="pb-3 border-b border-slate-105 dark:border-slate-800">
+                                        <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
                                           <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm">
                                             Upload {e.eventType} Entry Photo
                                           </h3>
-                                          <p className="text-[11px] text-slate-455 mt-0.5">
+                                          <p className="text-[11px] text-slate-400 mt-0.5">
                                             {e.eventType === 'Photography' 
                                               ? 'Provide details and select files. We will parse EXIF metadata to auto-fill camera specifications.' 
                                               : 'Provide details, dimensions, medium and location specifications.'}
@@ -1323,7 +1323,7 @@ export default function Dashboard() {
                                                 value={title}
                                                 onChange={(e) => setTitle(e.target.value)}
                                                 placeholder="Sunrise in Sumba"
-                                                className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-xs font-semibold text-slate-700 dark:text-slate-200"
+                                                className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-xs font-semibold text-slate-700 dark:text-slate-200"
                                               />
                                             </div>
 
@@ -1333,7 +1333,7 @@ export default function Dashboard() {
                                                 id="photoCategory"
                                                 value={category}
                                                 onChange={(e) => setCategory(e.target.value)}
-                                                className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+                                                className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
                                               >
                                                 <option value="">Select Category</option>
                                                 {categories.map((cat) => (
@@ -1354,14 +1354,14 @@ export default function Dashboard() {
                                                   value={cameraBrand}
                                                   onChange={(e) => setCameraBrand(e.target.value)}
                                                   placeholder={e.eventType === 'Photography' ? 'Canon' : 'Oil on Canvas'}
-                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
+                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
                                                 />
                                                 <input
                                                   type="text"
                                                   value={cameraModel}
                                                   onChange={(e) => setCameraModel(e.target.value)}
                                                   placeholder={e.eventType === 'Photography' ? 'EOS R5' : '12x18 inches'}
-                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
+                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
                                                 />
                                               </div>
                                             </div>
@@ -1376,14 +1376,14 @@ export default function Dashboard() {
                                                   value={lensUsed}
                                                   onChange={(e) => setLensUsed(e.target.value)}
                                                   placeholder={e.eventType === 'Photography' ? '24-70mm f2.8' : 'Acrylic Paint'}
-                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
+                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
                                                 />
                                                 <input
                                                   type="text"
                                                   value={location}
                                                   onChange={(e) => setLocation(e.target.value)}
                                                   placeholder="Sumba, Indonesia"
-                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
+                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
                                                 />
                                               </div>
                                             </div>
@@ -1398,7 +1398,7 @@ export default function Dashboard() {
                                                 value={description}
                                                 onChange={(e) => setDescription(e.target.value)}
                                                 placeholder="Tell us about your work..."
-                                                className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-650 resize-none text-[11px] font-semibold text-slate-700 dark:text-slate-200"
+                                                className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 resize-none text-[11px] font-semibold text-slate-700 dark:text-slate-200"
                                               />
                                             </div>
 
@@ -1426,17 +1426,17 @@ export default function Dashboard() {
 
                                   {/* List of uploaded photographs */}
                                   <div className="flex flex-col gap-4">
-                                    <h3 className="font-display font-black text-slate-905 dark:text-white text-xs">
+                                    <h3 className="font-display font-black text-slate-900 dark:text-white text-xs">
                                       Uploaded Contest Entries ({submission.photographs.length})
                                     </h3>
 
                                     {submission.photographs.length === 0 ? (
-                                      <div className="glass-panel border border-slate-150 dark:border-slate-850 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 bg-slate-50/50 dark:bg-slate-900/10">
+                                      <div className="glass-panel border border-slate-100 dark:border-slate-800 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 bg-slate-50/50 dark:bg-slate-900/10">
                                         <ImageIcon size={32} className="text-slate-300" />
                                         <p className="font-bold text-slate-700 dark:text-slate-300 text-xs">
                                           No photos uploaded in this entry folder yet.
                                         </p>
-                                        <p className="text-xs max-w-xs text-slate-505">
+                                        <p className="text-xs max-w-xs text-slate-500">
                                           Use the entry form above to upload photographs corresponding to your selected package tier.
                                         </p>
                                       </div>
@@ -1448,18 +1448,18 @@ export default function Dashboard() {
                                             <div className="p-4 flex flex-col gap-3 grow justify-between">
                                               <div>
                                                 <div className="flex justify-between items-start gap-2">
-                                                  <h4 className="font-display font-extrabold text-xs text-slate-905 dark:text-white line-clamp-1">
+                                                  <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white line-clamp-1">
                                                     {photo.title}
                                                   </h4>
                                                   <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase shrink-0 ${
-                                                    photo.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-450' :
-                                                    photo.status === 'Rejected' ? 'bg-red-100 text-red-700 dark:bg-red-955/20 dark:text-red-400' :
-                                                    'bg-amber-100 text-amber-700 dark:bg-amber-955/20 dark:text-amber-400'
+                                                    photo.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-500' :
+                                                    photo.status === 'Rejected' ? 'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400' :
+                                                    'bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400'
                                                   }`}>
                                                     {photo.status}
                                                   </span>
                                                 </div>
-                                                <span className="text-[9px] text-indigo-505 font-bold uppercase tracking-wider block mt-0.5">
+                                                <span className="text-[9px] text-indigo-500 font-bold uppercase tracking-wider block mt-0.5">
                                                   {photo.category}
                                                 </span>
                                                 {photo.cameraBrand && (
@@ -1470,16 +1470,16 @@ export default function Dashboard() {
                                               </div>
 
                                               {!isFinalized && (
-                                                <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-805/40">
+                                                <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/40">
                                                   <button
                                                     onClick={() => handleEditPhotoClick(photo)}
-                                                    className="flex-1 text-[10px] font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-350 text-center py-1 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-800 rounded-lg border border-slate-205 dark:border-slate-805 transition-colors"
+                                                    className="flex-1 text-[10px] font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 text-center py-1 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors"
                                                   >
                                                     Edit Details
                                                   </button>
                                                   <button
                                                     onClick={() => handleDeletePhoto(photo.id)}
-                                                    className="text-[10px] font-semibold text-red-650 hover:text-red-750 text-center py-1 px-3 bg-red-50 hover:bg-red-100 dark:bg-red-955/20 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200/40 dark:border-red-900/10"
+                                                    className="text-[10px] font-semibold text-red-600 hover:text-red-700 text-center py-1 px-3 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200/40 dark:border-red-900/10"
                                                   >
                                                     Delete
                                                   </button>
@@ -1496,7 +1496,7 @@ export default function Dashboard() {
                                 {/* Right panel: Submission info card, payment, finalize actions */}
                                 <div className="lg:col-span-4 flex flex-col gap-6">
                                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
-                                    <div className="flex justify-between items-center pb-3 border-b border-slate-105 dark:border-slate-800">
+                                    <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
                                       <span className="text-[10px] text-slate-400 font-extrabold uppercase">Folder Config</span>
                                       <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${isPaid ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
                                         {isPaid ? 'Paid' : 'Awaiting Payment'}
@@ -1529,9 +1529,10 @@ export default function Dashboard() {
                                         </div>
                                         <button
                                           onClick={() => setShowPaymentModal(true)}
-                                          className="w-full bg-indigo-650 hover:bg-indigo-755 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer font-bold"
+                                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer text-sm"
                                         >
-                                          Pay Registration Fee
+                                          <CreditCard size={16} />
+                                          Complete Online Payment
                                         </button>
                                       </div>
                                     )}
@@ -1540,14 +1541,14 @@ export default function Dashboard() {
                                     {isPaid && (
                                       <div className="mt-2 flex flex-col gap-2.5">
                                         {isFinalized ? (
-                                          <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-emerald-700 dark:text-emerald-450 leading-relaxed font-semibold">
+                                          <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-emerald-700 dark:text-emerald-500 leading-relaxed font-semibold">
                                             <ShieldCheck size={18} className="text-emerald-500 shrink-0 mt-0.5" />
                                             <p>This folder is sealed and submitted. Your DSLR EXIF specs are locked for jury panel grading. Best of luck!</p>
                                           </div>
                                         ) : (
                                           <>
-                                            <div className="bg-slate-50 dark:bg-slate-950 border border-slate-105 dark:border-slate-800/40 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-semibold">
-                                              <Clock size={18} className="text-indigo-505 shrink-0 mt-0.5" />
+                                            <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/40 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
+                                              <Clock size={18} className="text-indigo-500 shrink-0 mt-0.5" />
                                               <p>Provide all photo attachments. When complete, click the Lock folder button to submit to the panel.</p>
                                             </div>
                                             <button
@@ -1602,13 +1603,13 @@ export default function Dashboard() {
 
                 {/* Accordion Body */}
                 {historyExpanded && (
-                  <div className="border-t border-slate-100 dark:border-slate-800 p-6 flex flex-col gap-6 bg-slate-50/20 dark:bg-slate-955/5">
+                  <div className="border-t border-slate-100 dark:border-slate-800 p-6 flex flex-col gap-6 bg-slate-50/20 dark:bg-slate-900/5">
                     <div className="grid grid-cols-1 gap-6">
                       {pastSubmissions.map((sub, idx) => {
                         const ev = eventsList.find(e => e._id === sub.eventId);
                         return (
-                          <div key={idx} className="bg-white dark:bg-slate-950 border border-slate-205 dark:border-slate-805 rounded-2xl p-5 shadow-sm">
-                            <div className="flex justify-between items-start border-b border-slate-101 dark:border-slate-800 pb-3 mb-4">
+                          <div key={idx} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                            <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                               <div>
                                 <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
                                   {sub.eventTitle}
@@ -1633,8 +1634,8 @@ export default function Dashboard() {
                                       <WatermarkPreview src={photo.fileUrl} className="aspect-video w-full" />
                                       <div className="p-3.5 flex flex-col gap-2.5">
                                         <div>
-                                          <h5 className="font-bold text-xs text-slate-905 dark:text-white line-clamp-1">{photo.title}</h5>
-                                          <span className="text-[9px] text-indigo-505 font-extrabold uppercase mt-0.5 block">{photo.category}</span>
+                                          <h5 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">{photo.title}</h5>
+                                          <span className="text-[9px] text-indigo-500 font-extrabold uppercase mt-0.5 block">{photo.category}</span>
                                         </div>
                                         {photo.cameraBrand && (
                                           <p className="text-[10px] text-slate-400">
@@ -1644,7 +1645,7 @@ export default function Dashboard() {
                                         {/* Ratings and Jury comments if available */}
                                         {photo.score ? (
                                           <div className="mt-1 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 p-2.5 rounded-lg text-[10px] leading-relaxed">
-                                            <div className="flex justify-between font-bold text-indigo-955 dark:text-indigo-300">
+                                            <div className="flex justify-between font-bold text-indigo-950 dark:text-indigo-300">
                                               <span>Jury Rating:</span>
                                               <span>{photo.score.averageScore} / 10</span>
                                             </div>
@@ -1693,7 +1694,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => setEditingPhoto(null)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-655 dark:hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
               >
                 <X size={20} />
               </button>
@@ -1704,7 +1705,7 @@ export default function Dashboard() {
                 
                 {/* Edit Title */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editPhotoTitle" className="font-extrabold text-slate-450 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="editPhotoTitle" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
                     Photograph Title *
                   </label>
                   <input
@@ -1713,20 +1714,20 @@ export default function Dashboard() {
                     required
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
 
                 {/* Edit Category */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editPhotoCategory" className="font-extrabold text-slate-455 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="editPhotoCategory" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
                     Contest Category *
                   </label>
                   <select
                     id="editPhotoCategory"
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-855 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                   >
                     {categories.map((c) => (
                       <option key={c._id} value={c.name}>
@@ -1738,7 +1739,7 @@ export default function Dashboard() {
 
                 {/* Edit Camera Brand */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editCameraBrand" className="font-extrabold text-slate-450 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="editCameraBrand" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
                     Camera Brand
                   </label>
                   <input
@@ -1746,13 +1747,13 @@ export default function Dashboard() {
                     id="editCameraBrand"
                     value={editCameraBrand}
                     onChange={(e) => setEditCameraBrand(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-950 border border-slate-205 border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="bg-slate-50 dark:bg-slate-950 border border-slate-200 border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
 
                 {/* Edit Camera Model */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editCameraModel" className="font-extrabold text-slate-450 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="editCameraModel" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
                     Camera Model
                   </label>
                   <input
@@ -1760,13 +1761,13 @@ export default function Dashboard() {
                     id="editCameraModel"
                     value={editCameraModel}
                     onChange={(e) => setEditCameraModel(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
 
                 {/* Edit Lens Used */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editLensUsed" className="font-extrabold text-slate-450 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="editLensUsed" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
                     Lens Model Used
                   </label>
                   <input
@@ -1774,13 +1775,13 @@ export default function Dashboard() {
                     id="editLensUsed"
                     value={editLensUsed}
                     onChange={(e) => setEditLensUsed(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-855 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
 
                 {/* Edit Location Captured */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editLocationCaptured" className="font-extrabold text-slate-455 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="editLocationCaptured" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
                     Location Captured
                   </label>
                   <input
@@ -1788,13 +1789,13 @@ export default function Dashboard() {
                     id="editLocationCaptured"
                     value={editLocation}
                     onChange={(e) => setEditLocation(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
 
                 {/* Edit Date Captured */}
                 <div className="flex flex-col gap-1.5 md:col-span-2">
-                  <label htmlFor="editDateCaptured" className="font-extrabold text-slate-455 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="editDateCaptured" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
                     Date Captured
                   </label>
                   <input
@@ -1802,13 +1803,13 @@ export default function Dashboard() {
                     id="editDateCaptured"
                     value={editDateCaptured}
                     onChange={(e) => setDateCaptured(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-855 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                   />
                 </div>
 
                 {/* Edit Description */}
                 <div className="flex flex-col gap-1.5 md:col-span-2">
-                  <label htmlFor="editPhotoDescription" className="font-extrabold text-slate-455 dark:text-slate-505 uppercase text-[9px] tracking-wider">
+                  <label htmlFor="editPhotoDescription" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
                     Photo Description *
                   </label>
                   <textarea
@@ -1817,7 +1818,7 @@ export default function Dashboard() {
                     rows={3}
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-955 border border-slate-205 border-slate-805 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-505 resize-none leading-relaxed font-semibold text-slate-700 dark:text-slate-350 text-xs"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 resize-none leading-relaxed font-semibold text-slate-700 dark:text-slate-300 text-xs"
                   />
                 </div>
 
@@ -1833,7 +1834,7 @@ export default function Dashboard() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-indigo-650 hover:bg-indigo-750 text-white font-bold py-2 px-5 rounded-xl shadow-md transition-all cursor-pointer text-xs"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-xl shadow-md transition-all cursor-pointer text-xs"
                 >
                   Save Changes
                 </button>
@@ -1866,7 +1867,7 @@ export default function Dashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
-              <div className="p-3 bg-amber-50 dark:bg-amber-955/20 text-amber-500 rounded-2xl mb-2">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-2xl mb-2">
                 <AlertTriangle size={28} />
               </div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">
@@ -1888,7 +1889,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={executeFinalSubmit}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-707 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
               >
                 Yes, Finalize Entry
               </button>

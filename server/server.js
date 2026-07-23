@@ -20,19 +20,16 @@ const contestTypeRoutes = require("./routes/contestTypes");
 const app = express();
 
 // Middleware
-// Bulletproof Custom CORS Configuration
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  res.setHeader("Access-Control-Allow-Origin", origin || "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
+// Official Robust CORS Middleware Configuration
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow all origins with credentials support by echoing them back
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+}));
 
 // Capture raw request body for Razorpay webhook verification
 app.use(express.json({

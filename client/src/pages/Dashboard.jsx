@@ -1217,8 +1217,22 @@ export default function Dashboard() {
                               </div>
                             )}
 
-                            {/* STEP 1: Not started yet */}
-                            {!submission ? (
+                            {e.gradingConfirmed && !isFinalized ? (
+                              <div className="max-w-xl mx-auto bg-red-50 dark:bg-red-955/20 border border-red-200/50 p-6 rounded-3xl flex flex-col items-center gap-4 text-center my-6">
+                                <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-2xl">
+                                  <ShieldAlert size={28} />
+                                </div>
+                                <div className="flex flex-col gap-1.5 animate-in fade-in duration-200">
+                                  <h3 className="font-display font-black text-sm text-slate-900 dark:text-white">Submissions Closed</h3>
+                                  <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                                    The jury panel has finalized grading and signed off on this contest event. No new registrations, payments, or file uploads are permitted.
+                                  </p>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                {/* STEP 1: Not started yet */}
+                                {!submission ? (
                               <div className="max-w-4xl mx-auto flex flex-col gap-6 py-2">
                                 <div className="text-center flex flex-col gap-1.5">
                                   <h1 className="font-display font-black text-2xl text-slate-900 dark:text-white">
@@ -1581,6 +1595,8 @@ export default function Dashboard() {
                                   </div>
                                 </div>
                               </div>
+                            )}
+                              </>
                             )}
                           </>
                         )}

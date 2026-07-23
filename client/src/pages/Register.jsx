@@ -44,6 +44,10 @@ export default function Register() {
 
   const handleEmailRegister = async (e) => {
     e.preventDefault();
+    if (event?.gradingConfirmed) {
+      setError('Registrations are closed for this event.');
+      return;
+    }
     if (!name || !email || !mobile || !password || !city) {
       setError('Please fill in all fields');
       return;
@@ -69,6 +73,10 @@ export default function Register() {
 
   const handleMobileRegister = async (e) => {
     e.preventDefault();
+    if (event?.gradingConfirmed) {
+      setError('Registrations are closed for this event.');
+      return;
+    }
     if (!name || !mobile || !city) {
       setError('Please enter Name, Mobile, and City');
       return;
@@ -126,6 +134,29 @@ export default function Register() {
     }
   };
 
+  if (event?.gradingConfirmed) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] w-full flex items-center justify-center p-6 text-center text-white bg-slate-950 relative">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6 shadow-2xl items-center">
+          <div className="p-4 bg-red-955/40 text-red-500 rounded-2xl border border-red-900/30">
+            <ShieldAlert size={36} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">Registrations Closed</h2>
+            <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+              The jury panel has finalized grading and signed off on the results for this event. Registrations are no longer accepted.
+            </p>
+          </div>
+          <Link
+            to="/login"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1.5 font-bold"
+          >
+            Go to Login <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    );
+  }
   return (
     <div 
       className="min-h-[calc(100vh-4rem)] w-full flex items-center bg-cover bg-center relative"

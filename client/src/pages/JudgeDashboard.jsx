@@ -906,22 +906,22 @@ export default function JudgeDashboard() {
                             )}
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={() => handleOpenScoring(photo)}
-                            className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
-                              user?.role === 'Admin' 
-                                ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
-                                : !photo.graded 
-                                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                                  : photo.score?.approvalStatus === 'Disapproved'
-                                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                          {photo.score?.approvalStatus !== 'Disapproved' && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenScoring(photo)}
+                              className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                                user?.role === 'Admin' 
+                                  ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
+                                  : !photo.graded 
+                                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                                     : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                            }`}
-                          >
-                            {user?.role === 'Admin' ? 'Review Scoring' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
-                            <ChevronRight size={14} />
-                          </button>
+                              }`}
+                            >
+                              {user?.role === 'Admin' ? 'Review Scoring' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
+                              <ChevronRight size={14} />
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -977,12 +977,16 @@ export default function JudgeDashboard() {
                                 By: {photo.participantName}
                               </span>
                               {photo.score && (
-                                <div className="mt-2 flex items-center gap-1">
-                                  <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
-                                    photo.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
-                                  }`}>
-                                    {photo.score.approvalStatus}
-                                  </span>
+                                <div className="mt-2 flex items-center gap-1.5">
+                                  {photo.score.approvalStatus === 'Approved' ? (
+                                    <span className="px-2 py-0.5 rounded text-[8px] font-extrabold uppercase bg-emerald-500/10 text-emerald-500">
+                                      Approved
+                                    </span>
+                                  ) : (
+                                    <span className="px-3 py-1 rounded-xl text-[10px] font-extrabold bg-red-650 text-white animate-pulse uppercase tracking-wider">
+                                      🛑 Disapproved
+                                    </span>
+                                  )}
                                   {photo.score.approvalStatus !== 'Disapproved' && (
                                     <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
                                       Grade: {photo.score.averageScore}
@@ -992,22 +996,22 @@ export default function JudgeDashboard() {
                               )}
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={() => handleOpenOfflineScoring(photo)}
-                              className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
-                                user?.role === 'Admin' 
-                                  ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
-                                  : !photo.graded 
-                                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                                    : photo.score?.approvalStatus === 'Disapproved'
-                                      ? 'bg-red-600 hover:bg-red-700 text-white'
+                            {photo.score?.approvalStatus !== 'Disapproved' && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenOfflineScoring(photo)}
+                                className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                                  user?.role === 'Admin' 
+                                    ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
+                                    : !photo.graded 
+                                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                                       : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                              }`}
-                            >
-                              {user?.role === 'Admin' ? 'Review' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
-                              <ChevronRight size={14} />
-                            </button>
+                                }`}
+                              >
+                                {user?.role === 'Admin' ? 'Review' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
+                                <ChevronRight size={14} />
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}

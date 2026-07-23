@@ -962,18 +962,7 @@ export default function JudgeDashboard() {
                     ))}
                   </div>
 
-                      {user?.role === 'Judge' && event && !event.gradingConfirmed && (
-                        <div className="mt-8 flex justify-center border-t border-slate-200 dark:border-slate-800 pt-6">
-                          <button
-                            type="button"
-                            onClick={handleSaveAllScoringSheets}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-2xl shadow-lg transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center gap-2"
-                          >
-                            <Check size={16} />
-                            Save All Scoring Sheets & Finalize
-                          </button>
-                        </div>
-                      )}
+
                     </>
                   ) : (
                   /* Card-based Offline Evaluation grid */
@@ -1052,18 +1041,7 @@ export default function JudgeDashboard() {
                       ))}
                     </div>
 
-                    {user?.role === 'Judge' && event && !event.gradingConfirmed && (
-                      <div className="mt-8 flex justify-center border-t border-slate-200 dark:border-slate-800 pt-6">
-                        <button
-                          type="button"
-                          onClick={handleSaveAllScoringSheets}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-2xl shadow-lg transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center gap-2"
-                        >
-                          <Check size={16} />
-                          Save All Scoring Sheets & Finalize
-                        </button>
-                      </div>
-                    )}
+
                   </div>
                 )
               )}

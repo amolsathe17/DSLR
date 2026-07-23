@@ -26,6 +26,7 @@ import {
   Clock,
   ChevronDown,
   ChevronUp,
+  Printer,
 } from "lucide-react";
 import DragDropUpload from "../components/DragDropUpload";
 import WatermarkPreview from "../components/WatermarkPreview";
@@ -45,6 +46,17 @@ export default function Dashboard() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const handlePrintCertificate = (pdfUrl) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = pdfUrl;
+    document.body.appendChild(iframe);
+    iframe.onload = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    };
+  };
   const [uploading, setUploading] = useState(false);
 
   // Form states for photo details
@@ -639,6 +651,39 @@ export default function Dashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
       
+      {/* Unread Notifications Banner */}
+      {user?.notifications && user.notifications.filter(n => !n.isRead).length > 0 && (
+        <div className="flex flex-col gap-3 mb-6">
+          {user.notifications.filter(n => !n.isRead).map((notif, idx) => (
+            <div key={idx} className="flex justify-between items-center p-4 bg-emerald-550/10 border border-emerald-500/20 rounded-2xl text-left animate-in slide-in-from-top-4 duration-305">
+              <div className="flex items-center gap-3">
+                <span className="p-1.5 bg-emerald-500 text-white rounded-lg text-xs">🎉</span>
+                <span className="text-xs text-slate-800 dark:text-slate-100 font-semibold">{notif.message}</span>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    // Mark as read API call
+                    await apiFetch(`/api/auth/notifications/${notif._id || idx}/read`, { method: 'POST' });
+                    notif.isRead = true;
+                    // Force refresh of state
+                    setAllSubmissions([...allSubmissions]);
+                  } catch (e) {
+                    console.error("Failed to dismiss notification:", e);
+                    notif.isRead = true;
+                    setAllSubmissions([...allSubmissions]);
+                  }
+                }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-[10px] font-extrabold uppercase shrink-0 transition-colors cursor-pointer px-2 py-1 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 rounded-lg"
+              >
+                Dismiss
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      
       {/* Dashboard Sub-navigation Tabs */}
       <div className="flex border-b border-slate-200 dark:border-slate-800 mb-8 gap-6 justify-center sm:justify-start">
         <button
@@ -1033,56 +1078,154 @@ export default function Dashboard() {
               );
             }
 
+            // Group submissions into Winners and General Participants
+            const winnerCards = [];
+            const standardCards = [];
+
+            eligibleSubs.forEach(sub => {
+              const evDetails = eventsList.find(e => e._id === sub.eventId);
+              const winInfo = evDetails?.winners?.find(w => w.userId === user?._id || w.userId === user?.id);
+              if (winInfo && winInfo.certificatePdfUrl) {
+                winnerCards.push({ sub, evDetails, winInfo });
+              } else {
+                standardCards.push({ sub, evDetails });
+              }
+            });
+
             return (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {eligibleSubs.map((sub, index) => {
-                  const evDetails = eventsList.find(e => e._id === sub.eventId);
-                  const isReady = evDetails?.winnersPublished;
+              <div className="flex flex-col gap-8">
+                {/* 1. Champion Credentials Section */}
+                {winnerCards.length > 0 && (
+                  <div className="flex flex-col gap-4">
+                    <h3 className="font-display font-black text-sm text-amber-600 dark:text-amber-500 flex items-center gap-1.5 uppercase tracking-wider">
+                      <Trophy size={16} className="text-amber-500 animate-pulse shrink-0" />
+                      🥇 My Champion Credentials
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {winnerCards.map(({ sub, evDetails, winInfo }, index) => {
+                        const isFirst = winInfo.rank.toLowerCase().includes('1st') || winInfo.rank.toLowerCase().includes('first');
+                        const isSecond = winInfo.rank.toLowerCase().includes('2nd') || winInfo.rank.toLowerCase().includes('second');
+                        const certTemplateName = isFirst ? '1st-Prize.png' : isSecond ? '2nd-Prize.png' : '3rd-Prize.png';
+                        
+                        return (
+                          <div key={index} className="bg-gradient-to-br from-amber-500/5 to-amber-600/5 border-2 border-amber-500/35 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center">
+                            
+                            {/* Certificate Thumbnail Preview */}
+                            <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-amber-500/20 shadow-sm cursor-pointer animate-in zoom-in-95"
+                                 onClick={() => winInfo.certificatePdfUrl && window.open(winInfo.certificatePdfUrl, '_blank')}>
+                              <img
+                                src={`/uploads/${certTemplateName}`}
+                                alt="Certificate Thumbnail"
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                              />
+                            </div>
 
-                  return (
-                    <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-left shadow-sm justify-between">
-                      <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider">
-                            Entry {sub.entryNumber}
-                          </span>
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${isReady ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-400'}`}>
-                            {isReady ? 'Ready for Download' : 'Grading in Progress'}
-                          </span>
-                        </div>
-                        <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
-                          {sub.eventTitle}
-                        </h4>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">
-                          Package: {sub.photoLimit} photos ({sub.photographs?.length || 0} uploaded). Submitted on {new Date(sub.updatedAt).toLocaleDateString()}.
-                        </p>
-                      </div>
+                            <div className="flex-1 flex flex-col justify-between h-full w-full gap-3 text-left">
+                              <div>
+                                <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-600">
+                                  🏆 {winInfo.rank}
+                                </span>
+                                <h4 className="font-display font-black text-sm text-slate-900 dark:text-white mt-1.5 leading-tight">
+                                  {sub.eventTitle}
+                                </h4>
+                                <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                                  Reward: <strong className="text-amber-700 dark:text-amber-500 font-bold">{winInfo.prizeAmount || (isFirst ? '₹50,000' : isSecond ? '₹30,000' : '₹20,000')}</strong>
+                                </p>
+                                <p className="text-[10px] text-slate-500 leading-none mt-0.5 font-semibold">
+                                  Winning Entry: <span className="italic">"${winInfo.photoTitle}"</span> (Grade: {winInfo.score}/10)
+                                </p>
+                              </div>
 
-                      {isReady ? (
-                        <button
-                          onClick={() => {
-                            setEvent(evDetails);
-                            setSubmission(sub);
-                            setShowCertificate(true);
-                          }}
-                          className={`text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full mt-2 ${
-                            isWinner 
-                              ? 'bg-amber-600 hover:bg-amber-700 shadow-md' 
-                              : 'bg-indigo-600 hover:bg-indigo-700 shadow-md'
-                          }`}
-                        >
-                          <Award size={14} />
-                          {isWinner ? 'View & Download Winner Certificate' : 'View & Download Participation Certificate'}
-                        </button>
-                      ) : (
-                        <div className="bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/40 p-3 rounded-xl text-[10px] text-slate-400 mt-2 flex items-center gap-2">
-                          <Clock size={14} className="shrink-0" />
-                          <span>Jury panel is compiling results. Certificate unlocks immediately upon publishing.</span>
-                        </div>
-                      )}
+                              <div className="flex flex-col gap-1.5 mt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => winInfo.certificatePdfUrl && window.open(winInfo.certificatePdfUrl, '_blank')}
+                                  className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                                >
+                                  <Eye size={12} />
+                                  View Certificate
+                                </button>
+                                <div className="flex gap-2">
+                                  <a
+                                    href={winInfo.certificatePdfUrl || '#'}
+                                    download
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex-1 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                                  >
+                                    <Download size={12} />
+                                    Download PDF
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() => winInfo.certificatePdfUrl && handlePrintCertificate(winInfo.certificatePdfUrl)}
+                                    className="px-2.5 py-1.5 bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-250 rounded-xl text-[10px] font-bold flex items-center justify-center transition-colors cursor-pointer"
+                                    title="Print Certificate"
+                                  >
+                                    <Printer size={12} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </div>
+                )}
+
+                {/* 2. Participation Credentials Section */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-display font-black text-sm text-slate-950 dark:text-white uppercase tracking-wider">
+                    🎖️ Contest Participation Credentials
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {standardCards.map(({ sub, evDetails }, index) => {
+                      const isReady = evDetails?.winnersPublished;
+
+                      return (
+                        <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-left shadow-sm justify-between">
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider">
+                                Entry {sub.entryNumber}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${isReady ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-400'}`}>
+                                {isReady ? 'Ready for Download' : 'Grading in Progress'}
+                              </span>
+                            </div>
+                            <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
+                              {sub.eventTitle}
+                            </h4>
+                            <p className="text-[11px] text-slate-500 leading-relaxed">
+                              Package: {sub.photoLimit} photos ({sub.photographs?.length || 0} uploaded). Submitted on {new Date(sub.updatedAt).toLocaleDateString()}.
+                            </p>
+                          </div>
+
+                          {isReady ? (
+                            <button
+                              onClick={() => {
+                                setEvent(evDetails);
+                                setSubmission(sub);
+                                setShowCertificate(true);
+                              }}
+                              className="text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full mt-2 bg-indigo-600 hover:bg-indigo-700 shadow-md"
+                            >
+                              <Award size={14} />
+                              View & Download Participation Certificate
+                            </button>
+                          ) : (
+                            <div className="bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/40 p-3 rounded-xl text-[10px] text-slate-400 mt-2 flex items-center gap-2">
+                              <Clock size={14} className="shrink-0" />
+                              <span>Jury panel is compiling results. Certificate unlocks immediately upon publishing.</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             );
           })()}

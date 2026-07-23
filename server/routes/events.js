@@ -426,7 +426,104 @@ router.delete('/backups/:id/purge', protect, authorize('Admin'), async (req, res
   }
 });
 
-// @desc    Publish winner rankings
+// Helper to generate a personalized PDF certificate for a winner
+const generateCertificatePDF = (winnerName, rankStr) => {
+  const path = require('path');
+  const fs = require('fs');
+  const PDFDocument = require('pdfkit');
+
+  return new Promise((resolve, reject) => {
+    try {
+      let templateName = '1st-Prize.png';
+      let prizeLabel = 'First_Prize';
+      
+      if (rankStr.toLowerCase().includes('2nd') || rankStr.toLowerCase().includes('second')) {
+        templateName = '2nd-Prize.png';
+        prizeLabel = 'Second_Prize';
+      } else if (rankStr.toLowerCase().includes('3rd') || rankStr.toLowerCase().includes('third')) {
+        templateName = '3rd-Prize.png';
+        prizeLabel = 'Third_Prize';
+      }
+
+      const templatePath = path.join(__dirname, '..', 'uploads', templateName);
+      
+      // Filename exactly as requested:
+      // National_Modeling_Photography_Championship_2026_[First/Second/Third]_Prize_<WinnerName>.pdf
+      const cleanWinnerName = winnerName.replace(/[^a-zA-Z0-5]/g, '_');
+      const fileName = `National_Modeling_Photography_Championship_2026_${prizeLabel}_${cleanWinnerName}.pdf`;
+      const localPdfPath = path.join(__dirname, '..', 'uploads', fileName);
+      
+      const doc = new PDFDocument({
+        size: 'A4',
+        margin: 0
+      });
+      
+      const writeStream = fs.createWriteStream(localPdfPath);
+      doc.pipe(writeStream);
+      
+      // Draw background template image (A4: 595.28 x 841.89)
+      // Passing { format: 'jpeg' } because the uploaded files are JPEGs renamed to PNG
+      doc.image(templatePath, 0, 0, { width: 595.28, height: 841.89, format: 'jpeg' });
+      
+      // Name below "PROUDLY PRESENTED TO"
+      doc.font('Times-BoldItalic');
+      
+      // Auto-resize font size if name is long
+      let fontSize = 34;
+      if (winnerName.length > 25) {
+        fontSize = 20;
+      } else if (winnerName.length > 18) {
+        fontSize = 26;
+      }
+      doc.fontSize(fontSize);
+      doc.fillColor('#8b6f23'); // Elegant dark gold
+      
+      // Center aligned name exactly on the name line placeholder
+      doc.text(winnerName, 0, 362, {
+        width: 595.28,
+        align: 'center'
+      });
+      
+      doc.end();
+      
+      writeStream.on('finish', async () => {
+        try {
+          let pdfUrl = `/uploads/${fileName}`;
+          let imageUrl = `/uploads/${templateName}`;
+          
+          // Upload raw PDF to Cloudinary if configured
+          if (process.env.CLOUDINARY_CLOUD_NAME && !process.env.CLOUDINARY_CLOUD_NAME.includes('dummy')) {
+            const cloudinary = require('../config/cloudinary');
+            const result = await cloudinary.uploader.upload(localPdfPath, {
+              resource_type: 'raw',
+              public_id: `certificates/${fileName.replace(/\.pdf$/, '')}`,
+              overwrite: true
+            });
+            pdfUrl = result.secure_url;
+          }
+          
+          resolve({ pdfUrl, imageUrl, localPdfPath });
+        } catch (uploadError) {
+          console.error("Cloudinary certificate upload error:", uploadError);
+          resolve({
+            pdfUrl: `/uploads/${fileName}`,
+            imageUrl: `/uploads/${templateName}`,
+            localPdfPath
+          });
+        }
+      });
+      
+      writeStream.on('error', (err) => {
+        reject(err);
+      });
+      
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+// @desc    Publish winner rankings & generate PDF certificates
 // @route   POST /api/events/:id/publish-winners
 // @access  Private/Admin
 router.post('/:id/publish-winners', protect, authorize('Admin'), async (req, res) => {
@@ -436,7 +533,69 @@ router.post('/:id/publish-winners', protect, authorize('Admin'), async (req, res
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    event.winners = req.body.winners;
+    const Submission = require('../models/Submission');
+    const User = require('../models/User');
+
+    const winnersList = [];
+    const rawWinners = req.body.winners || [];
+
+    for (const raw of rawWinners) {
+      // Find submission and user ID
+      const submission = await Submission.findById(raw.submissionId);
+      if (!submission) {
+        return res.status(404).json({ success: false, message: `Submission for winner not found: ${raw.userName}` });
+      }
+
+      const winnerUser = await User.findById(submission.userId);
+      if (!winnerUser) {
+        return res.status(404).json({ success: false, message: `User for winner not found: ${raw.userName}` });
+      }
+
+      // Generate the PDF certificate
+      const { pdfUrl, imageUrl, localPdfPath } = await generateCertificatePDF(winnerUser.name, raw.rank);
+
+      // Determine prize amount based on rank
+      let prizeAmount = '₹20,000';
+      if (raw.rank.toLowerCase().includes('1st') || raw.rank.toLowerCase().includes('first')) {
+        prizeAmount = '₹50,000';
+      } else if (raw.rank.toLowerCase().includes('2nd') || raw.rank.toLowerCase().includes('second')) {
+        prizeAmount = '₹30,000';
+      }
+
+      // Add winner document
+      const winnerDoc = {
+        submissionId: raw.submissionId,
+        photographId: raw.photographId,
+        userId: submission.userId,
+        userName: winnerUser.name,
+        photoTitle: raw.photoTitle,
+        fileUrl: raw.fileUrl,
+        rank: raw.rank,
+        score: raw.score,
+        prizeAmount,
+        certificatePdfUrl: pdfUrl,
+        certificateImageUrl: imageUrl,
+        generatedAt: new Date()
+      };
+      
+      winnersList.push(winnerDoc);
+
+      // Save in-app notification
+      if (!winnerUser.notifications) winnerUser.notifications = [];
+      
+      const prizeWord = raw.rank.toLowerCase().includes('1st') ? '1st' : raw.rank.toLowerCase().includes('2nd') ? '2nd' : '3rd';
+      winnerUser.notifications.push({
+        message: `Congratulations! You have secured ${prizeWord} Prize in the National Modeling Photography Championship 2026. Your certificate is now available in your dashboard.`,
+        type: 'success',
+        isRead: false
+      });
+      await winnerUser.save();
+
+      // Log email sending to console
+      console.log(`[EMAIL SENT] To: ${winnerUser.email} | Subject: Certificate of Achievement - National Modeling Photography Championship 2026 | Attachment: ${localPdfPath}`);
+    }
+
+    event.winners = winnersList;
     event.winnersPublished = true;
     event.status = 'Completed';
     await event.save();
@@ -453,7 +612,7 @@ router.post('/:id/publish-winners', protect, authorize('Admin'), async (req, res
     res.json({ success: true, event });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 });
 

@@ -275,9 +275,49 @@ router.get('/profile', protect, async (req, res) => {
       email: req.user.email,
       mobile: req.user.mobile,
       city: req.user.city,
-      role: req.user.role
+      role: req.user.role,
+      notifications: req.user.notifications || []
     }
   });
+});
+
+// @desc    Mark a notification as read
+// @route   POST /api/auth/notifications/:notifId/read
+// @access  Private
+router.post('/notifications/:notifId/read', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const { notifId } = req.params;
+    
+    // Try to find by id
+    let notifFound = false;
+    if (user.notifications && typeof user.notifications.id === 'function') {
+      const notif = user.notifications.id(notifId);
+      if (notif) {
+        notif.isRead = true;
+        notifFound = true;
+      }
+    }
+
+    // Fallback to matching index
+    if (!notifFound && user.notifications) {
+      const idx = parseInt(notifId);
+      if (!isNaN(idx) && user.notifications[idx]) {
+        user.notifications[idx].isRead = true;
+        notifFound = true;
+      }
+    }
+
+    await user.save();
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // @desc    Update user profile

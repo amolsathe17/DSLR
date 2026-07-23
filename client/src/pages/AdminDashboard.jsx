@@ -1132,7 +1132,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ winners: winnerAssignments })
       });
       if (data.success) {
-        triggerSuccessModal('Results Published', 'The contest results and winners have been published successfully.');
+        triggerSuccessModal('Results Published', 'Contest completed successfully. Winners published. Personalized certificates generated and converted into PDF. Winners Circle has been updated successfully.');
         setEventToPublish(null);
         fetchJudgesAndEvents();
       }

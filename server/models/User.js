@@ -13,7 +13,13 @@ const userSchema = new mongoose.Schema({
   otpExpires: { type: Date },
   isSuspended: { type: Boolean, default: false },
   suspensionReason: { type: String },
-  lastLogin: { type: Date }
+  lastLogin: { type: Date },
+  notifications: [{
+    message: { type: String, required: true },
+    type: { type: String, default: 'info' },
+    isRead: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+  }]
 }, { timestamps: true });
 
 module.exports = getModel('User', userSchema);

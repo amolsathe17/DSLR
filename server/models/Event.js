@@ -42,7 +42,11 @@ const eventSchema = new mongoose.Schema({
     photoTitle: { type: String },
     fileUrl: { type: String },
     rank: { type: String },
-    score: { type: Number }
+    score: { type: Number },
+    prizeAmount: { type: String },
+    certificatePdfUrl: { type: String },
+    certificateImageUrl: { type: String },
+    generatedAt: { type: Date, default: Date.now }
   }]
 }, { timestamps: true });
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, HelpCircle, Flag, MessageSquare, AlertTriangle } from 'lucide-react';
+import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, HelpCircle, Flag, MessageSquare, AlertTriangle, Trophy, Eye, Download } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function Gallery() {
@@ -358,63 +358,106 @@ export default function Gallery() {
                 <p className="text-xs text-slate-500 mt-1">Judges are currently grading the entries. Winners will be declared shortly.</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-6">
-                {event.winners.map((w, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex flex-col sm:flex-row items-center gap-6 p-6 bg-white dark:bg-slate-900 border rounded-3xl shadow-sm ${
-                      idx === 0 
-                        ? 'border-amber-500/40 bg-amber-500/5' 
-                        : 'border-slate-200 dark:border-slate-800'
-                    }`}
-                  >
-                    <div className="relative group shrink-0 w-full sm:w-48 aspect-video sm:aspect-square overflow-hidden rounded-2xl bg-slate-900">
-                      <img
-                        src={w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl}
-                        alt={w.photoTitle}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="flex-1 flex flex-col justify-between h-full gap-4 text-center sm:text-left w-full">
-                      <div className="flex-grow flex flex-col gap-3">
-                        <div>
-                          <span className={`text-[10px] font-black uppercase tracking-wider block ${idx === 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-400'}`}>
-                            {w.rank}
-                          </span>
-                          <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white mt-0.5">
+              <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto">
+                {event.winners.map((w, idx) => {
+                  const isFirst = w.rank.toLowerCase().includes('1st') || w.rank.toLowerCase().includes('first');
+                  const isSecond = w.rank.toLowerCase().includes('2nd') || w.rank.toLowerCase().includes('second');
+                  
+                  const trophyColor = isFirst ? 'text-amber-500' : isSecond ? 'text-slate-400' : 'text-amber-700';
+                  const badgeBg = isFirst ? 'bg-amber-500/10 text-amber-600' : isSecond ? 'bg-slate-300/20 text-slate-600 dark:text-slate-400' : 'bg-amber-700/10 text-amber-800 dark:text-amber-600';
+                  const cardBorder = isFirst ? 'border-amber-500/40 bg-amber-500/5' : isSecond ? 'border-slate-300 dark:border-slate-700' : 'border-amber-750/30';
+                  
+                  // Predefined certificate template preview
+                  const certTemplateName = isFirst ? '1st-Prize.png' : isSecond ? '2nd-Prize.png' : '3rd-Prize.png';
+                  
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex flex-col lg:flex-row items-center gap-6 p-6 bg-white dark:bg-slate-900 border rounded-3xl shadow-md transition-all hover:shadow-lg ${cardBorder}`}
+                    >
+                      {/* Left: Winning Photograph Display */}
+                      <div className="relative group shrink-0 w-full lg:w-64 aspect-video overflow-hidden rounded-2xl bg-slate-900 border border-slate-200 dark:border-slate-800">
+                        <img
+                          src={w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl}
+                          alt={w.photoTitle}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute top-2 left-2 px-2.5 py-1 bg-black/60 backdrop-blur-sm rounded-lg text-[9px] text-white font-extrabold uppercase">
+                          Winning Frame
+                        </div>
+                      </div>
+                      
+                      {/* Middle: Winner details */}
+                      <div className="flex-1 flex flex-col justify-between gap-4 text-left w-full">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${badgeBg}`}>
+                              <Trophy size={11} className={trophyColor} />
+                              {w.rank}
+                            </span>
+                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/25 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                              Final Score: {w.score}/10
+                            </span>
+                          </div>
+
+                          <h3 className="font-display font-black text-xl text-slate-900 dark:text-white leading-snug">
                             {w.photoTitle}
                           </h3>
-                        </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/60 pt-2.5">
-                          <div>
-                            <p className="font-bold text-slate-400 uppercase text-[9px] tracking-wider">Participant Details</p>
-                            <p className="mt-0.5 text-slate-850 dark:text-slate-200 font-semibold">{w.userName}</p>
-                            {w.userEmail && <p className="text-[10px] text-slate-400 mt-0.5">{w.userEmail}</p>}
-                            {w.userCity && <p className="text-[10px] text-slate-400">City: {w.userCity}</p>}
-                          </div>
-                          <div>
-                            <p className="font-bold text-slate-400 uppercase text-[9px] tracking-wider">Evaluated By Judges</p>
-                            <p className="mt-0.5 text-slate-850 dark:text-slate-200 font-semibold">
-                              {w.judges && w.judges.length > 0 ? w.judges.join(', ') : 'Assigned Panel'}
-                            </p>
-                            <p className="text-[10px] text-slate-400 mt-0.5">Grade Score: {w.score}/10</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/60 pt-3 mt-1">
+                            <div>
+                              <p className="font-bold text-slate-400 uppercase text-[9px] tracking-wider">Champion Artist</p>
+                              <p className="mt-0.5 text-slate-850 dark:text-slate-200 font-extrabold text-sm">{w.userName}</p>
+                              {w.userEmail && <p className="text-[10px] text-slate-400 mt-0.5">{w.userEmail}</p>}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-400 uppercase text-[9px] tracking-wider">Reward & Accolades</p>
+                              <p className="mt-0.5 text-indigo-600 dark:text-indigo-400 font-bold">{w.prizeAmount || (isFirst ? '₹50,000' : isSecond ? '₹30,000' : '₹20,000')} Cash</p>
+                              <p className="text-[10px] text-slate-450 mt-0.5">Includes Winner Trophy & Certificate</p>
+                            </div>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="border-t border-slate-100 dark:border-slate-800/60 pt-2.5 flex justify-between items-center text-xs mt-1">
-                          <span className="font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20 px-3 py-1 rounded-xl">
-                            Reward: {w.reward}
-                          </span>
-                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/25 px-2.5 py-1 rounded-xl">
-                            Verified Grade: {w.score}/10
-                          </span>
+                      {/* Right: Certificate Preview and Action Buttons */}
+                      <div className="shrink-0 w-full lg:w-44 flex flex-col gap-3 items-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800/60 pt-4 lg:pt-0 lg:pl-6">
+                        <div className="relative group w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer"
+                             onClick={() => w.certificatePdfUrl && window.open(w.certificatePdfUrl, '_blank')}>
+                          <img
+                            src={`/uploads/${certTemplateName}`}
+                            alt="Certificate Preview"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/30 flex items-center justify-center transition-all duration-300">
+                            <Eye size={18} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Certificate Preview</span>
+
+                        <div className="flex flex-col gap-1.5 w-full mt-1">
+                          <button
+                            type="button"
+                            onClick={() => w.certificatePdfUrl && window.open(w.certificatePdfUrl, '_blank')}
+                            className="w-full py-1.5 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer"
+                          >
+                            <Eye size={12} />
+                            View Certificate
+                          </button>
+                          <a
+                            href={w.certificatePdfUrl || '#'}
+                            download
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all text-center"
+                          >
+                            <Download size={12} />
+                            Download PDF
+                          </a>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

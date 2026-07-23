@@ -35,6 +35,13 @@ import Certificate from "../components/Certificate";
 
 export default function Dashboard() {
   const { apiFetch, user, token } = useAuth();
+
+  const getBackendUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    return `${baseUrl}${path}`;
+  };
   const [dashboardTab, setDashboardTab] = useState("entries");
   const [confirmModal, setConfirmModal] = useState(null);
   const [allSubmissions, setAllSubmissions] = useState([]);
@@ -50,7 +57,7 @@ export default function Dashboard() {
   const handlePrintCertificate = (pdfUrl) => {
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
-    iframe.src = pdfUrl;
+    iframe.src = getBackendUrl(pdfUrl);
     document.body.appendChild(iframe);
     iframe.onload = () => {
       iframe.contentWindow.focus();
@@ -1112,7 +1119,7 @@ export default function Dashboard() {
                             
                             {/* Certificate Thumbnail Preview */}
                             <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-amber-500/20 shadow-sm cursor-pointer animate-in zoom-in-95"
-                                 onClick={() => winInfo.certificatePdfUrl && window.open(winInfo.certificatePdfUrl, '_blank')}>
+                                 onClick={() => winInfo.certificatePdfUrl && window.open(getBackendUrl(winInfo.certificatePdfUrl), '_blank')}>
                               <img
                                 src={`/${certTemplateName}`}
                                 alt="Certificate Thumbnail"
@@ -1139,7 +1146,7 @@ export default function Dashboard() {
                               <div className="flex flex-col gap-1.5 mt-1">
                                 <button
                                   type="button"
-                                  onClick={() => winInfo.certificatePdfUrl && window.open(winInfo.certificatePdfUrl, '_blank')}
+                                  onClick={() => winInfo.certificatePdfUrl && window.open(getBackendUrl(winInfo.certificatePdfUrl), '_blank')}
                                   className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                                 >
                                   <Eye size={12} />
@@ -1147,7 +1154,7 @@ export default function Dashboard() {
                                 </button>
                                 <div className="flex gap-2">
                                   <a
-                                    href={winInfo.certificatePdfUrl || '#'}
+                                    href={winInfo.certificatePdfUrl ? getBackendUrl(winInfo.certificatePdfUrl) : '#'}
                                     download
                                     target="_blank"
                                     rel="noreferrer"

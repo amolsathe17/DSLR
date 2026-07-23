@@ -5,6 +5,13 @@ import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function Gallery() {
   const { apiFetch, user, loading: authLoading } = useAuth();
+
+  const getBackendUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    return `${baseUrl}${path}`;
+  };
   const [activeTab, setActiveTab] = useState('winners'); // Default to winners for guests
   const [event, setEvent] = useState(null);
   const [photographs, setPhotographs] = useState([]);
@@ -439,7 +446,7 @@ export default function Gallery() {
                       {/* Right: Certificate Preview and Action Buttons */}
                       <div className="shrink-0 w-full lg:w-44 flex flex-col gap-3 items-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800/60 pt-4 lg:pt-0 lg:pl-6">
                         <div className="relative group w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer"
-                             onClick={() => w.certificatePdfUrl && window.open(w.certificatePdfUrl, '_blank')}>
+                             onClick={() => w.certificatePdfUrl && window.open(getBackendUrl(w.certificatePdfUrl), '_blank')}>
                           <img
                             src={`/${certTemplateName}`}
                             alt="Certificate Preview"
@@ -454,14 +461,14 @@ export default function Gallery() {
                         <div className="flex flex-col gap-1.5 w-full mt-1">
                           <button
                             type="button"
-                            onClick={() => w.certificatePdfUrl && window.open(w.certificatePdfUrl, '_blank')}
+                            onClick={() => w.certificatePdfUrl && window.open(getBackendUrl(w.certificatePdfUrl), '_blank')}
                             className="w-full py-1.5 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer"
                           >
                             <Eye size={12} />
                             View Certificate
                           </button>
                           <a
-                            href={w.certificatePdfUrl || '#'}
+                            href={w.certificatePdfUrl ? getBackendUrl(w.certificatePdfUrl) : '#'}
                             download
                             target="_blank"
                             rel="noreferrer"

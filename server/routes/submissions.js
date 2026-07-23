@@ -376,7 +376,7 @@ router.post('/upload', protect, upload.fields([
       fileSizeBytes: photoFile.size,
       status: 'Pending',
       scores: [],
-      assignedJudges: [],
+      assignedJudges: event.assignedJudges || [],
       cloudinaryPublicId: cloudinaryResult.public_id,
       width: width || cloudinaryResult.width,
       height: height || cloudinaryResult.height,

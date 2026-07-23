@@ -629,30 +629,10 @@ router.get('/judges', protect, authorize('Admin'), async (req, res) => {
 // @route   POST /api/admin/photographs/assign-judges
 // @access  Private/Admin
 router.post('/photographs/assign-judges', protect, authorize('Admin'), async (req, res) => {
-  try {
-    const { assignments } = req.body; // Array of { submissionId, photoId, judgeIds: [] }
-
-    if (!Array.isArray(assignments)) {
-      return res.status(400).json({ success: false, message: 'Assignments list must be an array' });
-    }
-
-    for (const assign of assignments) {
-      const { submissionId, photoId, judgeIds } = assign;
-      const submission = await Submission.findById(submissionId);
-      if (submission) {
-        const idx = submission.photographs.findIndex(p => p.id === photoId);
-        if (idx !== -1) {
-          submission.photographs[idx].assignedJudges = judgeIds;
-          await submission.save();
-        }
-      }
-    }
-
-    res.json({ success: true, message: 'Photographs assigned to judges successfully!' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+  return res.status(403).json({
+    success: false,
+    message: 'Admin does not have rights to manually assign judges to photographs. They are automatically assigned to all event judges.'
+  });
 });
 
 // @desc    Get financial transactions list

@@ -621,29 +621,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleAssignJudges = async () => {
-    try {
-      const data = await apiFetch('/api/admin/photographs/assign-judges', {
-        method: 'POST',
-        body: JSON.stringify({
-          assignments: [
-            {
-              submissionId: assignJudgesPhoto.submissionId,
-              photoId: assignJudgesPhoto.photoId,
-              judgeIds: selectedAssignJudges
-            }
-          ]
-        })
-      });
-      if (data.success) {
-        fetchPhotographs();
-        setAssignJudgesPhoto(null);
-        setSelectedAssignJudges([]);
-      }
-    } catch (e) {
-      alert(e.message);
-    }
-  };
+
 
   const handleCreateCategory = async (e) => {
     e.preventDefault();
@@ -3038,64 +3016,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* ASSIGN JUDGES MODAL */}
-      {assignJudgesPhoto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="font-display font-extrabold text-lg pb-3 border-b border-slate-150 text-slate-900 dark:text-white">Assign Judges to Photograph</h3>
-            
-            <div className="flex flex-col gap-4 mt-4 text-xs">
-              <p className="text-slate-400">Select which judging panel members will review and score this photograph:</p>
-              
-              <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
-                {judges.map(j => {
-                  const isChecked = selectedAssignJudges.includes(j._id);
-                  return (
-                    <label key={j._id} className="flex items-center gap-3 p-2.5 hover:bg-slate-50 dark:hover:bg-slate-950 rounded-xl cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedAssignJudges([...selectedAssignJudges, j._id]);
-                          } else {
-                            setSelectedAssignJudges(selectedAssignJudges.filter(id => id !== j._id));
-                          }
-                        }}
-                        className="w-4 h-4 text-indigo-600 border-slate-350 rounded focus:ring-indigo-500"
-                      />
-                      <div>
-                        <span className="font-bold text-slate-800 dark:text-slate-100">{j.name}</span>
-                        <span className="text-[10px] text-slate-400 block">{j.email}</span>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
 
-              <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAssignJudgesPhoto(null);
-                    setSelectedAssignJudges([]);
-                  }}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-2 rounded-xl transition-all cursor-pointer font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAssignJudges}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl shadow transition-all cursor-pointer font-bold"
-                >
-                  Save Assignments
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* DETAIL / ZOOM VIEW MODAL */}
       {selectedPhoto && !showRejectModal && (

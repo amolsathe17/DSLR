@@ -194,6 +194,21 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
       );
     }
 
+    if (updateData.assignedJudges && Array.isArray(updateData.assignedJudges)) {
+      const Submission = require('../models/Submission');
+      const submissions = await Submission.find({ eventId: req.params.id });
+      for (const sub of submissions) {
+        let changed = false;
+        sub.photographs.forEach(photo => {
+          photo.assignedJudges = updateData.assignedJudges;
+          changed = true;
+        });
+        if (changed) {
+          await sub.save();
+        }
+      }
+    }
+
     event = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
     await AuditLog.create({

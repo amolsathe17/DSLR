@@ -50,12 +50,6 @@ export default function Gallery() {
   }, []);
 
   const filteredPhotos = photographs.filter(p => {
-    // If logged in as Participant, only see own photos
-    if (user && user.role === 'Participant') {
-      const isOwnPhoto = p.userId === user._id || p.participantEmail === user.email;
-      if (!isOwnPhoto) return false;
-    }
-
     const matchesSearch = 
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.participantName.toLowerCase().includes(search.toLowerCase()) ||
@@ -262,7 +256,16 @@ export default function Gallery() {
 
             {/* Gallery Grid */}
             {(() => {
-              const disapprovedPhotos = filteredPhotos.filter(p => p.scores && p.scores.some(s => s.approvalStatus === 'Disapproved'));
+              const disapprovedPhotos = filteredPhotos.filter(p => {
+                const isDisapproved = p.scores && p.scores.some(s => s.approvalStatus === 'Disapproved');
+                if (!isDisapproved) return false;
+                
+                // For participants, restrict to their own disapproved photos only
+                if (user && user.role === 'Participant') {
+                  return p.userId === user._id || p.participantEmail === user.email || p.userId === user.id;
+                }
+                return true;
+              });
               if (disapprovedPhotos.length === 0) {
                 return (
                   <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">

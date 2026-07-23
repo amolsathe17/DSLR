@@ -21,19 +21,15 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), as
 
     const isAssignedToEvent = isAdmin || (event.assignedJudges && event.assignedJudges.includes(judgeId));
 
-    // Find submissions for this event (only paid ones)
+    // Find submissions for this event (matching admin view to ensure all uploaded photos are graded)
     let submissions;
     if (isAssignedToEvent) {
       submissions = await Submission.find({
-        eventId,
-        isFinalSubmitted: true,
-        paymentStatus: 'Paid'
+        eventId
       });
     } else {
       submissions = await Submission.find({
         eventId,
-        isFinalSubmitted: true,
-        paymentStatus: 'Paid',
         'photographs.assignedJudges': judgeId
       });
     }

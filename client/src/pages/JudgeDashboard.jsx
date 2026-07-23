@@ -536,7 +536,7 @@ export default function JudgeDashboard() {
 
             return (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
                     <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Assigned Contests</span>
                     <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalEvents}</h3>
@@ -559,6 +559,12 @@ export default function JudgeDashboard() {
                     <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Ungraded Photos</span>
                     <h3 className="font-display font-extrabold text-2xl text-red-600 dark:text-red-400">{pendingCount}</h3>
                     <span className="text-[10px] text-slate-400">Assessments remaining</span>
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Total Photographs</span>
+                    <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalPhotos}</h3>
+                    <span className="text-[10px] text-slate-400">Total assigned photo frames</span>
                   </div>
                 </div>
 

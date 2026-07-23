@@ -24,6 +24,9 @@ export default function JudgeDashboard() {
   const [remarks, setRemarks] = useState('');
   const [approvalStatus, setApprovalStatus] = useState('Approved');
 
+  const [offlineAverageScore, setOfflineAverageScore] = useState(5);
+  const [offlineRemarks, setOfflineRemarks] = useState('');
+  const [offlineApprovalStatus, setOfflineApprovalStatus] = useState('Approved');
   const [selectedSubmissionId, setSelectedSubmissionId] = useState('all');
   const [evaluationMode, setEvaluationMode] = useState('online'); // 'online' or 'offline'
   const [offlineScores, setOfflineScores] = useState({});
@@ -232,6 +235,72 @@ export default function JudgeDashboard() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenOfflineScoring = (photo) => {
+    setOfflineZoomPhoto(photo);
+    const existing = photo.score || {
+      averageScore: 5,
+      remarks: '',
+      approvalStatus: 'Approved'
+    };
+    const avg = existing.averageScore ? Math.round(existing.averageScore) : 5;
+    setOfflineAverageScore(avg);
+    setOfflineRemarks(existing.remarks || '');
+    setOfflineApprovalStatus(existing.approvalStatus || 'Approved');
+  };
+
+  const handleSaveOfflineScoring = async (e) => {
+    if (e) e.preventDefault();
+    if (user?.role === 'Admin') return;
+    if (offlineApprovalStatus === 'Disapproved' && (!offlineRemarks || offlineRemarks.trim() === '')) {
+      setError('An explanation/remarks is required when disapproving an entry.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+
+    try {
+      const data = await apiFetch('/api/judges/score', {
+        method: 'POST',
+        body: JSON.stringify({
+          submissionId: offlineZoomPhoto.submissionId,
+          photoId: offlineZoomPhoto.photoId,
+          creativity: offlineAverageScore,
+          composition: offlineAverageScore,
+          technicalQuality: offlineAverageScore,
+          storytelling: offlineAverageScore,
+          overallImpact: offlineAverageScore,
+          remarks: offlineRemarks,
+          approvalStatus: offlineApprovalStatus
+        })
+      });
+
+      if (data.success) {
+        const photoData = await apiFetch(`/api/judges/assigned-photos/${event._id}`);
+        if (photoData.success) {
+          setPhotographs(photoData.photographs);
+        }
+        setOfflineZoomPhoto(null);
+        triggerSuccess('Review Submitted', 'The photograph score evaluation has been saved successfully.');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAllScoringSheets = () => {
+    const ungradedCount = photographs.filter(p => !p.graded).length;
+    if (ungradedCount > 0) {
+      setConfirmModal({
+        message: `Evaluation Incomplete: You have ${ungradedCount} photograph${ungradedCount > 1 ? 's' : ''} remaining for evaluation. Please evaluate all photos before saving the scoring sheets.`,
+        isAlert: true
+      });
+    } else {
+      setShowSignOffModal(true);
     }
   };
 
@@ -791,6 +860,7 @@ export default function JudgeDashboard() {
                 </div>
               ) : (
                 evaluationMode === 'online' ? (
+                    <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 text-left">
                     {displayedPhotos.map((photo) => (
                       <div
@@ -856,179 +926,102 @@ export default function JudgeDashboard() {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  /* Offline Score sheets */
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm text-left">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-xs text-left">
-                        <thead>
-                          <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider font-bold">
-                            <th className="px-5 py-4 w-28">Preview</th>
-                            <th className="px-5 py-4 w-40">Photo details</th>
-                            <th className="px-5 py-4">Creativity</th>
-                            <th className="px-5 py-4">Comp</th>
-                            <th className="px-5 py-4">Tech</th>
-                            <th className="px-5 py-4">Story</th>
-                            <th className="px-5 py-4">Impact</th>
-                            <th className="px-5 py-4 w-40">Status & Remarks</th>
-                            <th className="px-5 py-4 text-center font-bold">Save</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                          {displayedPhotos.map((photo) => {
-                            const scores = offlineScores[photo.photoId] || {
-                              creativity: 5,
-                              composition: 5,
-                              technicalQuality: 5,
-                              storytelling: 5,
-                              overallImpact: 5,
-                              remarks: '',
-                              approvalStatus: 'Approved'
-                            };
 
-                            const isSuspendedUser = user?.isSuspended || user?.role === 'Admin';
-                            const isDisapproved = scores.approvalStatus === 'Disapproved';
+                      {user?.role === 'Judge' && event && !event.gradingConfirmed && (
+                        <div className="mt-8 flex justify-center border-t border-slate-200 dark:border-slate-800 pt-6">
+                          <button
+                            type="button"
+                            onClick={handleSaveAllScoringSheets}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-2xl shadow-lg transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center gap-2"
+                          >
+                            <Check size={16} />
+                            Save All Scoring Sheets & Finalize
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                  /* Card-based Offline Evaluation grid */
+                  <div className="flex flex-col gap-6 text-left">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 text-left">
+                      {displayedPhotos.map((photo) => (
+                        <div
+                          key={photo.photoId}
+                          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow transition-all flex flex-col justify-between"
+                        >
+                          {/* Thumbnail / Click handler */}
+                          <div 
+                            onClick={() => handleOpenOfflineScoring(photo)}
+                            className="w-full h-48 bg-slate-950 relative overflow-hidden flex items-center justify-center cursor-zoom-in"
+                          >
+                            <WatermarkPreview
+                              src={photo.fileUrl}
+                              className="w-full h-full object-contain"
+                            />
+                            <span className={`absolute top-3 left-3 px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full shadow-sm ${
+                              photo.graded ? 'bg-indigo-600 text-white' : 'bg-slate-500 text-white'
+                            }`}>
+                              {photo.graded ? 'Graded' : 'Not Graded'}
+                            </span>
+                          </div>
 
-                            return (
-                              <tr key={photo.photoId} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20">
-                                <td className="px-5 py-4">
-                                  <div
-                                    onClick={() => setOfflineZoomPhoto(photo)}
-                                    className="w-20 h-14 bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center cursor-zoom-in relative border border-slate-100 dark:border-slate-800"
-                                  >
-                                    <WatermarkPreview src={photo.fileUrl} className="w-full h-full object-cover" />
-                                  </div>
-                                </td>
-                                <td className="px-5 py-4 flex flex-col gap-0.5 justify-center h-20 min-w-[150px]">
-                                  <span className="font-extrabold text-slate-900 dark:text-white line-clamp-1">{photo.title}</span>
-                                  <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">{photo.category}</span>
-                                  <span className="text-[9px] text-indigo-500 font-semibold">{photo.participantName}</span>
-                                </td>
-                                {/* Creativity */}
-                                <td className="px-5 py-4">
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="10"
-                                    disabled={isSuspendedUser || isDisapproved}
-                                    value={isDisapproved ? 0 : scores.creativity}
-                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'creativity', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
-                                  />
-                                </td>
-                                {/* Composition */}
-                                <td className="px-5 py-4">
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="10"
-                                    disabled={isSuspendedUser || isDisapproved}
-                                    value={isDisapproved ? 0 : scores.composition}
-                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'composition', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
-                                  />
-                                </td>
-                                {/* Tech Quality */}
-                                <td className="px-5 py-4">
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="10"
-                                    disabled={isSuspendedUser || isDisapproved}
-                                    value={isDisapproved ? 0 : scores.technicalQuality}
-                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'technicalQuality', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
-                                  />
-                                </td>
-                                {/* Storytelling */}
-                                <td className="px-5 py-4">
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="10"
-                                    disabled={isSuspendedUser || isDisapproved}
-                                    value={isDisapproved ? 0 : scores.storytelling}
-                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'storytelling', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
-                                  />
-                                </td>
-                                {/* Overall Impact */}
-                                <td className="px-5 py-4">
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="10"
-                                    disabled={isSuspendedUser || isDisapproved}
-                                    value={isDisapproved ? 0 : scores.overallImpact}
-                                    onChange={(e) => handleOfflineScoreChange(photo.photoId, 'overallImpact', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                                    className="w-12 px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
-                                  />
-                                </td>
-                                {/* Status & Remarks */}
-                                <td className="px-5 py-4 min-w-[200px]">
-                                  <div className="flex flex-col gap-2">
-                                    <div className="flex border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden w-fit">
-                                      <button
-                                        type="button"
-                                        disabled={user?.role !== 'Judge' || user?.isSuspended}
-                                        onClick={() => handleOfflineScoreChange(photo.photoId, 'approvalStatus', 'Approved')}
-                                        className={`px-2.5 py-1 text-[10px] font-extrabold uppercase transition-colors cursor-pointer ${
-                                          !isDisapproved ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-600'
-                                        }`}
-                                      >
-                                        Approve
-                                      </button>
-                                      <button
-                                        type="button"
-                                        disabled={user?.role !== 'Judge' || user?.isSuspended}
-                                        onClick={() => handleOfflineScoreChange(photo.photoId, 'approvalStatus', 'Disapproved')}
-                                        className={`px-2.5 py-1 text-[10px] font-extrabold uppercase transition-colors cursor-pointer ${
-                                          isDisapproved ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-600'
-                                        }`}
-                                      >
-                                        Reject
-                                      </button>
-                                    </div>
-                                    <textarea
-                                      disabled={isSuspendedUser}
-                                      value={scores.remarks}
-                                      onChange={(e) => handleOfflineScoreChange(photo.photoId, 'remarks', e.target.value)}
-                                      placeholder={isDisapproved ? "Explanation required *" : "Remarks (Optional)..."}
-                                      className={`bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1 outline-none text-[11px] leading-relaxed resize-none h-12 w-full ${
-                                        isDisapproved && (!scores.remarks || scores.remarks.trim() === '') ? 'border-red-500 focus:ring-red-500' : 'focus:ring-indigo-500'
-                                      }`}
-                                    />
-                                  </div>
-                                </td>
-                                {/* Actions */}
-                                <td className="px-5 py-4 text-center">
-                                  <button
-                                    type="button"
-                                    disabled={isSuspendedUser || loading}
-                                    onClick={() => handleSaveSingleOfflineScore(photo)}
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2 transition-all cursor-pointer inline-flex items-center justify-center"
-                                    title="Save scoring sheet for this row"
-                                  >
-                                    <Check size={14} strokeWidth={2.5} />
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                          <div className="p-4 flex flex-col gap-3.5 flex-grow justify-between">
+                            <div className="flex flex-col gap-1">
+                              <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white truncate font-black">
+                                {photo.title}
+                              </h4>
+                              <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider block">
+                                {photo.category}
+                              </span>
+                              <span className="text-[10px] text-slate-500 font-bold block">
+                                By: {photo.participantName}
+                              </span>
+                              {photo.score && (
+                                <div className="mt-2 flex items-center gap-1">
+                                  <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
+                                    photo.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                                  }`}>
+                                    {photo.score.approvalStatus}
+                                  </span>
+                                  {photo.score.approvalStatus !== 'Disapproved' && (
+                                    <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                      Grade: {photo.score.averageScore}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleOpenOfflineScoring(photo)}
+                              className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                                user?.role === 'Admin' 
+                                  ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
+                                  : !photo.graded 
+                                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                                    : photo.score?.approvalStatus === 'Disapproved'
+                                      ? 'bg-red-600 hover:bg-red-700 text-white'
+                                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                              }`}
+                            >
+                              {user?.role === 'Admin' ? 'Review' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
+                              <ChevronRight size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
-                    {/* Offline batch triggers */}
-                    {user?.role !== 'Admin' && (
-                      <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 p-5 flex justify-end gap-3 font-bold">
+                    {user?.role === 'Judge' && event && !event.gradingConfirmed && (
+                      <div className="mt-8 flex justify-center border-t border-slate-200 dark:border-slate-800 pt-6">
                         <button
                           type="button"
-                          disabled={loading}
-                          onClick={handleSaveAllOfflineScores}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow-sm hover:shadow transition-all cursor-pointer"
+                          onClick={handleSaveAllScoringSheets}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-2xl shadow-lg transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center gap-2"
                         >
-                          {loading ? 'Submitting evaluations...' : 'Save All Scoring Sheets'}
+                          <Check size={16} />
+                          Save All Scoring Sheets & Finalize
                         </button>
                       </div>
                     )}
@@ -1300,13 +1293,13 @@ export default function JudgeDashboard() {
         </div>
       )}
 
-      {/* Offline Zoom Modal */}
+      {/* Offline Zoom & Scoring Modal */}
       {offlineZoomPhoto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-[90vh]">
             
-            {/* Left Column: Photograph (takes up full height and width, zooms on hover) */}
-            <div className="flex-grow bg-slate-950 relative overflow-hidden flex items-center justify-center p-4">
+            {/* Left Column: Photograph (zooms on hover) */}
+            <div className="flex-grow bg-slate-950 relative overflow-hidden flex items-center justify-center p-4 border-r border-slate-100 dark:border-slate-800">
               <div className="absolute top-4 left-4 z-10 flex gap-2">
                 <span className="bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
                   Offline Zoom Mode
@@ -1328,7 +1321,7 @@ export default function JudgeDashboard() {
               </div>
             </div>
 
-            {/* Right Column: Metadata details / sidebar */}
+            {/* Right Column: Metadata details / sidebar & scoring fields */}
             <div className="w-full md:w-[380px] bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
               
               {/* Header */}
@@ -1345,8 +1338,8 @@ export default function JudgeDashboard() {
                 </button>
               </div>
 
-              {/* Metadata content */}
-              <div className="p-6 flex-grow flex flex-col gap-5 text-xs">
+              {/* Scrollable Content (Metadata + Evaluation) */}
+              <div className="p-6 flex-grow flex flex-col gap-5 text-xs overflow-y-auto">
                 
                 {/* Title and Category */}
                 <div className="flex flex-col gap-1">
@@ -1393,18 +1386,97 @@ export default function JudgeDashboard() {
                 {/* Description & Story */}
                 <div className="flex flex-col gap-1.5 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
                   <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Photo Description & Story</span>
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed italic bg-white dark:bg-slate-950 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 max-h-[140px] overflow-y-auto">
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed italic bg-white dark:bg-slate-950 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 max-h-[120px] overflow-y-auto">
                     "{offlineZoomPhoto.description || 'No description shared.'}"
                   </p>
                 </div>
+
+                {/* Jury Evaluation Section */}
+                <div className="flex flex-col gap-3.5 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
+                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Jury Evaluation</span>
+                  
+                  {error && (
+                    <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 p-2.5 rounded-xl text-[10px] font-semibold leading-relaxed">
+                      {error}
+                    </div>
+                  )}
+
+                  {/* Approval Status switches */}
+                  <div className="flex border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                    <button
+                      type="button"
+                      disabled={user?.role !== 'Judge' || user?.isSuspended}
+                      onClick={() => setOfflineApprovalStatus('Approved')}
+                      className={`flex-1 py-1.5 font-display font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${
+                        offlineApprovalStatus === 'Approved' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                    >
+                      Approve Frame
+                    </button>
+                    <button
+                      type="button"
+                      disabled={user?.role !== 'Judge' || user?.isSuspended}
+                      onClick={() => setOfflineApprovalStatus('Disapproved')}
+                      className={`flex-1 py-1.5 font-display font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${
+                        offlineApprovalStatus === 'Disapproved' ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                    >
+                      Reject Frame
+                    </button>
+                  </div>
+
+                  {/* Average Grade Dropdown */}
+                  {offlineApprovalStatus !== 'Disapproved' && (
+                    <div className="flex flex-col gap-1">
+                      <label className="font-semibold text-slate-400 text-[10px]">Average Grade *</label>
+                      <select
+                        disabled={user?.role !== 'Judge' || user?.isSuspended}
+                        value={offlineAverageScore}
+                        onChange={(e) => setOfflineAverageScore(parseInt(e.target.value))}
+                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-indigo-500 font-bold dark:text-white cursor-pointer"
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(val => (
+                          <option key={val} value={val}>{val} / 10</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Remarks Comments */}
+                  <div className="flex flex-col gap-1">
+                    <label className="font-semibold text-slate-400 text-[10px]">
+                      {offlineApprovalStatus === 'Disapproved' ? 'Explanation (Required) *' : 'Remarks (Optional)'}
+                    </label>
+                    <textarea
+                      rows={2}
+                      disabled={user?.role !== 'Judge' || user?.isSuspended}
+                      value={offlineRemarks}
+                      onChange={(e) => setOfflineRemarks(e.target.value)}
+                      placeholder={offlineApprovalStatus === 'Disapproved' ? "Please explain rejection reason..." : "Add comments or jury feedback..."}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-1 focus:ring-indigo-500 font-medium dark:text-white"
+                    />
+                  </div>
+
+                </div>
+
               </div>
 
-              {/* Footer action to close */}
-              <div className="p-6 border-t border-slate-200 dark:border-slate-800 shrink-0 font-bold">
+              {/* Footer action buttons */}
+              <div className="p-6 border-t border-slate-200 dark:border-slate-800 shrink-0 flex flex-col gap-2 font-bold">
+                {user?.role === 'Judge' && !user?.isSuspended && (
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={handleSaveOfflineScoring}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+                  >
+                    {loading ? 'Saving Evaluation...' : 'Save Evaluation'}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setOfflineZoomPhoto(null)}
-                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+                  className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
                 >
                   Close Details
                 </button>

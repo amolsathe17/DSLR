@@ -849,7 +849,7 @@ export default function JudgeDashboard() {
                                     : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                             }`}
                           >
-                            {user?.role === 'Admin' ? 'Review Scoring' : photo.graded ? 'Edit Evaluation' : 'Evaluate photograph'}
+                            {user?.role === 'Admin' ? 'Review Scoring' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
                             <ChevronRight size={14} />
                           </button>
                         </div>

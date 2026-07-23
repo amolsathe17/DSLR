@@ -1612,74 +1612,21 @@ export default function AdminDashboard() {
             {photographs.map((photo) => (
               <div 
                 key={photo.photoId}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"
+                onClick={() => setSelectedPhoto(photo)}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow transition-all cursor-zoom-in relative aspect-video"
               >
-                <div className="relative group">
-                  <img 
-                    src={photo.fileUrl} 
-                    alt={photo.title} 
-                    className="w-full aspect-video object-cover"
-                    crossOrigin="anonymous"
-                    referrerPolicy="no-referrer"
-                  />
-                  {photo.scores && photo.scores.some(s => s.approvalStatus === 'Disapproved') && (
-                    <span className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm animate-pulse">
-                      <Flag size={9} className="fill-white" /> Disapproved
-                    </span>
-                  )}
-                  <button
-                    onClick={() => setSelectedPhoto(photo)}
-                    className="absolute top-2 right-2 p-1.5 bg-slate-950/60 hover:bg-slate-950 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    data-tooltip="Zoom Details"
-                  >
-                    <Maximize2 size={14} />
-                  </button>
-                </div>
-
-                <div className="p-4 flex flex-col gap-3">
-                  <div>
-                    <div className="flex justify-between items-start gap-2">
-                      <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
-                        {photo.title}
-                      </h4>
-                      <span className="text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded font-semibold text-slate-600 dark:text-slate-400">
-                        {photo.category}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">By {photo.participantName} ({photo.participantEmail})</span>
-                    
-                    {/* EXIF Metadata verification list */}
-                    <div className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-100 dark:border-slate-850 text-[10px] text-slate-500 mt-2.5 flex flex-col gap-1">
-                      <span className="font-bold text-slate-700 dark:text-slate-300">EXIF Device Logs:</span>
-                      <p>Camera: <span className="font-bold text-slate-800 dark:text-slate-200">{photo.cameraBrand} {photo.cameraModel}</span></p>
-                      <p>Lens: <span className="font-semibold text-slate-700 dark:text-slate-350">{photo.lensUsed || 'N/A'}</span></p>
-                      <p>Capture Date: <span className="font-semibold text-slate-700 dark:text-slate-350">{photo.dateCaptured ? new Date(photo.dateCaptured).toLocaleDateString() : 'N/A'}</span></p>
-                      <p>Raw File: <span className={`font-bold ${photo.rawFileUrl ? 'text-emerald-500' : 'text-slate-400'}`}>{photo.rawFileUrl ? 'Available (.RAW)' : 'None Provided'}</span></p>
-                    </div>
-
-                    {/* Judge Disapproval Remarks section */}
-                    {photo.scores && photo.scores.some(s => s.approvalStatus === 'Disapproved') && (
-                      <div className="mt-2.5 flex flex-col gap-1.5 border border-red-200/50 dark:border-red-900/30 rounded-xl p-2.5 bg-red-50/40 dark:bg-red-950/10">
-                        <span className="text-[10px] font-bold text-red-650 dark:text-red-400 uppercase tracking-wide flex items-center gap-1">
-                          <AlertTriangle size={10} className="text-red-500 shrink-0" />
-                          <span>Judge Disapproval Remarks:</span>
-                        </span>
-                        {photo.scores
-                          .filter(s => s.approvalStatus === 'Disapproved')
-                          .map((s, i) => (
-                            <div key={i} className="text-[9px] border-t border-red-150/40 dark:border-red-900/20 pt-1.5 first:border-0 first:pt-0">
-                              <span className="font-bold text-red-600">✗ {s.judgeName || 'Judge'}:</span>
-                              {s.remarks ? (
-                                <p className="italic text-red-500 mt-0.5">"{s.remarks}"</p>
-                              ) : (
-                                <p className="italic text-red-450 mt-0.5">No comments left.</p>
-                              )}
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <img 
+                  src={photo.fileUrl} 
+                  alt={photo.title} 
+                  className="w-full h-full object-cover"
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
+                />
+                {photo.scores && photo.scores.some(s => s.approvalStatus === 'Disapproved') && (
+                  <span className="absolute top-2 left-2 bg-red-650 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider animate-pulse font-bold">
+                    <Flag size={9} className="fill-white" /> Disapproved
+                  </span>
+                )}
               </div>
             ))}
             {photographs.length === 0 && (
@@ -3153,146 +3100,142 @@ export default function AdminDashboard() {
       {/* DETAIL / ZOOM VIEW MODAL */}
       {selectedPhoto && !showRejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <button
-              onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 z-10 p-2 bg-slate-950/60 hover:bg-slate-950 text-white rounded-full cursor-pointer transition-colors"
-            >
-              <X size={20} />
-            </button>
-            <div className="grid grid-cols-1 lg:grid-cols-12">
-              <div className="lg:col-span-8 bg-slate-950 flex items-center justify-center min-h-75 max-h-125">
-                <img 
-                  src={selectedPhoto.fileUrl} 
-                  alt={selectedPhoto.title}
-                  className="w-full h-full object-contain"
-                  crossOrigin="anonymous"
-                  referrerPolicy="no-referrer"
-                />
+          <div className="relative w-full max-w-[80vw] h-[80vh] bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left">
+            
+            {/* Left Column: Image Viewport */}
+            <div className="flex-grow bg-slate-950 flex items-center justify-center p-6 relative h-full">
+              <img 
+                src={selectedPhoto.fileUrl} 
+                alt={selectedPhoto.title}
+                className="w-full h-full object-contain rounded-2xl shadow-lg border border-slate-800"
+                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+
+            {/* Right Column: Information Panel */}
+            <div className="w-full md:w-[380px] bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
+              {/* Sidebar Header */}
+              <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 bg-white dark:bg-slate-950">
+                <div>
+                  <h3 className="font-display font-extrabold text-xs text-slate-900 dark:text-white uppercase tracking-wider">Photograph Inspection</h3>
+                  <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">Admin Read-Only Viewer</span>
+                </div>
+                <button
+                  onClick={() => setSelectedPhoto(null)}
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg cursor-pointer transition-colors"
+                >
+                  <X size={18} />
+                </button>
               </div>
-              <div className="lg:col-span-4 p-6 flex flex-col justify-between text-xs max-h-125 overflow-y-auto">
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <h3 className="font-display font-black text-lg text-slate-900 dark:text-white">{selectedPhoto.title}</h3>
-                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-350 px-2 py-0.5 rounded font-bold text-[9px] inline-block mt-1">
-                      {selectedPhoto.category}
-                    </span>
-                  </div>
-                  
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Owner</span>
-                    <p className="font-semibold text-slate-800 dark:text-slate-250">{selectedPhoto.participantName}</p>
-                    <p className="text-[10px] text-slate-400">{selectedPhoto.participantEmail}</p>
-                  </div>
 
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Story Details</span>
-                    <p className="text-slate-500 leading-relaxed mt-0.5">{selectedPhoto.description || 'No description shared.'}</p>
-                  </div>
-
-                  <div className="flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                    <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">EXIF Device Info</span>
-                    <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
-                      <div>
-                        <span>Brand:</span>
-                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.cameraBrand}</p>
-                      </div>
-                      <div>
-                        <span>Model:</span>
-                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.cameraModel}</p>
-                      </div>
-                      <div>
-                        <span>Lens:</span>
-                        <p className="font-bold text-slate-700 dark:text-slate-250 truncate">{selectedPhoto.lensUsed || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <span>Capture Date:</span>
-                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.dateCaptured ? new Date(selectedPhoto.dateCaptured).toLocaleDateString() : 'N/A'}</p>
-                      </div>
-                      <div>
-                        <span>Dimensions:</span>
-                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.width && selectedPhoto.height ? `${selectedPhoto.width}x${selectedPhoto.height}` : 'N/A'}</p>
-                      </div>
-                      <div>
-                        <span>Format:</span>
-                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.format || 'N/A'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                    <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Cloudinary & Security</span>
-                    <div className="text-[10px] text-slate-500 flex flex-col gap-1">
-                      <p>Cloudinary ID: <span className="font-mono text-slate-700 dark:text-slate-350">{selectedPhoto.cloudinaryPublicId || 'N/A'}</span></p>
-                      <p>Original File: <span className="font-mono text-slate-700 dark:text-slate-350">{selectedPhoto.originalFilename || 'N/A'}</span></p>
-                      <p>DSLR Validation: 
-                        <span className={`ml-1 font-bold ${
-                          selectedPhoto.dslrValidationStatus === 'VERIFIED' 
-                            ? 'text-emerald-500' 
-                            : selectedPhoto.dslrValidationStatus === 'REJECTED' 
-                              ? 'text-red-500' 
-                              : 'text-amber-500'
-                        }`}>
-                          {selectedPhoto.dslrValidationStatus}
-                        </span>
-                      </p>
-                      {selectedPhoto.validationReason && (
-                        <p className="italic text-slate-400 mt-0.5">"{selectedPhoto.validationReason}"</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {selectedPhoto.scores && selectedPhoto.scores.length > 0 && (
-                    <div className="flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                      <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Judge Evaluations ({selectedPhoto.scores.length})</span>
-                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                        {selectedPhoto.scores.map((score, sIdx) => (
-                          <div key={sIdx} className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-100 dark:border-slate-850 flex flex-col gap-1 text-[10px]">
-                            <div className="flex justify-between items-center font-bold">
-                              <span className="text-slate-800 dark:text-slate-200">{score.judgeName}</span>
-                              <span className={score.approvalStatus === 'Disapproved' ? 'text-red-500 font-extrabold' : 'text-emerald-500 font-extrabold'}>
-                                {score.approvalStatus || 'Approved'} ({score.averageScore}/10)
-                              </span>
-                            </div>
-                            {score.remarks && (
-                              <p className="italic text-slate-500 dark:text-slate-400 mt-0.5">"{score.remarks}"</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded font-bold uppercase text-slate-500">
-                    {selectedPhoto.status}
+              {/* Sidebar Body */}
+              <div className="p-6 flex-grow flex flex-col gap-4 text-xs overflow-y-auto">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Title & Category</span>
+                  <h3 className="font-display font-black text-base text-slate-900 dark:text-white mt-0.5">{selectedPhoto.title}</h3>
+                  <span className="bg-slate-100 dark:bg-slate-850 text-slate-650 dark:text-slate-350 px-2 py-0.5 rounded font-bold text-[9px] inline-block mt-1">
+                    {selectedPhoto.category}
                   </span>
-                  
-                  {selectedPhoto.status === 'Pending' && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          handlePhotoStatusUpdate(selectedPhoto.submissionId, selectedPhoto.photoId, 'Approved');
-                          setSelectedPhoto(null);
-                        }}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg shadow cursor-pointer"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowRejectModal(true);
-                        }}
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg shadow cursor-pointer"
-                      >
-                        Reject
-                      </button>
+                </div>
+                
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Owner / Photographer</span>
+                  <p className="font-semibold text-slate-800 dark:text-slate-250 mt-0.5">{selectedPhoto.participantName}</p>
+                  <p className="text-[10px] text-slate-400">{selectedPhoto.participantEmail}</p>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Story Details</span>
+                  <p className="text-slate-500 leading-relaxed mt-0.5">{selectedPhoto.description || 'No description shared.'}</p>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                  <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">EXIF Device Info</span>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
+                    <div>
+                      <span>Brand:</span>
+                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.cameraBrand}</p>
                     </div>
+                    <div>
+                      <span>Model:</span>
+                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.cameraModel}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
+                    <div>
+                      <span>Lens:</span>
+                      <p className="font-bold text-slate-700 dark:text-slate-250 truncate">{selectedPhoto.lensUsed || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span>Capture Date:</span>
+                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.dateCaptured ? new Date(selectedPhoto.dateCaptured).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
+                    <div>
+                      <span>Dimensions:</span>
+                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.width && selectedPhoto.height ? `${selectedPhoto.width}x${selectedPhoto.height}` : 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span>Format:</span>
+                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.format || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5 pt-3 border-t border-slate-200 dark:border-slate-800 text-[10px] text-slate-500">
+                  <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Cloudinary & Security</span>
+                  <p>Cloudinary ID: <span className="font-mono text-slate-700 dark:text-slate-350">{selectedPhoto.cloudinaryPublicId || 'N/A'}</span></p>
+                  <p>Original File: <span className="font-mono text-slate-700 dark:text-slate-350">{selectedPhoto.originalFilename || 'N/A'}</span></p>
+                  <p className="mt-1 flex items-center gap-1">
+                    DSLR Validation: 
+                    <span className={`font-bold px-1.5 py-0.5 rounded ${
+                      selectedPhoto.dslrValidationStatus === 'VERIFIED'
+                        ? 'bg-emerald-500/10 text-emerald-500'
+                        : selectedPhoto.dslrValidationStatus === 'REJECTED'
+                          ? 'bg-red-500/10 text-red-500'
+                          : 'bg-amber-500/10 text-amber-500'
+                    }`}>
+                      {selectedPhoto.dslrValidationStatus}
+                    </span>
+                  </p>
+                  {selectedPhoto.validationReason && (
+                    <p className="italic text-slate-400 mt-0.5">"{selectedPhoto.validationReason}"</p>
                   )}
                 </div>
+
+                {selectedPhoto.scores && selectedPhoto.scores.length > 0 && (
+                  <div className="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Judge Evaluations ({selectedPhoto.scores.length})</span>
+                    <div className="flex flex-col gap-2">
+                      {selectedPhoto.scores.map((score, sIdx) => (
+                        <div key={sIdx} className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-100 dark:border-slate-850 flex justify-between items-center text-[10px]">
+                          <span className="font-semibold text-slate-700 dark:text-slate-350">{score.judgeName || 'Judge'}</span>
+                          <span className={`font-bold px-1.5 py-0.5 rounded ${
+                            (score.approvalStatus || 'Approved') === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                          }`}>
+                            {score.approvalStatus || 'Approved'} ({score.averageScore}/10)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sidebar Footer */}
+              <div className="p-5 border-t border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-950">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPhoto(null)}
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+                >
+                  Close Details
+                </button>
               </div>
             </div>
+
           </div>
         </div>
       )}

@@ -183,6 +183,13 @@ router.post('/upload', protect, upload.fields([
       return res.status(400).json({ success: false, message: 'Please upload a photo' });
     }
 
+    const event = await Event.findById(eventId);
+    if (event && event.gradingConfirmed) {
+      if (req.files && req.files.photoFile) fs.unlinkSync(req.files.photoFile[0].path);
+      if (req.files && req.files.rawFile) fs.unlinkSync(req.files.rawFile[0].path);
+      return res.status(403).json({ success: false, message: 'Submissions are closed. The jury panel has already finalized grading.' });
+    }
+
     const photoFile = req.files.photoFile[0];
     const rawFile = req.files.rawFile ? req.files.rawFile[0] : null;
 

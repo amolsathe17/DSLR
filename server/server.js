@@ -22,13 +22,10 @@ const app = express();
 // Middleware
 // Official Robust CORS Middleware Configuration
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow all origins with credentials support by echoing them back
-    callback(null, true);
-  },
+  origin: true, // Mirrors request origin back dynamically to support credentials
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  // Omit allowedHeaders so it dynamically mirrors whatever headers the browser requests in preflight
 }));
 
 // Capture raw request body for Razorpay webhook verification

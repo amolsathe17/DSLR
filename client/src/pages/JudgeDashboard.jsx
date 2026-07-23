@@ -612,7 +612,7 @@ export default function JudgeDashboard() {
                       );
                     })()}
 
-                    {/* Category Distribution Bar Chart */}
+                    {/* Category Distribution Pie/Donut Chart */}
                     {(() => {
                       const categoriesMap = {};
                       allPhotos.forEach(p => {
@@ -620,29 +620,81 @@ export default function JudgeDashboard() {
                         categoriesMap[cat] = (categoriesMap[cat] || 0) + 1;
                       });
                       const catData = Object.entries(categoriesMap).map(([name, count]) => ({ name, count }));
-                      const maxCount = Math.max(...catData.map(c => c.count), 1);
+                      const totalCatPhotos = catData.reduce((acc, c) => acc + c.count, 0);
+
+                      const colors = [
+                        '#f59e0b', // Amber
+                        '#10b981', // Emerald
+                        '#6366f1', // Indigo
+                        '#ec4899', // Pink
+                        '#0ea5e9', // Sky
+                        '#f43f5e', // Rose
+                        '#8b5cf6', // Violet
+                      ];
+
+                      const radius = 50;
+                      const circumference = 2 * Math.PI * radius;
+                      let accumulatedPercent = 0;
 
                       return (
                         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
                           <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Assigned Categories Distribution</h3>
-                          <div className="flex flex-col gap-3 py-1">
-                            {catData.map(({ name, count }) => {
-                              const widthPct = (count / maxCount) * 100;
-                              return (
-                                <div key={name} className="flex flex-col gap-1">
-                                  <div className="flex justify-between text-[11px] font-bold">
-                                    <span className="text-slate-600 dark:text-slate-300">{name}</span>
-                                    <span className="text-slate-500">{count} {count === 1 ? 'photo' : 'photos'}</span>
-                                  </div>
-                                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                                    <div
-                                      style={{ width: `${widthPct}%` }}
-                                      className="bg-amber-600 h-full rounded-full transition-all duration-1000 ease-out"
-                                    />
+                          <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
+                            {totalCatPhotos > 0 ? (
+                              <>
+                                <div className="relative w-32 h-32">
+                                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
+                                    {catData.map((item, idx) => {
+                                      const pct = item.count / totalCatPhotos;
+                                      const strokeDashoffset = circumference - (circumference * pct);
+                                      const rotation = accumulatedPercent * 360;
+                                      accumulatedPercent += pct;
+
+                                      return (
+                                        <circle
+                                          key={item.name}
+                                          cx="70"
+                                          cy="70"
+                                          r={radius}
+                                          fill="transparent"
+                                          stroke={colors[idx % colors.length]}
+                                          strokeWidth="12"
+                                          strokeDasharray={circumference}
+                                          strokeDashoffset={strokeDashoffset}
+                                          style={{
+                                            transformOrigin: '70px 70px',
+                                            transform: `rotate(${rotation}deg)`,
+                                          }}
+                                          className="transition-all duration-1000 ease-out"
+                                        />
+                                      );
+                                    })}
+                                  </svg>
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="font-display font-black text-2xl text-slate-900 dark:text-white">
+                                      {totalCatPhotos}
+                                    </span>
+                                    <span className="text-[8px] text-slate-400 font-extrabold uppercase">Photos</span>
                                   </div>
                                 </div>
-                              );
-                            })}
+
+                                <div className="flex flex-col gap-2 text-[11px] max-h-32 overflow-y-auto pr-1">
+                                  {catData.map((item, idx) => (
+                                    <div key={item.name} className="flex items-center gap-2">
+                                      <span
+                                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                                        style={{ backgroundColor: colors[idx % colors.length] }}
+                                      />
+                                      <span className="font-semibold text-slate-500 dark:text-slate-400">
+                                        {item.name}: <strong className="text-slate-900 dark:text-white">{item.count}</strong>
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              <span className="text-slate-400 text-xs">No photograph data available.</span>
+                            )}
                           </div>
                         </div>
                       );

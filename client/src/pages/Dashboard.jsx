@@ -1114,7 +1114,7 @@ export default function Dashboard() {
                             <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-amber-500/20 shadow-sm cursor-pointer animate-in zoom-in-95"
                                  onClick={() => winInfo.certificatePdfUrl && window.open(winInfo.certificatePdfUrl, '_blank')}>
                               <img
-                                src={`/uploads/${certTemplateName}`}
+                                src={`/${certTemplateName}`}
                                 alt="Certificate Thumbnail"
                                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                               />

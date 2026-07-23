@@ -423,7 +423,7 @@ export default function Gallery() {
                         <div className="relative group w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer"
                              onClick={() => w.certificatePdfUrl && window.open(w.certificatePdfUrl, '_blank')}>
                           <img
-                            src={`/uploads/${certTemplateName}`}
+                            src={`/${certTemplateName}`}
                             alt="Certificate Preview"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />

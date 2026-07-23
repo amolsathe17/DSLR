@@ -58,12 +58,27 @@ export default function JudgeDashboard() {
           const active = assigned.find(e => e.status === 'Active') || assigned[0];
           setEvent(active);
           
-          // Fetch assigned photos for this active event
-          const photoData = await apiFetch(`/api/judges/assigned-photos/${active._id}`);
-          if (photoData.success) {
-            setPhotographs(photoData.photographs);
-            setSelectedSubmissionId('all');
+          // Fetch assigned photos for ALL assigned events to populate overview statistics
+          const photoByEventData = {};
+          let activePhotos = [];
+          
+          for (const ev of assigned) {
+            try {
+              const res = await apiFetch(`/api/judges/assigned-photos/${ev._id}`);
+              if (res.success) {
+                photoByEventData[ev._id] = res.photographs;
+                if (ev._id === active._id) {
+                  activePhotos = res.photographs;
+                }
+              }
+            } catch (err) {
+              console.warn(`Could not load photos for event ${ev.title}:`, err.message);
+            }
           }
+          
+          setAllPhotographsByEvent(photoByEventData);
+          setPhotographs(activePhotos);
+          setSelectedSubmissionId('all');
         }
       }
     } catch (err) {
@@ -84,6 +99,10 @@ export default function JudgeDashboard() {
       const photoData = await apiFetch(`/api/judges/assigned-photos/${selected._id}`);
       if (photoData.success) {
         setPhotographs(photoData.photographs);
+        setAllPhotographsByEvent(prev => ({
+          ...prev,
+          [selected._id]: photoData.photographs
+        }));
         setSelectedSubmissionId('all');
       }
     } catch (err) {
@@ -166,6 +185,10 @@ export default function JudgeDashboard() {
         const photoData = await apiFetch(`/api/judges/assigned-photos/${event._id}`);
         if (photoData.success) {
           setPhotographs(photoData.photographs);
+          setAllPhotographsByEvent(prev => ({
+            ...prev,
+            [event._id]: photoData.photographs
+          }));
         }
         triggerSuccess('Score Saved', `Offline grades for "${photo.title}" saved successfully.`);
       }
@@ -229,6 +252,10 @@ export default function JudgeDashboard() {
       const photoData = await apiFetch(`/api/judges/assigned-photos/${event._id}`);
       if (photoData.success) {
         setPhotographs(photoData.photographs);
+        setAllPhotographsByEvent(prev => ({
+          ...prev,
+          [event._id]: photoData.photographs
+        }));
       }
       triggerSuccess('All Scores Saved', 'All offline evaluations have been saved and submitted successfully.');
     } catch (err) {
@@ -281,6 +308,10 @@ export default function JudgeDashboard() {
         const photoData = await apiFetch(`/api/judges/assigned-photos/${event._id}`);
         if (photoData.success) {
           setPhotographs(photoData.photographs);
+          setAllPhotographsByEvent(prev => ({
+            ...prev,
+            [event._id]: photoData.photographs
+          }));
         }
         setOfflineZoomPhoto(null);
         triggerSuccess('Review Submitted', 'The photograph score evaluation has been saved successfully.');
@@ -355,6 +386,10 @@ export default function JudgeDashboard() {
         const photoData = await apiFetch(`/api/judges/assigned-photos/${event._id}`);
         if (photoData.success) {
           setPhotographs(photoData.photographs);
+          setAllPhotographsByEvent(prev => ({
+            ...prev,
+            [event._id]: photoData.photographs
+          }));
         }
         setActivePhoto(null);
         triggerSuccess('Review Submitted', 'The photograph score evaluations and remarks have been saved successfully.');

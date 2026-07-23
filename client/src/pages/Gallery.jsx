@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, HelpCircle, Flag, MessageSquare, AlertTriangle, Trophy, Eye, Download } from 'lucide-react';
+import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, HelpCircle, Flag, MessageSquare, AlertTriangle, Trophy, Eye, Download, Lock } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function Gallery() {
@@ -11,6 +11,14 @@ export default function Gallery() {
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     return `${baseUrl}${path}`;
+  };
+
+  const [certAlertMsg, setCertAlertMsg] = useState(null);
+
+  const handleShowCertificateAlert = (type) => {
+    setCertAlertMsg(
+      `This is a preview of your ${type === 'Champion' ? 'Champion' : 'Participation'} Certificate. The official printed certificate can only be collected from the event office or the designated exhibition/gallery after the competition. Digital download is not available.`
+    );
   };
   const [activeTab, setActiveTab] = useState('winners'); // Default to winners for guests
   const [event, setEvent] = useState(null);
@@ -445,15 +453,22 @@ export default function Gallery() {
 
                       {/* Right: Certificate Preview and Action Buttons */}
                       <div className="shrink-0 w-full lg:w-44 flex flex-col gap-3 items-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800/60 pt-4 lg:pt-0 lg:pl-6">
-                        <div className="relative group w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer"
-                             onClick={() => w.certificatePdfUrl && window.open(getBackendUrl(w.certificatePdfUrl), '_blank')}>
+                        <div className="relative group w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer select-none"
+                             onClick={() => handleShowCertificateAlert('Champion')}>
                           <img
                             src={`/${certTemplateName}`}
                             alt="Certificate Preview"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
+                            onContextMenu={e => e.preventDefault()}
                           />
-                          <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/30 flex items-center justify-center transition-all duration-300">
-                            <Eye size={18} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">
+                            <div className="text-[5.5px] leading-tight font-black text-red-650/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-650/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
+                              SAMPLE CERTIFICATE
+                              <br />
+                              NOT VALID FOR
+                              <br />
+                              PRINT OR DOWNLOAD
+                            </div>
                           </div>
                         </div>
                         <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Certificate Preview</span>
@@ -461,22 +476,20 @@ export default function Gallery() {
                         <div className="flex flex-col gap-1.5 w-full mt-1">
                           <button
                             type="button"
-                            onClick={() => w.certificatePdfUrl && window.open(getBackendUrl(w.certificatePdfUrl), '_blank')}
-                            className="w-full py-1.5 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer"
+                            onClick={() => handleShowCertificateAlert('Champion')}
+                            className="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer"
                           >
                             <Eye size={12} />
-                            View Certificate
+                            View Preview (Locked)
                           </button>
-                          <a
-                            href={w.certificatePdfUrl ? getBackendUrl(w.certificatePdfUrl) : '#'}
-                            download
-                            target="_blank"
-                            rel="noreferrer"
-                            className="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all text-center"
+                          <button
+                            onClick={() => handleShowCertificateAlert('Champion')}
+                            className="w-full py-1.5 px-3 bg-slate-200 hover:bg-slate-350 dark:bg-slate-800 text-slate-400 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer text-center"
+                            type="button"
                           >
-                            <Download size={12} />
+                            <Lock size={12} />
                             Download PDF
-                          </a>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -560,6 +573,31 @@ export default function Gallery() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Certificate Preview Alert Modal */}
+      {certAlertMsg && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border-2 border-indigo-500/20 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 text-center">
+            <div className="flex flex-col gap-2 items-center">
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl mb-2">
+                <Lock size={28} className="animate-pulse" />
+              </div>
+              <h3 className="font-display font-black text-lg text-slate-900 dark:text-white uppercase tracking-wider">
+                Reference Preview Only
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-350 leading-relaxed font-semibold">
+                {certAlertMsg}
+              </p>
+            </div>
+            <button
+              onClick={() => setCertAlertMsg(null)}
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md"
+            >
+              Got It
+            </button>
           </div>
         </div>
       )}

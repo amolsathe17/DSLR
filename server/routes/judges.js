@@ -122,13 +122,15 @@ router.post('/score', protect, authorize('Judge'), async (req, res) => {
       return res.status(403).json({ success: false, message: 'You are not assigned to score this photograph' });
     }
 
-    const c = parseFloat(creativity) || 0;
-    const co = parseFloat(composition) || 0;
-    const t = parseFloat(technicalQuality) || 0;
-    const s = parseFloat(storytelling) || 0;
-    const o = parseFloat(overallImpact) || 0;
+    const isDisapproved = (approvalStatus === 'Disapproved');
 
-    if ([c, co, t, s, o].some(val => val < 1 || val > 10)) {
+    const c = isDisapproved ? 0 : (parseFloat(creativity) || 0);
+    const co = isDisapproved ? 0 : (parseFloat(composition) || 0);
+    const t = isDisapproved ? 0 : (parseFloat(technicalQuality) || 0);
+    const s = isDisapproved ? 0 : (parseFloat(storytelling) || 0);
+    const o = isDisapproved ? 0 : (parseFloat(overallImpact) || 0);
+
+    if (!isDisapproved && [c, co, t, s, o].some(val => val < 1 || val > 10)) {
       return res.status(400).json({ success: false, message: 'All scores must be between 1 and 10' });
     }
 

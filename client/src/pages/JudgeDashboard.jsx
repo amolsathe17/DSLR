@@ -153,11 +153,11 @@ export default function JudgeDashboard() {
         body: JSON.stringify({
           submissionId: photo.submissionId,
           photoId: photo.photoId,
-          creativity: Math.min(10, Math.max(1, Number(scores.creativity) || 5)),
-          composition: Math.min(10, Math.max(1, Number(scores.composition) || 5)),
-          technicalQuality: Math.min(10, Math.max(1, Number(scores.technicalQuality) || 5)),
-          storytelling: Math.min(10, Math.max(1, Number(scores.storytelling) || 5)),
-          overallImpact: Math.min(10, Math.max(1, Number(scores.overallImpact) || 5)),
+          creativity: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.creativity) || 5)),
+          composition: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.composition) || 5)),
+          technicalQuality: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.technicalQuality) || 5)),
+          storytelling: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.storytelling) || 5)),
+          overallImpact: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.overallImpact) || 5)),
           remarks: scores.remarks || '',
           approvalStatus: scores.approvalStatus || 'Approved'
         })
@@ -214,11 +214,11 @@ export default function JudgeDashboard() {
           body: JSON.stringify({
             submissionId: photo.submissionId,
             photoId: photo.photoId,
-            creativity: Math.min(10, Math.max(1, Number(scores.creativity) || 5)),
-            composition: Math.min(10, Math.max(1, Number(scores.composition) || 5)),
-            technicalQuality: Math.min(10, Math.max(1, Number(scores.technicalQuality) || 5)),
-            storytelling: Math.min(10, Math.max(1, Number(scores.storytelling) || 5)),
-            overallImpact: Math.min(10, Math.max(1, Number(scores.overallImpact) || 5)),
+            creativity: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.creativity) || 5)),
+            composition: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.composition) || 5)),
+            technicalQuality: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.technicalQuality) || 5)),
+            storytelling: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.storytelling) || 5)),
+            overallImpact: scores.approvalStatus === 'Disapproved' ? 0 : Math.min(10, Math.max(1, Number(scores.overallImpact) || 5)),
             remarks: scores.remarks || '',
             approvalStatus: scores.approvalStatus || 'Approved'
           })
@@ -340,11 +340,11 @@ export default function JudgeDashboard() {
         body: JSON.stringify({
           submissionId: activePhoto.submissionId,
           photoId: activePhoto.photoId,
-          creativity,
-          composition,
-          technicalQuality,
-          storytelling,
-          overallImpact,
+          creativity: approvalStatus === 'Disapproved' ? 0 : creativity,
+          composition: approvalStatus === 'Disapproved' ? 0 : composition,
+          technicalQuality: approvalStatus === 'Disapproved' ? 0 : technicalQuality,
+          storytelling: approvalStatus === 'Disapproved' ? 0 : storytelling,
+          overallImpact: approvalStatus === 'Disapproved' ? 0 : overallImpact,
           remarks,
           approvalStatus
         })

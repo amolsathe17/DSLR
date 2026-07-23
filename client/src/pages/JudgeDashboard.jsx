@@ -323,17 +323,7 @@ export default function JudgeDashboard() {
     }
   };
 
-  const handleSaveAllScoringSheets = () => {
-    const ungradedCount = photographs.filter(p => !p.graded).length;
-    if (ungradedCount > 0) {
-      setConfirmModal({
-        message: `Evaluation Incomplete: You have ${ungradedCount} photograph${ungradedCount > 1 ? 's' : ''} remaining for evaluation. Please evaluate all photos before saving the scoring sheets.`,
-        isAlert: true
-      });
-    } else {
-      setShowSignOffModal(true);
-    }
-  };
+
 
   const handleOpenScoring = (photo) => {
     setActivePhoto(photo);

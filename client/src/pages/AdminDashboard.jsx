@@ -1305,7 +1305,13 @@ export default function AdminDashboard() {
                         return (
                           <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-emerald-200/50 dark:border-emerald-900/20 rounded-xl overflow-hidden flex flex-col shadow-sm">
                             <div className="relative">
-                              <img src={photo.fileUrl} alt={photo.title} className="w-full aspect-video object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                              {photo.fileUrl ? (
+                                <img src={photo.fileUrl} alt={photo.title} className="w-full aspect-video object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                              ) : (
+                                <div className="w-full aspect-video flex items-center justify-center bg-slate-800 text-slate-500 text-xs">
+                                  No Preview
+                                </div>
+                              )}
                               <span className="absolute top-1.5 right-1.5 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                                 <Star size={8} fill="white" /> {avgScore}/10
                               </span>
@@ -1339,7 +1345,13 @@ export default function AdminDashboard() {
                         return (
                           <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-red-200/60 dark:border-red-900/30 rounded-xl overflow-hidden flex flex-col shadow-sm">
                             <div className="relative">
-                              <img src={photo.fileUrl} alt={photo.title} className="w-full aspect-video object-cover opacity-80" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                              {photo.fileUrl ? (
+                                  <img src={photo.fileUrl} alt={photo.title} className="w-full aspect-video object-cover opacity-80" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                                ) : (
+                                  <div className="w-full aspect-video flex items-center justify-center bg-slate-800 text-slate-500 text-xs">
+                                    No Preview
+                                  </div>
+                                )}
                               <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                                 <Flag size={8} /> Disapproved
                               </span>

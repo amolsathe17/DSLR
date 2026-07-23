@@ -175,11 +175,17 @@ export default function Gallery() {
                       className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col group"
                     >
                       <div className="relative overflow-hidden aspect-video">
-                        <img
-                          src={photo.fileUrl}
-                          alt={photo.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+                        {photo.fileUrl ? (
+                          <img
+                            src={photo.fileUrl}
+                            alt={photo.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500 text-xs">
+                            No Preview
+                          </div>
+                        )}
                         <button
                           onClick={() => setSelectedPhoto(photo)}
                           className="absolute top-3 right-3 p-1.5 bg-slate-950/60 hover:bg-slate-950 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
@@ -281,11 +287,17 @@ export default function Gallery() {
                         className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col group justify-between"
                       >
                         <div className="relative overflow-hidden aspect-video">
-                          <img
-                            src={photo.fileUrl}
-                            alt={photo.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
-                          />
+                          {photo.fileUrl ? (
+                            <img
+                              src={photo.fileUrl}
+                              alt={photo.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500 text-xs">
+                              No Preview
+                            </div>
+                          )}
                           <span className="absolute top-3 left-3 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
                             <Flag size={9} className="fill-white" /> Disapproved
                           </span>
@@ -376,11 +388,17 @@ export default function Gallery() {
                     >
                       {/* Left: Winning Photograph Display */}
                       <div className="relative group shrink-0 w-full lg:w-64 aspect-video overflow-hidden rounded-2xl bg-slate-900 border border-slate-200 dark:border-slate-800">
-                        <img
-                          src={w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl}
-                          alt={w.photoTitle}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+                        { (w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl) ? (
+                          <img
+                            src={w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl}
+                            alt={w.photoTitle}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500 text-xs font-semibold">
+                            No Photo Preview
+                          </div>
+                        )}
                         <div className="absolute top-2 left-2 px-2.5 py-1 bg-black/60 backdrop-blur-sm rounded-lg text-[9px] text-white font-extrabold uppercase">
                           Winning Frame
                         </div>

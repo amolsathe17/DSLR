@@ -96,6 +96,13 @@ export default function Dashboard() {
   // Certificate Modal State
   const [showCertificate, setShowCertificate] = useState(false);
   const [showFinalSubmitModal, setShowFinalSubmitModal] = useState(false);
+  const [certAlertMsg, setCertAlertMsg] = useState(null);
+
+  const handleShowCertificateAlert = (type) => {
+    setCertAlertMsg(
+      `This is a preview of your ${type === 'Champion' ? 'Champion' : 'Participation'} Certificate. The official printed certificate can only be collected from the event office or the designated exhibition/gallery after the competition. Digital download is not available.`
+    );
+  };
 
   // Package & Declaration selection
   const [selectedPkgId, setSelectedPkgId] = useState("");
@@ -1066,24 +1073,12 @@ export default function Dashboard() {
           <div>
             <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">Digital Certificates & Credentials</h2>
             <p className="text-xs text-slate-500 mt-1">
-              You can claim digital credentials for contests you finalized once results are officially compiled and published by the administrators.
+              Online reference previews of your contest certificates. Official physical copies are issued directly at the event office or gallery.
             </p>
           </div>
 
           {(() => {
             const eligibleSubs = allSubmissions.filter(sub => sub.isFinalSubmitted);
-            
-            if (eligibleSubs.length === 0) {
-              return (
-                <div className="max-w-md mx-auto text-center py-16 flex flex-col items-center gap-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-3xl shadow-sm w-full">
-                  <Award className="w-10 h-10 text-indigo-500 animate-bounce" />
-                  <h2 className="font-display font-bold text-sm text-slate-900 dark:text-white">No Finalized Entries Found</h2>
-                  <p className="text-[11px] text-slate-500">
-                    You haven't finalized any contest submissions yet. Once you complete the upload, pay, and finalized under the "My Entries" tab, you'll be able to claim your certificate here once grading finishes!
-                  </p>
-                </div>
-              );
-            }
 
             // Group submissions into Winners and General Participants
             const winnerCards = [];
@@ -1098,6 +1093,27 @@ export default function Dashboard() {
                 standardCards.push({ sub, evDetails });
               }
             });
+
+            // If no standard participation certificates exist, we inject a dummy sample card
+            // so the user always sees a sample Participation Certificate in their dashboard!
+            if (standardCards.length === 0) {
+              const defaultEvent = eventsList[0] || {
+                title: "National Modeling Photography Championship 2026",
+                theme: "DSLR Portfolio & Creative Modeling",
+                eventDate: new Date().toISOString()
+              };
+              standardCards.push({
+                isDummy: true,
+                sub: {
+                  entryNumber: "SAMPLE-999999",
+                  eventTitle: defaultEvent.title,
+                  photoLimit: 3,
+                  photographs: [],
+                  updatedAt: new Date().toISOString()
+                },
+                evDetails: defaultEvent
+              });
+            }
 
             return (
               <div className="flex flex-col gap-8">
@@ -1115,22 +1131,32 @@ export default function Dashboard() {
                         const certTemplateName = isFirst ? '1st-Prize.png' : isSecond ? '2nd-Prize.png' : '3rd-Prize.png';
                         
                         return (
-                          <div key={index} className="bg-gradient-to-br from-amber-500/5 to-amber-600/5 border-2 border-amber-500/35 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center">
+                          <div key={index} className="bg-gradient-to-br from-amber-500/5 to-amber-600/5 border-2 border-amber-500/35 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center relative overflow-hidden">
                             
                             {/* Certificate Thumbnail Preview */}
-                            <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-amber-500/20 shadow-sm cursor-pointer animate-in zoom-in-95"
-                                 onClick={() => winInfo.certificatePdfUrl && window.open(getBackendUrl(winInfo.certificatePdfUrl), '_blank')}>
+                            <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-amber-500/20 shadow-sm cursor-pointer animate-in zoom-in-95 relative select-none"
+                                 onClick={() => handleShowCertificateAlert('Champion')}>
                               <img
                                 src={`/${certTemplateName}`}
                                 alt="Certificate Thumbnail"
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
+                                onContextMenu={e => e.preventDefault()}
                               />
+                              <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">
+                                <div className="text-[5.5px] leading-tight font-black text-red-650/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-650/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
+                                  SAMPLE CERTIFICATE
+                                  <br />
+                                  NOT VALID FOR
+                                  <br />
+                                  PRINT OR DOWNLOAD
+                                </div>
+                              </div>
                             </div>
 
                             <div className="flex-1 flex flex-col justify-between h-full w-full gap-3 text-left">
                               <div>
                                 <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-600">
-                                  🏆 {winInfo.rank}
+                                  🏆 {winInfo.rank} (Preview Only)
                                 </span>
                                 <h4 className="font-display font-black text-sm text-slate-900 dark:text-white mt-1.5 leading-tight">
                                   {sub.eventTitle}
@@ -1146,30 +1172,27 @@ export default function Dashboard() {
                               <div className="flex flex-col gap-1.5 mt-1">
                                 <button
                                   type="button"
-                                  onClick={() => winInfo.certificatePdfUrl && window.open(getBackendUrl(winInfo.certificatePdfUrl), '_blank')}
+                                  onClick={() => handleShowCertificateAlert('Champion')}
                                   className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                                 >
                                   <Eye size={12} />
-                                  View Certificate
+                                  View Preview (Locked)
                                 </button>
                                 <div className="flex gap-2">
-                                  <a
-                                    href={winInfo.certificatePdfUrl ? getBackendUrl(winInfo.certificatePdfUrl) : '#'}
-                                    download
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex-1 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                                  <button
+                                    onClick={() => handleShowCertificateAlert('Champion')}
+                                    className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-400 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
                                   >
-                                    <Download size={12} />
+                                    <Lock size={12} />
                                     Download PDF
-                                  </a>
+                                  </button>
                                   <button
                                     type="button"
-                                    onClick={() => winInfo.certificatePdfUrl && handlePrintCertificate(winInfo.certificatePdfUrl)}
-                                    className="px-2.5 py-1.5 bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-250 rounded-xl text-[10px] font-bold flex items-center justify-center transition-colors cursor-pointer"
-                                    title="Print Certificate"
+                                    onClick={() => handleShowCertificateAlert('Champion')}
+                                    className="px-2.5 py-1.5 bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 rounded-xl text-[10px] font-bold flex items-center justify-center transition-colors cursor-pointer"
+                                    title="Print Certificate (Disabled)"
                                   >
-                                    <Printer size={12} />
+                                    <Lock size={12} />
                                   </button>
                                 </div>
                               </div>
@@ -1188,46 +1211,75 @@ export default function Dashboard() {
                     🎖️ Contest Participation Credentials
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {standardCards.map(({ sub, evDetails }, index) => {
-                      const isReady = evDetails?.winnersPublished;
-
+                    {standardCards.map(({ sub, evDetails, isDummy }, index) => {
                       return (
-                        <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-left shadow-sm justify-between">
-                          <div className="flex flex-col gap-1.5">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider">
-                                Entry {sub.entryNumber}
-                              </span>
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${isReady ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-400'}`}>
-                                {isReady ? 'Ready for Download' : 'Grading in Progress'}
-                              </span>
+                        <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center relative overflow-hidden">
+                          
+                          {/* Watermarked Thumbnail Preview */}
+                          <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer select-none relative"
+                               onClick={() => handleShowCertificateAlert('Participation')}>
+                            <img
+                              src="/participation-template.png"
+                              alt="Participation Certificate Thumbnail"
+                              className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
+                              onContextMenu={e => e.preventDefault()}
+                            />
+                            <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">
+                              <div className="text-[5.5px] leading-tight font-black text-red-650/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-650/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
+                                SAMPLE CERTIFICATE
+                                <br />
+                                NOT VALID FOR
+                                <br />
+                                PRINT OR DOWNLOAD
+                              </div>
                             </div>
-                            <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
-                              {sub.eventTitle}
-                            </h4>
-                            <p className="text-[11px] text-slate-500 leading-relaxed">
-                              Package: {sub.photoLimit} photos ({sub.photographs?.length || 0} uploaded). Submitted on {new Date(sub.updatedAt).toLocaleDateString()}.
-                            </p>
                           </div>
 
-                          {isReady ? (
-                            <button
-                              onClick={() => {
-                                setEvent(evDetails);
-                                setSubmission(sub);
-                                setShowCertificate(true);
-                              }}
-                              className="text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full mt-2 bg-indigo-600 hover:bg-indigo-700 shadow-md"
-                            >
-                              <Award size={14} />
-                              View & Download Participation Certificate
-                            </button>
-                          ) : (
-                            <div className="bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/40 p-3 rounded-xl text-[10px] text-slate-400 mt-2 flex items-center gap-2">
-                              <Clock size={14} className="shrink-0" />
-                              <span>Jury panel is compiling results. Certificate unlocks immediately upon publishing.</span>
+                          <div className="flex-1 flex flex-col justify-between h-full w-full gap-3 text-left">
+                            <div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isDummy ? 'bg-rose-500/10 text-rose-600' : 'bg-indigo-500/10 text-indigo-600'}`}>
+                                🎖️ {isDummy ? 'SAMPLE PREVIEW' : `Entry ${sub.entryNumber}`}
+                              </span>
+                              <h4 className="font-display font-black text-sm text-slate-900 dark:text-white mt-1.5 leading-tight">
+                                {sub.eventTitle}
+                              </h4>
+                              <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                                Type: Participation Reference Preview
+                              </p>
+                              <p className="text-[10px] text-slate-500 leading-none mt-0.5 font-semibold">
+                                Recipient: <span className="italic">{user?.name}</span>
+                              </p>
                             </div>
-                          )}
+
+                            <div className="flex flex-col gap-1.5 mt-1">
+                              <button
+                                type="button"
+                                onClick={() => handleShowCertificateAlert('Participation')}
+                                className="w-full py-1.5 bg-slate-900/90 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                              >
+                                <Eye size={12} />
+                                View Preview (Locked)
+                              </button>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleShowCertificateAlert('Participation')}
+                                  className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-400 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                                  type="button"
+                                >
+                                  <Lock size={12} />
+                                  Download PDF
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowCertificateAlert('Participation')}
+                                  className="px-2.5 py-1.5 bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 rounded-xl text-[10px] font-bold flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Print Certificate (Disabled)"
+                                >
+                                  <Lock size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
@@ -2124,6 +2176,31 @@ export default function Dashboard() {
           event={event}
           onClose={() => setShowCertificate(false)}
         />
+      )}
+
+      {/* Custom Certificate Preview Alert Modal */}
+      {certAlertMsg && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border-2 border-indigo-500/20 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 text-center">
+            <div className="flex flex-col gap-2 items-center">
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl mb-2">
+                <Lock size={28} className="animate-pulse" />
+              </div>
+              <h3 className="font-display font-black text-lg text-slate-900 dark:text-white uppercase tracking-wider">
+                Reference Preview Only
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-350 leading-relaxed font-semibold">
+                {certAlertMsg}
+              </p>
+            </div>
+            <button
+              onClick={() => setCertAlertMsg(null)}
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
       )}
 
       {/* FINAL SUBMISSION CONFIRMATION MODAL */}

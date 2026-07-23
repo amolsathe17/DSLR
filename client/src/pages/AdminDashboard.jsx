@@ -1260,7 +1260,7 @@ export default function AdminDashboard() {
           {/* ── Judge Photo Review Cards ── */}
           {(() => {
             const judgedPhotos = photographs.filter(p => p.scores && p.scores.length > 0);
-            const approvedPhotos = judgedPhotos.filter(p => p.scores.every(s => s.approvalStatus === 'Approved'));
+            const approvedPhotos = judgedPhotos.filter(p => p.scores.every(s => (s.approvalStatus || 'Approved') === 'Approved'));
             const disapprovedPhotos = judgedPhotos.filter(p => p.scores.some(s => s.approvalStatus === 'Disapproved'));
 
             return (

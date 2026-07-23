@@ -161,7 +161,7 @@ export default function Gallery() {
 
             {/* Gallery Grid */}
             {(() => {
-              const approvedPhotos = filteredPhotos.filter(p => !p.scores || p.scores.every(s => s.approvalStatus === 'Approved'));
+              const approvedPhotos = filteredPhotos.filter(p => !p.scores || p.scores.every(s => (s.approvalStatus || 'Approved') === 'Approved'));
               if (approvedPhotos.length === 0) {
                 return (
                   <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">

@@ -406,7 +406,7 @@ export default function JudgeDashboard() {
       if (data.success) {
         setEvent(data.event);
         setEvents(events.map(e => e._id === data.event._id ? data.event : e));
-        triggerSuccess('Grading Signed Off', 'You have successfully finalized and signed off on your evaluations for this event.');
+        triggerSuccess('Signed Off', 'You have successfully signed off on your evaluations for this event.');
       }
     } catch (err) {
       console.error(err);

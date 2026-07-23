@@ -565,15 +565,8 @@ router.post('/final-submit', protect, async (req, res) => {
 // @access  Public
 router.get('/gallery', async (req, res) => {
   try {
-    const completedEvents = await Event.find({ status: 'Completed' });
-    const completedEventIds = completedEvents.map(e => e._id.toString());
-
     const submissions = await Submission.find({
-      isFinalSubmitted: true,
-      $or: [
-        { paymentStatus: 'Paid' },
-        { eventId: { $in: completedEventIds } }
-      ]
+      isFinalSubmitted: true
     });
     const photos = [];
 

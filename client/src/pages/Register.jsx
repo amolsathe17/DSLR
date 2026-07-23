@@ -160,7 +160,15 @@ export default function Register() {
   return (
     <div 
       className="min-h-[calc(100vh-4rem)] w-full flex items-center bg-cover bg-center relative"
-      style={{ backgroundImage: `url('${event?.loginBgUrl || '/login_bg.jpg'}')` }}
+      style={{
+        backgroundImage: `url('${
+          event?.loginBgUrl
+            ? event.loginBgUrl.startsWith('http')
+              ? event.loginBgUrl
+              : `${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}${event.loginBgUrl.startsWith('/') ? '' : '/'}${event.loginBgUrl}`
+            : '/login_bg.jpg'
+        }')`
+      }}
     >
       {/* Dark tint overlay without blur */}
       <div className="absolute inset-0 bg-slate-950/15"></div>

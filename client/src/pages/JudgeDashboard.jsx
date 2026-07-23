@@ -4,6 +4,12 @@ import { Camera, ShieldAlert, Award, Star, Star as StarIcon, CheckCircle2, Chevr
 import WatermarkPreview from '../components/WatermarkPreview';
 
 export default function JudgeDashboard() {
+  const getBackendUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    return `${baseUrl}${path}`;
+  };
   const { apiFetch, user } = useAuth();
   
   const [event, setEvent] = useState(null);
@@ -791,7 +797,7 @@ export default function JudgeDashboard() {
                               <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
                                 <td className="py-3.5 px-4 whitespace-nowrap">
                                   <div className="w-16 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
-                                    <img src={item.fileUrl} alt={item.title} className="w-full h-full object-cover" />
+                                    <img src={getBackendUrl(item.fileUrl)} alt={item.title} className="w-full h-full object-cover" />
                                   </div>
                                 </td>
                                 <td className="py-3.5 px-4">
@@ -975,7 +981,7 @@ export default function JudgeDashboard() {
                       >
                         <div className="w-full h-48 bg-slate-950 relative overflow-hidden flex items-center justify-center">
                           <WatermarkPreview
-                            src={photo.fileUrl}
+                            src={getBackendUrl(photo.fileUrl)}
                             className="w-full h-full object-contain"
                           />
                           <span className={`absolute top-3 left-3 px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full shadow-sm ${
@@ -1050,7 +1056,7 @@ export default function JudgeDashboard() {
                             className="w-full h-48 bg-slate-950 relative overflow-hidden flex items-center justify-center cursor-zoom-in"
                           >
                             <WatermarkPreview
-                              src={photo.fileUrl}
+                              src={getBackendUrl(photo.fileUrl)}
                               className="w-full h-full object-contain"
                             />
                             <span className={`absolute top-3 left-3 px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full shadow-sm ${
@@ -1142,7 +1148,7 @@ export default function JudgeDashboard() {
               <div className="flex-grow flex items-center justify-center p-4 overflow-hidden">
                 <div className="relative w-full h-full flex items-center justify-center group cursor-zoom-in">
                   <WatermarkPreview
-                    src={activePhoto.fileUrl}
+                    src={getBackendUrl(activePhoto.fileUrl)}
                     className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg"
                     enableZoom={true}
                   />
@@ -1402,7 +1408,7 @@ export default function JudgeDashboard() {
               {/* Hover Zoom preview container */}
               <div className="relative w-full h-full flex items-center justify-center overflow-hidden group cursor-zoom-in">
                 <WatermarkPreview
-                  src={offlineZoomPhoto.fileUrl}
+                  src={getBackendUrl(offlineZoomPhoto.fileUrl)}
                   className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg"
                   enableZoom={true}
                 />

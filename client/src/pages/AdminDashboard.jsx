@@ -35,6 +35,12 @@ import {
 import StatsCharts from '../components/StatsCharts';
 
 export default function AdminDashboard() {
+  const getBackendUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    return `${baseUrl}${path}`;
+  };
   const { apiFetch, user, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -1306,7 +1312,7 @@ export default function AdminDashboard() {
                           <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-emerald-200/50 dark:border-emerald-900/20 rounded-xl overflow-hidden flex flex-col shadow-sm">
                             <div className="relative">
                               {photo.fileUrl ? (
-                                <img src={photo.fileUrl} alt={photo.title} className="w-full aspect-video object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                                <img src={getBackendUrl(photo.fileUrl)} alt={photo.title} className="w-full aspect-video object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
                               ) : (
                                 <div className="w-full aspect-video flex items-center justify-center bg-slate-800 text-slate-500 text-xs">
                                   No Preview
@@ -1346,7 +1352,7 @@ export default function AdminDashboard() {
                           <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-red-200/60 dark:border-red-900/30 rounded-xl overflow-hidden flex flex-col shadow-sm">
                             <div className="relative">
                               {photo.fileUrl ? (
-                                  <img src={photo.fileUrl} alt={photo.title} className="w-full aspect-video object-cover opacity-80" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                                  <img src={getBackendUrl(photo.fileUrl)} alt={photo.title} className="w-full aspect-video object-cover opacity-80" crossOrigin="anonymous" referrerPolicy="no-referrer" />
                                 ) : (
                                   <div className="w-full aspect-video flex items-center justify-center bg-slate-800 text-slate-500 text-xs">
                                     No Preview
@@ -1606,7 +1612,7 @@ export default function AdminDashboard() {
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow transition-all cursor-zoom-in relative aspect-video"
               >
                 <img 
-                  src={photo.fileUrl} 
+                  src={getBackendUrl(photo.fileUrl)} 
                   alt={photo.title} 
                   className="w-full h-full object-cover"
                   crossOrigin="anonymous"
@@ -1925,7 +1931,7 @@ export default function AdminDashboard() {
                                 return (
                                   <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-red-200/50 dark:border-red-900/30 rounded-xl overflow-hidden flex gap-3 p-2 shadow-sm">
                                     <img
-                                      src={photo.fileUrl}
+                                      src={getBackendUrl(photo.fileUrl)}
                                       alt={photo.title}
                                       className="w-14 h-14 object-cover rounded-lg shrink-0 opacity-75"
                                       crossOrigin="anonymous"
@@ -3038,7 +3044,7 @@ export default function AdminDashboard() {
             {/* Left Column: Image Viewport */}
             <div className="flex-grow bg-slate-950 flex items-center justify-center p-6 relative h-full">
               <img 
-                src={selectedPhoto.fileUrl} 
+                src={getBackendUrl(selectedPhoto.fileUrl)} 
                 alt={selectedPhoto.title}
                 className="w-full h-full object-contain rounded-2xl shadow-lg border border-slate-800"
                 crossOrigin="anonymous"
@@ -3280,7 +3286,7 @@ export default function AdminDashboard() {
                     {selectedParticipant.photographs.map(photo => (
                       <div key={photo.id} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex gap-3 p-3">
                         <img 
-                          src={photo.fileUrl} 
+                          src={getBackendUrl(photo.fileUrl)} 
                           alt={photo.title}
                           className="w-24 h-24 object-cover rounded-lg shrink-0 border border-slate-200 dark:border-slate-800"
                           crossOrigin="anonymous"

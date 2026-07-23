@@ -192,7 +192,7 @@ export default function Gallery() {
                       <div className="relative overflow-hidden aspect-video">
                         {photo.fileUrl ? (
                           <img
-                            src={photo.fileUrl}
+                            src={getBackendUrl(photo.fileUrl)}
                             alt={photo.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -304,7 +304,7 @@ export default function Gallery() {
                         <div className="relative overflow-hidden aspect-video">
                           {photo.fileUrl ? (
                             <img
-                              src={photo.fileUrl}
+                              src={getBackendUrl(photo.fileUrl)}
                               alt={photo.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
                             />
@@ -405,7 +405,7 @@ export default function Gallery() {
                       <div className="relative group shrink-0 w-full lg:w-64 aspect-video overflow-hidden rounded-2xl bg-slate-900 border border-slate-200 dark:border-slate-800">
                         { (w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl) ? (
                           <img
-                            src={w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl}
+                            src={getBackendUrl(w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl)}
                             alt={w.photoTitle}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
@@ -515,7 +515,7 @@ export default function Gallery() {
             <div className="grid grid-cols-1 lg:grid-cols-12">
               <div className="lg:col-span-8 bg-slate-950 flex items-center justify-center min-h-[300px] max-h-[500px]">
                 {/* Custom Watermarked Preview component */}
-                <WatermarkPreview src={selectedPhoto.fileUrl} className="w-full h-full" />
+                <WatermarkPreview src={getBackendUrl(selectedPhoto.fileUrl)} className="w-full h-full" />
               </div>
               <div className="lg:col-span-4 p-6 flex flex-col justify-between text-xs max-h-[500px] overflow-y-auto">
                 <div className="flex flex-col gap-4">

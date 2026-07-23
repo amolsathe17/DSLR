@@ -1672,7 +1672,7 @@ export default function Dashboard() {
                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {submission.photographs.map((photo) => (
                                           <div key={photo.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-sm">
-                                            <WatermarkPreview src={photo.fileUrl} className="aspect-video w-full" />
+                                            <WatermarkPreview src={getBackendUrl(photo.fileUrl)} className="aspect-video w-full" />
                                             <div className="p-4 flex flex-col gap-3 grow justify-between">
                                               <div>
                                                 <div className="flex justify-between items-start gap-2">
@@ -1867,7 +1867,7 @@ export default function Dashboard() {
                                 {sub.photographs.map((photo) => {
                                   return (
                                     <div key={photo.id} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
-                                      <WatermarkPreview src={photo.fileUrl} className="aspect-video w-full" />
+                                      <WatermarkPreview src={getBackendUrl(photo.fileUrl)} className="aspect-video w-full" />
                                       <div className="p-3.5 flex flex-col gap-2.5">
                                         <div>
                                           <h5 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">{photo.title}</h5>

@@ -651,112 +651,135 @@ export default function JudgeDashboard() {
                   </div>
                 )}
 
-                {/* Approved/Disapproved list by event, and history */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-left">
-                  
-                  {/* Event wise approvals / disapproval tracking */}
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm">
-                    <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Events Breakdown Tracking</h3>
-                    <div className="flex flex-col gap-4 overflow-y-auto max-h-[350px] pr-2">
-                      {events.map((e, idx) => {
-                        const eventPhotos = allPhotographsByEvent[e._id] || [];
-                        const total = eventPhotos.length;
-                        const approved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Approved').length;
-                        const disapproved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Disapproved').length;
-                        const evaluated = eventPhotos.filter(p => p.graded).length;
-
-                        return (
-                          <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-2.5 text-xs">
-                            <div className="flex justify-between items-center">
-                              <span className="font-extrabold text-slate-900 dark:text-white">{e.title}</span>
-                              <span className={`px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full ${
-                                evaluated === total && total > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
-                              }`}>
-                                {evaluated} / {total} Graded
-                              </span>
-                            </div>
-                            
-                            {/* Visual Progress bar */}
-                            <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                              <div
-                                style={{ width: `${total ? (evaluated / total) * 100 : 0}%` }}
-                                className="bg-indigo-600 h-full rounded-full"
-                              />
-                            </div>
-
-                            <div className="flex justify-between text-[10px] text-slate-400 mt-1 border-t border-slate-100 dark:border-slate-800/40 pt-2">
-                              <span>Approved: <strong className="text-emerald-600 dark:text-emerald-400">{approved}</strong></span>
-                              <span>Disapproved: <strong className="text-red-600 dark:text-red-400">{disapproved}</strong></span>
-                              <span>Pending: <strong className="text-slate-600 dark:text-slate-300">{total - evaluated}</strong></span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Right side: Evaluation history timeline */}
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm">
-                    <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Past Evaluation History Log</h3>
-                    
-                    {(() => {
-                      const historyList = [];
-                      events.forEach(e => {
-                        const eventPhotos = allPhotographsByEvent[e._id] || [];
-                        eventPhotos.forEach(p => {
-                          if (p.graded && p.score) {
-                            historyList.push({
-                              ...p,
-                              eventTitle: e.title
-                            });
-                          }
-                        });
-                      });
-
-                      // Sort by grading update date
-                      historyList.sort((a, b) => new Date(b.score.updatedAt || b.score.createdAt) - new Date(a.score.updatedAt || a.score.createdAt));
-
-                      if (historyList.length === 0) {
-                        return (
-                          <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-[220px]">
-                            <span>No graded photographs found. Get started in the workspace tab!</span>
-                          </div>
-                        );
-                      }
+                {/* Event wise approvals / disapproval tracking (Stacked Full-Width) */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left">
+                  <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Events Breakdown Tracking</h3>
+                  <div className="flex flex-col gap-4">
+                    {events.map((e, idx) => {
+                      const eventPhotos = allPhotographsByEvent[e._id] || [];
+                      const total = eventPhotos.length;
+                      const approved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Approved').length;
+                      const disapproved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Disapproved').length;
+                      const evaluated = eventPhotos.filter(p => p.graded).length;
 
                       return (
-                        <div className="flex flex-col gap-4 overflow-y-auto max-h-[350px] pr-2 pl-4 border-l border-slate-100 dark:border-slate-800">
-                          {historyList.map((item, idx) => (
-                            <div key={idx} className="relative flex flex-col gap-1.5 text-xs text-left">
-                              <span className="absolute -left-[22px] top-1 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-500" />
-                              <span className="text-[10px] text-slate-400 font-semibold">
-                                {new Date(item.score.updatedAt || item.score.createdAt).toLocaleDateString()}
-                              </span>
-                              <div className="flex justify-between items-start gap-2">
-                                <h4 className="font-extrabold text-slate-900 dark:text-white leading-tight">
-                                  {item.title}
-                                </h4>
-                                <span className={`shrink-0 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
-                                  item.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
-                                }`}>
-                                  {item.score.approvalStatus}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-slate-500 leading-none">
-                                Event: {item.eventTitle} | Average: <strong className="text-indigo-600 dark:text-indigo-400">{item.score.averageScore}</strong>
-                              </p>
-                              {item.score.remarks && (
-                                <p className="text-[11px] text-slate-500 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-100 dark:border-slate-800/40 leading-relaxed mt-1">
-                                  "${item.score.remarks}"
-                                </p>
-                              )}
-                            </div>
-                          ))}
+                        <div key={idx} className="p-5 bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl flex flex-col gap-3 text-xs">
+                          <div className="flex justify-between items-center">
+                            <span className="font-extrabold text-slate-900 dark:text-white text-sm">{e.title}</span>
+                            <span className={`px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-full ${
+                              evaluated === total && total > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                            }`}>
+                              {evaluated} / {total} Graded
+                            </span>
+                          </div>
+                          
+                          {/* Visual Progress bar */}
+                          <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div
+                              style={{ width: `${total ? (evaluated / total) * 100 : 0}%` }}
+                              className="bg-indigo-600 h-full rounded-full transition-all duration-1000 ease-out"
+                            />
+                          </div>
+
+                          <div className="flex justify-between text-[11px] text-slate-400 mt-1 border-t border-slate-100 dark:border-slate-850 pt-2.5">
+                            <span>Approved: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{approved}</strong></span>
+                            <span>Disapproved: <strong className="text-red-600 dark:text-red-400 font-bold">{disapproved}</strong></span>
+                            <span>Pending: <strong className="text-slate-600 dark:text-slate-350 font-bold">{total - evaluated}</strong></span>
+                          </div>
                         </div>
                       );
-                    })()}
+                    })}
                   </div>
+                </div>
 
+                {/* Past Evaluation History Log (Full-Width modern table/grid view) */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left">
+                  <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Past Evaluation History Log</h3>
+                  
+                  {(() => {
+                    const historyList = [];
+                    events.forEach(e => {
+                      const eventPhotos = allPhotographsByEvent[e._id] || [];
+                      eventPhotos.forEach(p => {
+                        if (p.graded && p.score) {
+                          historyList.push({
+                            ...p,
+                            eventTitle: e.title
+                          });
+                        }
+                      });
+                    });
+
+                    // Sort by grading update date
+                    historyList.sort((a, b) => new Date(b.score.updatedAt || b.score.createdAt) - new Date(a.score.updatedAt || a.score.createdAt));
+
+                    if (historyList.length === 0) {
+                      return (
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-[220px]">
+                          <span>No graded photographs found. Get started in the workspace tab!</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="overflow-x-auto w-full border border-slate-200/60 dark:border-slate-800 rounded-2xl">
+                        <table className="w-full text-xs text-left border-collapse">
+                          <thead>
+                            <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                              <th className="py-3 px-4">Photo</th>
+                              <th className="py-3 px-4">Details</th>
+                              <th className="py-3 px-4 text-center">Scores</th>
+                              <th className="py-3 px-4 text-center">Average</th>
+                              <th className="py-3 px-4 text-center">Status</th>
+                              <th className="py-3 px-4">Remarks</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                            {historyList.map((item, idx) => (
+                              <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
+                                <td className="py-3.5 px-4 whitespace-nowrap">
+                                  <div className="w-16 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
+                                    <img src={item.fileUrl} alt={item.title} className="w-full h-full object-cover" />
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className="font-extrabold text-slate-900 dark:text-white block truncate max-w-[200px]">{item.title}</span>
+                                  <span className="text-[10px] text-slate-400 block truncate max-w-[200px]">{item.eventTitle}</span>
+                                  <span className="text-[9px] text-slate-500 block mt-0.5 font-semibold">{new Date(item.score.updatedAt || item.score.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <div className="flex items-center justify-center gap-1 text-[9px] font-mono font-bold">
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded" title="Creativity">C:{item.score.creativity}</span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded" title="Composition">CO:{item.score.composition}</span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded" title="Technical Quality">T:{item.score.technicalQuality}</span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded" title="Storytelling">S:{item.score.storytelling}</span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded" title="Overall Impact">I:{item.score.overallImpact}</span>
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="font-mono text-xs font-black text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 dark:bg-indigo-500/5 px-2.5 py-1 rounded-lg">
+                                    {Number(item.score.averageScore).toFixed(2)}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide ${
+                                    item.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                                  }`}>
+                                    {item.score.approvalStatus === 'Approved' ? '✓ Approved' : '🛑 Disapproved'}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 italic max-w-xs truncate" title={item.score.remarks}>
+                                    {item.score.remarks ? `"${item.score.remarks}"` : '-'}
+                                  </p>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
                 </div>
               </>
             );

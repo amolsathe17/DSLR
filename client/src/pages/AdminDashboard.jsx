@@ -1708,8 +1708,8 @@ export default function AdminDashboard() {
                 {/* Select contest */}
                 {events.map(e => {
                   // Calculate rank averages for this event specifically (only paid ones)
-                  const eventPhotos = photographs.filter(p => p.eventId === e._id && p.paymentStatus === 'Paid');
-                  const finalPhotos = eventPhotos.filter(p => p.isFinalSubmitted);
+                  const eventPhotos = photographs.filter(p => p.eventId === e._id);
+                  const finalPhotos = eventPhotos;
                   const gradedPhotos = eventPhotos.filter(p => p.scores && p.scores.length > 0);
 
                   // Sort graded photos by score (total or average)
@@ -3387,7 +3387,7 @@ export default function AdminDashboard() {
                         >
                           <option value="">-- Choose Photograph --</option>
                           {photographs
-                            .filter(p => p.status !== 'Rejected' && p.scores?.length > 0 && p.paymentStatus === 'Paid')
+                            .filter(p => p.status !== 'Rejected' && p.scores?.length > 0)
                             .map(p => (
                               <option key={p.photoId} value={`${p.submissionId}:${p.photoId}`}>
                                 {p.title} - By {p.participantName} (Avg: {p.averageScore})

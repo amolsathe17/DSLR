@@ -18,7 +18,7 @@ export default function About() {
             The Sumba Story
           </div>
           <h1 className="font-display font-black text-4xl sm:text-6xl tracking-tight text-slate-900 dark:text-white leading-tight">
-            Honoring Art in its <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">Truest Form</span>
+            Honoring Art in its <span className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">Truest Form</span>
           </h1>
           <p className="text-sm sm:text-base text-slate-500 max-w-xl leading-relaxed">
             A celebration of heritage, tribal traditions, and decades of creative devotion, keeping fading voices alive.
@@ -30,7 +30,7 @@ export default function About() {
           
           {/* Card 1: Core Mission */}
           <div className="group relative glass-panel border border-slate-200/65 dark:border-slate-800/65 p-8 rounded-3xl shadow-xl flex flex-col gap-5 hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-all duration-300 bg-white/50 dark:bg-slate-900/30 backdrop-blur-md">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-tr-3xl rounded-bl-full -z-10"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-indigo-500/10 to-transparent rounded-tr-3xl rounded-bl-full -z-10"></div>
             <div className="p-3 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 rounded-2xl w-max">
               <Compass size={24} />
             </div>
@@ -44,7 +44,7 @@ export default function About() {
 
           {/* Card 2: Inspiration & Legacy */}
           <div className="group relative glass-panel border border-slate-200/65 dark:border-slate-800/65 p-8 rounded-3xl shadow-xl flex flex-col gap-5 hover:border-pink-500/40 dark:hover:border-pink-400/40 transition-all duration-300 bg-white/50 dark:bg-slate-900/30 backdrop-blur-md">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-500/10 to-transparent rounded-tr-3xl rounded-bl-full -z-10"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-pink-500/10 to-transparent rounded-tr-3xl rounded-bl-full -z-10"></div>
             <div className="p-3 bg-pink-50 dark:bg-pink-950/30 text-pink-500 dark:text-pink-400 rounded-2xl w-max">
               <Feather size={24} />
             </div>

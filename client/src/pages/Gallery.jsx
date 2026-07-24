@@ -106,42 +106,44 @@ export default function Gallery() {
         </div>
 
         {/* Tab switchers */}
-        <div className="flex justify-center border-b border-slate-200 dark:border-slate-800 max-w-xl mx-auto gap-8 mb-8">
-          <button
-            onClick={() => setActiveTab('gallery')}
-            className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'gallery'
-                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-          >
-            <Camera size={16} />
-            Approved Entries
-          </button>
-          <button
-            onClick={() => setActiveTab('disapproved')}
-            className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'disapproved'
-                ? 'border-red-500 text-red-600 dark:text-red-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-          >
-            <Flag size={16} className={activeTab === 'disapproved' ? 'text-red-500' : 'text-slate-400'} />
-            Disapproved Entries
-          </button>
-          {(!user || user.role !== 'Participant' || event?.winnersPublished) && (
+        <div className="flex justify-center mb-8">
+          <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto overflow-x-auto whitespace-nowrap min-w-max gap-1">
             <button
-              onClick={() => setActiveTab('winners')}
-              className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
-                activeTab === 'winners'
-                  ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
-                  : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+              onClick={() => setActiveTab('gallery')}
+              className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'gallery'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              <Award size={16} />
-              Winners Circle
+              <Camera size={14} />
+              Approved Entries
             </button>
-          )}
+            <button
+              onClick={() => setActiveTab('disapproved')}
+              className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'disapproved'
+                  ? 'bg-red-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              <Flag size={14} />
+              Disapproved Entries
+            </button>
+            {(!user || user.role !== 'Participant' || event?.winnersPublished) && (
+              <button
+                onClick={() => setActiveTab('winners')}
+                className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'winners'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                <Award size={14} />
+                Winners Circle
+              </button>
+            )}
+          </div>
         </div>
 
         {/* TAB 1: APPROVED SUBMISSIONS */}

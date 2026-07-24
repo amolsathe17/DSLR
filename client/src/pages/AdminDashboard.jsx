@@ -1216,29 +1216,31 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tabs list */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800/60 overflow-x-auto gap-4 mb-8">
-        {[
-          { id: 'overview', label: 'Overview', icon: BarChart },
-          { id: 'participants', label: 'Participants', icon: Users },
-          { id: 'photographs', label: 'Photographs', icon: Camera },
-          { id: 'judges', label: 'Judges & Results', icon: Award },
-          { id: 'events', label: 'Contests & Configuration', icon: Calendar },
-          { id: 'categories_config', label: 'Categories', icon: Layers },
-          { id: 'profile_settings', label: 'Profile Settings', icon: User }
-        ].map(t => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all px-2 whitespace-nowrap cursor-pointer ${
-              activeTab === t.id
-                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-          >
-            <t.icon size={16} />
-            {t.label}
-          </button>
-        ))}
+      <div className="flex mb-8 overflow-x-auto justify-center sm:justify-start">
+        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 overflow-x-auto whitespace-nowrap min-w-max gap-1">
+          {[
+            { id: 'overview', label: 'Overview', icon: BarChart },
+            { id: 'participants', label: 'Participants', icon: Users },
+            { id: 'photographs', label: 'Photographs', icon: Camera },
+            { id: 'judges', label: 'Judges & Results', icon: Award },
+            { id: 'events', label: 'Contests & Configuration', icon: Calendar },
+            { id: 'categories_config', label: 'Categories', icon: Layers },
+            { id: 'profile_settings', label: 'Profile Settings', icon: User }
+          ].map(t => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
+                activeTab === t.id
+                  ? 'bg-amber-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              <t.icon size={14} />
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* TAB 1: OVERVIEW */}

@@ -479,27 +479,29 @@ export default function JudgeDashboard() {
       )}
 
       {/* Dashboard Sub-navigation Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 mb-8 gap-6 justify-center sm:justify-start">
-        <button
-          onClick={() => setJudgeDashboardTab("overview")}
-          className={`pb-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-            judgeDashboardTab === "overview"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-          }`}
-        >
-          Overview
-        </button>
-        <button
-          onClick={() => setJudgeDashboardTab("portal")}
-          className={`pb-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-            judgeDashboardTab === "portal"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-          }`}
-        >
-          Evaluation Portal Workspace
-        </button>
+      <div className="flex justify-center sm:justify-start mb-8">
+        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto">
+          <button
+            onClick={() => setJudgeDashboardTab("overview")}
+            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              judgeDashboardTab === "overview"
+                ? "bg-emerald-600 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setJudgeDashboardTab("portal")}
+            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              judgeDashboardTab === "portal"
+                ? "bg-emerald-600 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            Evaluation Portal Workspace
+          </button>
+        </div>
       </div>
 
       {judgeDashboardTab === "overview" && (
@@ -904,12 +906,12 @@ export default function JudgeDashboard() {
           ) : (
             <>
               {/* Evaluation Mode Tabs */}
-              <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6 bg-slate-100 dark:bg-slate-900/40 p-1 rounded-2xl w-fit">
+              <div className="flex mb-6 bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-fit">
                 <button
                   onClick={() => setEvaluationMode('online')}
                   className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
                     evaluationMode === 'online'
-                      ? 'bg-indigo-600 text-white shadow-md'
+                      ? 'bg-emerald-600 text-white shadow-md'
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                   }`}
                 >
@@ -919,7 +921,7 @@ export default function JudgeDashboard() {
                   onClick={() => setEvaluationMode('offline')}
                   className={`py-2 px-5 font-display font-bold text-xs uppercase tracking-wider cursor-pointer rounded-xl transition-all ${
                     evaluationMode === 'offline'
-                      ? 'bg-indigo-600 text-white shadow-md'
+                      ? 'bg-emerald-600 text-white shadow-md'
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                   }`}
                 >

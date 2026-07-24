@@ -701,37 +701,39 @@ export default function Dashboard() {
       )}
       
       {/* Dashboard Sub-navigation Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 mb-8 gap-6 justify-center sm:justify-start">
-        <button
-          onClick={() => setDashboardTab("overview")}
-          className={`pb-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-            dashboardTab === "overview"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-          }`}
-        >
-          Overview
-        </button>
-        <button
-          onClick={() => setDashboardTab("entries")}
-          className={`pb-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-            dashboardTab === "entries"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-          }`}
-        >
-          My Entries
-        </button>
-        <button
-          onClick={() => setDashboardTab("certificates")}
-          className={`pb-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-            dashboardTab === "certificates"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-          }`}
-        >
-          Digital Certificates
-        </button>
+      <div className="flex justify-center sm:justify-start mb-8">
+        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto">
+          <button
+            onClick={() => setDashboardTab("overview")}
+            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              dashboardTab === "overview"
+                ? "bg-indigo-600 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setDashboardTab("entries")}
+            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              dashboardTab === "entries"
+                ? "bg-indigo-600 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            My Entries
+          </button>
+          <button
+            onClick={() => setDashboardTab("certificates")}
+            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              dashboardTab === "certificates"
+                ? "bg-indigo-600 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            Digital Certificates
+          </button>
+        </div>
       </div>
 
       {dashboardTab === "overview" && (

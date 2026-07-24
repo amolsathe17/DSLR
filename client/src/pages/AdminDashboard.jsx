@@ -2265,121 +2265,127 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-                  <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs mb-2">Rewards & Prize Valuation</h4>
-                  <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-semibold">1st Prize Reward</label>
-                      <input
-                        type="text"
-                        value={prize1Reward}
-                        onChange={(e) => setPrize1Reward(e.target.value)}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-semibold">2nd Prize Reward</label>
-                      <input
-                        type="text"
-                        value={prize2Reward}
-                        onChange={(e) => setPrize2Reward(e.target.value)}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-semibold">3rd Prize Reward</label>
-                      <input
-                        type="text"
-                        value={prize3Reward}
-                        onChange={(e) => setPrize3Reward(e.target.value)}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs">Package Entry Fees (INR)</h4>
-                    <button
-                      type="button"
-                      onClick={() => setNewEventPackages([...newEventPackages, { name: '', price: 0, maxPhotos: 1 }])}
-                      className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
-                    >
-                      + Add Package
-                    </button>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-150 dark:border-slate-800 pt-4">
                   
-                  <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4">
-                    {newEventPackages.map((pkg, idx) => (
-                      <div key={idx} className={`flex flex-wrap sm:flex-nowrap gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
-                        <div className="flex-1 min-w-30 flex flex-col gap-1">
-                          <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
-                          <input
-                            type="text"
-                            value={pkg.name}
-                            onChange={(e) => {
-                              const updated = [...newEventPackages];
-                              updated[idx].name = e.target.value;
-                              setNewEventPackages(updated);
-                            }}
-                            placeholder="e.g. Starter, Amateur"
-                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                            required
-                          />
-                        </div>
-                        
-                        <div className="w-24 flex flex-col gap-1">
-                          <label className="text-[10px] text-slate-400 font-semibold">Price (₹)</label>
-                          <input
-                            type="number"
-                            value={pkg.price || ''}
-                            onChange={(e) => {
-                              const updated = [...newEventPackages];
-                              updated[idx].price = Number(e.target.value);
-                              setNewEventPackages(updated);
-                            }}
-                            placeholder="Price"
-                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                            required
-                          />
-                        </div>
-
-                        <div className="w-28 flex flex-col gap-1">
-                          <label className="text-[10px] text-slate-400 font-semibold">Max Uploads</label>
-                          <input
-                            type="number"
-                            value={pkg.maxPhotos || ''}
-                            onChange={(e) => {
-                              const updated = [...newEventPackages];
-                              updated[idx].maxPhotos = Number(e.target.value);
-                              setNewEventPackages(updated);
-                            }}
-                            placeholder="Max photos"
-                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                            required
-                          />
-                        </div>
-
-                        {newEventPackages.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updated = newEventPackages.filter((_, pIdx) => pIdx !== idx);
-                              setNewEventPackages(updated);
-                            }}
-                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors mb-0.5"
-                            data-tooltip="Remove Package"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
+                  {/* Left Side: Rewards */}
+                  <div className="flex flex-col gap-2">
+                    <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs">Rewards & Prize Valuation</h4>
+                    <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-slate-400 font-semibold">1st Prize Reward</label>
+                        <input
+                          type="text"
+                          value={prize1Reward}
+                          onChange={(e) => setPrize1Reward(e.target.value)}
+                          className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                          required
+                        />
                       </div>
-                    ))}
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-slate-400 font-semibold">2nd Prize Reward</label>
+                        <input
+                          type="text"
+                          value={prize2Reward}
+                          onChange={(e) => setPrize2Reward(e.target.value)}
+                          className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                          required
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-slate-400 font-semibold">3rd Prize Reward</label>
+                        <input
+                          type="text"
+                          value={prize3Reward}
+                          onChange={(e) => setPrize3Reward(e.target.value)}
+                          className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Right Side: Packages */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center h-[18px]">
+                      <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs">Package Entry Fees (INR)</h4>
+                      <button
+                        type="button"
+                        onClick={() => setNewEventPackages([...newEventPackages, { name: '', price: 0, maxPhotos: 1 }])}
+                        className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
+                      >
+                        + Add Package
+                      </button>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
+                      {newEventPackages.map((pkg, idx) => (
+                        <div key={idx} className={`flex flex-wrap sm:flex-nowrap gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
+                          <div className="flex-1 min-w-30 flex flex-col gap-1">
+                            <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
+                            <input
+                              type="text"
+                              value={pkg.name}
+                              onChange={(e) => {
+                                const updated = [...newEventPackages];
+                                updated[idx].name = e.target.value;
+                                setNewEventPackages(updated);
+                              }}
+                              placeholder="e.g. Starter, Amateur"
+                              className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                              required
+                            />
+                          </div>
+                          
+                          <div className="w-24 flex flex-col gap-1">
+                            <label className="text-[10px] text-slate-400 font-semibold">Price (₹)</label>
+                            <input
+                              type="number"
+                              value={pkg.price || ''}
+                              onChange={(e) => {
+                                const updated = [...newEventPackages];
+                                updated[idx].price = Number(e.target.value);
+                                updated[idx].price = Number(e.target.value);
+                                setNewEventPackages(updated);
+                              }}
+                              placeholder="Price"
+                              className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                              required
+                            />
+                          </div>
+
+                          <div className="w-28 flex flex-col gap-1">
+                            <label className="text-[10px] text-slate-400 font-semibold">Max Uploads</label>
+                            <input
+                              type="number"
+                              value={pkg.maxPhotos || ''}
+                              onChange={(e) => {
+                                const updated = [...newEventPackages];
+                                updated[idx].maxPhotos = Number(e.target.value);
+                                setNewEventPackages(updated);
+                              }}
+                              placeholder="Max photos"
+                              className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                              required
+                            />
+                          </div>
+
+                          {newEventPackages.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = newEventPackages.filter((_, pIdx) => pIdx !== idx);
+                                setNewEventPackages(updated);
+                              }}
+                              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors mb-0.5"
+                              data-tooltip="Remove Package"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
 
                 <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800 pt-3">
@@ -3854,124 +3860,128 @@ export default function AdminDashboard() {
                 )}
               </div>
 
-              {/* Prizes Rewards */}
-              <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
-                <span className="font-bold text-slate-850 dark:text-white">Prizes & Awards Configuration</span>
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-slate-500 font-semibold">1st Prize Reward</span>
-                    <input
-                      type="text"
-                      value={editPrize1Reward}
-                      onChange={(e) => setEditPrize1Reward(e.target.value)}
-                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-slate-500 font-semibold">2nd Prize Reward</span>
-                    <input
-                      type="text"
-                      value={editPrize2Reward}
-                      onChange={(e) => setEditPrize2Reward(e.target.value)}
-                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-slate-500 font-semibold">3rd Prize Reward</span>
-                    <input
-                      type="text"
-                      value={editPrize3Reward}
-                      onChange={(e) => setEditPrize3Reward(e.target.value)}
-                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Packages config */}
-              <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-bold text-slate-850 dark:text-white">Submission Entry Packages Fees</span>
-                  <button
-                    type="button"
-                    onClick={() => setEditEventPackages([...editEventPackages, { name: '', price: 0, maxPhotos: 1 }])}
-                    className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
-                  >
-                    + Add Package
-                  </button>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-150 dark:border-slate-800 pt-4">
                 
-                <div className="flex flex-col gap-4">
-                  {editEventPackages.map((pkg, idx) => (
-                    <div key={idx} className={`flex flex-wrap sm:flex-nowrap gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
-                      
-                      <div className="flex-1 min-w-[120px] flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
-                        <input
-                          type="text"
-                          value={pkg.name}
-                          onChange={(e) => {
-                            const newPkgs = [...editEventPackages];
-                            newPkgs[idx].name = e.target.value;
-                            setEditEventPackages(newPkgs);
-                          }}
-                          placeholder="e.g. Starter, Amateur"
-                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="w-24 flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 font-semibold">Price (₹)</label>
-                        <input
-                          type="number"
-                          value={pkg.price || ''}
-                          onChange={(e) => {
-                            const newPkgs = [...editEventPackages];
-                            newPkgs[idx].price = Number(e.target.value);
-                            setEditEventPackages(newPkgs);
-                          }}
-                          placeholder="Price"
-                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                          required
-                        />
-                      </div>
-
-                      <div className="w-28 flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 font-semibold">Max Uploads</label>
-                        <input
-                          type="number"
-                          value={pkg.maxPhotos || ''}
-                          onChange={(e) => {
-                            const newPkgs = [...editEventPackages];
-                            newPkgs[idx].maxPhotos = Number(e.target.value);
-                            setEditEventPackages(newPkgs);
-                          }}
-                          placeholder="Max photos"
-                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                          required
-                        />
-                      </div>
-
-                      {editEventPackages.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newPkgs = editEventPackages.filter((_, pIdx) => pIdx !== idx);
-                            setEditEventPackages(newPkgs);
-                          }}
-                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors mb-0.5"
-                          data-tooltip="Remove Package"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
+                {/* Left Side: Prizes Rewards */}
+                <div className="flex flex-col gap-2">
+                  <span className="font-bold text-slate-850 dark:text-white">Prizes & Awards Configuration</span>
+                  <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 font-semibold">1st Prize Reward</span>
+                      <input
+                        type="text"
+                        value={editPrize1Reward}
+                        onChange={(e) => setEditPrize1Reward(e.target.value)}
+                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
                     </div>
-                  ))}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 font-semibold">2nd Prize Reward</span>
+                      <input
+                        type="text"
+                        value={editPrize2Reward}
+                        onChange={(e) => setEditPrize2Reward(e.target.value)}
+                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 font-semibold">3rd Prize Reward</span>
+                      <input
+                        type="text"
+                        value={editPrize3Reward}
+                        onChange={(e) => setEditPrize3Reward(e.target.value)}
+                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
+
+                {/* Right Side: Packages config */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center h-[18px]">
+                    <span className="font-bold text-slate-850 dark:text-white">Submission Entry Packages Fees</span>
+                    <button
+                      type="button"
+                      onClick={() => setEditEventPackages([...editEventPackages, { name: '', price: 0, maxPhotos: 1 }])}
+                      className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
+                    >
+                      + Add Package
+                    </button>
+                  </div>
+                  
+                  <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
+                    {editEventPackages.map((pkg, idx) => (
+                      <div key={idx} className={`flex flex-wrap sm:flex-nowrap gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
+                        
+                        <div className="flex-1 min-w-[120px] flex flex-col gap-1">
+                          <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
+                          <input
+                            type="text"
+                            value={pkg.name}
+                            onChange={(e) => {
+                              const newPkgs = [...editEventPackages];
+                              newPkgs[idx].name = e.target.value;
+                              setEditEventPackages(newPkgs);
+                            }}
+                            placeholder="e.g. Starter, Amateur"
+                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="w-24 flex flex-col gap-1">
+                          <label className="text-[10px] text-slate-400 font-semibold">Price (₹)</label>
+                          <input
+                            type="number"
+                            value={pkg.price || ''}
+                            onChange={(e) => {
+                              const newPkgs = [...editEventPackages];
+                              newPkgs[idx].price = Number(e.target.value);
+                              setEditEventPackages(newPkgs);
+                            }}
+                            placeholder="Price"
+                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+
+                        <div className="w-28 flex flex-col gap-1">
+                          <label className="text-[10px] text-slate-400 font-semibold">Max Uploads</label>
+                          <input
+                            type="number"
+                            value={pkg.maxPhotos || ''}
+                            onChange={(e) => {
+                              const newPkgs = [...editEventPackages];
+                              newPkgs[idx].maxPhotos = Number(e.target.value);
+                              setEditEventPackages(newPkgs);
+                            }}
+                            placeholder="Max photos"
+                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+
+                        {editEventPackages.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newPkgs = editEventPackages.filter((_, pIdx) => pIdx !== idx);
+                              setEditEventPackages(newPkgs);
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors mb-0.5"
+                            data-tooltip="Remove Package"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
 
               <div className="flex gap-3 justify-end pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">

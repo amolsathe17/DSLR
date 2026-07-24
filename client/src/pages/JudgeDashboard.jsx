@@ -505,27 +505,29 @@ export default function JudgeDashboard() {
       {judgeDashboardTab === "overview" && (
         <div className="flex flex-col gap-8 animate-in fade-in duration-200">
           {/* Welcome header */}
-          <div className="bg-linear-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex flex-col gap-2 text-left">
-              <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">
-                Jury Panel Dashboard
-              </span>
-              <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
-                Welcome back, Judge {user?.name || "Jury Member"}!
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Review assigned DSLR uploads, grade photography composition benchmarks, and submit final signed-off scores.
-              </p>
+          {user?.role !== 'Admin' && (
+            <div className="bg-linear-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex flex-col gap-2 text-left">
+                <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">
+                  Jury Panel Dashboard
+                </span>
+                <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
+                  Welcome back, Judge {user?.name || "Jury Member"}!
+                </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Review assigned DSLR uploads, grade photography composition benchmarks, and submit final signed-off scores.
+                </p>
+              </div>
+              <div className="flex gap-2 self-start md:self-center">
+                <button
+                  onClick={() => setJudgeDashboardTab("portal")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-2xl text-xs shadow-sm hover:shadow transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <Camera size={14} /> Open Evaluation Portal
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2 self-start md:self-center">
-              <button
-                onClick={() => setJudgeDashboardTab("portal")}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-2xl text-xs shadow-sm hover:shadow transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <Camera size={14} /> Open Evaluation Portal
-              </button>
-            </div>
-          </div>
+          )}
 
           {/* Stats Widgets */}
           {(() => {
@@ -537,17 +539,11 @@ export default function JudgeDashboard() {
 
             return (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
                     <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Assigned Contests</span>
                     <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalEvents}</h3>
                     <span className="text-[10px] text-slate-400">Total events panel seat</span>
-                  </div>
-                  
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Assigned Photographs</span>
-                    <h3 className="font-display font-extrabold text-2xl text-amber-600 dark:text-amber-400">{totalPhotos}</h3>
-                    <span className="text-[10px] text-slate-400">Assigned photo frames</span>
                   </div>
 
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
@@ -756,7 +752,7 @@ export default function JudgeDashboard() {
                 )}
 
                 {/* Past Evaluation History Log (Full-Width modern table/grid view) */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left h-[400px] overflow-y-auto">
                   <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Past Evaluation History Log</h3>
                   
                   {(() => {

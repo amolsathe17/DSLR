@@ -505,7 +505,7 @@ export default function JudgeDashboard() {
       {judgeDashboardTab === "overview" && (
         <div className="flex flex-col gap-8 animate-in fade-in duration-200">
           {/* Welcome header */}
-          <div className="bg-gradient-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-linear-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex flex-col gap-2 text-left">
               <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">
                 Jury Panel Dashboard
@@ -537,7 +537,7 @@ export default function JudgeDashboard() {
 
             return (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
                     <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Assigned Contests</span>
                     <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalEvents}</h3>
@@ -571,7 +571,7 @@ export default function JudgeDashboard() {
 
                 {/* SVG Progress charts */}
                 {totalPhotos > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
                     {/* Donut Progress chart */}
                     {(() => {
@@ -711,49 +711,49 @@ export default function JudgeDashboard() {
                       );
                     })()}
 
+                    {/* Event wise approvals / disapproval tracking */}
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left">
+                      <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Events Breakdown Tracking</h3>
+                      <div className="flex flex-col gap-4 max-h-[170px] overflow-y-auto pr-1">
+                        {events.map((e, idx) => {
+                          const eventPhotos = allPhotographsByEvent[e._id] || [];
+                          const total = eventPhotos.length;
+                          const approved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Approved').length;
+                          const disapproved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Disapproved').length;
+                          const evaluated = eventPhotos.filter(p => p.graded).length;
+
+                          return (
+                            <div key={idx} className="p-3 bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl flex flex-col gap-2 text-xs">
+                              <div className="flex justify-between items-center">
+                                <span className="font-extrabold text-slate-900 dark:text-white text-xs truncate max-w-[120px]">{e.title}</span>
+                                <span className={`px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full ${
+                                  evaluated === total && total > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                                }`}>
+                                  {evaluated}/{total}
+                                </span>
+                              </div>
+                              
+                              {/* Visual Progress bar */}
+                              <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div
+                                  style={{ width: `${total ? (evaluated / total) * 100 : 0}%` }}
+                                  className="bg-indigo-600 h-full rounded-full transition-all duration-1000 ease-out"
+                                />
+                              </div>
+
+                              <div className="flex justify-between text-[9px] text-slate-400 mt-0.5 border-t border-slate-100 dark:border-slate-850 pt-1">
+                                <span>App: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{approved}</strong></span>
+                                <span>Dis: <strong className="text-red-600 dark:text-red-400 font-bold">{disapproved}</strong></span>
+                                <span>Pen: <strong className="text-slate-650 dark:text-slate-350 font-bold">{total - evaluated}</strong></span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                   </div>
                 )}
-
-                {/* Event wise approvals / disapproval tracking (Stacked Full-Width) */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left">
-                  <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Events Breakdown Tracking</h3>
-                  <div className="flex flex-col gap-4">
-                    {events.map((e, idx) => {
-                      const eventPhotos = allPhotographsByEvent[e._id] || [];
-                      const total = eventPhotos.length;
-                      const approved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Approved').length;
-                      const disapproved = eventPhotos.filter(p => p.score && p.score.approvalStatus === 'Disapproved').length;
-                      const evaluated = eventPhotos.filter(p => p.graded).length;
-
-                      return (
-                        <div key={idx} className="p-5 bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl flex flex-col gap-3 text-xs">
-                          <div className="flex justify-between items-center">
-                            <span className="font-extrabold text-slate-900 dark:text-white text-sm">{e.title}</span>
-                            <span className={`px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-full ${
-                              evaluated === total && total > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
-                            }`}>
-                              {evaluated} / {total} Graded
-                            </span>
-                          </div>
-                          
-                          {/* Visual Progress bar */}
-                          <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div
-                              style={{ width: `${total ? (evaluated / total) * 100 : 0}%` }}
-                              className="bg-indigo-600 h-full rounded-full transition-all duration-1000 ease-out"
-                            />
-                          </div>
-
-                          <div className="flex justify-between text-[11px] text-slate-400 mt-1 border-t border-slate-100 dark:border-slate-850 pt-2.5">
-                            <span>Approved: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{approved}</strong></span>
-                            <span>Disapproved: <strong className="text-red-600 dark:text-red-400 font-bold">{disapproved}</strong></span>
-                            <span>Pending: <strong className="text-slate-600 dark:text-slate-350 font-bold">{total - evaluated}</strong></span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
 
                 {/* Past Evaluation History Log (Full-Width modern table/grid view) */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left">
@@ -778,7 +778,7 @@ export default function JudgeDashboard() {
 
                     if (historyList.length === 0) {
                       return (
-                        <div className="flex-1 flex flex-col items-center justify-center p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-[220px]">
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-55">
                           <span>No graded photographs found. Get started in the workspace tab!</span>
                         </div>
                       );
@@ -806,8 +806,8 @@ export default function JudgeDashboard() {
                                   </div>
                                 </td>
                                 <td className="py-3.5 px-4">
-                                  <span className="font-extrabold text-slate-900 dark:text-white block truncate max-w-[200px]">{item.title}</span>
-                                  <span className="text-[10px] text-slate-400 block truncate max-w-[200px]">{item.eventTitle}</span>
+                                  <span className="font-extrabold text-slate-900 dark:text-white block truncate max-w-50">{item.title}</span>
+                                  <span className="text-[10px] text-slate-400 block truncate max-w-50">{item.eventTitle}</span>
                                   <span className="text-[9px] text-slate-500 block mt-0.5 font-semibold">{new Date(item.score.updatedAt || item.score.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center">
@@ -978,7 +978,7 @@ export default function JudgeDashboard() {
               ) : (
                 evaluationMode === 'online' ? (
                     <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 text-left">
+                  <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 text-left">
                     {displayedPhotos.map((photo) => (
                       <div
                         key={photo.photoId}

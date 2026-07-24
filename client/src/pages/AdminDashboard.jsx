@@ -62,6 +62,7 @@ export default function AdminDashboard() {
   const [photoDslrStatus, setPhotoDslrStatus] = useState('');
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [selectedParticipantFilter, setSelectedParticipantFilter] = useState('');
+  const [selectedContestTypeFilter, setSelectedContestTypeFilter] = useState('');
 
   // Judges states
   const [judges, setJudges] = useState([]);
@@ -1475,14 +1476,31 @@ export default function AdminDashboard() {
               </select>
 
               <select
+                value={selectedContestTypeFilter}
+                onChange={(e) => {
+                  setSelectedContestTypeFilter(e.target.value);
+                  setPhotoCategory('');
+                }}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
+              >
+                <option value="">All Contest Types</option>
+                {contestTypes.map(ct => (
+                  <option key={ct._id} value={ct.name}>{ct.name}</option>
+                ))}
+              </select>
+
+              <select
                 value={photoCategory}
                 onChange={(e) => setPhotoCategory(e.target.value)}
                 className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
               >
                 <option value="">All Categories</option>
-                {categories.map(c => (
-                  <option key={c._id} value={c.name}>{c.name}</option>
-                ))}
+                {categories
+                  .filter(c => !selectedContestTypeFilter || (c.contestTypes && c.contestTypes.includes(selectedContestTypeFilter)))
+                  .map(c => (
+                    <option key={c._id} value={c.name}>{c.name}</option>
+                  ))
+                }
               </select>
             </div>
           </div>
@@ -1491,6 +1509,13 @@ export default function AdminDashboard() {
             const filteredPhotos = photographs.filter(p => {
               if (selectedParticipantFilter && p.participantName !== selectedParticipantFilter) {
                 return false;
+              }
+              if (selectedContestTypeFilter) {
+                const event = events.find(e => e._id === p.eventId);
+                const photoContestType = event ? event.eventType : 'Photography';
+                if (photoContestType !== selectedContestTypeFilter) {
+                  return false;
+                }
               }
               return true;
             });

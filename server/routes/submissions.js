@@ -565,9 +565,7 @@ router.post('/final-submit', protect, async (req, res) => {
 // @access  Public
 router.get('/gallery', async (req, res) => {
   try {
-    const submissions = await Submission.find({
-      isFinalSubmitted: true
-    });
+    const submissions = await Submission.find({});
     const photos = [];
 
     submissions.forEach(sub => {

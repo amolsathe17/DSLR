@@ -12,13 +12,7 @@ router.get('/', async (req, res) => {
     const { contestType } = req.query;
     let filter = {};
     if (contestType) {
-      filter = {
-        $or: [
-          { contestTypes: contestType },
-          { contestTypes: { $exists: false } },
-          { contestTypes: { $size: 0 } }
-        ]
-      };
+      filter = { contestTypes: contestType };
     }
     const categories = await Category.find(filter);
     res.json({ success: true, categories });

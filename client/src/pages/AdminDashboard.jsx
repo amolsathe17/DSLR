@@ -2267,34 +2267,34 @@ export default function AdminDashboard() {
 
                 <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
                   <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs mb-2">Rewards & Prize Valuation</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-medium">1st Prize Reward</label>
+                      <label className="text-[10px] text-slate-400 font-semibold">1st Prize Reward</label>
                       <input
                         type="text"
                         value={prize1Reward}
                         onChange={(e) => setPrize1Reward(e.target.value)}
-                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
                         required
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-medium">2nd Prize Reward</label>
+                      <label className="text-[10px] text-slate-400 font-semibold">2nd Prize Reward</label>
                       <input
                         type="text"
                         value={prize2Reward}
                         onChange={(e) => setPrize2Reward(e.target.value)}
-                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
                         required
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-slate-400 font-medium">3rd Prize Reward</label>
+                      <label className="text-[10px] text-slate-400 font-semibold">3rd Prize Reward</label>
                       <input
                         type="text"
                         value={prize3Reward}
                         onChange={(e) => setPrize3Reward(e.target.value)}
-                        className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
                         required
                       />
                     </div>
@@ -2313,9 +2313,9 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                   
-                  <div className="flex flex-col gap-3">
+                  <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4">
                     {newEventPackages.map((pkg, idx) => (
-                      <div key={idx} className="flex flex-wrap sm:flex-nowrap gap-3 items-end bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-150 dark:border-slate-850">
+                      <div key={idx} className={`flex flex-wrap sm:flex-nowrap gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
                         <div className="flex-1 min-w-30 flex flex-col gap-1">
                           <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
                           <input
@@ -2371,10 +2371,10 @@ export default function AdminDashboard() {
                               const updated = newEventPackages.filter((_, pIdx) => pIdx !== idx);
                               setNewEventPackages(updated);
                             }}
-                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors mb-0.5"
                             data-tooltip="Remove Package"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         )}
                       </div>
@@ -3857,34 +3857,34 @@ export default function AdminDashboard() {
               {/* Prizes Rewards */}
               <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
                 <span className="font-bold text-slate-850 dark:text-white">Prizes & Awards Configuration</span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-slate-500 font-bold">1st Prize Reward</span>
+                    <span className="text-[10px] text-slate-500 font-semibold">1st Prize Reward</span>
                     <input
                       type="text"
                       value={editPrize1Reward}
                       onChange={(e) => setEditPrize1Reward(e.target.value)}
-                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl"
+                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
                       required
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-slate-500 font-bold">2nd Prize Reward</span>
+                    <span className="text-[10px] text-slate-500 font-semibold">2nd Prize Reward</span>
                     <input
                       type="text"
                       value={editPrize2Reward}
                       onChange={(e) => setEditPrize2Reward(e.target.value)}
-                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl"
+                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
                       required
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-slate-500 font-bold">3rd Prize Reward</span>
+                    <span className="text-[10px] text-slate-500 font-semibold">3rd Prize Reward</span>
                     <input
                       type="text"
                       value={editPrize3Reward}
                       onChange={(e) => setEditPrize3Reward(e.target.value)}
-                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl"
+                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
                       required
                     />
                   </div>
@@ -3904,9 +3904,9 @@ export default function AdminDashboard() {
                   </button>
                 </div>
                 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                   {editEventPackages.map((pkg, idx) => (
-                    <div key={idx} className="flex flex-wrap sm:flex-nowrap gap-3 items-end bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-100 dark:border-slate-850">
+                    <div key={idx} className={`flex flex-wrap sm:flex-nowrap gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
                       
                       <div className="flex-1 min-w-[120px] flex flex-col gap-1">
                         <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
@@ -3919,7 +3919,7 @@ export default function AdminDashboard() {
                             setEditEventPackages(newPkgs);
                           }}
                           placeholder="e.g. Starter, Amateur"
-                          className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold"
+                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                           required
                         />
                       </div>
@@ -3935,7 +3935,7 @@ export default function AdminDashboard() {
                             setEditEventPackages(newPkgs);
                           }}
                           placeholder="Price"
-                          className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                           required
                         />
                       </div>
@@ -3951,7 +3951,7 @@ export default function AdminDashboard() {
                             setEditEventPackages(newPkgs);
                           }}
                           placeholder="Max photos"
-                          className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                           required
                         />
                       </div>
@@ -3963,10 +3963,10 @@ export default function AdminDashboard() {
                             const newPkgs = editEventPackages.filter((_, pIdx) => pIdx !== idx);
                             setEditEventPackages(newPkgs);
                           }}
-                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors mb-0.5"
                           data-tooltip="Remove Package"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={16} />
                         </button>
                       )}
                     </div>

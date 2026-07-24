@@ -139,17 +139,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Divider */}
-            <span className="h-5 w-px bg-slate-200 dark:bg-slate-800"></span>
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
 
             {/* Auth Buttons */}
             {user ? (
@@ -197,12 +186,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center md:hidden gap-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

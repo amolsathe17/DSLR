@@ -61,6 +61,7 @@ export default function AdminDashboard() {
   const [photoStatus, setPhotoStatus] = useState('');
   const [photoDslrStatus, setPhotoDslrStatus] = useState('');
   const [selectedParticipant, setSelectedParticipant] = useState(null);
+  const [selectedParticipantFilter, setSelectedParticipantFilter] = useState('');
 
   // Judges states
   const [judges, setJudges] = useState([]);
@@ -1263,135 +1264,7 @@ export default function AdminDashboard() {
             categoryStats={charts.categoryStats} 
           />
 
-          {/* ── Judge Photo Review Cards ── */}
-          {(() => {
-            const judgedPhotos = photographs.filter(p => p.scores && p.scores.length > 0);
-            const approvedPhotos = judgedPhotos.filter(p => p.scores.every(s => (s.approvalStatus || 'Approved') === 'Approved'));
-            const disapprovedPhotos = judgedPhotos.filter(p => p.scores.some(s => s.approvalStatus === 'Disapproved'));
 
-            return (
-              <div className="flex flex-col gap-6">
-                {/* Summary bar */}
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/30 rounded-2xl px-4 py-3 flex-1 min-w-[160px]">
-                    <ThumbsUp size={18} className="text-emerald-500 shrink-0" />
-                    <div>
-                      <p className="font-black text-2xl text-emerald-600">{approvedPhotos.length}</p>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600/70">Approved by Judges</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/30 rounded-2xl px-4 py-3 flex-1 min-w-[160px]">
-                    <ThumbsDown size={18} className="text-red-500 shrink-0" />
-                    <div>
-                      <p className="font-black text-2xl text-red-500">{disapprovedPhotos.length}</p>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-500/70">Disapproved by Judges</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 flex-1 min-w-[160px]">
-                    <Camera size={18} className="text-slate-400 shrink-0" />
-                    <div>
-                      <p className="font-black text-2xl text-slate-700 dark:text-slate-200">{judgedPhotos.length}</p>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Evaluated</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Approved Cards */}
-                {approvedPhotos.length > 0 && (
-                  <div className="glass-panel border border-emerald-200/60 dark:border-emerald-900/30 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-emerald-100 dark:border-emerald-900/30">
-                      <ThumbsUp size={15} className="text-emerald-500" />
-                      <h3 className="font-display font-bold text-emerald-700 dark:text-emerald-400 text-sm">Approved by Judges ({approvedPhotos.length})</h3>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                      {approvedPhotos.map(photo => {
-                        const avgScore = photo.scores.length > 0
-                          ? (photo.scores.reduce((a, s) => a + (s.averageScore || 0), 0) / photo.scores.length).toFixed(1)
-                          : '—';
-                        return (
-                          <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-emerald-200/50 dark:border-emerald-900/20 rounded-xl overflow-hidden flex flex-col shadow-sm">
-                            <div className="relative">
-                              {photo.fileUrl ? (
-                                <img src={getBackendUrl(photo.fileUrl)} alt={photo.title} className="w-full aspect-video object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
-                              ) : (
-                                <div className="w-full aspect-video flex items-center justify-center bg-slate-800 text-slate-500 text-xs">
-                                  No Preview
-                                </div>
-                              )}
-                              <span className="absolute top-1.5 right-1.5 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                                <Star size={8} fill="white" /> {avgScore}/10
-                              </span>
-                            </div>
-                            <div className="p-2 flex flex-col gap-0.5">
-                              <p className="text-[10px] font-bold text-slate-800 dark:text-white truncate">{photo.title}</p>
-                              <p className="text-[9px] text-slate-400 truncate">{photo.participantName}</p>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {photo.scores.map((s, i) => (
-                                  <span key={i} className="text-[8px] bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 px-1.5 py-0.5 rounded font-semibold">✓ {s.judgeName}</span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Disapproved Cards */}
-                {disapprovedPhotos.length > 0 && (
-                  <div className="glass-panel border border-red-200/60 dark:border-red-900/30 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-red-100 dark:border-red-900/30">
-                      <Flag size={15} className="text-red-500" />
-                      <h3 className="font-display font-bold text-red-600 dark:text-red-400 text-sm">Disapproved by Judges ({disapprovedPhotos.length})</h3>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                      {disapprovedPhotos.map(photo => {
-                        const disapprovals = photo.scores.filter(s => s.approvalStatus === 'Disapproved');
-                        return (
-                          <div key={photo.photoId} className="bg-white dark:bg-slate-900 border border-red-200/60 dark:border-red-900/30 rounded-xl overflow-hidden flex flex-col shadow-sm">
-                            <div className="relative">
-                              {photo.fileUrl ? (
-                                  <img src={getBackendUrl(photo.fileUrl)} alt={photo.title} className="w-full aspect-video object-cover opacity-80" crossOrigin="anonymous" referrerPolicy="no-referrer" />
-                                ) : (
-                                  <div className="w-full aspect-video flex items-center justify-center bg-slate-800 text-slate-500 text-xs">
-                                    No Preview
-                                  </div>
-                                )}
-                              <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                                <Flag size={8} /> Disapproved
-                              </span>
-                            </div>
-                            <div className="p-2 flex flex-col gap-1">
-                              <p className="text-[10px] font-bold text-slate-800 dark:text-white truncate">{photo.title}</p>
-                              <p className="text-[9px] text-slate-400 truncate">{photo.participantName}</p>
-                              {disapprovals.map((s, i) => (
-                                <div key={i} className="bg-red-50 dark:bg-red-950/30 rounded-lg p-1.5 flex flex-col gap-0.5">
-                                  <span className="text-[9px] font-bold text-red-600">✗ {s.judgeName}</span>
-                                  {s.remarks && (
-                                    <div className="flex items-start gap-1">
-                                      <MessageSquare size={8} className="text-red-400 shrink-0 mt-0.5" />
-                                      <p className="text-[9px] italic text-red-500 leading-snug">"{s.remarks}"</p>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {judgedPhotos.length === 0 && (
-                  <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-sm italic">
-                    No photographs have been evaluated by judges yet.
-                  </div>
-                )}
-              </div>
-            );
-          })()}
 
           {/* Downloadable Reports Panel */}
           <div className="glass-panel border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
@@ -1429,7 +1302,7 @@ export default function AdminDashboard() {
 
       {/* TAB 2: PARTICIPANTS */}
       {activeTab === 'participants' && (
-        <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-6 shadow-sm animate-in fade-in duration-200">
+        <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-6 shadow-sm animate-in fade-in duration-200 h-[600px] overflow-y-auto">
           
           {/* Filters row */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -1591,6 +1464,17 @@ export default function AdminDashboard() {
 
             <div className="flex gap-2 w-full sm:w-auto">
               <select
+                value={selectedParticipantFilter}
+                onChange={(e) => setSelectedParticipantFilter(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
+              >
+                <option value="">All Participants</option>
+                {Array.from(new Set(participants.map(p => p.name).filter(Boolean))).sort().map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+
+              <select
                 value={photoCategory}
                 onChange={(e) => setPhotoCategory(e.target.value)}
                 className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
@@ -1603,32 +1487,201 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Grid layout for images approval workflow */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-            {photographs.map((photo) => (
-              <div 
-                key={photo.photoId}
-                onClick={() => setSelectedPhoto(photo)}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow transition-all cursor-zoom-in relative aspect-video"
-              >
-                <img 
-                  src={getBackendUrl(photo.fileUrl)} 
-                  alt={photo.title} 
-                  className="w-full h-full object-cover"
-                  crossOrigin="anonymous"
-                  referrerPolicy="no-referrer"
-                />
-                {photo.scores && photo.scores.some(s => s.approvalStatus === 'Disapproved') && (
-                  <span className="absolute top-2 left-2 bg-red-650 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider animate-pulse font-bold">
-                    <Flag size={9} className="fill-white" /> Disapproved
-                  </span>
+          {(() => {
+            const filteredPhotos = photographs.filter(p => {
+              if (selectedParticipantFilter && p.participantName !== selectedParticipantFilter) {
+                return false;
+              }
+              return true;
+            });
+
+            const judgedPhotos = filteredPhotos.filter(p => p.scores && p.scores.length > 0);
+            const approvedPhotos = judgedPhotos.filter(p => p.scores.every(s => (s.approvalStatus || 'Approved') === 'Approved'));
+            const disapprovedPhotos = judgedPhotos.filter(p => p.scores.some(s => s.approvalStatus === 'Disapproved'));
+            const pendingPhotos = filteredPhotos.filter(p => !p.scores || p.scores.length === 0);
+
+            return (
+              <>
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/30 rounded-2xl px-5 py-4 shadow-sm">
+                    <div className="p-2.5 bg-emerald-500/10 rounded-xl">
+                      <ThumbsUp size={20} className="text-emerald-500 shrink-0" />
+                    </div>
+                    <div>
+                      <p className="font-display font-black text-2xl text-emerald-600 dark:text-emerald-400">{approvedPhotos.length}</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-650/80 dark:text-emerald-400/80">Approved by Judges</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/30 rounded-2xl px-5 py-4 shadow-sm">
+                    <div className="p-2.5 bg-red-500/10 rounded-xl">
+                      <ThumbsDown size={20} className="text-red-500 shrink-0" />
+                    </div>
+                    <div>
+                      <p className="font-display font-black text-2xl text-red-500 dark:text-red-400">{disapprovedPhotos.length}</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-600/80 dark:text-red-400/80">Disapproved by Judges</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-4 shadow-sm">
+                    <div className="p-2.5 bg-slate-500/10 rounded-xl">
+                      <Camera size={20} className="text-slate-500 shrink-0" />
+                    </div>
+                    <div>
+                      <p className="font-display font-black text-2xl text-slate-700 dark:text-slate-200">{judgedPhotos.length}</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Evaluated</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Approved photos section */}
+                <div className="glass-panel border border-emerald-250 dark:border-emerald-900/40 rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
+                  <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <ThumbsUp size={16} className="text-emerald-500" />
+                    <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm">Approved by Judges ({approvedPhotos.length})</h3>
+                  </div>
+                  
+                  {approvedPhotos.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                      {approvedPhotos.map((photo) => {
+                        const avgScore = photo.scores.length > 0
+                          ? (photo.scores.reduce((a, s) => a + (s.averageScore || 0), 0) / photo.scores.length).toFixed(1)
+                          : '0.0';
+                        return (
+                          <div 
+                            key={photo.photoId}
+                            onClick={() => setSelectedPhoto(photo)}
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-zoom-in flex flex-col justify-between group"
+                          >
+                            <div className="w-full aspect-video bg-slate-950 relative overflow-hidden flex items-center justify-center">
+                              <img 
+                                src={getBackendUrl(photo.fileUrl)} 
+                                alt={photo.title} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                crossOrigin="anonymous"
+                                referrerPolicy="no-referrer"
+                              />
+                              <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm">
+                                <Star size={8} fill="white" /> {avgScore}/10
+                              </span>
+                            </div>
+                            <div className="p-3 flex flex-col gap-0.5 text-left">
+                              <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate font-black">
+                                {photo.title}
+                              </h4>
+                              <p className="text-[10px] text-slate-500 font-semibold truncate">
+                                By: {photo.participantName}
+                              </p>
+                              <p className="text-[9px] text-indigo-500 font-semibold truncate uppercase tracking-wider">
+                                {photo.cameraModel}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center text-slate-400 py-6 text-xs italic">No approved photographs yet.</div>
+                  )}
+                </div>
+
+                {/* Disapproved photos section */}
+                <div className="glass-panel border border-red-250 dark:border-red-900/40 rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
+                  <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <ThumbsDown size={16} className="text-red-500" />
+                    <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm">Disapproved by Judges ({disapprovedPhotos.length})</h3>
+                  </div>
+
+                  {disapprovedPhotos.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                      {disapprovedPhotos.map((photo) => (
+                        <div 
+                          key={photo.photoId}
+                          onClick={() => setSelectedPhoto(photo)}
+                          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-zoom-in flex flex-col justify-between group"
+                        >
+                          <div className="w-full aspect-video bg-slate-950 relative overflow-hidden flex items-center justify-center">
+                            <img 
+                              src={getBackendUrl(photo.fileUrl)} 
+                              alt={photo.title} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
+                              crossOrigin="anonymous"
+                              referrerPolicy="no-referrer"
+                            />
+                            <span className="absolute top-2 right-2 bg-red-650 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm">
+                              🛑 Grade: 0
+                            </span>
+                          </div>
+                          <div className="p-3 flex flex-col gap-0.5 text-left">
+                            <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate font-black">
+                              {photo.title}
+                            </h4>
+                            <p className="text-[10px] text-slate-500 font-semibold truncate">
+                              By: {photo.participantName}
+                            </p>
+                            <p className="text-[9px] text-red-500 font-semibold truncate uppercase tracking-wider">
+                              Disapproved
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center text-slate-400 py-6 text-xs italic">No disapproved photographs yet.</div>
+                  )}
+                </div>
+
+                {/* Pending Evaluation section */}
+                {pendingPhotos.length > 0 && (
+                  <div className="glass-panel border border-slate-250 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
+                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                      <Camera size={16} className="text-amber-500" />
+                      <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm">Pending Evaluation ({pendingPhotos.length})</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                      {pendingPhotos.map((photo) => (
+                        <div 
+                          key={photo.photoId}
+                          onClick={() => setSelectedPhoto(photo)}
+                          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-zoom-in flex flex-col justify-between group"
+                        >
+                          <div className="w-full aspect-video bg-slate-950 relative overflow-hidden flex items-center justify-center">
+                            <img 
+                              src={getBackendUrl(photo.fileUrl)} 
+                              alt={photo.title} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              crossOrigin="anonymous"
+                              referrerPolicy="no-referrer"
+                            />
+                            <span className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm">
+                              Pending
+                            </span>
+                          </div>
+                          <div className="p-3 flex flex-col gap-0.5 text-left">
+                            <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate font-black">
+                              {photo.title}
+                            </h4>
+                            <p className="text-[10px] text-slate-500 font-semibold truncate">
+                              By: {photo.participantName}
+                            </p>
+                            <p className="text-[9px] text-amber-500 font-semibold truncate uppercase tracking-wider">
+                              {photo.cameraModel}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </div>
-            ))}
-            {photographs.length === 0 && (
-              <div className="col-span-full text-center text-slate-400 py-12">No uploaded photographs match this query.</div>
-            )}
-          </div>
+
+                {filteredPhotos.length === 0 && (
+                  <div className="text-center text-slate-400 py-12 italic text-xs">No uploaded photographs match this query.</div>
+                )}
+              </>
+            );
+          })()}
 
         </div>
       )}
@@ -3076,6 +3129,19 @@ export default function AdminDashboard() {
                   <span className="bg-slate-100 dark:bg-slate-850 text-slate-650 dark:text-slate-350 px-2 py-0.5 rounded font-bold text-[9px] inline-block mt-1">
                     {selectedPhoto.category}
                   </span>
+                  {selectedPhoto.scores && selectedPhoto.scores.length > 0 && (
+                    <span className={`px-2 py-0.5 rounded font-bold text-[9px] inline-block mt-1 ml-2 ${
+                      selectedPhoto.scores.some(s => s.approvalStatus === 'Disapproved')
+                        ? 'bg-red-500/10 text-red-500 font-extrabold'
+                        : 'bg-emerald-500/10 text-emerald-500 font-extrabold'
+                    }`}>
+                      Average Grade: {
+                        selectedPhoto.scores.some(s => s.approvalStatus === 'Disapproved')
+                          ? '0.0/10'
+                          : (selectedPhoto.scores.reduce((a, s) => a + (s.averageScore || 0), 0) / selectedPhoto.scores.length).toFixed(1) + '/10'
+                      }
+                    </span>
+                  )}
                 </div>
                 
                 <div>

@@ -816,7 +816,7 @@ export default function JudgeDashboard() {
                                 </td>
                                 <td className="py-3.5 px-4 text-center">
                                   <span className="font-mono text-xs font-black text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 dark:bg-indigo-500/5 px-2.5 py-1 rounded-lg">
-                                    {Number(item.score.averageScore).toFixed(2)}
+                                    {item.score.approvalStatus === 'Disapproved' ? '0.00' : Number(item.score.averageScore).toFixed(2)}
                                   </span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center">
@@ -1009,11 +1009,9 @@ export default function JudgeDashboard() {
                                 }`}>
                                   {photo.score.approvalStatus}
                                 </span>
-                                {photo.score.approvalStatus !== 'Disapproved' && (
-                                  <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
-                                    Grade: {photo.score.averageScore}
-                                  </span>
-                                )}
+                                <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                  Grade: {photo.score.approvalStatus === 'Disapproved' ? 0 : photo.score.averageScore}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -1088,11 +1086,9 @@ export default function JudgeDashboard() {
                                       🛑 Disapproved
                                     </span>
                                   )}
-                                  {photo.score.approvalStatus !== 'Disapproved' && (
-                                    <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
-                                      Grade: {photo.score.averageScore}
-                                    </span>
-                                  )}
+                                  <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                    Grade: {photo.score.approvalStatus === 'Disapproved' ? 0 : photo.score.averageScore}
+                                  </span>
                                 </div>
                               )}
                             </div>

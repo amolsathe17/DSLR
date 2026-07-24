@@ -1507,45 +1507,37 @@ export default function AdminDashboard() {
                 ))}
               </select>
 
-              <select
-                value={selectedContestTypeFilter}
-                onChange={(e) => {
-                  setSelectedContestTypeFilter(e.target.value);
-                  setPhotoCategory('');
-                }}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
-              >
-                <option value="">All Contest Types</option>
-                {contestTypes.map(ct => (
-                  <option key={ct._id} value={ct.name}>{ct.name}</option>
-                ))}
-              </select>
-
-              <select
-                value={photoCategory}
-                onChange={(e) => setPhotoCategory(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
-              >
-                <option value="">All Categories</option>
-                {categories
-                  .filter(c => !selectedContestTypeFilter || (c.contestTypes && c.contestTypes.includes(selectedContestTypeFilter)))
-                  .map(c => (
-                    <option key={c._id} value={c.name}>{c.name}</option>
-                  ))
-                }
-              </select>
+              {(() => {
+                const activeEvent = events.find(e => e.status === 'Active') || events[0];
+                return (
+                  <select
+                    value={photoCategory}
+                    onChange={(e) => setPhotoCategory(e.target.value)}
+                    className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none cursor-pointer font-semibold"
+                  >
+                    <option value="">All Categories</option>
+                    {categories
+                      .filter(c => !activeEvent?.eventType || (c.contestTypes && c.contestTypes.includes(activeEvent.eventType)))
+                      .map(c => (
+                        <option key={c._id} value={c.name}>{c.name}</option>
+                      ))
+                    }
+                  </select>
+                );
+              })()}
             </div>
           </div>
 
           {(() => {
+            const activeEvent = events.find(e => e.status === 'Active') || events[0];
             const filteredPhotos = photographs.filter(p => {
               if (selectedParticipantFilter && p.participantName !== selectedParticipantFilter) {
                 return false;
               }
-              if (selectedContestTypeFilter) {
+              if (activeEvent?.eventType) {
                 const event = events.find(e => e._id === p.eventId);
                 const photoContestType = event ? event.eventType : 'Photography';
-                if (photoContestType !== selectedContestTypeFilter) {
+                if (photoContestType !== activeEvent.eventType) {
                   return false;
                 }
               }

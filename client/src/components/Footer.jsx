@@ -118,7 +118,7 @@ export default function Footer() {
             <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
               Our Location
             </h3>
-            <div className="w-full h-32 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="w-full h-53.25 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
               <iframe
                 title="Google Map Location"
                 src="https://maps.google.com/maps?q=Trio%20Chambers,%20Sadashiv%20Peth,%20Pune%20-%20411030&t=&z=15&ie=UTF8&iwloc=&output=embed"

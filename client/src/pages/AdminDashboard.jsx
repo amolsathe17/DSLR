@@ -1305,7 +1305,7 @@ export default function AdminDashboard() {
 
       {/* TAB 2: PARTICIPANTS */}
       {activeTab === 'participants' && (
-        <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-6 shadow-sm animate-in fade-in duration-200 h-[500px] overflow-y-auto">
+        <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-6 shadow-sm animate-in fade-in duration-200 h-125 overflow-y-auto">
           
           {/* Filters row */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -2314,7 +2314,7 @@ export default function AdminDashboard() {
                   <div className="flex flex-col gap-3">
                     {newEventPackages.map((pkg, idx) => (
                       <div key={idx} className="flex flex-wrap sm:flex-nowrap gap-3 items-end bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-150 dark:border-slate-850">
-                        <div className="flex-1 min-w-[120px] flex flex-col gap-1">
+                        <div className="flex-1 min-w-30 flex flex-col gap-1">
                           <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
                           <input
                             type="text"

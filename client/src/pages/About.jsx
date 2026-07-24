@@ -80,13 +80,6 @@ export default function About() {
           </div>
         </div>
 
-        {/* Footer Support/Community Link */}
-        <div className="text-center flex flex-col items-center gap-4 py-8 border-t border-slate-200 dark:border-slate-800">
-          <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400">
-            <Heart size={14} className="text-red-500 fill-current animate-pulse" />
-            <span>Dedicated to preserving fading tribal traditions and creative mentorship.</span>
-          </div>
-        </div>
 
       </div>
     </div>

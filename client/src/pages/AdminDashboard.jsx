@@ -54,6 +54,7 @@ export default function AdminDashboard() {
   const [partCity, setPartCity] = useState('');
   const [partSuspended, setPartSuspended] = useState('');
   const [partParticipantFilter, setPartParticipantFilter] = useState('');
+  const [partPaymentFilter, setPartPaymentFilter] = useState('');
 
   // Photograph list states
   const [photographs, setPhotographs] = useState([]);
@@ -1308,44 +1309,54 @@ export default function AdminDashboard() {
           
           {/* Filters row */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-              <div className="relative w-full sm:max-w-xs">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  value={partSearch}
-                  onChange={(e) => setPartSearch(e.target.value)}
-                  placeholder="Search name, email, mobile..."
-                  className="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
-                />
-              </div>
+            <div className="relative w-full sm:max-w-xs">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={partSearch}
+                onChange={(e) => setPartSearch(e.target.value)}
+                placeholder="Search name, email, mobile..."
+                className="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
+              />
+            </div>
+
+            <div className="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
               <select
                 value={partParticipantFilter}
                 onChange={(e) => setPartParticipantFilter(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none font-semibold w-full sm:w-auto cursor-pointer"
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none font-semibold cursor-pointer"
               >
                 <option value="">All Participants</option>
                 {[...new Set(participants.map(p => p.name))].map(name => (
                   <option key={name} value={name}>{name}</option>
                 ))}
               </select>
-            </div>
 
-            <div className="flex gap-2 w-full sm:w-auto">
               <select
                 value={partCity}
                 onChange={(e) => setPartCity(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
               >
                 <option value="">All Cities</option>
                 {[...new Set(participants.map(p => p.city))].map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
+
+              <select
+                value={partPaymentFilter}
+                onChange={(e) => setPartPaymentFilter(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
+              >
+                <option value="">All Payments</option>
+                <option value="Paid">Paid</option>
+                <option value="Unpaid">Unpaid</option>
+              </select>
+
               <select
                 value={partSuspended}
                 onChange={(e) => setPartSuspended(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
               >
                 <option value="">All Accounts</option>
                 <option value="false">Active</option>
@@ -1370,7 +1381,15 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {participants.filter(p => !partParticipantFilter || p.name === partParticipantFilter).map(p => (
+                {participants
+                  .filter(p => !partParticipantFilter || p.name === partParticipantFilter)
+                  .filter(p => {
+                    if (!partPaymentFilter) return true;
+                    if (partPaymentFilter === 'Paid') return p.paymentStatus === 'Paid';
+                    if (partPaymentFilter === 'Unpaid') return p.paymentStatus !== 'Paid';
+                    return true;
+                  })
+                  .map(p => (
                   <tr key={p._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
                     <td className="py-3.5 pr-4">
                        <div className="flex items-center gap-2">

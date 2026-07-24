@@ -825,10 +825,10 @@ export default function JudgeDashboard() {
                                   </span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center">
-                                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide ${
-                                    item.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                                  <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide ${
+                                    item.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
                                   }`}>
-                                    {item.score.approvalStatus === 'Approved' ? '✓ Approved' : '🛑 Disapproved'}
+                                    {item.score.approvalStatus === 'Approved' ? 'APPROVED' : 'DISAPPROVED'}
                                   </span>
                                 </td>
                                 <td className="py-3.5 px-4">
@@ -1082,15 +1082,11 @@ export default function JudgeDashboard() {
                               </span>
                               {photo.score && (
                                 <div className="mt-2 flex items-center gap-1.5">
-                                  {photo.score.approvalStatus === 'Approved' ? (
-                                    <span className="px-2 py-0.5 rounded text-[8px] font-extrabold uppercase bg-emerald-500/10 text-emerald-500">
-                                      Approved
-                                    </span>
-                                  ) : (
-                                    <span className="px-3 py-1 rounded-xl text-[10px] font-extrabold bg-red-600 text-white animate-pulse uppercase tracking-wider">
-                                      🛑 Disapproved
-                                    </span>
-                                  )}
+                                  <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
+                                    photo.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
+                                  }`}>
+                                    {photo.score.approvalStatus === 'Approved' ? 'APPROVED' : 'DISAPPROVED'}
+                                  </span>
                                   <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
                                     Grade: {photo.score.approvalStatus === 'Disapproved' ? 0 : photo.score.averageScore}
                                   </span>

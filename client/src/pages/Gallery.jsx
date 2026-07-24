@@ -120,7 +120,7 @@ export default function Gallery() {
             onClick={() => setActiveTab('disapproved')}
             className={`flex items-center gap-1.5 pb-3 border-b-2 font-display text-sm font-semibold transition-all cursor-pointer ${
               activeTab === 'disapproved'
-                ? 'border-red-500 text-red-650 dark:text-red-400 font-bold'
+                ? 'border-red-500 text-red-600 dark:text-red-400 font-bold'
                 : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
             }`}
           >
@@ -172,7 +172,7 @@ export default function Gallery() {
 
             {/* Gallery Grid */}
             {(() => {
-              const approvedPhotos = filteredPhotos.filter(p => !p.scores || p.scores.every(s => (s.approvalStatus || 'Approved') === 'Approved'));
+              const approvedPhotos = filteredPhotos.filter(p => p.scores && p.scores.length > 0 && p.scores.every(s => (s.approvalStatus || 'Approved') === 'Approved'));
               if (approvedPhotos.length === 0) {
                 return (
                   <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">
@@ -340,7 +340,7 @@ export default function Gallery() {
 
                             {/* Disapproval reasons */}
                             <div className="mt-2 pt-2 border-t border-red-200/40 dark:border-red-900/20 text-[10px] bg-red-50/50 dark:bg-red-950/10 p-2.5 rounded-lg border border-red-100 dark:border-red-900/10">
-                              <span className="font-extrabold text-red-650 dark:text-red-455 flex items-center gap-1">
+                              <span className="font-extrabold text-red-600 dark:text-red-400 flex items-center gap-1">
                                 ⚠️ Entry Disapproved by Judge
                               </span>
                               <div className="flex flex-col gap-1.5 mt-1 text-slate-650 dark:text-slate-400">
@@ -462,7 +462,7 @@ export default function Gallery() {
                             onContextMenu={e => e.preventDefault()}
                           />
                           <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">
-                            <div className="text-[5.5px] leading-tight font-black text-red-650/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-650/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
+                            <div className="text-[5.5px] leading-tight font-black text-red-600/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-600/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
                               SAMPLE CERTIFICATE
                               <br />
                               NOT VALID FOR

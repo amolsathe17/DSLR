@@ -1634,7 +1634,7 @@ export default function AdminDashboard() {
                               crossOrigin="anonymous"
                               referrerPolicy="no-referrer"
                             />
-                            <span className="absolute top-2 right-2 bg-red-650 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm">
+                            <span className="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm">
                               🛑 Grade: 0
                             </span>
                           </div>
@@ -2900,7 +2900,7 @@ export default function AdminDashboard() {
             </div>
 
             {profileError && (
-              <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-xs text-red-650 dark:text-red-400">
+              <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-xs text-red-600 dark:text-red-400">
                 <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                 <span>{profileError}</span>
               </div>

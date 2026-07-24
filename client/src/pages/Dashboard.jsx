@@ -1145,7 +1145,7 @@ export default function Dashboard() {
                                 onContextMenu={e => e.preventDefault()}
                               />
                               <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">
-                                <div className="text-[5.5px] leading-tight font-black text-red-650/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-650/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
+                                <div className="text-[5.5px] leading-tight font-black text-red-600/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-600/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
                                   SAMPLE CERTIFICATE
                                   <br />
                                   NOT VALID FOR
@@ -1227,7 +1227,7 @@ export default function Dashboard() {
                               onContextMenu={e => e.preventDefault()}
                             />
                             <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">
-                              <div className="text-[5.5px] leading-tight font-black text-red-650/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-650/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
+                              <div className="text-[5.5px] leading-tight font-black text-red-600/45 dark:text-red-500/35 uppercase tracking-tighter text-center select-none rotate-[-25deg] border border-dashed border-red-600/30 bg-white/80 px-1 py-0.5 rounded shadow-sm">
                                 SAMPLE CERTIFICATE
                                 <br />
                                 NOT VALID FOR

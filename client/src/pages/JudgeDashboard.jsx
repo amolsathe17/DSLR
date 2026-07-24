@@ -44,6 +44,7 @@ export default function JudgeDashboard() {
   const [successMessage, setSuccessMessage] = useState('');
 
   const [showSignOffModal, setShowSignOffModal] = useState(false);
+  const [showSignedOffBlockModal, setShowSignedOffBlockModal] = useState(false);
 
   const triggerSuccess = (title, message) => {
     setSuccessTitle(title);
@@ -332,6 +333,10 @@ export default function JudgeDashboard() {
 
 
   const handleOpenScoring = (photo) => {
+    if (hasConfirmed && user?.role !== 'Admin') {
+      setShowSignedOffBlockModal(true);
+      return;
+    }
     setActivePhoto(photo);
     if (photo.score) {
       setCreativity(photo.score.creativity);
@@ -1082,7 +1087,7 @@ export default function JudgeDashboard() {
                                       Approved
                                     </span>
                                   ) : (
-                                    <span className="px-3 py-1 rounded-xl text-[10px] font-extrabold bg-red-650 text-white animate-pulse uppercase tracking-wider">
+                                    <span className="px-3 py-1 rounded-xl text-[10px] font-extrabold bg-red-600 text-white animate-pulse uppercase tracking-wider">
                                       🛑 Disapproved
                                     </span>
                                   )}
@@ -1634,6 +1639,29 @@ export default function JudgeDashboard() {
               className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center font-bold"
             >
               Awesome, Understood
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SIGNED OFF BLOCK MODAL */}
+      {showSignedOffBlockModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-950/30 rounded-full flex items-center justify-center text-red-500 text-3xl font-bold">
+              🛑
+            </div>
+            <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
+              Evaluation Locked
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              You have already signed off on your evaluations for this event. Editing evaluations is no longer allowed.
+            </p>
+            <button
+              onClick={() => setShowSignedOffBlockModal(false)}
+              className="mt-2 w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+            >
+              Close
             </button>
           </div>
         </div>

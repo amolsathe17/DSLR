@@ -203,6 +203,28 @@ export default function Login() {
         }')`
       }}
     >
+      {/* DEADLINE BLOCK MODAL */}
+      {loginRole === 'Participant' && event && new Date(event.deadline) < new Date() && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-250">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-950/30 rounded-full flex items-center justify-center text-red-500 text-3xl font-bold">
+              🛑
+            </div>
+            <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
+              Submission Deadline Passed
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              The submission deadline for this contest has passed. Contestant logins are closed for this event.
+            </p>
+            <button
+              onClick={() => setLoginRole('Judge')}
+              className="mt-2 w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+            >
+              Log in as Judge/Admin
+            </button>
+          </div>
+        </div>
+      )}
       {/* Dark tint overlay without blur */}
       <div className="absolute inset-0 bg-slate-950/15"></div>
 

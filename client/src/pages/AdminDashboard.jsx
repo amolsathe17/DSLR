@@ -53,6 +53,7 @@ export default function AdminDashboard() {
   const [partSearch, setPartSearch] = useState('');
   const [partCity, setPartCity] = useState('');
   const [partSuspended, setPartSuspended] = useState('');
+  const [partParticipantFilter, setPartParticipantFilter] = useState('');
 
   // Photograph list states
   const [photographs, setPhotographs] = useState([]);
@@ -1303,19 +1304,31 @@ export default function AdminDashboard() {
 
       {/* TAB 2: PARTICIPANTS */}
       {activeTab === 'participants' && (
-        <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-6 shadow-sm animate-in fade-in duration-200 h-[600px] overflow-y-auto">
+        <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-6 shadow-sm animate-in fade-in duration-200 h-[500px] overflow-y-auto">
           
           {/* Filters row */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="relative w-full sm:max-w-xs">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={partSearch}
-                onChange={(e) => setPartSearch(e.target.value)}
-                placeholder="Search name, email, mobile..."
-                className="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
-              />
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+              <div className="relative w-full sm:max-w-xs">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={partSearch}
+                  onChange={(e) => setPartSearch(e.target.value)}
+                  placeholder="Search name, email, mobile..."
+                  className="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none"
+                />
+              </div>
+              <select
+                value={partParticipantFilter}
+                onChange={(e) => setPartParticipantFilter(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none font-semibold w-full sm:w-auto cursor-pointer"
+              >
+                <option value="">All Participants</option>
+                {[...new Set(participants.map(p => p.name))].map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
             </div>
 
             <div className="flex gap-2 w-full sm:w-auto">
@@ -1357,7 +1370,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {participants.map(p => (
+                {participants.filter(p => !partParticipantFilter || p.name === partParticipantFilter).map(p => (
                   <tr key={p._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
                     <td className="py-3.5 pr-4">
                        <div className="flex items-center gap-2">

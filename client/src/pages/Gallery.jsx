@@ -27,6 +27,7 @@ export default function Gallery() {
   
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [selectedParticipantFilter, setSelectedParticipantFilter] = useState('');
   
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +72,8 @@ export default function Gallery() {
       p.cameraModel.toLowerCase().includes(search.toLowerCase()) ||
       p.cameraBrand.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = category ? p.category === category : true;
-    return matchesSearch && matchesCategory;
+    const matchesParticipant = selectedParticipantFilter ? p.participantName === selectedParticipantFilter : true;
+    return matchesSearch && matchesCategory && matchesParticipant;
   });
 
   if (loading) {
@@ -158,16 +160,32 @@ export default function Gallery() {
                 />
               </div>
 
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full sm:w-auto px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-semibold"
-              >
-                <option value="">All Categories</option>
-                {categories.map(c => (
-                  <option key={c._id} value={c.name}>{c.name}</option>
-                ))}
-              </select>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <select
+                  value={selectedParticipantFilter}
+                  onChange={(e) => setSelectedParticipantFilter(e.target.value)}
+                  className="w-full sm:w-auto px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
+                >
+                  <option value="">All Participants</option>
+                  {[...new Set(photographs.map(p => p.participantName))].map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full sm:w-auto px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
+                >
+                  <option value="">All Categories</option>
+                  {categories
+                    .filter(c => !event?.eventType || (c.contestTypes && c.contestTypes.includes(event.eventType)))
+                    .map(c => (
+                      <option key={c._id} value={c.name}>{c.name}</option>
+                    ))
+                  }
+                </select>
+              </div>
             </div>
 
             {/* Gallery Grid */}
@@ -259,16 +277,32 @@ export default function Gallery() {
                 />
               </div>
 
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full sm:w-auto px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-semibold"
-              >
-                <option value="">All Categories</option>
-                {categories.map(c => (
-                  <option key={c._id} value={c.name}>{c.name}</option>
-                ))}
-              </select>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <select
+                  value={selectedParticipantFilter}
+                  onChange={(e) => setSelectedParticipantFilter(e.target.value)}
+                  className="w-full sm:w-auto px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
+                >
+                  <option value="">All Participants</option>
+                  {[...new Set(photographs.map(p => p.participantName))].map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full sm:w-auto px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
+                >
+                  <option value="">All Categories</option>
+                  {categories
+                    .filter(c => !event?.eventType || (c.contestTypes && c.contestTypes.includes(event.eventType)))
+                    .map(c => (
+                      <option key={c._id} value={c.name}>{c.name}</option>
+                    ))
+                  }
+                </select>
+              </div>
             </div>
 
             {/* Gallery Grid */}

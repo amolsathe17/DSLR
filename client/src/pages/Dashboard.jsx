@@ -1073,11 +1073,11 @@ export default function Dashboard() {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
               <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Refund Status Tracking</h3>
               {(() => {
-                const refundedSubs = allSubmissions.filter(s => s.paymentStatus === 'Refunded');
+                const refundedSubs = allSubmissions.filter(s => s.paymentStatus === 'Refunded' || s.paymentStatus === 'Withdrawn');
                 if (refundedSubs.length === 0) {
                   return (
                     <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-[220px]">
-                      <span>No refunded entry packages.</span>
+                      <span>No refunded or withdrawn entry packages.</span>
                     </div>
                   );
                 }
@@ -1088,16 +1088,20 @@ export default function Dashboard() {
                       <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl flex flex-col gap-2 text-xs">
                         <div className="flex justify-between items-center">
                           <span className="font-extrabold text-slate-900 dark:text-white">{sub.eventTitle}</span>
-                          <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase bg-amber-500/10 text-amber-500 rounded-full">
-                            Refunded
+                          <span className={`px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full ${
+                            sub.paymentStatus === 'Refunded' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-550'
+                          }`}>
+                            {sub.paymentStatus === 'Refunded' ? 'Refunded' : 'Refund Pending'}
                           </span>
                         </div>
                         <div className="flex justify-between text-[11px] text-slate-400">
                           <span>Entry ID: {sub.entryNumber}</span>
-                          <span>Refunded Amount: <strong className="text-indigo-600 dark:text-indigo-400">INR {sub.amount}</strong></span>
+                          <span>Amount: <strong className="text-indigo-600 dark:text-indigo-400">INR {sub.amount}</strong></span>
                         </div>
                         <div className="text-[10px] text-slate-400 italic mt-0.5">
-                          Status: The registration fees have been reverted. Photo upload limits reset to unpaid.
+                          {sub.paymentStatus === 'Refunded'
+                            ? 'Status: The registration fees have been reverted. Photo upload limits reset to unpaid.'
+                            : 'Status: Submission has been withdrawn. Fee refund request is registered and pending admin review.'}
                         </div>
                       </div>
                     ))}

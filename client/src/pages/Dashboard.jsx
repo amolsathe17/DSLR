@@ -1370,7 +1370,7 @@ export default function Dashboard() {
                     {/* Accordion Header */}
                     <div
                       onClick={() => toggleActiveEvent(e)}
-                      className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors select-none"
+                      className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors select-none gap-4 sm:gap-2"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         <span className="font-display font-extrabold text-sm text-slate-900 dark:text-white">

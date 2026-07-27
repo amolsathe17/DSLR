@@ -66,7 +66,7 @@ export default function Navbar() {
         </button>
 
         {showNotifications && (
-          <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="absolute right-0 mt-2 w-[280px] sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
             <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
               <h4 className="font-display font-extrabold text-slate-900 dark:text-white text-xs">Notifications</h4>
               {unreadCount > 0 && (

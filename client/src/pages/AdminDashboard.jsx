@@ -1446,7 +1446,7 @@ export default function AdminDashboard() {
                         >
                           <Ban size={14} />
                         </button>
-                        {p.paymentStatus === 'Paid' && (
+                        {(p.paymentStatus === 'Paid' || p.paymentStatus === 'Withdrawn' || (p.isSuspended && p.paymentStatus !== 'Refunded' && p.paymentStatus !== 'Unpaid')) && (
                           <button
                             onClick={() => handleRefundParticipant(p._id, p.name)}
                             className="p-1.5 bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-950/20 rounded-lg cursor-pointer"

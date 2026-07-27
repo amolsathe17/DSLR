@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const Submission = require('../models/Submission');
 const Payment = require('../models/Payment');
@@ -696,6 +697,110 @@ router.post('/participants/:id/refund', protect, authorize('Admin'), async (req,
     });
 
     res.json({ success: true, message: 'Payment successfully marked as Refunded and credited back.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Send broadcast notifications
+// @route   POST /api/admin/broadcasts
+// @access  Private/Admin
+router.post('/broadcasts', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const { message, recipientType } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ success: false, message: 'Notification message is required' });
+    }
+    if (!['Participant', 'Judge', 'Both'].includes(recipientType)) {
+      return res.status(400).json({ success: false, message: 'Invalid recipient type' });
+    }
+
+    // 1. Save broadcast record
+    const Broadcast = require('../models/Broadcast');
+    const broadcast = await Broadcast.create({
+      message: message.trim(),
+      recipientType,
+      sentBy: req.user.name || 'Admin'
+    });
+
+    // 2. Query target users
+    const User = require('../models/User');
+    let targetRoles = [];
+    if (recipientType === 'Participant') {
+      targetRoles = ['Participant'];
+    } else if (recipientType === 'Judge') {
+      targetRoles = ['Judge'];
+    } else {
+      targetRoles = ['Participant', 'Judge'];
+    }
+
+    const users = await User.find({ role: { $in: targetRoles } });
+
+    // 3. Push to each user's notifications array
+    for (const u of users) {
+      if (!u.notifications) u.notifications = [];
+      u.notifications.push({
+        _id: new mongoose.Types.ObjectId(),
+        message: message.trim(),
+        type: 'info',
+        isRead: false,
+        createdAt: new Date()
+      });
+      await u.save();
+    }
+
+    res.status(201).json({ success: true, message: 'Broadcast notification sent successfully', broadcast });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Get sent broadcasts list
+// @route   GET /api/admin/broadcasts
+// @access  Private/Admin
+router.get('/broadcasts', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const Broadcast = require('../models/Broadcast');
+    const broadcasts = await Broadcast.find().sort({ createdAt: -1 });
+    res.json({ success: true, broadcasts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Delete a broadcast
+// @route   DELETE /api/admin/broadcasts/:id
+// @access  Private/Admin
+router.delete('/broadcasts/:id', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const Broadcast = require('../models/Broadcast');
+    const broadcast = await Broadcast.findByIdAndDelete(req.params.id);
+    if (!broadcast) {
+      return res.status(404).json({ success: false, message: 'Broadcast not found' });
+    }
+    res.json({ success: true, message: 'Broadcast notification deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Toggle archive status of a broadcast
+// @route   POST /api/admin/broadcasts/:id/archive
+// @access  Private/Admin
+router.post('/broadcasts/:id/archive', protect, authorize('Admin'), async (req, res) => {
+  try {
+    const Broadcast = require('../models/Broadcast');
+    const broadcast = await Broadcast.findById(req.params.id);
+    if (!broadcast) {
+      return res.status(404).json({ success: false, message: 'Broadcast not found' });
+    }
+    broadcast.isArchived = !broadcast.isArchived;
+    await broadcast.save();
+    res.json({ success: true, message: `Broadcast successfully ${broadcast.isArchived ? 'archived' : 'unarchived'}`, broadcast });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

@@ -25,6 +25,14 @@ export default function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      if (refreshUser) refreshUser();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [user, refreshUser]);
+
   const unreadNotifs = user?.notifications ? user.notifications.filter(n => !n.isRead) : [];
   const unreadCount = unreadNotifs.length;
 

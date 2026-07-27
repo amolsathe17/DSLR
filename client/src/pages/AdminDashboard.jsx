@@ -30,7 +30,11 @@ import {
   ThumbsDown,
   Flag,
   Star,
-  MessageSquare
+  MessageSquare,
+  Bell,
+  Send,
+  Archive,
+  Clock
 } from 'lucide-react';
 import StatsCharts from '../components/StatsCharts';
 
@@ -273,6 +277,24 @@ export default function AdminDashboard() {
   const [editLoginBgUrl, setEditLoginBgUrl] = useState('');
   const [uploadingEditBg, setUploadingEditBg] = useState(false);
 
+  // Broadcast states
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastRecipient, setBroadcastRecipient] = useState('Participant');
+  const [broadcasts, setBroadcasts] = useState([]);
+  const [broadcastFilter, setBroadcastFilter] = useState('all');
+  const [broadcastSubmitting, setBroadcastSubmitting] = useState(false);
+
+  const fetchBroadcasts = async () => {
+    try {
+      const data = await apiFetch('/api/admin/broadcasts');
+      if (data.success) {
+        setBroadcasts(data.broadcasts);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const triggerSuccessModal = (title, message) => {
     setGeneralSuccessTitle(title);
     setGeneralSuccessMsg(message);
@@ -287,8 +309,63 @@ export default function AdminDashboard() {
       setProfilePassword('');
       setProfileConfirmPassword('');
       setProfileError('');
+      fetchBroadcasts();
     }
   }, [user, activeTab]);
+
+  const handleSendBroadcast = async (e) => {
+    e.preventDefault();
+    if (!broadcastMessage || !broadcastMessage.trim()) {
+      alert('Notification message cannot be empty');
+      return;
+    }
+    setBroadcastSubmitting(true);
+    try {
+      const data = await apiFetch('/api/admin/broadcasts', {
+        method: 'POST',
+        body: JSON.stringify({
+          message: broadcastMessage.trim(),
+          recipientType: broadcastRecipient
+        })
+      });
+      if (data.success) {
+        setBroadcastMessage('');
+        fetchBroadcasts();
+        triggerSuccessModal('Broadcast Sent', 'Your notification message has been successfully broadcast to all target recipients.');
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to send broadcast');
+    } finally {
+      setBroadcastSubmitting(false);
+    }
+  };
+
+  const handleDeleteBroadcast = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this notification record?')) return;
+    try {
+      const data = await apiFetch(`/api/admin/broadcasts/${id}`, {
+        method: 'DELETE'
+      });
+      if (data.success) {
+        fetchBroadcasts();
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to delete broadcast');
+    }
+  };
+
+  const handleToggleArchiveBroadcast = async (id) => {
+    try {
+      const data = await apiFetch(`/api/admin/broadcasts/${id}/archive`, {
+        method: 'POST'
+      });
+      if (data.success) {
+        fetchBroadcasts();
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to update archive status');
+    }
+  };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -2924,8 +3001,8 @@ export default function AdminDashboard() {
 
       {/* TAB 7: PROFILE SETTINGS */}
       {activeTab === 'profile_settings' && (
-        <div className="max-w-2xl mx-auto animate-in fade-in duration-200 text-left">
-          <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+        <div className="max-w-2xl mx-auto animate-in fade-in duration-200 text-left flex flex-col gap-6">
+          <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
             <div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">Profile Settings</h3>
               <p className="text-xs text-slate-400 mt-0.5">Manage your administrator account credentials and personal details</p>
@@ -3012,6 +3089,154 @@ export default function AdminDashboard() {
                 {profileSubmitting ? 'Saving Changes...' : 'Save Profile Changes'}
               </button>
             </form>
+          </div>
+
+          {/* Broadcast Notification Management Card */}
+          <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
+            <div>
+              <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                <Bell size={20} className="text-indigo-600" />
+                Notification Management
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">Compose announcements and broadcast them to contestants, judges, or both groups.</p>
+            </div>
+
+            <form onSubmit={handleSendBroadcast} className="flex flex-col gap-5 text-xs">
+              <div className="flex flex-col gap-1.5">
+                <label className="font-bold text-slate-500">Recipient Audience</label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-305 select-none">
+                    <input
+                      type="radio"
+                      name="broadcastRecipient"
+                      value="Participant"
+                      checked={broadcastRecipient === 'Participant'}
+                      onChange={() => setBroadcastRecipient('Participant')}
+                      className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    Contestants Only
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-305 select-none">
+                    <input
+                      type="radio"
+                      name="broadcastRecipient"
+                      value="Judge"
+                      checked={broadcastRecipient === 'Judge'}
+                      onChange={() => setBroadcastRecipient('Judge')}
+                      className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    Judges Only
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-305 select-none">
+                    <input
+                      type="radio"
+                      name="broadcastRecipient"
+                      value="Both"
+                      checked={broadcastRecipient === 'Both'}
+                      onChange={() => setBroadcastRecipient('Both')}
+                      className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    Both (Announce Globally)
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="font-bold text-slate-500">Notification Message</label>
+                <textarea
+                  value={broadcastMessage}
+                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  placeholder="Enter details about results, schedules, rules updates, or deadline changes..."
+                  className="w-full min-h-[90px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none resize-none"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={broadcastSubmitting || !broadcastMessage.trim()}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 font-bold"
+              >
+                <Send size={13} />
+                {broadcastSubmitting ? 'Dispatching Message...' : 'Send Broadcast Notification'}
+              </button>
+            </form>
+
+            <div className="border-t border-slate-100 dark:border-slate-800/80 pt-6 flex flex-col gap-4 mt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs">Announcements History</h4>
+                
+                <select
+                  value={broadcastFilter}
+                  onChange={(e) => setBroadcastFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-semibold text-slate-600 cursor-pointer focus:outline-none"
+                >
+                  <option value="all">All Recipients</option>
+                  <option value="Participant">Contestants Only</option>
+                  <option value="Judge">Judges Only</option>
+                  <option value="Both">Both Audience</option>
+                </select>
+              </div>
+
+              {(() => {
+                const filtered = broadcasts.filter(b => broadcastFilter === 'all' || b.recipientType === broadcastFilter);
+                if (filtered.length === 0) {
+                  return (
+                    <div className="bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-850 p-6 rounded-2xl text-center text-slate-400 italic text-[11px]">
+                      No previous notifications match this selection.
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1">
+                    {filtered.map((b) => (
+                      <div key={b._id} className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-850 flex justify-between gap-4 items-start text-[11px] text-left">
+                        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                          <p className="font-semibold text-slate-700 dark:text-slate-300 leading-relaxed break-words">{b.message}</p>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-slate-400 font-semibold">
+                            <span className="flex items-center gap-1">
+                              <Users size={11} className="text-slate-400" />
+                              Recipient: <strong className="text-indigo-500">{b.recipientType === 'Both' ? 'Contestants & Judges' : b.recipientType === 'Participant' ? 'Contestants' : 'Judges'}</strong>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock size={11} className="text-slate-400" />
+                              {new Date(b.createdAt).toLocaleString()}
+                            </span>
+                            {b.isArchived && (
+                              <span className="px-1.5 py-0.5 rounded text-[8px] bg-slate-200 text-slate-600 uppercase font-black">
+                                Archived
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-1 shrink-0">
+                          <button
+                            onClick={() => handleToggleArchiveBroadcast(b._id)}
+                            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                              b.isArchived 
+                                ? 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-600 dark:bg-indigo-950/20' 
+                                : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-605 dark:bg-slate-900'
+                            }`}
+                            title={b.isArchived ? 'Activate Notification' : 'Archive Notification'}
+                          >
+                            <Archive size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBroadcast(b._id)}
+                            className="p-1.5 bg-red-50 hover:bg-red-100 border border-red-250 text-red-650 dark:bg-red-950/20 rounded-lg transition-colors cursor-pointer"
+                            title="Delete Record"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         </div>
       )}

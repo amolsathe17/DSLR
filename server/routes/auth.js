@@ -320,6 +320,53 @@ router.post('/notifications/:notifId/read', protect, async (req, res) => {
   }
 });
 
+// @desc    Delete a notification
+// @route   DELETE /api/auth/notifications/:notifId
+// @access  Private
+router.delete('/notifications/:notifId', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const { notifId } = req.params;
+
+    // Try to pull by id
+    let pulled = false;
+    if (user.notifications && typeof user.notifications.pull === 'function') {
+      try {
+        user.notifications.pull(notifId);
+        pulled = true;
+      } catch (err) {
+        // ignore cast error and fallback
+      }
+    }
+
+    // Fallback to matching index
+    if (!pulled && user.notifications) {
+      const idx = parseInt(notifId);
+      if (!isNaN(idx) && user.notifications[idx]) {
+        user.notifications.splice(idx, 1);
+        pulled = true;
+      } else {
+        // search by _id manually
+        const foundIdx = user.notifications.findIndex(n => n._id && n._id.toString() === notifId);
+        if (foundIdx !== -1) {
+          user.notifications.splice(foundIdx, 1);
+          pulled = true;
+        }
+      }
+    }
+
+    await user.save();
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @desc    Update user profile
 // @route   PUT /api/auth/profile
 // @access  Private

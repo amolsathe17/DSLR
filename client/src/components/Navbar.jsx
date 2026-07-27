@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Camera, Sun, Moon, Menu, X, LogOut, LayoutDashboard, User, Bell, CheckCheck, Check } from 'lucide-react';
+import { Camera, Sun, Moon, Menu, X, LogOut, LayoutDashboard, User, Bell, CheckCheck, Check, Trash2 } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout, refreshUser, apiFetch } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showParticipantModal, setShowParticipantModal] = useState(false);
   const notifRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,12 +58,28 @@ export default function Navbar() {
     }
   };
 
+  const deleteNotif = async (notifId, e) => {
+    if (e) e.stopPropagation();
+    try {
+      await apiFetch(`/api/auth/notifications/${notifId}`, { method: 'DELETE' });
+      if (refreshUser) await refreshUser();
+    } catch (err) {
+      console.error("Failed to delete notification:", err.message);
+    }
+  };
+
   const renderNotificationBell = () => {
     if (!user) return null;
     return (
       <div className="relative" ref={notifRef}>
         <button
-          onClick={() => setShowNotifications(!showNotifications)}
+          onClick={() => {
+            if (user?.role === 'Participant') {
+              setShowParticipantModal(true);
+            } else {
+              setShowNotifications(!showNotifications);
+            }
+          }}
           className="relative p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         >
           <Bell size={18} />
@@ -108,15 +125,24 @@ export default function Navbar() {
                           {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
                         </span>
                       </div>
-                      {!notif.isRead && (
+                      <div className="flex gap-1 items-center shrink-0 self-start">
+                        {!notif.isRead && (
+                          <button
+                            onClick={(e) => markAsRead(notif._id || realIdx, e)}
+                            className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer rounded hover:bg-slate-100 dark:hover:bg-slate-850"
+                            title="Dismiss (Mark read)"
+                          >
+                            <Check size={12} />
+                          </button>
+                        )}
                         <button
-                          onClick={(e) => markAsRead(notif._id || realIdx, e)}
-                          className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 self-start cursor-pointer rounded"
-                          title="Mark as read"
+                          onClick={(e) => deleteNotif(notif._id || realIdx, e)}
+                          className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer rounded hover:bg-slate-100 dark:hover:bg-slate-855"
+                          title="Delete Notification"
                         >
-                          <Check size={12} />
+                          <Trash2 size={12} />
                         </button>
-                      )}
+                      </div>
                     </div>
                   );
                 })
@@ -452,6 +478,93 @@ export default function Navbar() {
                   >
                     Register
                   </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Participant Centered Notifications Modal Popup */}
+      {showParticipantModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-4xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col gap-6 max-h-[85vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center border-b border-slate-200/60 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-2">
+                <Bell className="text-indigo-600 dark:text-indigo-400" size={20} />
+                <h3 className="font-display font-black text-slate-900 dark:text-white text-base">My Notifications ({unreadCount} unread)</h3>
+              </div>
+              <div className="flex items-center gap-4">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    <CheckCheck size={14} />
+                    Mark all as read
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowParticipantModal(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body: Notifications list */}
+            <div className="flex flex-col gap-3">
+              {user?.notifications && user.notifications.length > 0 ? (
+                [...user.notifications].reverse().map((notif, idx) => {
+                  const realIdx = user.notifications.length - 1 - idx;
+                  return (
+                    <div
+                      key={notif._id || idx}
+                      className="border border-slate-100 dark:border-slate-800/80 rounded-2xl bg-white dark:bg-slate-900 p-4 flex items-center justify-between gap-4 shadow-sm text-xs font-semibold"
+                    >
+                      <div className="flex items-center gap-3.5 flex-grow text-left">
+                        {/* Green Badge Icon */}
+                        <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                          <CheckCheck size={14} />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-slate-700 dark:text-slate-200 text-[11px] leading-relaxed font-semibold">{notif.message}</p>
+                          <span className="text-[9px] text-slate-400 font-semibold">
+                            {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : new Date().toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right Action buttons */}
+                      <div className="flex items-center gap-3 shrink-0">
+                        {!notif.isRead ? (
+                          <button
+                            onClick={(e) => markAsRead(notif._id || realIdx, e)}
+                            className="text-slate-400 hover:text-slate-650 dark:text-slate-400 dark:hover:text-slate-250 font-black tracking-wider text-[10px] uppercase cursor-pointer py-1 px-2.5 rounded-lg transition-all font-bold"
+                          >
+                            DISMISS
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-600 font-extrabold tracking-wider text-[10px] uppercase select-none px-2 font-bold">
+                            READ
+                          </span>
+                        )}
+                        <button
+                          onClick={(e) => deleteNotif(notif._id || realIdx, e)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                          title="Delete notification"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-10 text-center text-slate-400 text-xs italic">
+                  No notifications found.
                 </div>
               )}
             </div>

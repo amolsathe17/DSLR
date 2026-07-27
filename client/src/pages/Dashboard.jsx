@@ -1128,33 +1128,24 @@ export default function Dashboard() {
 
             eligibleSubs.forEach(sub => {
               const evDetails = eventsList.find(e => e._id === sub.eventId);
-              const winInfo = evDetails?.winners?.find(w => w.userId === user?._id || w.userId === user?.id);
-              if (winInfo && winInfo.certificatePdfUrl) {
-                winnerCards.push({ sub, evDetails, winInfo });
-              } else {
-                standardCards.push({ sub, evDetails });
+              if (evDetails?.status === 'Completed') {
+                const winInfo = evDetails?.winners?.find(w => w.userId === user?._id || w.userId === user?.id);
+                if (winInfo && winInfo.certificatePdfUrl) {
+                  winnerCards.push({ sub, evDetails, winInfo });
+                } else {
+                  standardCards.push({ sub, evDetails });
+                }
               }
             });
 
-            // If no standard participation certificates exist, we inject a dummy sample card
-            // so the user always sees a sample Participation Certificate in their dashboard!
-            if (standardCards.length === 0) {
-              const defaultEvent = eventsList[0] || {
-                title: "National Modeling Photography Championship 2026",
-                theme: "DSLR Portfolio & Creative Modeling",
-                eventDate: new Date().toISOString()
-              };
-              standardCards.push({
-                isDummy: true,
-                sub: {
-                  entryNumber: "SAMPLE-999999",
-                  eventTitle: defaultEvent.title,
-                  photoLimit: 3,
-                  photographs: [],
-                  updatedAt: new Date().toISOString()
-                },
-                evDetails: defaultEvent
-              });
+            if (winnerCards.length === 0 && standardCards.length === 0) {
+              return (
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-10 text-center text-slate-500 text-xs leading-relaxed max-w-lg mx-auto shadow-sm">
+                  <div className="text-3xl mb-3">🎖️</div>
+                  <h4 className="font-display font-extrabold text-slate-850 dark:text-white text-sm mb-1">Certificates Awaiting Event Completion</h4>
+                  <p>Your digital certificates (Participation & Winner credentials) will be generated and made available here once the competition event has concluded and is marked as Completed by the administrator.</p>
+                </div>
+              );
             }
 
             return (

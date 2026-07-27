@@ -303,12 +303,18 @@ router.post('/notifications/:notifId/read', protect, async (req, res) => {
       }
     }
 
-    // Fallback to matching index
+    // Fallback to matching index or manual search
     if (!notifFound && user.notifications) {
       const idx = parseInt(notifId);
       if (!isNaN(idx) && user.notifications[idx]) {
         user.notifications[idx].isRead = true;
         notifFound = true;
+      } else {
+        const foundIdx = user.notifications.findIndex(n => n._id && n._id.toString() === notifId);
+        if (foundIdx !== -1) {
+          user.notifications[foundIdx].isRead = true;
+          notifFound = true;
+        }
       }
     }
 

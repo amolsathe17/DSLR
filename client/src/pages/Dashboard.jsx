@@ -648,6 +648,43 @@ export default function Dashboard() {
     }
   };
 
+  const handleWithdrawClick = (subId) => {
+    setConfirmModal({
+      message: "Are you sure you want to withdraw your entry folder from this contest? All uploaded photographs will be withdrawn, and a refund request will be registered with the administrator.",
+      isAlert: false,
+      onConfirm: () => executeWithdrawal(subId)
+    });
+  };
+
+  const executeWithdrawal = async (subId) => {
+    setConfirmModal(null);
+    setLoading(true);
+    try {
+      const res = await apiFetch(`/api/submissions/withdraw/${subId}`, {
+        method: 'POST'
+      });
+      if (res.success) {
+        // Refresh local dashboard data
+        await fetchDashboardData();
+        // Refresh profile notifications
+        if (refreshUser) await refreshUser();
+        // Show success alert
+        setConfirmModal({
+          message: "refund request send successfully",
+          isAlert: true
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setConfirmModal({
+        message: err.message || 'Failed to withdraw submission folder.',
+        isAlert: true
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading && !submission && !event) {
     return (
       <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center">

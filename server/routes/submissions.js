@@ -784,7 +784,7 @@ router.post('/withdraw/:id', protect, async (req, res) => {
       ipAddress: req.ip
     });
 
-    res.json({ success: true, message: 'Your submission has been successfully withdrawn. Admin will process your refund shortly.' });
+    res.json({ success: true, message: 'refund request send successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

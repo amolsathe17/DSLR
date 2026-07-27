@@ -211,6 +211,29 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
 
     event = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
+    // Notify newly assigned judges
+    if (updateData.assignedJudges && Array.isArray(updateData.assignedJudges)) {
+      const User = require('../models/User');
+      for (const jId of updateData.assignedJudges) {
+        const judgeUser = await User.findById(jId);
+        if (judgeUser) {
+          if (!judgeUser.notifications) judgeUser.notifications = [];
+          
+          // Verify if notification has already been sent to prevent duplicates
+          const hasNotif = judgeUser.notifications.some(n => n.message.includes(event.title) && n.message.includes('assigned'));
+          if (!hasNotif) {
+            judgeUser.notifications.push({
+              message: `You have been assigned to evaluate entries for the contest event: "${event.title}".`,
+              type: 'info',
+              isRead: false,
+              createdAt: new Date()
+            });
+            await judgeUser.save();
+          }
+        }
+      }
+    }
+
     await AuditLog.create({
       userId: req.user._id,
       userName: req.user.name,
@@ -667,6 +690,20 @@ router.post('/:id/confirm-grading', protect, authorize('Judge'), async (req, res
     }
 
     await event.save();
+
+    // Notify all admin users
+    const User = require('../models/User');
+    const admins = await User.find({ role: 'Admin' });
+    for (const admin of admins) {
+      if (!admin.notifications) admin.notifications = [];
+      admin.notifications.push({
+        message: `Judge ${req.user.name} has signed off on their evaluations for event "${event.title}".`,
+        type: 'info',
+        isRead: false,
+        createdAt: new Date()
+      });
+      await admin.save();
+    }
 
     const AuditLog = require('../models/AuditLog');
     await AuditLog.create({

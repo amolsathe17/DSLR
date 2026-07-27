@@ -1435,6 +1435,8 @@ export default function Dashboard() {
                                   </p>
                                 </div>
                               </div>
+                            ) : submission && (submission.paymentStatus === 'Withdrawn' || submission.paymentStatus === 'Refunded') ? (
+                              null
                             ) : (
                               <>
                                 {/* STEP 1: Not started yet */}
@@ -1797,6 +1799,16 @@ export default function Dashboard() {
                                           </>
                                         )}
                                       </div>
+                                    )}
+                                    {/* Withdrawal Button */}
+                                    {submission && submission.paymentStatus !== 'Withdrawn' && submission.paymentStatus !== 'Refunded' && (new Date() < new Date(e.deadline)) && (
+                                      <button
+                                        onClick={() => handleWithdrawClick(submission._id)}
+                                        className="w-full mt-3 bg-red-50 hover:bg-red-105 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/45 dark:text-red-400 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all border border-red-200/40 dark:border-red-900/10 cursor-pointer font-bold"
+                                      >
+                                        <RotateCcw size={13} className="shrink-0" />
+                                        Withdraw Entry & Refund
+                                      </button>
                                     )}
                                   </div>
                                 </div>

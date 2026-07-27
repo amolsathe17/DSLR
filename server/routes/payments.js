@@ -15,6 +15,39 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret'
 });
 
+const sendPaymentNotifications = async (userId, userName, amount, eventTitle) => {
+  try {
+    const User = require('../models/User');
+    // Notify participant
+    const user = await User.findById(userId);
+    if (user) {
+      if (!user.notifications) user.notifications = [];
+      user.notifications.push({
+        message: `Payment of ₹${amount} for entry package in "${eventTitle}" was completed successfully. You can now upload your entries.`,
+        type: 'success',
+        isRead: false,
+        createdAt: new Date()
+      });
+      await user.save();
+    }
+
+    // Notify all admins
+    const admins = await User.find({ role: 'Admin' });
+    for (const admin of admins) {
+      if (!admin.notifications) admin.notifications = [];
+      admin.notifications.push({
+        message: `Participant ${userName} has completed payment of ₹${amount} for event "${eventTitle}".`,
+        type: 'success',
+        isRead: false,
+        createdAt: new Date()
+      });
+      await admin.save();
+    }
+  } catch (err) {
+    console.error('Error sending payment notifications:', err);
+  }
+};
+
 // @desc    Initiate Razorpay checkout order
 // @route   POST /api/payments/pay
 // @access  Private
@@ -175,6 +208,9 @@ router.post('/verify', protect, async (req, res) => {
       await submission.save();
     }
 
+    // Push targeted notifications
+    await sendPaymentNotifications(payment.userId, payment.userName, payment.amount, payment.eventTitle);
+
     await AuditLog.create({
       userId: req.user._id.toString(),
       userName: req.user.name,
@@ -283,9 +319,12 @@ router.post('/dummy-bypass', protect, async (req, res) => {
       invoiceNumber
     });
 
-    await payment.save();
+     await payment.save();
     submission.paymentId = payment._id.toString();
     await submission.save();
+
+    // Push targeted notifications
+    await sendPaymentNotifications(req.user._id.toString(), req.user.name, plan.amount, event.title);
 
     await AuditLog.create({
       userId: req.user._id.toString(),
@@ -360,6 +399,9 @@ router.post('/webhook', async (req, res) => {
           submission.paymentId = payment._id.toString();
           await submission.save();
         }
+
+        // Push targeted notifications
+        await sendPaymentNotifications(payment.userId, payment.userName, payment.amount, payment.eventTitle);
       }
     }
 

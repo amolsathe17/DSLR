@@ -25,11 +25,13 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), as
     let submissions;
     if (isAssignedToEvent) {
       submissions = await Submission.find({
-        eventId
+        eventId,
+        entryStatus: { $ne: 'Withdrawn' }
       });
     } else {
       submissions = await Submission.find({
         eventId,
+        entryStatus: { $ne: 'Withdrawn' },
         'photographs.assignedJudges': judgeId
       });
     }

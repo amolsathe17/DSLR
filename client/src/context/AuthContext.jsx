@@ -188,6 +188,18 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const refreshUser = async () => {
+    if (!token) return;
+    try {
+      const data = await apiFetch("/api/auth/profile");
+      if (data.success) {
+        setUser(data.user);
+      }
+    } catch (err) {
+      console.error("Profile refresh failed:", err.message);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     setToken(null);
@@ -210,6 +222,7 @@ export const AuthProvider = ({ children }) => {
         updateProfile,
         logout,
         apiFetch,
+        refreshUser,
       }}
     >
       {children}

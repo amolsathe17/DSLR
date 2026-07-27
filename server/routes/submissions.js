@@ -565,7 +565,7 @@ router.post('/final-submit', protect, async (req, res) => {
 // @access  Public
 router.get('/gallery', async (req, res) => {
   try {
-    const submissions = await Submission.find({});
+    const submissions = await Submission.find({ entryStatus: { $ne: 'Withdrawn' } });
     const photos = [];
 
     submissions.forEach(sub => {
@@ -712,6 +712,79 @@ router.put('/photographs/:photoId', protect, async (req, res) => {
     });
 
     res.json({ success: true, submission });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @desc    Withdraw a submission before event deadline
+// @route   POST /api/submissions/withdraw/:id
+// @access  Private
+router.post('/withdraw/:id', protect, async (req, res) => {
+  try {
+    const submission = await Submission.findById(req.params.id);
+    if (!submission) {
+      return res.status(404).json({ success: false, message: 'Submission not found' });
+    }
+
+    if (submission.userId !== req.user._id.toString()) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
+
+    const event = await Event.findById(submission.eventId);
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    // Check if current date is before the event's deadline
+    if (new Date() >= new Date(event.deadline)) {
+      return res.status(400).json({ success: false, message: 'Withdrawals are not permitted after the submission deadline.' });
+    }
+
+    // Update status
+    submission.paymentStatus = 'Withdrawn';
+    submission.entryStatus = 'Withdrawn';
+    await submission.save();
+
+    // Notify the user
+    const User = require('../models/User');
+    const user = await User.findById(req.user._id);
+    if (user) {
+      if (!user.notifications) user.notifications = [];
+      user.notifications.push({
+        message: `You have successfully withdrawn your entry for the event "${event.title}". Refund is pending administrator approval.`,
+        type: 'info',
+        isRead: false,
+        createdAt: new Date()
+      });
+      await user.save();
+    }
+
+    // Notify all admin users
+    const admins = await User.find({ role: 'Admin' });
+    for (const admin of admins) {
+      if (!admin.notifications) admin.notifications = [];
+      admin.notifications.push({
+        message: `Participant ${req.user.name} has withdrawn their entry for "${event.title}". Please review and refund their payment.`,
+        type: 'warning',
+        isRead: false,
+        createdAt: new Date()
+      });
+      await admin.save();
+    }
+
+    // Create Audit Log
+    await AuditLog.create({
+      userId: req.user._id.toString(),
+      userName: req.user.name,
+      userEmail: req.user.email,
+      action: 'Withdraw Submission',
+      details: `Participant withdrew entry ${submission.entryNumber || submission._id} for event "${event.title}" before deadline.`,
+      ipAddress: req.ip
+    });
+
+    res.json({ success: true, message: 'Your submission has been successfully withdrawn. Admin will process your refund shortly.' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

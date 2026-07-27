@@ -675,6 +675,16 @@ router.post('/participants/:id/refund', protect, authorize('Admin'), async (req,
       { $set: { paymentStatus: 'Refunded' } }
     );
 
+    // Notify the user
+    if (!user.notifications) user.notifications = [];
+    user.notifications.push({
+      message: `Your refund of ₹${payment.amount} for event "${payment.eventTitle || 'Contest'}" has been successfully processed by the administrator.`,
+      type: 'success',
+      isRead: false,
+      createdAt: new Date()
+    });
+    await user.save();
+
     // Create Audit Log
     await AuditLog.create({
       userId: req.user._id,

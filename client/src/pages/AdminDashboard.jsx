@@ -3272,13 +3272,24 @@ export default function AdminDashboard() {
                     <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Judge Evaluations ({selectedPhoto.scores.length})</span>
                     <div className="flex flex-col gap-2">
                       {selectedPhoto.scores.map((score, sIdx) => (
-                        <div key={sIdx} className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-100 dark:border-slate-850 flex justify-between items-center text-[10px]">
-                          <span className="font-semibold text-slate-700 dark:text-slate-350">{score.judgeName || 'Judge'}</span>
-                          <span className={`font-bold px-1.5 py-0.5 rounded ${
-                            (score.approvalStatus || 'Approved') === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
-                          }`}>
-                            {score.approvalStatus || 'Approved'} ({score.averageScore}/10)
-                          </span>
+                        <div key={sIdx} className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-100 dark:border-slate-850 flex flex-col gap-1.5 text-[10px] text-left">
+                          <div className="flex justify-between items-center w-full">
+                            <span className="font-semibold text-slate-700 dark:text-slate-350">{score.judgeName || 'Judge'}</span>
+                            <span className={`font-bold px-1.5 py-0.5 rounded ${
+                              (score.approvalStatus || 'Approved') === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                            }`}>
+                              {score.approvalStatus || 'Approved'} ({score.averageScore}/10)
+                            </span>
+                          </div>
+                          {score.remarks ? (
+                            <div className="bg-white dark:bg-slate-900/50 p-2 rounded-lg border border-slate-200/40 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 italic">
+                              Remarks: "{score.remarks}"
+                            </div>
+                          ) : (
+                            <div className="text-[9px] text-slate-400 italic px-1">
+                              No remarks shared.
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

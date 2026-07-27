@@ -34,6 +34,7 @@ export default function JudgeDashboard() {
   const [offlineRemarks, setOfflineRemarks] = useState('');
   const [offlineApprovalStatus, setOfflineApprovalStatus] = useState('Approved');
   const [selectedSubmissionId, setSelectedSubmissionId] = useState('all');
+  const [filterGradingStatus, setFilterGradingStatus] = useState('all');
   const [evaluationMode, setEvaluationMode] = useState('online'); // 'online' or 'offline'
   const [offlineScores, setOfflineScores] = useState({});
   const [judgeDashboardTab, setJudgeDashboardTab] = useState('overview');
@@ -446,9 +447,17 @@ export default function JudgeDashboard() {
     }
   });
 
-  const displayedPhotos = selectedSubmissionId === 'all'
+  let displayedPhotos = selectedSubmissionId === 'all'
     ? photographs
     : photographs.filter(p => p.submissionId === selectedSubmissionId);
+
+  if (filterGradingStatus === 'graded') {
+    displayedPhotos = displayedPhotos.filter(p => p.graded);
+  } else if (filterGradingStatus === 'ungraded') {
+    displayedPhotos = displayedPhotos.filter(p => !p.graded);
+  } else if (filterGradingStatus === 'disapproved') {
+    displayedPhotos = displayedPhotos.filter(p => p.graded && p.score?.approvalStatus === 'Disapproved');
+  }
 
   if (loading && photographs.length === 0) {
     return (
@@ -940,6 +949,17 @@ export default function JudgeDashboard() {
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-4 shrink-0">
+                  <select
+                    value={filterGradingStatus}
+                    onChange={(e) => setFilterGradingStatus(e.target.value)}
+                    className="px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="all">All Photos</option>
+                    <option value="graded">Graded</option>
+                    <option value="ungraded">Ungraded</option>
+                    <option value="disapproved">Disapproved</option>
+                  </select>
+
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-slate-500">Grading Progress:</span>
                     <span className="text-sm font-black text-indigo-600 dark:text-indigo-400 font-bold">

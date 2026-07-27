@@ -62,8 +62,8 @@ const submissionSchema = new mongoose.Schema({
   amount: { type: Number, default: 0 },
   photoLimit: { type: Number, default: 0 },
   activePhotosCount: { type: Number, default: 0 },
-  paymentStatus: { type: String, enum: ['Unpaid', 'Paid', 'Refunded'], default: 'Unpaid' },
-  entryStatus: { type: String, enum: ['Draft', 'Finalized'], default: 'Draft' }
+  paymentStatus: { type: String, enum: ['Unpaid', 'Paid', 'Refunded', 'Withdrawn'], default: 'Unpaid' },
+  entryStatus: { type: String, enum: ['Draft', 'Finalized', 'Withdrawn'], default: 'Draft' }
 }, { timestamps: true });
 
 module.exports = getModel('Submission', submissionSchema);

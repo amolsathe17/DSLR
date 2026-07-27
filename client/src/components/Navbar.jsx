@@ -1,15 +1,128 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Camera, Sun, Moon, Menu, X, LogOut, LayoutDashboard, User } from 'lucide-react';
+import { Camera, Sun, Moon, Menu, X, LogOut, LayoutDashboard, User, Bell, CheckCheck, Check } from 'lucide-react';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser, apiFetch } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notifRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const unreadNotifs = user?.notifications ? user.notifications.filter(n => !n.isRead) : [];
+  const unreadCount = unreadNotifs.length;
+
+  const markAsRead = async (notifId, e) => {
+    if (e) e.stopPropagation();
+    try {
+      await apiFetch(`/api/auth/notifications/${notifId}/read`, { method: 'POST' });
+      if (refreshUser) await refreshUser();
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err.message);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      for (const notif of unreadNotifs) {
+        await apiFetch(`/api/auth/notifications/${notif._id || unreadNotifs.indexOf(notif)}/read`, { method: 'POST' });
+      }
+      if (refreshUser) await refreshUser();
+    } catch (err) {
+      console.error("Failed to mark all as read:", err.message);
+    }
+  };
+
+  const renderNotificationBell = () => {
+    if (!user) return null;
+    return (
+      <div className="relative" ref={notifRef}>
+        <button
+          onClick={() => setShowNotifications(!showNotifications)}
+          className="relative p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        >
+          <Bell size={18} />
+          {unreadCount > 0 && (
+            <span className="absolute top-0.5 right-0.5 min-w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[9px] font-bold px-1 select-none">
+              {unreadCount}
+            </span>
+          )}
+        </button>
+
+        {showNotifications && (
+          <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+              <h4 className="font-display font-extrabold text-slate-900 dark:text-white text-xs">Notifications</h4>
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="text-[10px] text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <CheckCheck size={12} />
+                  Mark all as read
+                </button>
+              )}
+            </div>
+
+            <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+              {user.notifications && user.notifications.length > 0 ? (
+                [...user.notifications].reverse().map((notif, idx) => {
+                  const realIdx = user.notifications.length - 1 - idx;
+                  return (
+                    <div
+                      key={notif._id || idx}
+                      onClick={(e) => !notif.isRead && markAsRead(notif._id || realIdx, e)}
+                      className={`p-4 text-left transition-colors cursor-pointer flex gap-3 ${
+                        notif.isRead
+                          ? 'bg-transparent text-slate-500 dark:text-slate-400'
+                          : 'bg-indigo-50/40 dark:bg-indigo-950/10 text-slate-900 dark:text-slate-200 font-medium'
+                      } hover:bg-slate-50 dark:hover:bg-slate-850`}
+                    >
+                      <div className="flex-grow text-xs leading-relaxed">
+                        <p>{notif.message}</p>
+                        <span className="text-[9px] text-slate-400 block mt-1">
+                          {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
+                        </span>
+                      </div>
+                      {!notif.isRead && (
+                        <button
+                          onClick={(e) => markAsRead(notif._id || realIdx, e)}
+                          className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 self-start cursor-pointer rounded"
+                          title="Mark as read"
+                        >
+                          <Check size={12} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="p-8 text-center text-xs text-slate-400 dark:text-slate-500 italic">
+                  No notifications yet.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const handleLogout = () => {
     logout();
@@ -143,6 +256,7 @@ export default function Navbar() {
             {/* Auth Buttons */}
             {user ? (
               <div className="flex items-center gap-4">
+                {renderNotificationBell()}
                 {user.role === 'Admin' ? (
                   <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 py-1.5 px-3 rounded-lg select-none cursor-default">
                     <User size={16} />
@@ -170,7 +284,7 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   state={{ forceContestant: true }}
-                  className="text-sm font-medium text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white px-3.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  className="text-sm font-medium text-slate-700 hover:text-slate-955 dark:text-slate-300 dark:hover:text-white px-3.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                 >
                   Login
                 </Link>
@@ -186,7 +300,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center md:hidden gap-2">
-
+            {renderNotificationBell()}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

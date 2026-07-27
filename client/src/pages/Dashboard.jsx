@@ -705,39 +705,6 @@ export default function Dashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
       
-      {/* Unread Notifications Banner */}
-      {user?.notifications && user.notifications.filter(n => !n.isRead).length > 0 && (
-        <div className="flex flex-col gap-3 mb-6">
-          {user.notifications.filter(n => !n.isRead).map((notif, idx) => (
-            <div key={idx} className="flex justify-between items-center p-4 bg-emerald-550/10 border border-emerald-500/20 rounded-2xl text-left animate-in slide-in-from-top-4 duration-305">
-              <div className="flex items-center gap-3">
-                <span className="p-1.5 bg-emerald-500 text-white rounded-lg text-xs">🎉</span>
-                <span className="text-xs text-slate-800 dark:text-slate-100 font-semibold">{notif.message}</span>
-              </div>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    // Mark as read API call
-                    await apiFetch(`/api/auth/notifications/${notif._id || idx}/read`, { method: 'POST' });
-                    notif.isRead = true;
-                    // Force refresh of state
-                    setAllSubmissions([...allSubmissions]);
-                  } catch (e) {
-                    console.error("Failed to dismiss notification:", e);
-                    notif.isRead = true;
-                    setAllSubmissions([...allSubmissions]);
-                  }
-                }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-[10px] font-extrabold uppercase shrink-0 transition-colors cursor-pointer px-2 py-1 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 rounded-lg"
-              >
-                Dismiss
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      
       {/* Dashboard Sub-navigation Tabs */}
       <div className="flex justify-center sm:justify-start mb-8">
         <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto">

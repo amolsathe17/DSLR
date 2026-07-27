@@ -1302,7 +1302,7 @@ export default function AdminDashboard() {
             { id: 'judges', label: 'Judges & Results', icon: Award },
             { id: 'events', label: 'Contests & Configuration', icon: Calendar },
             { id: 'categories_config', label: 'Categories', icon: Layers },
-            { id: 'profile_settings', label: 'Profile Settings', icon: User }
+            { id: 'profile_settings', label: 'Profile Settings & Notifications', icon: User }
           ].map(t => (
             <button
               key={t.id}
@@ -3001,7 +3001,7 @@ export default function AdminDashboard() {
 
       {/* TAB 7: PROFILE SETTINGS */}
       {activeTab === 'profile_settings' && (
-        <div className="max-w-2xl mx-auto animate-in fade-in duration-200 text-left flex flex-col gap-6">
+        <div className="max-w-6xl mx-auto animate-in fade-in duration-200 text-left grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
             <div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">Profile Settings</h3>

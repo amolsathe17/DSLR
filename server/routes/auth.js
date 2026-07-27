@@ -338,29 +338,30 @@ router.delete('/notifications/:notifId', protect, async (req, res) => {
 
     const { notifId } = req.params;
 
-    // Try to pull by id
-    let pulled = false;
-    if (user.notifications && typeof user.notifications.pull === 'function') {
-      try {
-        user.notifications.pull(notifId);
-        pulled = true;
-      } catch (err) {
-        // ignore cast error and fallback
+    let deleted = false;
+    if (user.notifications) {
+      // 1. Try to find by _id string comparison
+      const foundIdx = user.notifications.findIndex(n => n._id && n._id.toString() === notifId);
+      if (foundIdx !== -1) {
+        user.notifications.splice(foundIdx, 1);
+        deleted = true;
       }
-    }
-
-    // Fallback to matching index
-    if (!pulled && user.notifications) {
-      const idx = parseInt(notifId);
-      if (!isNaN(idx) && user.notifications[idx]) {
-        user.notifications.splice(idx, 1);
-        pulled = true;
-      } else {
-        // search by _id manually
-        const foundIdx = user.notifications.findIndex(n => n._id && n._id.toString() === notifId);
-        if (foundIdx !== -1) {
-          user.notifications.splice(foundIdx, 1);
-          pulled = true;
+      
+      // 2. If not found by _id, try by index fallback
+      if (!deleted) {
+        const idx = parseInt(notifId);
+        if (!isNaN(idx) && user.notifications[idx]) {
+          user.notifications.splice(idx, 1);
+          deleted = true;
+        }
+      }
+      
+      // 3. Fallback to mongoose .pull
+      if (!deleted && typeof user.notifications.pull === 'function') {
+        try {
+          user.notifications.pull(notifId);
+        } catch (err) {
+          // ignore
         }
       }
     }

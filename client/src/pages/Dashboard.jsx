@@ -29,6 +29,7 @@ import {
   Printer,
   Trophy,
   Eye,
+  RotateCcw,
 } from "lucide-react";
 import DragDropUpload from "../components/DragDropUpload";
 import WatermarkPreview from "../components/WatermarkPreview";

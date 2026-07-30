@@ -2973,149 +2973,162 @@ export default function AdminDashboard() {
             <p className="text-[11px] text-slate-400 mt-1">Configure dynamic custom field labels for entries in each category independently.</p>
           </div>
 
-          <div className="flex flex-col gap-1.5 max-w-md">
-            <label className="text-xs text-slate-500 font-semibold">Select Category</label>
-            <select
-              value={selectedCatForDetails}
-              onChange={(e) => handleSelectCatForDetails(e.target.value)}
-              className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
-            >
-              <option value="">-- Choose Category to Manage Custom Labels --</option>
-              {categories.map(cat => (
-                <option key={cat._id} value={cat._id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            {/* Left Column: Selector and Local Editor */}
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-slate-500 font-semibold">Select Category</label>
+                <select
+                  value={selectedCatForDetails}
+                  onChange={(e) => handleSelectCatForDetails(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
+                >
+                  <option value="">-- Choose Category to Manage Custom Labels --</option>
+                  {categories.map(cat => (
+                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
 
-          {selectedCatForDetails && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-2 pt-2 border-t border-slate-150 dark:border-slate-800">
-              {/* Left Column: Manage Labels for this category */}
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-850">
-                  <div>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Configure Fields for Category</span>
-                    <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold block mt-0.5">
-                      Category: {categories.find(c => c._id === selectedCatForDetails)?.name}
-                    </span>
+              {selectedCatForDetails ? (
+                <div className="flex flex-col gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-855">
+                    <div>
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Configure Fields</span>
+                      <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold block mt-0.5">
+                        Category: {categories.find(c => c._id === selectedCatForDetails)?.name}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddCatLabel}
+                      className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] rounded-lg cursor-pointer transition-colors flex items-center gap-1 shadow-sm"
+                    >
+                      <Plus size={12} />
+                      <span>Add Label</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleAddCatLabel}
-                    className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] rounded-lg cursor-pointer transition-colors flex items-center gap-1 shadow-sm"
-                  >
-                    <Plus size={12} />
-                    <span>Add Label</span>
-                  </button>
-                </div>
 
-                {catLabelsLocal.length === 0 ? (
-                  <p className="text-[10px] text-slate-400 italic text-center py-4 bg-slate-50/50 dark:bg-slate-950/20 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                    No custom fields configured for this category yet. Add labels using the button above or quick-assign common ones from the right.
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-2.5 max-h-[300px] overflow-y-auto pr-1">
-                    {catLabelsLocal.map((label, idx) => (
-                      <div key={idx} className="flex gap-2 items-center">
-                        <input
-                          type="text"
-                          value={label}
-                          onChange={(e) => handleEditCatLabel(idx, e.target.value)}
-                          placeholder="e.g. Designer / Brand"
-                          className="flex-1 px-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[11px] font-semibold text-slate-850 dark:text-slate-100 focus:outline-none"
-                        />
-                        {/* Reordering Controls */}
-                        <div className="flex flex-col gap-0.5">
+                  {catLabelsLocal.length === 0 ? (
+                    <p className="text-[10px] text-slate-400 italic text-center py-4 bg-slate-50/50 dark:bg-slate-950/20 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                      No custom fields configured for this category yet. Add labels using the button above or quick-assign common ones from the right.
+                    </p>
+                  ) : (
+                    <div className="flex flex-col gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                      {catLabelsLocal.map((label, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            value={label}
+                            onChange={(e) => handleEditCatLabel(idx, e.target.value)}
+                            placeholder="e.g. Designer / Brand"
+                            className="flex-1 px-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[11px] font-semibold text-slate-850 dark:text-slate-100 focus:outline-none"
+                          />
+                          {/* Reordering Controls */}
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={() => handleReorderCatLabel(idx, 'up')}
+                              className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
+                            >
+                              <ArrowUp size={11} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === catLabelsLocal.length - 1}
+                              onClick={() => handleReorderCatLabel(idx, 'down')}
+                              className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
+                            >
+                              <ArrowDown size={11} />
+                            </button>
+                          </div>
+                          {/* Delete Control */}
                           <button
                             type="button"
-                            disabled={idx === 0}
-                            onClick={() => handleReorderCatLabel(idx, 'up')}
-                            className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
+                            onClick={() => handleDeleteCatLabel(idx)}
+                            className="p-2 bg-red-50 hover:bg-red-100 text-red-650 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-xl cursor-pointer transition-colors border border-red-100/30 dark:border-red-950/20"
                           >
-                            <ArrowUp size={11} />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={idx === catLabelsLocal.length - 1}
-                            onClick={() => handleReorderCatLabel(idx, 'down')}
-                            className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
-                          >
-                            <ArrowDown size={11} />
+                            <Trash2 size={12} />
                           </button>
                         </div>
-                        {/* Delete Control */}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteCatLabel(idx)}
-                          className="p-2 bg-red-50 hover:bg-red-100 text-red-650 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-xl cursor-pointer transition-colors border border-red-100/30 dark:border-red-950/20"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
 
-                <button
-                  type="button"
-                  disabled={isSavingCatLabels}
-                  onClick={handleSaveCategoryLabels}
-                  className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-xs cursor-pointer transition-all shadow-md disabled:opacity-50 font-bold"
-                >
-                  {isSavingCatLabels ? 'Saving...' : 'Save Configuration'}
-                </button>
+                  <button
+                    type="button"
+                    disabled={isSavingCatLabels}
+                    onClick={handleSaveCategoryLabels}
+                    className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-xs cursor-pointer transition-all shadow-md disabled:opacity-50 font-bold"
+                  >
+                    {isSavingCatLabels ? 'Saving...' : 'Save Configuration'}
+                  </button>
+                </div>
+              ) : (
+                <div className="text-xs text-slate-450 dark:text-slate-500 italic p-6 bg-slate-50/50 dark:bg-slate-950/10 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center">
+                  Select a category above to configure custom field labels.
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Predefined & Configured Custom Field Labels (Common Pool) */}
+            <div className="flex flex-col gap-4 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 md:pl-6 pt-4 md:pt-0 self-start w-full">
+              <div className="pb-2 border-b border-slate-100 dark:border-slate-850">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350 flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-amber-500" />
+                  <span>Quick-Assign Common Field Labels</span>
+                </span>
               </div>
-
-              {/* Right Column: Predefined & Configured Custom Field Labels (Common Pool) */}
-              <div className="flex flex-col gap-4 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 md:pl-6 pt-4 md:pt-0">
-                <div className="pb-2 border-b border-slate-100 dark:border-slate-850">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-350 flex items-center gap-1.5">
-                    <Sparkles size={12} className="text-amber-500" />
-                    <span>Quick-Assign Common Field Labels</span>
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400">Click any label below to add it to this category's field list. If some are common, they can be assigned to multiple categories.</p>
-                
-                <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto">
-                  {(() => {
-                    const PREDEFINED_LABELS = [
-                      "Designer / Brand",
-                      "Garment Type",
-                      "Fabric / Material",
-                      "Color Palette",
-                      "Accessories Used",
-                      "Footwear",
-                      "Theme / Collection",
-                      "Runway / Venue"
-                    ];
-                    const existingLabels = categories.flatMap(c => c.customLabels || []);
-                    const pool = [...new Set([...PREDEFINED_LABELS, ...existingLabels])];
-                    return pool.map((lbl) => {
-                      const isAssigned = catLabelsLocal.includes(lbl);
-                      return (
-                        <button
-                          key={lbl}
-                          type="button"
-                          disabled={isAssigned}
-                          onClick={() => {
-                            if (!isAssigned) {
-                              setCatLabelsLocal([...catLabelsLocal, lbl]);
-                            }
-                          }}
-                          className={`px-3 py-1.5 text-[10px] font-bold rounded-xl border transition-all cursor-pointer select-none ${
-                            isAssigned 
+              <p className="text-[10px] text-slate-400">
+                {selectedCatForDetails
+                  ? "Click any label below to add it to the active category's field list. Common labels can be assigned to multiple categories."
+                  : "These are common custom field labels available in the system. Select a category on the left to start assigning them."}
+              </p>
+              
+              <div className="flex flex-wrap gap-2 max-h-[350px] overflow-y-auto">
+                {(() => {
+                  const PREDEFINED_LABELS = [
+                    "Designer / Brand",
+                    "Garment Type",
+                    "Fabric / Material",
+                    "Color Palette",
+                    "Accessories Used",
+                    "Footwear",
+                    "Theme / Collection",
+                    "Runway / Venue"
+                  ];
+                  const existingLabels = categories.flatMap(c => c.customLabels || []);
+                  const pool = [...new Set([...PREDEFINED_LABELS, ...existingLabels])];
+                  return pool.map((lbl) => {
+                    const isAssigned = selectedCatForDetails && catLabelsLocal.includes(lbl);
+                    const isDisabled = !selectedCatForDetails || isAssigned;
+                    return (
+                      <button
+                        key={lbl}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => {
+                          if (selectedCatForDetails && !isAssigned) {
+                            setCatLabelsLocal([...catLabelsLocal, lbl]);
+                          }
+                        }}
+                        className={`px-3 py-1.5 text-[10px] font-bold rounded-xl border transition-all select-none ${
+                          !selectedCatForDetails
+                            ? 'bg-slate-50 text-slate-400 border-slate-150 dark:bg-slate-950 dark:text-slate-600 dark:border-slate-850 cursor-not-allowed'
+                            : isAssigned 
                               ? 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-950 dark:text-slate-650 dark:border-slate-850 cursor-not-allowed'
-                              : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-indigo-100 hover:border-indigo-200 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30'
-                          }`}
-                        >
-                          {lbl}
-                        </button>
-                      );
-                    });
-                  })()}
-                </div>
+                              : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-indigo-100 hover:border-indigo-200 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30 cursor-pointer'
+                        }`}
+                      >
+                        {lbl}
+                      </button>
+                    );
+                  });
+                })()}
               </div>
             </div>
-          )}
+          </div>
         </div>
       </>
     )}

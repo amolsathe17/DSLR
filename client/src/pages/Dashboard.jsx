@@ -1683,13 +1683,14 @@ export default function Dashboard() {
                                                   <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white line-clamp-1">
                                                     {photo.title}
                                                   </h4>
-                                                  <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase shrink-0 ${
-                                                    photo.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-500' :
-                                                    photo.status === 'Rejected' ? 'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400' :
-                                                    'bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400'
-                                                  }`}>
-                                                    {photo.status}
-                                                  </span>
+                                                  {(photo.status === 'Approved' || photo.status === 'Rejected') && (
+                                                    <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase shrink-0 ${
+                                                      photo.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-500' :
+                                                      'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400'
+                                                    }`}>
+                                                      {photo.status === 'Rejected' ? 'Disapproved' : 'Approved'}
+                                                    </span>
+                                                  )}
                                                 </div>
                                                 <span className="text-[9px] text-indigo-500 font-bold uppercase tracking-wider block mt-0.5">
                                                   {photo.category}

@@ -1805,7 +1805,7 @@ export default function Dashboard() {
                                     {submission && submission.paymentStatus !== 'Withdrawn' && submission.paymentStatus !== 'Refunded' && (new Date() < new Date(e.deadline)) && (
                                       <button
                                         onClick={() => handleWithdrawClick(submission._id)}
-                                        className="w-full mt-3 bg-red-50 hover:bg-red-105 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/45 dark:text-red-400 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all border border-red-200/40 dark:border-red-900/10 cursor-pointer font-bold"
+                                        className="w-full mt-3 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
                                       >
                                         <RotateCcw size={13} className="shrink-0" />
                                         Withdraw Entry & Refund

@@ -1456,7 +1456,7 @@ export default function AdminDashboard() {
                   <th className="pb-3 px-4 text-center">Photos</th>
                   <th className="pb-3 px-4 text-center">Payment</th>
                   <th className="pb-3 px-4">Last Login</th>
-                  <th className="pb-3 pl-4 text-right">Actions</th>
+                  <th className="pb-3 pl-4 pr-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1503,7 +1503,7 @@ export default function AdminDashboard() {
                     <td className="py-3.5 px-4 text-slate-500 font-semibold">
                       {p.lastLogin ? new Date(p.lastLogin).toLocaleString() : 'Never'}
                     </td>
-                    <td className="py-3.5 pl-4 text-right">
+                    <td className="py-3.5 pl-4 pr-6 text-right">
                       <div className="flex justify-end gap-4 px-1.5">
                         <button
                           onClick={() => setSelectedParticipant(p)}

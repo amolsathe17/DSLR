@@ -34,7 +34,10 @@ import {
   Bell,
   Send,
   Archive,
-  Clock
+  Clock,
+  Sliders,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import StatsCharts from '../components/StatsCharts';
 
@@ -110,6 +113,11 @@ export default function AdminDashboard() {
   const [editingContestType, setEditingContestType] = useState(null);
   const [editContestTypeName, setEditContestTypeName] = useState('');
   const [editContestTypeDesc, setEditContestTypeDesc] = useState('');
+  
+  // Category Details Labels states
+  const [selectedCatForDetails, setSelectedCatForDetails] = useState('');
+  const [catLabelsLocal, setCatLabelsLocal] = useState([]);
+  const [isSavingCatLabels, setIsSavingCatLabels] = useState(false);
   
   // Create Event Form states
   const [newEventTitle, setNewEventTitle] = useState('');
@@ -549,6 +557,80 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchPhotographs();
   }, [photoSearch, photoCategory, photoStatus, photoDslrStatus]);
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      if (!selectedCatForDetails) {
+        const firstCat = categories[0];
+        setSelectedCatForDetails(firstCat._id);
+        setCatLabelsLocal(firstCat.customLabels || []);
+      } else {
+        const currentCatObj = categories.find(c => c._id === selectedCatForDetails);
+        if (currentCatObj) {
+          const serverLabels = currentCatObj.customLabels || [];
+          if (JSON.stringify(serverLabels) !== JSON.stringify(catLabelsLocal) && !isSavingCatLabels) {
+            setCatLabelsLocal(serverLabels);
+          }
+        }
+      }
+    }
+  }, [categories, selectedCatForDetails]);
+
+  const handleSelectCatForDetails = (catId) => {
+    setSelectedCatForDetails(catId);
+    const cat = categories.find(c => c._id === catId);
+    setCatLabelsLocal(cat ? (cat.customLabels || []) : []);
+  };
+
+  const handleAddCatLabel = () => {
+    setCatLabelsLocal([...catLabelsLocal, '']);
+  };
+
+  const handleEditCatLabel = (index, val) => {
+    const updated = [...catLabelsLocal];
+    updated[index] = val;
+    setCatLabelsLocal(updated);
+  };
+
+  const handleDeleteCatLabel = (index) => {
+    setCatLabelsLocal(catLabelsLocal.filter((_, idx) => idx !== index));
+  };
+
+  const handleReorderCatLabel = (index, direction) => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === catLabelsLocal.length - 1) return;
+
+    const targetIdx = direction === 'up' ? index - 1 : index + 1;
+    const updated = [...catLabelsLocal];
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    setCatLabelsLocal(updated);
+  };
+
+  const handleSaveCategoryLabels = async () => {
+    if (!selectedCatForDetails) return;
+    setIsSavingCatLabels(true);
+    try {
+      const res = await apiFetch(`/api/categories/${selectedCatForDetails}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          customLabels: catLabelsLocal.filter(l => l.trim() !== '')
+        })
+      });
+      if (res.success) {
+        alert('Category custom labels saved successfully!');
+        await fetchJudgesAndEvents();
+      } else {
+        alert(res.message || 'Failed to save configuration.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error saving labels: ' + err.message);
+    } finally {
+      setIsSavingCatLabels(false);
+    }
+  };
 
   // Actions
   const handleSuspendParticipant = async (id, isSuspended, name = '') => {
@@ -2795,6 +2877,103 @@ export default function AdminDashboard() {
                   </form>
                 )}
               </div>
+
+              {/* Category Details Configuration Card */}
+              <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col gap-4 text-left">
+                <div>
+                  <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                    <Sliders size={18} className="text-indigo-600 dark:text-indigo-400" />
+                    <span>Category Details</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-1">Configure dynamic custom field labels for entries in each category.</p>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs text-slate-500 font-semibold">Select Category</label>
+                  <select
+                    value={selectedCatForDetails}
+                    onChange={(e) => handleSelectCatForDetails(e.target.value)}
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
+                  >
+                    <option value="">-- Choose Category --</option>
+                    {categories.map(cat => (
+                      <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedCatForDetails && (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Custom Field Labels</span>
+                      <button
+                        type="button"
+                        onClick={handleAddCatLabel}
+                        className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] rounded-lg cursor-pointer transition-colors flex items-center gap-1 shadow-sm"
+                      >
+                        <Plus size={12} />
+                        <span>Add Label</span>
+                      </button>
+                    </div>
+
+                    {catLabelsLocal.length === 0 ? (
+                      <p className="text-[10px] text-slate-400 italic text-center py-4 bg-slate-50/50 dark:bg-slate-950/20 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                        No custom fields configured for this category yet. Click Add Label to configure.
+                      </p>
+                    ) : (
+                      <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
+                        {catLabelsLocal.map((label, idx) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <input
+                              type="text"
+                              value={label}
+                              onChange={(e) => handleEditCatLabel(idx, e.target.value)}
+                              placeholder="e.g. Designer / Brand"
+                              className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[11px] font-semibold text-slate-850 dark:text-slate-100 focus:outline-none"
+                            />
+                            {/* Reordering Controls */}
+                            <div className="flex flex-col gap-0.5">
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => handleReorderCatLabel(idx, 'up')}
+                                className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
+                              >
+                                <ArrowUp size={11} />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === catLabelsLocal.length - 1}
+                                onClick={() => handleReorderCatLabel(idx, 'down')}
+                                className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
+                              >
+                                <ArrowDown size={11} />
+                              </button>
+                            </div>
+                            {/* Delete Control */}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCatLabel(idx)}
+                              className="p-2 bg-red-50 hover:bg-red-100 text-red-650 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-xl cursor-pointer transition-colors border border-red-100/30 dark:border-red-950/20"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={isSavingCatLabels}
+                      onClick={handleSaveCategoryLabels}
+                      className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-xs cursor-pointer transition-all shadow-md disabled:opacity-50 font-bold"
+                    >
+                      {isSavingCatLabels ? 'Saving...' : 'Save Configuration'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Right Column: Categories Explorer by Contest Type */}
@@ -3318,39 +3497,53 @@ export default function AdminDashboard() {
                   <p className="text-slate-500 leading-relaxed mt-0.5">{selectedPhoto.description || 'No description shared.'}</p>
                 </div>
 
-                <div className="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
-                  <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">EXIF Device Info</span>
-                  <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
-                    <div>
-                      <span>Brand:</span>
-                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.cameraBrand}</p>
-                    </div>
-                    <div>
-                      <span>Model:</span>
-                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.cameraModel}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
-                    <div>
-                      <span>Lens:</span>
-                      <p className="font-bold text-slate-700 dark:text-slate-250 truncate">{selectedPhoto.lensUsed || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <span>Capture Date:</span>
-                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.dateCaptured ? new Date(selectedPhoto.dateCaptured).toLocaleDateString() : 'N/A'}</p>
+                {selectedPhoto.customFields && selectedPhoto.customFields.length > 0 ? (
+                  <div className="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Category Specifications</span>
+                    <div className="grid grid-cols-2 gap-3 text-[10px] text-slate-500">
+                      {selectedPhoto.customFields.map((cf, idx) => (
+                        <div key={idx} className="min-w-0">
+                          <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">{cf.label}:</span>
+                          <p className="font-bold text-slate-700 dark:text-slate-250 mt-0.5 break-words">{cf.value || 'N/A'}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
-                    <div>
-                      <span>Dimensions:</span>
-                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.width && selectedPhoto.height ? `${selectedPhoto.width}x${selectedPhoto.height}` : 'N/A'}</p>
+                ) : (
+                  <div className="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">EXIF Device Info</span>
+                    <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
+                      <div>
+                        <span>Brand:</span>
+                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.cameraBrand}</p>
+                      </div>
+                      <div>
+                        <span>Model:</span>
+                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.cameraModel}</p>
+                      </div>
                     </div>
-                    <div>
-                      <span>Format:</span>
-                      <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.format || 'N/A'}</p>
+                    <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
+                      <div>
+                        <span>Lens:</span>
+                        <p className="font-bold text-slate-700 dark:text-slate-250 truncate">{selectedPhoto.lensUsed || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <span>Capture Date:</span>
+                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.dateCaptured ? new Date(selectedPhoto.dateCaptured).toLocaleDateString() : 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
+                      <div>
+                        <span>Dimensions:</span>
+                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.width && selectedPhoto.height ? `${selectedPhoto.width}x${selectedPhoto.height}` : 'N/A'}</p>
+                      </div>
+                      <div>
+                        <span>Format:</span>
+                        <p className="font-bold text-slate-700 dark:text-slate-250">{selectedPhoto.format || 'N/A'}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div className="flex flex-col gap-1.5 pt-3 border-t border-slate-200 dark:border-slate-800 text-[10px] text-slate-500">
                   <span className="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Cloudinary & Security</span>

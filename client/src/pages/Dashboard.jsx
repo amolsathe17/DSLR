@@ -90,6 +90,10 @@ export default function Dashboard() {
   const [editDateCaptured, setEditDateCaptured] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
+  // Dynamic Custom Fields state
+  const [customFieldValues, setCustomFieldValues] = useState({});
+  const [editCustomFieldValues, setEditCustomFieldValues] = useState({});
+
   // Payment states
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("UPI");
@@ -227,6 +231,52 @@ export default function Dashboard() {
     fetchDashboardData(selectedTypeTab);
   }, [selectedTypeTab]);
 
+  useEffect(() => {
+    if (category && categories.length > 0) {
+      const selectedCat = categories.find(c => c.name === category);
+      if (selectedCat) {
+        const labels = selectedCat.customLabels || [];
+        const initialVals = {};
+        labels.forEach(l => {
+          initialVals[l] = '';
+        });
+        setCustomFieldValues(initialVals);
+      } else {
+        setCustomFieldValues({});
+      }
+    } else {
+      setCustomFieldValues({});
+    }
+  }, [category, categories]);
+
+  useEffect(() => {
+    if (editCategory && categories.length > 0) {
+      const selectedCat = categories.find(c => c.name === editCategory);
+      if (selectedCat) {
+        const labels = selectedCat.customLabels || [];
+        const updatedVals = { ...editCustomFieldValues };
+        
+        Object.keys(updatedVals).forEach(key => {
+          if (!labels.includes(key)) {
+            delete updatedVals[key];
+          }
+        });
+
+        labels.forEach(l => {
+          if (updatedVals[l] === undefined) {
+            const existingField = editingPhoto?.customFields?.find(f => f.label === l);
+            updatedVals[l] = existingField ? existingField.value : '';
+          }
+        });
+        setEditCustomFieldValues(updatedVals);
+      } else {
+        setEditCustomFieldValues({});
+      }
+    } else {
+      setEditCustomFieldValues({});
+    }
+  }, [editCategory, categories, editingPhoto]);
+
   const handleStartSubmission = async (e) => {
     e.preventDefault();
     if (!acceptedDeclaration) {
@@ -307,6 +357,12 @@ export default function Dashboard() {
       formData.append("location", location || "");
       formData.append("dateCaptured", dateCaptured || "");
       formData.append("description", description || "");
+
+      const customFieldsArr = Object.entries(customFieldValues).map(([lbl, val]) => ({
+        label: lbl,
+        value: val
+      }));
+      formData.append("customFields", JSON.stringify(customFieldsArr));
 
       formData.append("photoFile", photoFile);
 
@@ -531,6 +587,14 @@ export default function Dashboard() {
     setEditLensUsed(photo.lensUsed || "");
     setEditLocation(photo.location || "");
     setEditDescription(photo.description || "");
+
+    const initialVals = {};
+    if (photo.customFields && photo.customFields.length > 0) {
+      photo.customFields.forEach(cf => {
+        initialVals[cf.label] = cf.value;
+      });
+    }
+    setEditCustomFieldValues(initialVals);
     if (photo.dateCaptured) {
       try {
         const d = new Date(photo.dateCaptured);
@@ -554,6 +618,11 @@ export default function Dashboard() {
     setError("");
 
     try {
+      const customFieldsArr = Object.entries(editCustomFieldValues).map(([lbl, val]) => ({
+        label: lbl,
+        value: val
+      }));
+
       const data = await apiFetch(`/api/submissions/photographs/${editingPhoto.id}`, {
         method: "PUT",
         body: JSON.stringify({
@@ -566,6 +635,7 @@ export default function Dashboard() {
           location: editLocation,
           dateCaptured: editDateCaptured,
           description: editDescription,
+          customFields: customFieldsArr
         }),
       });
 
@@ -1573,49 +1643,26 @@ export default function Dashboard() {
                                               </select>
                                             </div>
 
-                                            <div className="flex flex-col gap-1 text-[11px]">
-                                              <label className="font-semibold text-slate-400">
-                                                {e.eventType === 'Photography' ? 'Camera Brand & Model (Optional EXIF)' : 'Medium & Dimensions'}
-                                              </label>
-                                              <div className="grid grid-cols-2 gap-2">
-                                                <input
-                                                  type="text"
-                                                  value={cameraBrand}
-                                                  onChange={(e) => setCameraBrand(e.target.value)}
-                                                  placeholder={e.eventType === 'Photography' ? 'Canon' : 'Oil on Canvas'}
-                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
-                                                />
-                                                <input
-                                                  type="text"
-                                                  value={cameraModel}
-                                                  onChange={(e) => setCameraModel(e.target.value)}
-                                                  placeholder={e.eventType === 'Photography' ? 'EOS R5' : '12x18 inches'}
-                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
-                                                />
-                                              </div>
-                                            </div>
-
-                                            <div className="flex flex-col gap-1 text-[11px]">
-                                              <label className="font-semibold text-slate-400">
-                                                {e.eventType === 'Photography' ? 'Lens Used & Location (Optional)' : 'Materials & Location'}
-                                              </label>
-                                              <div className="grid grid-cols-2 gap-2">
-                                                <input
-                                                  type="text"
-                                                  value={lensUsed}
-                                                  onChange={(e) => setLensUsed(e.target.value)}
-                                                  placeholder={e.eventType === 'Photography' ? '24-70mm f2.8' : 'Acrylic Paint'}
-                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
-                                                />
-                                                <input
-                                                  type="text"
-                                                  value={location}
-                                                  onChange={(e) => setLocation(e.target.value)}
-                                                  placeholder="Sumba, Indonesia"
-                                                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-[11px] font-semibold"
-                                                />
-                                              </div>
-                                            </div>
+                                            {(() => {
+                                               const selectedCatObj = categories.find(c => c.name === category);
+                                               const activeCustomLabels = selectedCatObj ? (selectedCatObj.customLabels || []) : [];
+                                               return activeCustomLabels.map((lbl) => (
+                                                 <div className="flex flex-col gap-1 text-[11px]" key={lbl}>
+                                                   <label className="font-semibold text-slate-400">{lbl} *</label>
+                                                   <input
+                                                     type="text"
+                                                     required
+                                                     value={customFieldValues[lbl] || ""}
+                                                     onChange={(e) => setCustomFieldValues({
+                                                       ...customFieldValues,
+                                                       [lbl]: e.target.value
+                                                     })}
+                                                     placeholder={`Enter ${lbl}`}
+                                                     className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-xs font-semibold text-slate-800 dark:text-slate-100"
+                                                   />
+                                                 </div>
+                                               ));
+                                             })()}
                                           </div>
 
                                           <div className="flex flex-col gap-4">
@@ -1695,11 +1742,20 @@ export default function Dashboard() {
                                                 <span className="text-[9px] text-indigo-500 font-bold uppercase tracking-wider block mt-0.5">
                                                   {photo.category}
                                                 </span>
-                                                {photo.cameraBrand && (
-                                                  <p className="text-[10px] text-slate-400 mt-1">
-                                                    EXIF: {photo.cameraBrand} {photo.cameraModel} | {photo.lensUsed || 'Standard Lens'}
-                                                  </p>
-                                                )}
+                                                {photo.customFields && photo.customFields.length > 0 ? (
+                                                   <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1 text-[10px] text-slate-400">
+                                                     {photo.customFields.map((cf, idx) => (
+                                                       <span key={idx} className="inline-block">
+                                                         <strong className="text-slate-500">{cf.label}:</strong> {cf.value || 'N/A'}
+                                                         {idx < photo.customFields.length - 1 && <span className="ml-2 text-slate-350 dark:text-slate-800 font-normal">|</span>}
+                                                       </span>
+                                                     ))}
+                                                   </div>
+                                                 ) : photo.cameraBrand ? (
+                                                   <p className="text-[10px] text-slate-400 mt-1">
+                                                     EXIF: {photo.cameraBrand} {photo.cameraModel} | {photo.lensUsed || 'Standard Lens'}
+                                                   </p>
+                                                 ) : null}
                                               </div>
 
                                               {!isFinalized && (
@@ -1888,11 +1944,20 @@ export default function Dashboard() {
                                           <h5 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">{photo.title}</h5>
                                           <span className="text-[9px] text-indigo-500 font-extrabold uppercase mt-0.5 block">{photo.category}</span>
                                         </div>
-                                        {photo.cameraBrand && (
+                                        {photo.customFields && photo.customFields.length > 0 ? (
+                                          <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-400">
+                                            {photo.customFields.map((cf, idx) => (
+                                              <span key={idx} className="inline-block">
+                                                <strong className="text-slate-500">{cf.label}:</strong> {cf.value || 'N/A'}
+                                                {idx < photo.customFields.length - 1 && <span className="ml-2 text-slate-350 dark:text-slate-800 font-normal">|</span>}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        ) : photo.cameraBrand ? (
                                           <p className="text-[10px] text-slate-400">
                                             EXIF: {photo.cameraBrand} {photo.cameraModel}
                                           </p>
-                                        )}
+                                        ) : null}
                                         {/* Ratings and Jury comments if available */}
                                         {photo.score ? (
                                           <div className="mt-1 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 p-2.5 rounded-lg text-[10px] leading-relaxed">
@@ -1951,7 +2016,7 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <form onSubmit={handleEditPhotoSubmit} className="flex flex-col gap-5 text-xs">
+            <form onSubmit={handleUpdatePhoto} className="flex flex-col gap-5 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 {/* Edit Title */}
@@ -1988,61 +2053,27 @@ export default function Dashboard() {
                   </select>
                 </div>
 
-                {/* Edit Camera Brand */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editCameraBrand" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
-                    Camera Brand
-                  </label>
-                  <input
-                    type="text"
-                    id="editCameraBrand"
-                    value={editCameraBrand}
-                    onChange={(e) => setEditCameraBrand(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-950 border border-slate-200 border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-
-                {/* Edit Camera Model */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editCameraModel" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
-                    Camera Model
-                  </label>
-                  <input
-                    type="text"
-                    id="editCameraModel"
-                    value={editCameraModel}
-                    onChange={(e) => setEditCameraModel(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-
-                {/* Edit Lens Used */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editLensUsed" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
-                    Lens Model Used
-                  </label>
-                  <input
-                    type="text"
-                    id="editLensUsed"
-                    value={editLensUsed}
-                    onChange={(e) => setEditLensUsed(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-
-                {/* Edit Location Captured */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editLocationCaptured" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
-                    Location Captured
-                  </label>
-                  <input
-                    type="text"
-                    id="editLocationCaptured"
-                    value={editLocation}
-                    onChange={(e) => setEditLocation(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
+                {(() => {
+                  const selectedCatObj = categories.find(c => c.name === editCategory);
+                  const activeCustomLabels = selectedCatObj ? (selectedCatObj.customLabels || []) : [];
+                  return activeCustomLabels.map((lbl) => (
+                    <div className="flex flex-col gap-1.5" key={lbl}>
+                      <label className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                        {lbl} *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={editCustomFieldValues[lbl] || ""}
+                        onChange={(e) => setEditCustomFieldValues({
+                          ...editCustomFieldValues,
+                          [lbl]: e.target.value
+                        })}
+                        className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-800 dark:text-slate-100"
+                      />
+                    </div>
+                  ));
+                })()}
 
                 {/* Edit Date Captured */}
                 <div className="flex flex-col gap-1.5 md:col-span-2">

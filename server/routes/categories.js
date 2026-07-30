@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
 // @access  Private/Admin
 router.post('/', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { name, description, contestTypes } = req.body;
+    const { name, description, contestTypes, customLabels } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: 'Category name is required' });
     }
@@ -40,7 +40,8 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
     const category = await Category.create({ 
       name, 
       description,
-      contestTypes: Array.isArray(contestTypes) ? contestTypes : ['Photography']
+      contestTypes: Array.isArray(contestTypes) ? contestTypes : ['Photography'],
+      customLabels: Array.isArray(customLabels) ? customLabels : []
     });
 
     await AuditLog.create({
@@ -64,7 +65,7 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
 // @access  Private/Admin
 router.put('/:id', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { name, description, contestTypes } = req.body;
+    const { name, description, contestTypes, customLabels } = req.body;
     const category = await Category.findById(req.params.id);
     if (!category) {
       return res.status(404).json({ success: false, message: 'Category not found' });
@@ -91,6 +92,9 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
     if (description !== undefined) category.description = description;
     if (contestTypes !== undefined) {
       category.contestTypes = Array.isArray(contestTypes) ? contestTypes : [contestTypes];
+    }
+    if (customLabels !== undefined) {
+      category.customLabels = Array.isArray(customLabels) ? customLabels : [];
     }
 
     await category.save();

@@ -42,7 +42,11 @@ const photographSchema = new mongoose.Schema({
   originalFilename: { type: String },
   deletionStatus: { type: Boolean, default: false },
   deletionTimestamp: { type: Date },
-  uploadTimestamp: { type: Date, default: Date.now }
+  uploadTimestamp: { type: Date, default: Date.now },
+  customFields: [{
+    label: { type: String, required: true },
+    value: { type: String, default: '' }
+  }]
 });
 
 const submissionSchema = new mongoose.Schema({

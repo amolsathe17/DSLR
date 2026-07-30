@@ -178,6 +178,16 @@ router.post('/upload', protect, upload.fields([
 ]), async (req, res) => {
   try {
     const { eventId, title, category, location, description } = req.body;
+    let customFields = [];
+    if (req.body.customFields) {
+      try {
+        customFields = typeof req.body.customFields === 'string'
+          ? JSON.parse(req.body.customFields)
+          : req.body.customFields;
+      } catch (err) {
+        console.warn('Failed to parse customFields:', err.message);
+      }
+    }
 
     if (!req.files || !req.files.photoFile) {
       return res.status(400).json({ success: false, message: 'Please upload a photo' });
@@ -357,7 +367,8 @@ router.post('/upload', protect, upload.fields([
       dslrValidationStatus: dslrCheck.status,
       validationReason: dslrCheck.reason,
       uploadTimestamp: new Date(),
-      deletionStatus: false
+      deletionStatus: false,
+      customFields
     });
 
     const newPhoto = {
@@ -385,7 +396,8 @@ router.post('/upload', protect, upload.fields([
       validationReason: dslrCheck.reason,
       originalFilename: photoFile.originalname,
       uploadTimestamp: new Date(),
-      deletionStatus: false
+      deletionStatus: false,
+      customFields
     };
 
     submission.photographs.push(newPhoto);
@@ -650,7 +662,7 @@ router.post('/payment-failed', protect, async (req, res) => {
 // @access  Private
 router.put('/photographs/:photoId', protect, async (req, res) => {
   try {
-    const { eventId, title, category, cameraBrand, cameraModel, lensUsed, location, dateCaptured, description } = req.body;
+    const { eventId, title, category, cameraBrand, cameraModel, lensUsed, location, dateCaptured, description, customFields } = req.body;
     const { photoId } = req.params;
 
     const submission = await Submission.findOne({ userId: req.user._id.toString(), eventId });
@@ -667,6 +679,17 @@ router.put('/photographs/:photoId', protect, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Photograph not found in submission' });
     }
 
+    let parsedCustomFields = [];
+    if (customFields) {
+      try {
+        parsedCustomFields = typeof customFields === 'string'
+          ? JSON.parse(customFields)
+          : customFields;
+      } catch (err) {
+        console.warn('Failed to parse customFields:', err.message);
+      }
+    }
+
     // Update the values in the subdocument
     submission.photographs[idx].title = title || submission.photographs[idx].title;
     submission.photographs[idx].category = category || submission.photographs[idx].category;
@@ -676,6 +699,10 @@ router.put('/photographs/:photoId', protect, async (req, res) => {
     submission.photographs[idx].location = location !== undefined ? location : submission.photographs[idx].location;
     submission.photographs[idx].dateCaptured = dateCaptured !== undefined ? dateCaptured : submission.photographs[idx].dateCaptured;
     submission.photographs[idx].description = description !== undefined ? description : submission.photographs[idx].description;
+    
+    if (customFields !== undefined) {
+      submission.photographs[idx].customFields = parsedCustomFields;
+    }
 
     await submission.save();
 
@@ -698,6 +725,9 @@ router.put('/photographs/:photoId', protect, async (req, res) => {
       photoDoc.lensModel = lensUsed !== undefined ? lensUsed : photoDoc.lensModel;
       if (dateCaptured) {
         photoDoc.originalCaptureDate = new Date(dateCaptured);
+      }
+      if (customFields !== undefined) {
+        photoDoc.customFields = parsedCustomFields;
       }
       await photoDoc.save();
     }

@@ -23,7 +23,11 @@ const photoSchema = new mongoose.Schema({
   validationReason: { type: String },
   uploadTimestamp: { type: Date, default: Date.now },
   deletionStatus: { type: Boolean, default: false },
-  deletionTimestamp: { type: Date }
+  deletionTimestamp: { type: Date },
+  customFields: [{
+    label: { type: String, required: true },
+    value: { type: String, default: '' }
+  }]
 }, { timestamps: true });
 
 module.exports = getModel('Photo', photoSchema);

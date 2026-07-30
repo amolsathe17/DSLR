@@ -1182,26 +1182,37 @@ export default function JudgeDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px]">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-slate-500 uppercase text-[8px] font-bold">Camera brand</span>
-                    <span className="font-extrabold truncate">{activePhoto.cameraBrand || 'N/A'}</span>
+                {activePhoto.customFields && activePhoto.customFields.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3 bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px]">
+                    {activePhoto.customFields.map((cf, idx) => (
+                      <div key={idx} className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-slate-500 uppercase text-[8px] font-bold">{cf.label}</span>
+                        <span className="font-extrabold text-slate-300 break-words">{cf.value || 'N/A'}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-slate-500 uppercase text-[8px] font-bold">Camera model</span>
-                    <span className="font-extrabold truncate">{activePhoto.cameraModel || 'N/A'}</span>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px]">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-slate-500 uppercase text-[8px] font-bold">Camera brand</span>
+                      <span className="font-extrabold truncate">{activePhoto.cameraBrand || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-slate-500 uppercase text-[8px] font-bold">Camera model</span>
+                      <span className="font-extrabold truncate">{activePhoto.cameraModel || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-slate-500 uppercase text-[8px] font-bold">Lens configuration</span>
+                      <span className="font-semibold truncate">{activePhoto.lensUsed || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-slate-500 uppercase text-[8px] font-bold">Date captured</span>
+                      <span className="font-semibold text-slate-300">
+                        {activePhoto.dateCaptured ? new Date(activePhoto.dateCaptured).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-slate-500 uppercase text-[8px] font-bold">Lens configuration</span>
-                    <span className="font-semibold truncate">{activePhoto.lensUsed || 'N/A'}</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-slate-500 uppercase text-[8px] font-bold">Date captured</span>
-                    <span className="font-semibold text-slate-300">
-                      {activePhoto.dateCaptured ? new Date(activePhoto.dateCaptured).toLocaleDateString() : 'N/A'}
-                    </span>
-                  </div>
-                </div>
+                )}
 
                 {/* Photo Description Box at bottom */}
                 <div className="bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px] flex flex-col gap-1">
@@ -1469,28 +1480,41 @@ export default function JudgeDashboard() {
                   <p className="font-extrabold text-slate-700 dark:text-slate-300">{offlineZoomPhoto.participantName}</p>
                 </div>
 
-                {/* Camera configuration parameters */}
+                {/* Camera configuration parameters / Custom fields */}
                 <div className="flex flex-col gap-2 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Camera Parameters</span>
-                  <div className="bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl p-4 flex flex-col gap-2 leading-relaxed">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Camera Brand:</span>
-                      <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{offlineZoomPhoto.cameraBrand || 'N/A'}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Camera Model:</span>
-                      <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{offlineZoomPhoto.cameraModel || 'N/A'}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Lens Model:</span>
-                      <strong className="text-slate-800 dark:text-slate-200 font-semibold truncate max-w-[150px]" title={offlineZoomPhoto.lensUsed}>{offlineZoomPhoto.lensUsed || 'N/A'}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Date Captured:</span>
-                      <strong className="text-slate-800 dark:text-slate-200 font-semibold">
-                        {offlineZoomPhoto.dateCaptured ? new Date(offlineZoomPhoto.dateCaptured).toLocaleDateString() : 'N/A'}
-                      </strong>
-                    </div>
+                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">
+                    {offlineZoomPhoto.customFields && offlineZoomPhoto.customFields.length > 0 ? 'Category Specifications' : 'Camera Parameters'}
+                  </span>
+                  <div className="bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl p-4 flex flex-col gap-2 leading-relaxed text-[10px]">
+                    {offlineZoomPhoto.customFields && offlineZoomPhoto.customFields.length > 0 ? (
+                      offlineZoomPhoto.customFields.map((cf, idx) => (
+                        <div key={idx} className="flex justify-between gap-4">
+                          <span className="text-slate-400 truncate shrink-0">{cf.label}:</span>
+                          <strong className="text-slate-800 dark:text-slate-200 font-extrabold break-all text-right">{cf.value || 'N/A'}</strong>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Camera Brand:</span>
+                          <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{offlineZoomPhoto.cameraBrand || 'N/A'}</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Camera Model:</span>
+                          <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{offlineZoomPhoto.cameraModel || 'N/A'}</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Lens Model:</span>
+                          <strong className="text-slate-800 dark:text-slate-200 font-semibold truncate max-w-[150px]" title={offlineZoomPhoto.lensUsed}>{offlineZoomPhoto.lensUsed || 'N/A'}</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Date Captured:</span>
+                          <strong className="text-slate-800 dark:text-slate-200 font-semibold">
+                            {offlineZoomPhoto.dateCaptured ? new Date(offlineZoomPhoto.dateCaptured).toLocaleDateString() : 'N/A'}
+                          </strong>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 

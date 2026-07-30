@@ -20,7 +20,6 @@ export default function Landing() {
   };
   const [event, setEvent] = useState(null);
   const [eventsList, setEventsList] = useState([]);
-  const [selectedTypeTab, setSelectedTypeTab] = useState('Photography');
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [openFaq, setOpenFaq] = useState(null);
@@ -30,7 +29,7 @@ export default function Landing() {
       const data = await apiFetch('/api/events');
       if (data.success && data.events.length > 0) {
         setEventsList(data.events);
-        const active = data.events.find(e => e.status === 'Active' && e.eventType === selectedTypeTab);
+        const active = data.events.find(e => e.status === 'Active') || data.events[0];
         setEvent(active || null);
       }
     } catch (err) {
@@ -43,15 +42,6 @@ export default function Landing() {
   useEffect(() => {
     fetchEventsList();
   }, []);
-
-  useEffect(() => {
-    if (eventsList.length > 0) {
-      const active = eventsList.find(e => e.status === 'Active' && e.eventType === selectedTypeTab);
-      setEvent(active || null);
-    } else {
-      setEvent(null);
-    }
-  }, [selectedTypeTab, eventsList]);
 
   // Countdown timer logic
   useEffect(() => {
@@ -90,31 +80,13 @@ export default function Landing() {
 
   return (
     <div className="bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-200 pt-8">
-      
-      {/* Event Type Tabs */}
-      <div className="flex flex-wrap gap-2 justify-center mb-10 p-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl mx-auto relative z-20">
-        {['Photography', 'Painting', 'Drawing', 'Paper Craft', 'Other'].map(type => (
-          <button
-            key={type}
-            type="button"
-            onClick={() => setSelectedTypeTab(type)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold font-display transition-all cursor-pointer ${
-              selectedTypeTab === type
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            {type} Info
-          </button>
-        ))}
-      </div>
 
       {!event ? (
         <div className="max-w-md mx-auto text-center py-20 flex flex-col items-center gap-4 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 p-8 rounded-3xl shadow-sm">
           <Camera className="w-10 h-10 text-indigo-500 animate-pulse" />
-          <h2 className="font-display font-extrabold text-sm text-slate-900 dark:text-white mt-2">No Active {selectedTypeTab} Contests</h2>
+          <h2 className="font-display font-extrabold text-sm text-slate-900 dark:text-white mt-2">No Active Contests</h2>
           <p className="text-[11px] text-slate-500">
-            There are currently no active {selectedTypeTab.toLowerCase()} competitions scheduled. Please explore our other contest categories!
+            There are currently no active art competitions scheduled. Please explore other categories soon!
           </p>
         </div>
       ) : (

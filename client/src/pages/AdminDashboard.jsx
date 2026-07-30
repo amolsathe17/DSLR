@@ -2351,9 +2351,9 @@ export default function AdminDashboard() {
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
                       {newEventPackages.map((pkg, idx) => (
-                        <div key={idx} className={`flex flex-wrap sm:flex-nowrap gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
-                          <div className="flex-1 min-w-30 flex flex-col gap-1">
-                            <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
+                        <div key={idx} className={`flex flex-row gap-2 sm:gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
+                          <div className="flex-1 min-w-[60px] flex flex-col gap-1">
+                            <label className="text-[10px] text-slate-400 font-semibold truncate">Package Name</label>
                             <input
                               type="text"
                               value={pkg.name}
@@ -2362,31 +2362,30 @@ export default function AdminDashboard() {
                                 updated[idx].name = e.target.value;
                                 setNewEventPackages(updated);
                               }}
-                              placeholder="e.g. Starter, Amateur"
-                              className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                              placeholder="e.g. Starter"
+                              className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                               required
                             />
                           </div>
                           
-                          <div className="w-24 flex flex-col gap-1">
-                            <label className="text-[10px] text-slate-400 font-semibold">Price (₹)</label>
+                          <div className="w-14 sm:w-24 flex flex-col gap-1 shrink-0">
+                            <label className="text-[10px] text-slate-400 font-semibold truncate">Price (₹)</label>
                             <input
                               type="number"
                               value={pkg.price || ''}
                               onChange={(e) => {
                                 const updated = [...newEventPackages];
                                 updated[idx].price = Number(e.target.value);
-                                updated[idx].price = Number(e.target.value);
                                 setNewEventPackages(updated);
                               }}
                               placeholder="Price"
-                              className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                              className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                               required
                             />
                           </div>
 
-                          <div className="w-28 flex flex-col gap-1">
-                            <label className="text-[10px] text-slate-400 font-semibold">Max Uploads</label>
+                          <div className="w-14 sm:w-20 flex flex-col gap-1 shrink-0">
+                            <label className="text-[10px] text-slate-400 font-semibold truncate">Max Uploads</label>
                             <input
                               type="number"
                               value={pkg.maxPhotos || ''}
@@ -2395,8 +2394,8 @@ export default function AdminDashboard() {
                                 updated[idx].maxPhotos = Number(e.target.value);
                                 setNewEventPackages(updated);
                               }}
-                              placeholder="Max photos"
-                              className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                              placeholder="Max"
+                              className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                               required
                             />
                           </div>
@@ -4106,10 +4105,9 @@ export default function AdminDashboard() {
                   
                   <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
                     {editEventPackages.map((pkg, idx) => (
-                      <div key={idx} className={`flex flex-wrap sm:flex-nowrap gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
-                        
-                        <div className="flex-1 min-w-[120px] flex flex-col gap-1">
-                          <label className="text-[10px] text-slate-400 font-semibold">Package Name</label>
+                      <div key={idx} className={`flex flex-row gap-2 sm:gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
+                        <div className="flex-1 min-w-[60px] flex flex-col gap-1">
+                          <label className="text-[10px] text-slate-400 font-semibold truncate">Package Name</label>
                           <input
                             type="text"
                             value={pkg.name}
@@ -4118,14 +4116,14 @@ export default function AdminDashboard() {
                               newPkgs[idx].name = e.target.value;
                               setEditEventPackages(newPkgs);
                             }}
-                            placeholder="e.g. Starter, Amateur"
-                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            placeholder="e.g. Starter"
+                            className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                             required
                           />
                         </div>
                         
-                        <div className="w-24 flex flex-col gap-1">
-                          <label className="text-[10px] text-slate-400 font-semibold">Price (₹)</label>
+                        <div className="w-14 sm:w-24 flex flex-col gap-1 shrink-0">
+                          <label className="text-[10px] text-slate-400 font-semibold truncate">Price (₹)</label>
                           <input
                             type="number"
                             value={pkg.price || ''}
@@ -4135,13 +4133,13 @@ export default function AdminDashboard() {
                               setEditEventPackages(newPkgs);
                             }}
                             placeholder="Price"
-                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                             required
                           />
                         </div>
 
-                        <div className="w-28 flex flex-col gap-1">
-                          <label className="text-[10px] text-slate-400 font-semibold">Max Uploads</label>
+                        <div className="w-14 sm:w-20 flex flex-col gap-1 shrink-0">
+                          <label className="text-[10px] text-slate-400 font-semibold truncate">Max Uploads</label>
                           <input
                             type="number"
                             value={pkg.maxPhotos || ''}
@@ -4150,8 +4148,8 @@ export default function AdminDashboard() {
                               newPkgs[idx].maxPhotos = Number(e.target.value);
                               setEditEventPackages(newPkgs);
                             }}
-                            placeholder="Max photos"
-                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            placeholder="Max"
+                            className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                             required
                           />
                         </div>

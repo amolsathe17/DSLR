@@ -590,7 +590,7 @@ export default function JudgeDashboard() {
                       return (
                         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
                           <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Grading Completion Progress</h3>
-                          <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
+                          <div className="flex flex-row items-center justify-around gap-4 sm:gap-6 py-2">
                             <div className="relative w-32 h-32">
                               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
                                 <circle cx="70" cy="70" r={radius} fill="transparent" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="12" />
@@ -1145,10 +1145,10 @@ export default function JudgeDashboard() {
       {/* Online Evaluation Grade Sheet / Modal popup */}
       {activePhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-[90vh]">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-auto max-h-[90vh] md:h-[90vh] overflow-y-auto md:overflow-hidden">
             
             {/* Left Column: Watermarked Zoom Preview */}
-            <div className="flex-1 bg-slate-950 relative overflow-hidden flex flex-col justify-between border-r border-slate-100 dark:border-slate-800">
+            <div className="w-full md:flex-1 bg-slate-950 relative overflow-hidden flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 h-auto shrink-0">
               <div className="absolute top-4 left-4 z-10 flex gap-2">
                 <span className="bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
                   Online Zoom Mode
@@ -1160,11 +1160,11 @@ export default function JudgeDashboard() {
                 </span>
               </div>
 
-              <div className="flex-grow flex items-center justify-center p-4 overflow-hidden">
-                <div className="relative w-full h-full flex items-center justify-center group cursor-zoom-in">
+              <div className="flex-grow flex items-center justify-center p-4">
+                <div className="relative w-full h-64 sm:h-80 md:h-full md:max-h-[68vh] flex items-center justify-center group cursor-zoom-in">
                   <WatermarkPreview
                     src={getBackendUrl(activePhoto.fileUrl)}
-                    className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg"
+                    className="w-full h-full max-h-[40vh] md:max-h-[68vh] object-contain rounded-lg shadow-lg"
                     enableZoom={true}
                   />
                 </div>
@@ -1214,7 +1214,7 @@ export default function JudgeDashboard() {
             </div>
 
             {/* Right Column: Scoring parameters sheet */}
-            <div className="w-full md:w-[380px] bg-white dark:bg-slate-900 flex flex-col justify-between overflow-y-auto">
+            <div className="w-full md:w-[380px] bg-white dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-auto md:h-full md:overflow-y-auto">
               
               {/* Grading Form header */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
@@ -1405,10 +1405,10 @@ export default function JudgeDashboard() {
       {/* Offline Zoom & Scoring Modal */}
       {offlineZoomPhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-[90vh]">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-auto max-h-[90vh] md:h-[90vh] overflow-y-auto md:overflow-hidden">
             
             {/* Left Column: Photograph (zooms on hover) */}
-            <div className="flex-grow bg-slate-950 relative overflow-hidden flex items-center justify-center p-4 border-r border-slate-100 dark:border-slate-800">
+            <div className="w-full md:flex-grow bg-slate-950 relative overflow-hidden flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 h-auto shrink-0">
               <div className="absolute top-4 left-4 z-10 flex gap-2">
                 <span className="bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
                   Offline Zoom Mode
@@ -1421,17 +1421,19 @@ export default function JudgeDashboard() {
               </div>
 
               {/* Hover Zoom preview container */}
-              <div className="relative w-full h-full flex items-center justify-center overflow-hidden group cursor-zoom-in">
-                <WatermarkPreview
-                  src={getBackendUrl(offlineZoomPhoto.fileUrl)}
-                  className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg"
-                  enableZoom={true}
-                />
+              <div className="flex-grow flex items-center justify-center p-4">
+                <div className="relative w-full h-64 sm:h-80 md:h-full md:max-h-[68vh] flex items-center justify-center group cursor-zoom-in">
+                  <WatermarkPreview
+                    src={getBackendUrl(offlineZoomPhoto.fileUrl)}
+                    className="w-full h-full max-h-[40vh] md:max-h-[68vh] object-contain rounded-lg shadow-lg"
+                    enableZoom={true}
+                  />
+                </div>
               </div>
             </div>
 
             {/* Right Column: Metadata details / sidebar & scoring fields */}
-            <div className="w-full md:w-[380px] bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
+            <div className="w-full md:w-[380px] bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-auto md:h-full md:overflow-y-auto">
               
               {/* Header */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">

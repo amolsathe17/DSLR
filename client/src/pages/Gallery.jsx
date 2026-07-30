@@ -107,7 +107,7 @@ export default function Gallery() {
 
         {/* Tab switchers */}
         <div className="flex justify-center mb-8">
-          <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto overflow-x-auto whitespace-nowrap min-w-max gap-1">
+          <div className="flex flex-wrap justify-center bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto gap-1">
             <button
               onClick={() => setActiveTab('gallery')}
               className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${

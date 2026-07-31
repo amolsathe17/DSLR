@@ -349,7 +349,7 @@ router.post('/upload', protect, upload.fields([
     await Photo.create({
       userId: req.user._id.toString(),
       entryId: submission._id.toString(),
-      title: title || 'Untitled',
+      title: title || photoFile.originalname || 'Untitled',
       category: category || 'General',
       description: description || '',
       originalFilename: photoFile.originalname,
@@ -373,7 +373,7 @@ router.post('/upload', protect, upload.fields([
 
     const newPhoto = {
       id: photoId,
-      title: title || 'Untitled',
+      title: title || photoFile.originalname || 'Untitled',
       category: category || 'General',
       cameraBrand: cameraMake,
       cameraModel,

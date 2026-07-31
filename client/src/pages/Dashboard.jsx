@@ -1615,18 +1615,6 @@ export default function Dashboard() {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                           <div className="flex flex-col gap-4">
                                             <div className="flex flex-col gap-1 text-[11px]">
-                                              <label htmlFor="photoTitle" className="font-semibold text-slate-400">Photo Title *</label>
-                                              <input
-                                                id="photoTitle"
-                                                type="text"
-                                                value={title}
-                                                onChange={(e) => setTitle(e.target.value)}
-                                                placeholder="Sunrise in Sumba"
-                                                className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-xs font-semibold text-slate-700 dark:text-slate-200"
-                                              />
-                                            </div>
-
-                                            <div className="flex flex-col gap-1 text-[11px]">
                                               <label htmlFor="photoCategory" className="font-semibold text-slate-400">Category *</label>
                                               <select
                                                 id="photoCategory"
@@ -1685,12 +1673,12 @@ export default function Dashboard() {
                                               </label>
                                               <DragDropUpload
                                                 onUpload={async (photo, raw) => {
-                                                  if (!title || !category) {
+                                                  if (!category) {
                                                     setConfirmModal({
-                                                      message: "Please fill in the Photo Title and Category first.",
+                                                      message: "Please select a Category first.",
                                                       isAlert: true
                                                     });
-                                                    throw new Error("Title and Category are required.");
+                                                    throw new Error("Category is required.");
                                                   }
                                                   await handleFileAnalyze(photo);
                                                   await handleUploadPhoto(photo, raw);
@@ -2019,20 +2007,7 @@ export default function Dashboard() {
             <form onSubmit={handleUpdatePhoto} className="flex flex-col gap-5 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
-                {/* Edit Title */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="editPhotoTitle" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
-                    Photograph Title *
-                  </label>
-                  <input
-                    type="text"
-                    id="editPhotoTitle"
-                    required
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
+
 
                 {/* Edit Category */}
                 <div className="flex flex-col gap-1.5">

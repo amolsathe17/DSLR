@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   BarChart,
@@ -562,30 +562,71 @@ export default function AdminDashboard() {
     fetchPhotographs();
   }, [photoSearch, photoCategory, photoStatus, photoDslrStatus]);
 
+  const lastSelectedCatRef = useRef(null);
+
   useEffect(() => {
     if (categories.length > 0) {
+      const activeCatId = selectedCatForDetails || categories[0]._id;
       if (!selectedCatForDetails) {
-        const firstCat = categories[0];
-        setSelectedCatForDetails(firstCat._id);
-        setCatLabelsLocal(firstCat.customLabels || []);
-      } else {
-        const currentCatObj = categories.find(c => c._id === selectedCatForDetails);
-        if (currentCatObj) {
-          const serverLabels = currentCatObj.customLabels || [];
-          if (JSON.stringify(serverLabels) !== JSON.stringify(catLabelsLocal) && !isSavingCatLabels) {
-            setCatLabelsLocal(serverLabels);
+        setSelectedCatForDetails(activeCatId);
+      }
+      
+      if (lastSelectedCatRef.current !== activeCatId) {
+        lastSelectedCatRef.current = activeCatId;
+        const cat = categories.find(c => c._id === activeCatId);
+        if (cat) {
+          const mode = cat.customLabelsMode || 'category';
+          setCatLabelsMode(mode);
+          const inheritedFrom = cat.customLabelsInheritedFrom || (cat.contestTypes && cat.contestTypes[0]) || '';
+          setCatLabelsInheritedFrom(inheritedFrom);
+          if (mode === 'contest_type') {
+            const matchedCt = contestTypes.find(ct => ct.name === inheritedFrom);
+            setCatLabelsLocal(matchedCt ? (matchedCt.customLabels || []) : []);
+          } else {
+            setCatLabelsLocal(cat.customLabels || []);
           }
         }
       }
     }
-  }, [categories, selectedCatForDetails]);
+  }, [categories, selectedCatForDetails, contestTypes]);
 
   const handleSelectCatForDetails = (catId) => {
     setSelectedCatForDetails(catId);
     const cat = categories.find(c => c._id === catId);
-    setCatLabelsLocal(cat ? (cat.customLabels || []) : []);
-    setCatLabelsMode(cat ? (cat.customLabelsMode || 'category') : 'category');
-    setCatLabelsInheritedFrom(cat ? (cat.customLabelsInheritedFrom || (cat.contestTypes && cat.contestTypes[0]) || '') : '');
+    if (cat) {
+      const mode = cat.customLabelsMode || 'category';
+      setCatLabelsMode(mode);
+      const inheritedFrom = cat.customLabelsInheritedFrom || (cat.contestTypes && cat.contestTypes[0]) || '';
+      setCatLabelsInheritedFrom(inheritedFrom);
+      if (mode === 'contest_type') {
+        const matchedCt = contestTypes.find(ct => ct.name === inheritedFrom);
+        setCatLabelsLocal(matchedCt ? (matchedCt.customLabels || []) : []);
+      } else {
+        setCatLabelsLocal(cat.customLabels || []);
+      }
+    } else {
+      setCatLabelsLocal([]);
+      setCatLabelsMode('category');
+      setCatLabelsInheritedFrom('');
+    }
+  };
+
+  const handleToggleLabelsMode = (newMode) => {
+    setCatLabelsMode(newMode);
+    const activeCategoryObj = categories.find(c => c._id === selectedCatForDetails);
+    const inheritedFrom = catLabelsInheritedFrom || (activeCategoryObj?.contestTypes && activeCategoryObj.contestTypes[0]) || '';
+    if (newMode === 'contest_type') {
+      const matchedCt = contestTypes.find(ct => ct.name === inheritedFrom);
+      setCatLabelsLocal(matchedCt ? (matchedCt.customLabels || []) : []);
+    } else {
+      setCatLabelsLocal(activeCategoryObj ? (activeCategoryObj.customLabels || []) : []);
+    }
+  };
+
+  const handleChangeInheritedFrom = (ctName) => {
+    setCatLabelsInheritedFrom(ctName);
+    const matchedCt = contestTypes.find(ct => ct.name === ctName);
+    setCatLabelsLocal(matchedCt ? (matchedCt.customLabels || []) : []);
   };
 
   const handleAddCatLabel = () => {
@@ -665,23 +706,42 @@ export default function AdminDashboard() {
     if (!selectedCatForDetails) return;
     setIsSavingCatLabels(true);
     try {
-      const res = await apiFetch(`/api/categories/${selectedCatForDetails}`, {
+      const activeCategoryObj = categories.find(c => c._id === selectedCatForDetails);
+      const inheritedFrom = catLabelsInheritedFrom || (activeCategoryObj?.contestTypes && activeCategoryObj.contestTypes[0]) || '';
+
+      const catRes = await apiFetch(`/api/categories/${selectedCatForDetails}`, {
         method: 'PUT',
         body: JSON.stringify({
-          customLabels: catLabelsLocal.filter(l => l.trim() !== ''),
           customLabelsMode: catLabelsMode,
-          customLabelsInheritedFrom: catLabelsInheritedFrom
+          customLabelsInheritedFrom: inheritedFrom,
+          customLabels: catLabelsMode === 'category' ? catLabelsLocal.filter(l => l.trim() !== '') : []
         })
       });
-      if (res.success) {
-        triggerSuccessModal('Category Labels Saved', 'Category custom labels saved successfully!');
-        await fetchJudgesAndEvents();
-      } else {
-        alert(res.message || 'Failed to save configuration.');
+
+      if (!catRes.success) {
+        throw new Error(catRes.message || 'Failed to save category configuration.');
       }
+
+      if (catLabelsMode === 'contest_type' && inheritedFrom) {
+        const matchedCt = contestTypes.find(ct => ct.name === inheritedFrom);
+        if (matchedCt) {
+          const ctRes = await apiFetch(`/api/contest-types/${matchedCt._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              customLabels: catLabelsLocal.filter(l => l.trim() !== '')
+            })
+          });
+          if (!ctRes.success) {
+            throw new Error(ctRes.message || 'Failed to save contest type labels.');
+          }
+        }
+      }
+
+      triggerSuccessModal('Configuration Saved', 'Field labels configuration saved successfully!');
+      await fetchJudgesAndEvents();
     } catch (err) {
       console.error(err);
-      alert('Error saving labels: ' + err.message);
+      alert('Error saving configuration: ' + err.message);
     } finally {
       setIsSavingCatLabels(false);
     }
@@ -948,7 +1008,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ 
           name: newContestTypeName, 
           description: newContestTypeDesc,
-          customLabels: newContestTypeLabels.filter(l => l.trim() !== '')
+          customLabels: []
         })
       });
       if (data.success) {
@@ -971,8 +1031,7 @@ export default function AdminDashboard() {
         method: 'PUT',
         body: JSON.stringify({ 
           name: editContestTypeName, 
-          description: editContestTypeDesc,
-          customLabels: editContestTypeLabels.filter(l => l.trim() !== '')
+          description: editContestTypeDesc
         })
       });
       if (data.success) {
@@ -2686,81 +2745,7 @@ export default function AdminDashboard() {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <div className="flex justify-between items-center">
-                      <label className="text-xs text-slate-500 font-semibold">Common Field Labels</label>
-                      <button
-                        type="button"
-                        onClick={() => handleAddContestTypeLabel(true)}
-                        className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] rounded border border-indigo-100 dark:border-indigo-900/50 cursor-pointer flex items-center gap-1"
-                      >
-                        <Plus size={10} /> Add Label
-                      </button>
-                    </div>
 
-                    {editContestTypeLabels.length === 0 ? (
-                      <p className="text-[10px] text-slate-400 italic text-center py-2 bg-slate-50/50 dark:bg-slate-950/10 border border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
-                        No common labels defined.
-                      </p>
-                    ) : (
-                      <div className="flex flex-col gap-1.5 max-h-[150px] overflow-y-auto pr-1">
-                        {editContestTypeLabels.map((label, idx) => (
-                          <div key={idx} className="flex gap-1 items-center">
-                            <input
-                              type="text"
-                              value={label}
-                              onChange={(e) => handleEditContestTypeLabel(true, idx, e.target.value)}
-                              placeholder="e.g. Designer / Brand"
-                              className="flex-1 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] text-slate-800 dark:text-slate-100"
-                            />
-                            <div className="flex">
-                              <button
-                                type="button"
-                                disabled={idx === 0}
-                                onClick={() => handleReorderContestTypeLabel(true, idx, 'up')}
-                                className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 disabled:opacity-30 rounded cursor-pointer"
-                              >
-                                <ArrowUp size={10} />
-                              </button>
-                              <button
-                                type="button"
-                                disabled={idx === editContestTypeLabels.length - 1}
-                                onClick={() => handleReorderContestTypeLabel(true, idx, 'down')}
-                                className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 disabled:opacity-30 rounded cursor-pointer"
-                              >
-                                <ArrowDown size={10} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteContestTypeLabel(true, idx)}
-                                className="p-0.5 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 rounded cursor-pointer"
-                              >
-                                <Trash2 size={10} />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Quick Suggest Pool */}
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {['Designer/Brand', 'Materials Used', 'Theme', 'Location', 'Camera Body', 'Lens Used'].map(sug => (
-                        <button
-                          key={sug}
-                          type="button"
-                          onClick={() => {
-                            if (!editContestTypeLabels.includes(sug)) {
-                              setEditContestTypeLabels([...editContestTypeLabels, sug]);
-                            }
-                          }}
-                          className="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] cursor-pointer"
-                        >
-                          + {sug}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
                   <div className="flex gap-2">
                     <button
@@ -2806,81 +2791,7 @@ export default function AdminDashboard() {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <div className="flex justify-between items-center">
-                      <label className="text-xs text-slate-500 font-semibold">Common Field Labels</label>
-                      <button
-                        type="button"
-                        onClick={() => handleAddContestTypeLabel(false)}
-                        className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] rounded border border-indigo-100 dark:border-indigo-900/50 cursor-pointer flex items-center gap-1"
-                      >
-                        <Plus size={10} /> Add Label
-                      </button>
-                    </div>
 
-                    {newContestTypeLabels.length === 0 ? (
-                      <p className="text-[10px] text-slate-400 italic text-center py-2 bg-slate-50/50 dark:bg-slate-950/10 border border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
-                        No common labels defined.
-                      </p>
-                    ) : (
-                      <div className="flex flex-col gap-1.5 max-h-[150px] overflow-y-auto pr-1">
-                        {newContestTypeLabels.map((label, idx) => (
-                          <div key={idx} className="flex gap-1 items-center">
-                            <input
-                              type="text"
-                              value={label}
-                              onChange={(e) => handleEditContestTypeLabel(false, idx, e.target.value)}
-                              placeholder="e.g. Designer / Brand"
-                              className="flex-1 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] text-slate-800 dark:text-slate-100"
-                            />
-                            <div className="flex">
-                              <button
-                                type="button"
-                                disabled={idx === 0}
-                                onClick={() => handleReorderContestTypeLabel(false, idx, 'up')}
-                                className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 disabled:opacity-30 rounded cursor-pointer"
-                              >
-                                <ArrowUp size={10} />
-                              </button>
-                              <button
-                                type="button"
-                                disabled={idx === newContestTypeLabels.length - 1}
-                                onClick={() => handleReorderContestTypeLabel(false, idx, 'down')}
-                                className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 disabled:opacity-30 rounded cursor-pointer"
-                              >
-                                <ArrowDown size={10} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteContestTypeLabel(false, idx)}
-                                className="p-0.5 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 rounded cursor-pointer"
-                              >
-                                <Trash2 size={10} />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Quick Suggest Pool */}
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {['Designer/Brand', 'Materials Used', 'Theme', 'Location', 'Camera Body', 'Lens Used'].map(sug => (
-                        <button
-                          key={sug}
-                          type="button"
-                          onClick={() => {
-                            if (!newContestTypeLabels.includes(sug)) {
-                              setNewContestTypeLabels([...newContestTypeLabels, sug]);
-                            }
-                          }}
-                          className="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[9px] cursor-pointer"
-                        >
-                          + {sug}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
                   <div className="flex gap-2">
                     <button
@@ -3220,7 +3131,7 @@ export default function AdminDashboard() {
                           name="catLabelsMode"
                           value="category"
                           checked={catLabelsMode === 'category'}
-                          onChange={() => setCatLabelsMode('category')}
+                          onChange={() => handleToggleLabelsMode('category')}
                           className="w-4 h-4 text-indigo-600 border-slate-350 focus:ring-indigo-500 cursor-pointer"
                         />
                         <span>Category Level (Custom)</span>
@@ -3231,7 +3142,7 @@ export default function AdminDashboard() {
                           name="catLabelsMode"
                           value="contest_type"
                           checked={catLabelsMode === 'contest_type'}
-                          onChange={() => setCatLabelsMode('contest_type')}
+                          onChange={() => handleToggleLabelsMode('contest_type')}
                           className="w-4 h-4 text-indigo-600 border-slate-350 focus:ring-indigo-500 cursor-pointer"
                         />
                         <span>Contest Type Level (Inherited)</span>
@@ -3239,138 +3150,107 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {catLabelsMode === 'contest_type' ? (
-                    /* CONTEST TYPE INHERITED MODE */
-                    (() => {
-                      const activeCategoryObj = categories.find(c => c._id === selectedCatForDetails);
-                      const availableContestTypes = activeCategoryObj?.contestTypes || [];
-                      const inheritedTypeName = catLabelsInheritedFrom || availableContestTypes[0] || '';
-                      const matchedCt = contestTypes.find(ct => ct.name === inheritedTypeName);
-                      const inheritedLabels = matchedCt ? (matchedCt.customLabels || []) : [];
-
-                      return (
-                        <div className="flex flex-col gap-4">
-                          {availableContestTypes.length > 1 && (
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-xs text-slate-500 font-semibold">Inherit Labels from Contest Type</label>
-                              <select
-                                value={catLabelsInheritedFrom}
-                                onChange={(e) => setCatLabelsInheritedFrom(e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
-                              >
-                                {availableContestTypes.map(ctName => (
-                                  <option key={ctName} value={ctName}>{ctName}</option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
-
-                          <div className="flex justify-between items-center pb-1">
-                            <div>
-                              <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Inherited Fields (Read-Only)</span>
-                              <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold block mt-0.5">
-                                Mapped via Contest Type: {inheritedTypeName || 'None'}
-                              </span>
-                            </div>
-                          </div>
-
-                          {inheritedLabels.length === 0 ? (
-                            <p className="text-[10px] text-slate-400 italic text-center py-4 bg-slate-50/50 dark:bg-slate-950/20 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                              No common labels defined on contest type "{inheritedTypeName || 'None'}". Go to "Edit Contest Type" above to add labels.
-                            </p>
-                          ) : (
-                            <div className="flex flex-col gap-2.5 max-h-[300px] overflow-y-auto pr-1">
-                              {inheritedLabels.map((label, idx) => (
-                                <div key={idx} className="flex gap-2 items-center opacity-65">
-                                  <input
-                                    type="text"
-                                    value={label}
-                                    disabled
-                                    className="flex-1 px-3 py-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-250 dark:border-slate-800 rounded-xl text-[11px] font-semibold text-slate-500 dark:text-slate-400 cursor-not-allowed focus:outline-none"
-                                  />
-                                  <span className="p-2 text-slate-400 shrink-0">
-                                    <Lock size={12} />
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          
-                          <div className="text-[10px] text-slate-400 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl flex items-start gap-2">
-                            <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                            <span>These fields are shared by all categories in this contest type. To add, edit, or reorder these labels, use the <strong>Edit Contest Type</strong> section at the top-left of this page.</span>
-                          </div>
-                        </div>
-                      );
-                    })()
-                  ) : (
-                    /* CATEGORY CUSTOM MODE */
-                    <>
-                      <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-855">
-                        <div>
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Configure Fields</span>
-                          <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold block mt-0.5">
-                            Category: {categories.find(c => c._id === selectedCatForDetails)?.name}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleAddCatLabel}
-                          className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] rounded-lg cursor-pointer transition-colors flex items-center gap-1 shadow-sm"
+                  {/* Contest Type Inheritance selector if in contest_type mode */}
+                  {catLabelsMode === 'contest_type' && (() => {
+                    const activeCategoryObj = categories.find(c => c._id === selectedCatForDetails);
+                    const availableContestTypes = activeCategoryObj?.contestTypes || [];
+                    const inheritedTypeName = catLabelsInheritedFrom || availableContestTypes[0] || '';
+                    return availableContestTypes.length > 1 && (
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs text-slate-500 font-semibold">Inherit Labels from Contest Type</label>
+                        <select
+                          value={inheritedTypeName}
+                          onChange={(e) => handleChangeInheritedFrom(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
                         >
-                          <Plus size={12} />
-                          <span>Add Label</span>
-                        </button>
+                          {availableContestTypes.map(ctName => (
+                            <option key={ctName} value={ctName}>{ctName}</option>
+                          ))}
+                        </select>
                       </div>
+                    );
+                  })()}
 
-                      {catLabelsLocal.length === 0 ? (
-                        <p className="text-[10px] text-slate-400 italic text-center py-4 bg-slate-50/50 dark:bg-slate-950/20 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                          No custom fields configured for this category yet. Add labels using the button above or quick-assign common ones from the right.
-                        </p>
-                      ) : (
-                        <div className="flex flex-col gap-2.5 max-h-[300px] overflow-y-auto pr-1">
-                          {catLabelsLocal.map((label, idx) => (
-                            <div key={idx} className="flex gap-2 items-center">
-                              <input
-                                type="text"
-                                value={label}
-                                onChange={(e) => handleEditCatLabel(idx, e.target.value)}
-                                placeholder="e.g. Designer / Brand"
-                                className="flex-1 px-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[11px] font-semibold text-slate-850 dark:text-slate-100 focus:outline-none"
-                              />
-                              {/* Reordering Controls */}
-                              <div className="flex flex-col gap-0.5">
+                  {/* Editable Fields Section */}
+                  {(() => {
+                    const activeCategoryObj = categories.find(c => c._id === selectedCatForDetails);
+                    const availableContestTypes = activeCategoryObj?.contestTypes || [];
+                    const inheritedTypeName = catLabelsInheritedFrom || availableContestTypes[0] || '';
+
+                    return (
+                      <>
+                        <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-855">
+                          <div>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-355">
+                              {catLabelsMode === 'contest_type' ? 'Configure Contest Type Fields' : 'Configure Category Fields'}
+                            </span>
+                            <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold block mt-0.5">
+                              {catLabelsMode === 'contest_type' 
+                                ? `Contest Type: ${inheritedTypeName || 'None'}` 
+                                : `Category: ${activeCategoryObj?.name || ''}`}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleAddCatLabel}
+                            className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] rounded-lg cursor-pointer transition-colors flex items-center gap-1 shadow-sm"
+                          >
+                            <Plus size={12} />
+                            <span>Add Label</span>
+                          </button>
+                        </div>
+
+                        {catLabelsLocal.length === 0 ? (
+                          <p className="text-[10px] text-slate-400 italic text-center py-4 bg-slate-50/50 dark:bg-slate-950/20 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                            {catLabelsMode === 'contest_type'
+                              ? 'No labels configured for this contest type yet. Add labels using the button above or quick-assign common ones from the right.'
+                              : 'No custom fields configured for this category yet. Add labels using the button above or quick-assign common ones from the right.'}
+                          </p>
+                        ) : (
+                          <div className="flex flex-col gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                            {catLabelsLocal.map((label, idx) => (
+                              <div key={idx} className="flex gap-2 items-center">
+                                <input
+                                  type="text"
+                                  value={label}
+                                  onChange={(e) => handleEditCatLabel(idx, e.target.value)}
+                                  placeholder="e.g. Designer / Brand"
+                                  className="flex-1 px-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[11px] font-semibold text-slate-850 dark:text-slate-100 focus:outline-none"
+                                />
+                                {/* Reordering Controls */}
+                                <div className="flex flex-col gap-0.5">
+                                  <button
+                                    type="button"
+                                    disabled={idx === 0}
+                                    onClick={() => handleReorderCatLabel(idx, 'up')}
+                                    className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
+                                  >
+                                    <ArrowUp size={11} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={idx === catLabelsLocal.length - 1}
+                                    onClick={() => handleReorderCatLabel(idx, 'down')}
+                                    className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
+                                  >
+                                    <ArrowDown size={11} />
+                                  </button>
+                                </div>
+                                {/* Delete Control */}
                                 <button
-                                  type="button"
-                                  disabled={idx === 0}
-                                  onClick={() => handleReorderCatLabel(idx, 'up')}
-                                  className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
-                                >
-                                  <ArrowUp size={11} />
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={idx === catLabelsLocal.length - 1}
-                                  onClick={() => handleReorderCatLabel(idx, 'down')}
-                                  className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:pointer-events-none rounded cursor-pointer animate-none"
-                                >
-                                  <ArrowDown size={11} />
-                                </button>
-                              </div>
-                              {/* Delete Control */}
-                              <button
                                   type="button"
                                   onClick={() => handleDeleteCatLabel(idx)}
                                   className="p-2 bg-red-50 hover:bg-red-100 text-red-650 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 rounded-xl cursor-pointer transition-colors border border-red-100/30 dark:border-red-950/20"
                                 >
                                   <Trash2 size={12} />
                                 </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
 
                   <button
                     type="button"

@@ -45,6 +45,27 @@ export default function Dashboard() {
     const baseUrl = import.meta.env.VITE_API_URL || '';
     return `${baseUrl}${path}`;
   };
+
+  const COMMON_LABELS = [
+    "Designer / Brand",
+    "Garment Type",
+    "Fabric / Material",
+    "Color Palette",
+    "Accessories Used",
+    "Footwear",
+    "Theme / Collection",
+    "Runway / Venue"
+  ];
+
+  const getActiveCustomLabels = (catObj) => {
+    if (!catObj) return [];
+    const labels = catObj.customLabels || [];
+    if (catObj.customLabelsMode === 'contest_type') {
+      return labels.filter(lbl => !COMMON_LABELS.includes(lbl));
+    }
+    return labels;
+  };
+
   const [dashboardTab, setDashboardTab] = useState("entries");
   const [confirmModal, setConfirmModal] = useState(null);
   const [allSubmissions, setAllSubmissions] = useState([]);
@@ -235,7 +256,7 @@ export default function Dashboard() {
     if (category && categories.length > 0) {
       const selectedCat = categories.find(c => c.name === category);
       if (selectedCat) {
-        const labels = selectedCat.customLabels || [];
+        const labels = getActiveCustomLabels(selectedCat);
         const initialVals = {};
         labels.forEach(l => {
           initialVals[l] = '';
@@ -253,7 +274,7 @@ export default function Dashboard() {
     if (editCategory && categories.length > 0) {
       const selectedCat = categories.find(c => c.name === editCategory);
       if (selectedCat) {
-        const labels = selectedCat.customLabels || [];
+        const labels = getActiveCustomLabels(selectedCat);
         const updatedVals = { ...editCustomFieldValues };
         
         Object.keys(updatedVals).forEach(key => {
@@ -1641,28 +1662,27 @@ export default function Dashboard() {
                                                   </option>
                                                 ))}
                                               </select>
-                                            </div>
-
-                                            {(() => {
-                                               const selectedCatObj = categories.find(c => c.name === category) || categories[0];
-                                               const activeCustomLabels = selectedCatObj ? (selectedCatObj.customLabels || []) : [];
-                                               return activeCustomLabels.map((lbl) => (
-                                                 <div className="flex flex-col gap-1 text-[11px]" key={lbl}>
-                                                   <label className="font-semibold text-slate-400">{lbl} *</label>
-                                                   <input
-                                                     type="text"
-                                                     required
-                                                     value={customFieldValues[lbl] || ""}
-                                                     onChange={(e) => setCustomFieldValues({
-                                                       ...customFieldValues,
-                                                       [lbl]: e.target.value
-                                                     })}
-                                                     placeholder={`Enter ${lbl}`}
-                                                     className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-xs font-semibold text-slate-800 dark:text-slate-100"
-                                                   />
-                                                 </div>
-                                               ));
+                                              {(() => {
+                                                const selectedCatObj = categories.find(c => c.name === category) || categories[0];
+                                                const activeCustomLabels = getActiveCustomLabels(selectedCatObj);
+                                                return activeCustomLabels.map((lbl) => (
+                                                  <div className="flex flex-col gap-1 text-[11px]" key={lbl}>
+                                                    <label className="font-semibold text-slate-400">{lbl} *</label>
+                                                    <input
+                                                      type="text"
+                                                      required
+                                                      value={customFieldValues[lbl] || ""}
+                                                      onChange={(e) => setCustomFieldValues({
+                                                        ...customFieldValues,
+                                                        [lbl]: e.target.value
+                                                      })}
+                                                      placeholder={`Enter ${lbl}`}
+                                                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-xs font-semibold text-slate-800 dark:text-slate-100"
+                                                    />
+                                                  </div>
+                                                ));
                                              })()}
+                                            </div>
                                           </div>
 
                                           <div className="flex flex-col gap-4">
@@ -1743,20 +1763,22 @@ export default function Dashboard() {
                                                 <span className="text-[9px] text-indigo-500 font-bold uppercase tracking-wider block mt-0.5">
                                                   {photo.category}
                                                 </span>
-                                                {photo.customFields && photo.customFields.length > 0 ? (
-                                                   <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1 text-[10px] text-slate-400">
-                                                     {photo.customFields.map((cf, idx) => (
-                                                       <span key={idx} className="inline-block">
-                                                         <strong className="text-slate-500">{cf.label}:</strong> {cf.value || 'N/A'}
-                                                         {idx < photo.customFields.length - 1 && <span className="ml-2 text-slate-350 dark:text-slate-800 font-normal">|</span>}
-                                                       </span>
-                                                     ))}
-                                                   </div>
-                                                 ) : photo.cameraBrand ? (
-                                                   <p className="text-[10px] text-slate-400 mt-1">
-                                                     EXIF: {photo.cameraBrand} {photo.cameraModel} | {photo.lensUsed || 'Standard Lens'}
-                                                   </p>
-                                                 ) : null}
+                                                {(() => {
+                                                   const selectedCatObj = categories.find(c => c.name === photo.category);
+                                                   const activeLabels = getActiveCustomLabels(selectedCatObj);
+                                                   const fieldsToDisplay = (photo.customFields || []).filter(cf => activeLabels.includes(cf.label));
+                                                   if (fieldsToDisplay.length === 0) return null;
+                                                   return (
+                                                     <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1 text-[10px] text-slate-400">
+                                                       {fieldsToDisplay.map((cf, idx) => (
+                                                         <span key={idx} className="inline-block">
+                                                           <strong className="text-slate-500">{cf.label}:</strong> {cf.value || 'N/A'}
+                                                           {idx < fieldsToDisplay.length - 1 && <span className="ml-2 text-slate-350 dark:text-slate-800 font-normal">|</span>}
+                                                         </span>
+                                                       ))}
+                                                     </div>
+                                                   );
+                                                 })()}
 
                                                  {/* Jury disapproval remarks */}
                                                  {(() => {
@@ -1975,20 +1997,22 @@ export default function Dashboard() {
                                           </div>
                                           <span className="text-[9px] text-indigo-500 font-extrabold uppercase mt-0.5 block">{photo.category}</span>
                                         </div>
-                                        {photo.customFields && photo.customFields.length > 0 ? (
-                                          <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-400">
-                                            {photo.customFields.map((cf, idx) => (
-                                              <span key={idx} className="inline-block">
-                                                <strong className="text-slate-500">{cf.label}:</strong> {cf.value || 'N/A'}
-                                                {idx < photo.customFields.length - 1 && <span className="ml-2 text-slate-350 dark:text-slate-800 font-normal">|</span>}
-                                              </span>
-                                            ))}
-                                          </div>
-                                        ) : photo.cameraBrand ? (
-                                          <p className="text-[10px] text-slate-400">
-                                            EXIF: {photo.cameraBrand} {photo.cameraModel}
-                                          </p>
-                                        ) : null}
+                                        {(() => {
+                                           const selectedCatObj = categories.find(c => c.name === photo.category);
+                                           const activeLabels = getActiveCustomLabels(selectedCatObj);
+                                           const fieldsToDisplay = (photo.customFields || []).filter(cf => activeLabels.includes(cf.label));
+                                           if (fieldsToDisplay.length === 0) return null;
+                                           return (
+                                             <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-400">
+                                               {fieldsToDisplay.map((cf, idx) => (
+                                                 <span key={idx} className="inline-block">
+                                                   <strong className="text-slate-500">{cf.label}:</strong> {cf.value || 'N/A'}
+                                                   {idx < fieldsToDisplay.length - 1 && <span className="ml-2 text-slate-350 dark:text-slate-800 font-normal">|</span>}
+                                                 </span>
+                                               ))}
+                                             </div>
+                                           );
+                                         })()}
 
                                         {isDisapproved && disapprovedRemarks && (
                                           <div className="mt-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/30 p-3 rounded-2xl text-[10px] text-red-800 dark:text-red-350 leading-relaxed font-semibold">
@@ -2086,7 +2110,7 @@ export default function Dashboard() {
 
                 {(() => {
                   const selectedCatObj = categories.find(c => c.name === editCategory);
-                  const activeCustomLabels = selectedCatObj ? (selectedCatObj.customLabels || []) : [];
+                  const activeCustomLabels = getActiveCustomLabels(selectedCatObj);
                   return activeCustomLabels.map((lbl) => (
                     <div className="flex flex-col gap-1.5" key={lbl}>
                       <label className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">

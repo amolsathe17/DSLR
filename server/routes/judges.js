@@ -63,6 +63,7 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), as
             rawFileUrl: photo.rawFileUrl,
             fileSizeBytes: photo.fileSizeBytes,
             status: photo.status,
+            paymentStatus: sub.paymentStatus || 'Unpaid',
             graded: isAdmin ? (photo.scores && photo.scores.length > 0) : !!existingScore,
             score: existingScore || null,
             allScores: photo.scores || [] // Expose all scores for the Admin to review

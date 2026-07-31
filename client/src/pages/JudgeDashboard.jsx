@@ -279,6 +279,7 @@ export default function JudgeDashboard() {
   };
 
   const handleOpenOfflineScoring = (photo) => {
+    if (photo.paymentStatus === 'Unpaid') return;
     setOfflineZoomPhoto(photo);
     const existing = photo.score || {
       averageScore: 5,
@@ -339,6 +340,7 @@ export default function JudgeDashboard() {
 
 
   const handleOpenScoring = (photo) => {
+    if (photo.paymentStatus === 'Unpaid') return;
     if (hasConfirmed && user?.role !== 'Admin') {
       setShowSignedOffBlockModal(true);
       return;
@@ -437,13 +439,14 @@ export default function JudgeDashboard() {
   const isFormDisapproved = approvalStatus === 'Disapproved';
   const totalScore = isFormDisapproved ? 0 : (creativity + composition + technicalQuality + storytelling + overallImpact);
   const averageScore = isFormDisapproved ? '0.0' : ((creativity + composition + technicalQuality + storytelling + overallImpact) / 5).toFixed(1);
-  const allGraded = photographs.length > 0 && photographs.every(p => p.graded);
+  const activePhotos = photographs.filter(p => p.paymentStatus !== 'Unpaid');
+  const allGraded = activePhotos.length > 0 && activePhotos.every(p => p.graded);
   const hasConfirmed = event?.confirmedJudges?.includes(user?.id);
-
+ 
   const participants = [];
   const seenSubmissions = new Set();
   photographs.forEach(p => {
-    if (!seenSubmissions.has(p.submissionId)) {
+    if (p.paymentStatus !== 'Unpaid' && !seenSubmissions.has(p.submissionId)) {
       seenSubmissions.add(p.submissionId);
       participants.push({
         submissionId: p.submissionId,
@@ -451,17 +454,21 @@ export default function JudgeDashboard() {
       });
     }
   });
-
+ 
   let displayedPhotos = selectedSubmissionId === 'all'
     ? photographs
     : photographs.filter(p => p.submissionId === selectedSubmissionId);
-
-  if (filterGradingStatus === 'graded') {
-    displayedPhotos = displayedPhotos.filter(p => p.graded);
+ 
+  if (filterGradingStatus === 'all') {
+    displayedPhotos = displayedPhotos.filter(p => p.paymentStatus !== 'Unpaid');
+  } else if (filterGradingStatus === 'graded') {
+    displayedPhotos = displayedPhotos.filter(p => p.graded && p.paymentStatus !== 'Unpaid');
   } else if (filterGradingStatus === 'ungraded') {
-    displayedPhotos = displayedPhotos.filter(p => !p.graded);
+    displayedPhotos = displayedPhotos.filter(p => !p.graded && p.paymentStatus !== 'Unpaid');
   } else if (filterGradingStatus === 'disapproved') {
-    displayedPhotos = displayedPhotos.filter(p => p.graded && p.score?.approvalStatus === 'Disapproved');
+    displayedPhotos = displayedPhotos.filter(p => p.graded && p.score?.approvalStatus === 'Disapproved' && p.paymentStatus !== 'Unpaid');
+  } else if (filterGradingStatus === 'unpaid') {
+    displayedPhotos = displayedPhotos.filter(p => p.paymentStatus === 'Unpaid');
   }
 
   if (loading && photographs.length === 0) {
@@ -963,12 +970,13 @@ export default function JudgeDashboard() {
                     <option value="graded">Graded</option>
                     <option value="ungraded">Ungraded</option>
                     <option value="disapproved">Disapproved</option>
+                    <option value="unpaid">Unpaid</option>
                   </select>
 
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-slate-500">Grading Progress:</span>
                     <span className="text-sm font-black text-indigo-600 dark:text-indigo-400 font-bold">
-                      {photographs.filter(p => p.graded).length} / {photographs.length}
+                      {activePhotos.filter(p => p.graded).length} / {activePhotos.length}
                     </span>
                   </div>
 
@@ -1013,9 +1021,13 @@ export default function JudgeDashboard() {
                             className="w-full h-full object-contain"
                           />
                           <span className={`absolute top-3 left-3 px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full shadow-sm ${
-                            photo.graded ? 'bg-indigo-600 text-white' : 'bg-slate-500 text-white'
+                            photo.paymentStatus === 'Unpaid'
+                              ? 'bg-rose-500 text-white'
+                              : photo.graded 
+                                ? 'bg-indigo-600 text-white' 
+                                : 'bg-slate-500 text-white'
                           }`}>
-                            {photo.graded ? 'Graded' : 'Not Graded'}
+                            {photo.paymentStatus === 'Unpaid' ? 'Unpaid' : photo.graded ? 'Graded' : 'Not Graded'}
                           </span>
                         </div>
 
@@ -1044,21 +1056,27 @@ export default function JudgeDashboard() {
                             )}
                           </div>
 
-                          {photo.score?.approvalStatus !== 'Disapproved' && (
-                            <button
-                              type="button"
-                              onClick={() => handleOpenScoring(photo)}
-                              className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
-                                user?.role === 'Admin' 
-                                  ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
-                                  : !photo.graded 
-                                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                              }`}
-                            >
-                              {user?.role === 'Admin' ? 'Review Scoring' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
-                              <ChevronRight size={14} />
-                            </button>
+                          {photo.paymentStatus === 'Unpaid' ? (
+                            <div className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-center text-xs">
+                              Payment Pending
+                            </div>
+                          ) : (
+                            photo.score?.approvalStatus !== 'Disapproved' && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenScoring(photo)}
+                                className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                                  user?.role === 'Admin' 
+                                    ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
+                                    : !photo.graded 
+                                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                }`}
+                              >
+                                {user?.role === 'Admin' ? 'Review Scoring' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
+                                <ChevronRight size={14} />
+                              </button>
+                            )
                           )}
                         </div>
                       </div>
@@ -1086,9 +1104,13 @@ export default function JudgeDashboard() {
                               className="w-full h-full object-contain"
                             />
                             <span className={`absolute top-3 left-3 px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full shadow-sm ${
-                              photo.graded ? 'bg-indigo-600 text-white' : 'bg-slate-500 text-white'
+                              photo.paymentStatus === 'Unpaid'
+                                ? 'bg-rose-500 text-white'
+                                : photo.graded 
+                                  ? 'bg-indigo-600 text-white' 
+                                  : 'bg-slate-500 text-white'
                             }`}>
-                              {photo.graded ? 'Graded' : 'Not Graded'}
+                              {photo.paymentStatus === 'Unpaid' ? 'Unpaid' : photo.graded ? 'Graded' : 'Not Graded'}
                             </span>
                           </div>
 
@@ -1117,21 +1139,27 @@ export default function JudgeDashboard() {
                               )}
                             </div>
 
-                            {photo.score?.approvalStatus !== 'Disapproved' && (
-                              <button
-                                type="button"
-                                onClick={() => handleOpenOfflineScoring(photo)}
-                                className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
-                                  user?.role === 'Admin' 
-                                    ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
-                                    : !photo.graded 
-                                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                }`}
-                              >
-                                {user?.role === 'Admin' ? 'Review' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
-                                <ChevronRight size={14} />
-                              </button>
+                            {photo.paymentStatus === 'Unpaid' ? (
+                              <div className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-center text-xs">
+                                Payment Pending
+                              </div>
+                            ) : (
+                              photo.score?.approvalStatus !== 'Disapproved' && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenOfflineScoring(photo)}
+                                  className={`w-full font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                                    user?.role === 'Admin' 
+                                      ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200' 
+                                      : !photo.graded 
+                                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                  }`}
+                                >
+                                  {user?.role === 'Admin' ? 'Review' : photo.graded ? 'Edit Evaluation' : 'Evaluate'}
+                                  <ChevronRight size={14} />
+                                </button>
+                              )
                             )}
                           </div>
                         </div>

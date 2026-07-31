@@ -4113,7 +4113,7 @@ export default function AdminDashboard() {
                         >
                           <option value="">-- Choose Photograph --</option>
                           {photographs
-                            .filter(p => p.status !== 'Rejected' && p.scores?.length > 0)
+                            .filter(p => p.status !== 'Rejected' && p.scores?.length > 0 && p.paymentStatus !== 'Unpaid')
                             .map(p => (
                               <option key={p.photoId} value={`${p.submissionId}:${p.photoId}`}>
                                 {p.title} - By {p.participantName} (Avg: {p.averageScore})

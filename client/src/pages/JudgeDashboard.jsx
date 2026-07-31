@@ -280,23 +280,15 @@ export default function JudgeDashboard() {
 
   const handleOpenOfflineScoring = (photo) => {
     setOfflineZoomPhoto(photo);
-    if (photo.score) {
-      setOfflineCreativity(photo.score.creativity || 5);
-      setOfflineComposition(photo.score.composition || 5);
-      setOfflineTechnicalQuality(photo.score.technicalQuality || 5);
-      setOfflineStorytelling(photo.score.storytelling || 5);
-      setOfflineOverallImpact(photo.score.overallImpact || 5);
-      setOfflineRemarks(photo.score.remarks || '');
-      setOfflineApprovalStatus(photo.score.approvalStatus || 'Approved');
-    } else {
-      setOfflineCreativity(5);
-      setOfflineComposition(5);
-      setOfflineTechnicalQuality(5);
-      setOfflineStorytelling(5);
-      setOfflineOverallImpact(5);
-      setOfflineRemarks('');
-      setOfflineApprovalStatus('Approved');
-    }
+    const existing = photo.score || {
+      averageScore: 5,
+      remarks: '',
+      approvalStatus: 'Approved'
+    };
+    const avg = existing.averageScore !== undefined ? Math.round(existing.averageScore) : 5;
+    setOfflineAverageScore(avg);
+    setOfflineRemarks(existing.remarks || '');
+    setOfflineApprovalStatus(existing.approvalStatus || 'Approved');
   };
 
   const handleSaveOfflineScoring = async (e) => {
@@ -315,11 +307,11 @@ export default function JudgeDashboard() {
         body: JSON.stringify({
           submissionId: offlineZoomPhoto.submissionId,
           photoId: offlineZoomPhoto.photoId,
-          creativity: offlineCreativity,
-          composition: offlineComposition,
-          technicalQuality: offlineTechnicalQuality,
-          storytelling: offlineStorytelling,
-          overallImpact: offlineOverallImpact,
+          creativity: offlineAverageScore,
+          composition: offlineAverageScore,
+          technicalQuality: offlineAverageScore,
+          storytelling: offlineAverageScore,
+          overallImpact: offlineAverageScore,
           remarks: offlineRemarks,
           approvalStatus: offlineApprovalStatus
         })
@@ -1429,8 +1421,8 @@ export default function JudgeDashboard() {
       {/* Offline Zoom & Scoring Modal */}
       {offlineZoomPhoto && (() => {
         const isOfflineDisapproved = offlineApprovalStatus === 'Disapproved';
-        const offlineTotalScore = isOfflineDisapproved ? 0 : (offlineCreativity + offlineComposition + offlineTechnicalQuality + offlineStorytelling + offlineOverallImpact);
-        const offlineAverageScoreCalculated = isOfflineDisapproved ? '0.0' : ((offlineCreativity + offlineComposition + offlineTechnicalQuality + offlineStorytelling + offlineOverallImpact) / 5).toFixed(1);
+        const offlineTotalScore = isOfflineDisapproved ? 0 : (offlineAverageScore * 5);
+        const offlineAverageScoreCalculated = isOfflineDisapproved ? '0.0' : offlineAverageScore.toFixed(1);
         const isReadOnly = user?.role === 'Admin' || hasConfirmed || offlineZoomPhoto.graded;
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
@@ -1520,31 +1512,54 @@ export default function JudgeDashboard() {
                     </div>
                   )}
 
-                  {/* Scoring criteria sliders */}
-                  {[
-                    { label: 'Creativity (1-10)', val: offlineCreativity, set: setOfflineCreativity, desc: 'Originality, artistic expression, and concept.' },
-                    { label: 'Composition (1-10)', val: offlineComposition, set: setOfflineComposition, desc: 'Rule of thirds, balance, visual framing.' },
-                    { label: 'Technical Quality (1-10)', val: offlineTechnicalQuality, set: setOfflineTechnicalQuality, desc: 'Focus, exposure, lighting, noise control.' },
-                    { label: 'Storytelling (1-10)', val: offlineStorytelling, set: setOfflineStorytelling, desc: 'Narrative element, emotional evoke.' },
-                    { label: 'Overall Impact (1-10)', val: offlineOverallImpact, set: setOfflineOverallImpact, desc: 'First impression, visual stun factor.' }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex flex-col gap-1.5">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-slate-700 dark:text-slate-200">{item.label}</span>
-                        <span className="font-display font-black text-sm text-indigo-600 dark:text-indigo-400">{item.val}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min={1}
-                        max={10}
-                        value={item.val}
-                        onChange={(e) => item.set(Number(e.target.value))}
-                        className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
+                  {/* Approval Status switches */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-extrabold text-slate-500 uppercase text-[9px] tracking-wider">Evaluation Status</label>
+                    <div className="flex border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                      <button
+                        type="button"
                         disabled={isReadOnly}
-                      />
-                      <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
+                        onClick={() => setOfflineApprovalStatus('Approved')}
+                        className={`flex-1 py-2 font-display font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${
+                          offlineApprovalStatus === 'Approved' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                      >
+                        Approve Frame
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isReadOnly}
+                        onClick={() => setOfflineApprovalStatus('Disapproved')}
+                        className={`flex-1 py-2 font-display font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${
+                          offlineApprovalStatus === 'Disapproved' ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                      >
+                        Reject Frame
+                      </button>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Average Grade Dropdown */}
+                  {offlineApprovalStatus !== 'Disapproved' ? (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-extrabold text-slate-500 uppercase text-[9px] tracking-wider">Average Grade *</label>
+                      <select
+                        disabled={isReadOnly}
+                        value={offlineAverageScore}
+                        onChange={(e) => setOfflineAverageScore(parseInt(e.target.value))}
+                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs outline-none focus:ring-1 focus:ring-indigo-500 font-bold dark:text-white cursor-pointer"
+                      >
+                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(val => (
+                          <option key={val} value={val}>{val} / 10</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="bg-red-50 dark:bg-red-950/20 border border-red-200/50 p-4 rounded-2xl flex items-start gap-2.5 text-[11px] text-red-700 dark:text-red-400 leading-relaxed font-semibold">
+                      <ShieldAlert className="shrink-0 mt-0.5 text-red-600" size={16} />
+                      <p>Frame will be scored as 0. An explanation / justification remarks is required below to submit the rejection.</p>
+                    </div>
+                  )}
 
                   {/* Score summary */}
                   <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl flex justify-between items-center text-center mt-2">
@@ -1560,22 +1575,6 @@ export default function JudgeDashboard() {
                         {offlineAverageScoreCalculated}
                       </p>
                     </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-slate-700 dark:text-slate-200">Approval Status</label>
-                    <select
-                      value={offlineApprovalStatus}
-                      onChange={(e) => setOfflineApprovalStatus(e.target.value)}
-                      disabled={isReadOnly}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-[11px] font-semibold"
-                    >
-                      <option value="Approved">Approved</option>
-                      <option value="Disapproved">Disapproved</option>
-                    </select>
-                    {offlineApprovalStatus === 'Disapproved' && (
-                      <span className="text-[9px] text-red-500 font-semibold mt-0.5">⚠️ An explanation/remarks is required when disapproving.</span>
-                    )}
                   </div>
 
                   <div className="flex flex-col gap-1">

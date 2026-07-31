@@ -132,7 +132,7 @@ export default function Dashboard() {
         if (categoryData.success) {
           setCategories(categoryData.categories);
           if (categoryData.categories.length > 0) {
-            setCategory(categoryData.categories[0].name);
+            setCategory("");
           }
         }
         const subData = await apiFetch(`/api/submissions/my-submission/${e._id}`);
@@ -181,7 +181,7 @@ export default function Dashboard() {
       if (categoryData.success) {
         setCategories(categoryData.categories);
         if (categoryData.categories.length > 0) {
-          setCategory(categoryData.categories[0].name);
+          setCategory("");
         }
       }
 
@@ -1632,7 +1632,7 @@ export default function Dashboard() {
                                             </div>
 
                                             {(() => {
-                                               const selectedCatObj = categories.find(c => c.name === category);
+                                               const selectedCatObj = categories.find(c => c.name === category) || categories[0];
                                                const activeCustomLabels = selectedCatObj ? (selectedCatObj.customLabels || []) : [];
                                                return activeCustomLabels.map((lbl) => (
                                                  <div className="flex flex-col gap-1 text-[11px]" key={lbl}>

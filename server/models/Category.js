@@ -5,7 +5,9 @@ const categorySchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   description: { type: String },
   contestTypes: { type: [String], default: ['Photography'] },
-  customLabels: { type: [String], default: [] }
+  customLabels: { type: [String], default: [] },
+  customLabelsMode: { type: String, enum: ['category', 'contest_type'], default: 'category' },
+  customLabelsInheritedFrom: { type: String }
 }, { timestamps: true });
 
 module.exports = getModel('Category', categorySchema);

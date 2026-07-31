@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
 // @access  Private/Admin
 router.post('/', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, customLabels } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: 'Contest type name is required' });
     }
@@ -33,7 +33,11 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Contest type already exists' });
     }
 
-    const contestType = await ContestType.create({ name, description });
+    const contestType = await ContestType.create({ 
+      name, 
+      description,
+      customLabels: Array.isArray(customLabels) ? customLabels : []
+    });
 
     await AuditLog.create({
       userId: req.user._id,
@@ -56,7 +60,7 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
 // @access  Private/Admin
 router.put('/:id', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, customLabels } = req.body;
     const contestType = await ContestType.findById(req.params.id);
     if (!contestType) {
       return res.status(404).json({ success: false, message: 'Contest type not found' });
@@ -87,6 +91,9 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
     }
 
     if (description !== undefined) contestType.description = description;
+    if (customLabels !== undefined) {
+      contestType.customLabels = Array.isArray(customLabels) ? customLabels : [];
+    }
 
     await contestType.save();
 

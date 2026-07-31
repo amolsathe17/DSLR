@@ -15,7 +15,22 @@ router.get('/', async (req, res) => {
       filter = { contestTypes: contestType };
     }
     const categories = await Category.find(filter);
-    res.json({ success: true, categories });
+
+    // Resolve custom labels dynamically if customLabelsMode is contest_type
+    const ContestType = require('../models/ContestType');
+    const allContestTypes = await ContestType.find({});
+
+    const resolvedCategories = categories.map(cat => {
+      const catObj = cat.toObject();
+      if (catObj.customLabelsMode === 'contest_type') {
+        const inheritedTypeName = catObj.customLabelsInheritedFrom || (catObj.contestTypes && catObj.contestTypes[0]);
+        const matchedCt = allContestTypes.find(ct => ct.name === inheritedTypeName);
+        catObj.customLabels = matchedCt ? matchedCt.customLabels : [];
+      }
+      return catObj;
+    });
+
+    res.json({ success: true, categories: resolvedCategories });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -27,7 +42,7 @@ router.get('/', async (req, res) => {
 // @access  Private/Admin
 router.post('/', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { name, description, contestTypes, customLabels } = req.body;
+    const { name, description, contestTypes, customLabels, customLabelsMode, customLabelsInheritedFrom } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: 'Category name is required' });
     }
@@ -41,7 +56,9 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
       name, 
       description,
       contestTypes: Array.isArray(contestTypes) ? contestTypes : ['Photography'],
-      customLabels: Array.isArray(customLabels) ? customLabels : []
+      customLabels: Array.isArray(customLabels) ? customLabels : [],
+      customLabelsMode: customLabelsMode || 'category',
+      customLabelsInheritedFrom: customLabelsInheritedFrom || ''
     });
 
     await AuditLog.create({
@@ -65,7 +82,7 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
 // @access  Private/Admin
 router.put('/:id', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { name, description, contestTypes, customLabels } = req.body;
+    const { name, description, contestTypes, customLabels, customLabelsMode, customLabelsInheritedFrom } = req.body;
     const category = await Category.findById(req.params.id);
     if (!category) {
       return res.status(404).json({ success: false, message: 'Category not found' });
@@ -95,6 +112,12 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
     }
     if (customLabels !== undefined) {
       category.customLabels = Array.isArray(customLabels) ? customLabels : [];
+    }
+    if (customLabelsMode !== undefined) {
+      category.customLabelsMode = customLabelsMode;
+    }
+    if (customLabelsInheritedFrom !== undefined) {
+      category.customLabelsInheritedFrom = customLabelsInheritedFrom;
     }
 
     await category.save();

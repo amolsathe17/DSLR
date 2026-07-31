@@ -3277,62 +3277,57 @@ export default function AdminDashboard() {
                 </span>
               </div>
               
-              {catLabelsMode === 'contest_type' ? (
-                <div className="text-xs text-slate-400 dark:text-slate-500 italic p-6 bg-slate-50/50 dark:bg-slate-950/10 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center flex flex-col gap-1.5 mt-2">
-                  <span>Common pool assignment is disabled in Contest Type Level mode.</span>
-                  <span className="text-[10px]">Change the mode to "Category Level (Custom)" to manually assign labels.</span>
+              <>
+                <p className="text-[10px] text-slate-400">
+                  {selectedCatForDetails
+                    ? (catLabelsMode === 'contest_type'
+                        ? "Click any label below to add it to the active contest type's field list."
+                        : "Click any label below to add it to the active category's field list. Common labels can be assigned to multiple categories.")
+                    : "These are common custom field labels available in the system. Select a category on the left to start assigning them."}
+                </p>
+                
+                <div className="flex flex-wrap gap-2 max-h-[350px] overflow-y-auto">
+                  {(() => {
+                    const PREDEFINED_LABELS = [
+                      "Designer / Brand",
+                      "Garment Type",
+                      "Fabric / Material",
+                      "Color Palette",
+                      "Accessories Used",
+                      "Footwear",
+                      "Theme / Collection",
+                      "Runway / Venue"
+                    ];
+                    const existingLabels = categories.flatMap(c => c.customLabels || []);
+                    const pool = [...new Set([...PREDEFINED_LABELS, ...existingLabels])];
+                    return pool.map((lbl) => {
+                      const isAssigned = selectedCatForDetails && catLabelsLocal.includes(lbl);
+                      const isDisabled = !selectedCatForDetails || isAssigned;
+                      return (
+                        <button
+                          key={lbl}
+                          type="button"
+                          disabled={isDisabled}
+                          onClick={() => {
+                            if (selectedCatForDetails && !isAssigned) {
+                              setCatLabelsLocal([...catLabelsLocal, lbl]);
+                            }
+                          }}
+                          className={`px-3 py-1.5 text-[10px] font-bold rounded-xl border transition-all select-none ${
+                            !selectedCatForDetails
+                              ? 'bg-slate-50 text-slate-400 border-slate-150 dark:bg-slate-950 dark:text-slate-600 dark:border-slate-855 cursor-not-allowed'
+                              : isAssigned 
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-950 dark:text-slate-650 dark:border-slate-855 cursor-not-allowed'
+                                : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-indigo-100 hover:border-indigo-200 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30 cursor-pointer'
+                          }`}
+                        >
+                          {lbl}
+                        </button>
+                      );
+                    });
+                  })()}
                 </div>
-              ) : (
-                <>
-                  <p className="text-[10px] text-slate-400">
-                    {selectedCatForDetails
-                      ? "Click any label below to add it to the active category's field list. Common labels can be assigned to multiple categories."
-                      : "These are common custom field labels available in the system. Select a category on the left to start assigning them."}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-2 max-h-[350px] overflow-y-auto">
-                    {(() => {
-                      const PREDEFINED_LABELS = [
-                        "Designer / Brand",
-                        "Garment Type",
-                        "Fabric / Material",
-                        "Color Palette",
-                        "Accessories Used",
-                        "Footwear",
-                        "Theme / Collection",
-                        "Runway / Venue"
-                      ];
-                      const existingLabels = categories.flatMap(c => c.customLabels || []);
-                      const pool = [...new Set([...PREDEFINED_LABELS, ...existingLabels])];
-                      return pool.map((lbl) => {
-                        const isAssigned = selectedCatForDetails && catLabelsLocal.includes(lbl);
-                        const isDisabled = !selectedCatForDetails || isAssigned;
-                        return (
-                          <button
-                            key={lbl}
-                            type="button"
-                            disabled={isDisabled}
-                            onClick={() => {
-                              if (selectedCatForDetails && !isAssigned) {
-                                setCatLabelsLocal([...catLabelsLocal, lbl]);
-                              }
-                            }}
-                            className={`px-3 py-1.5 text-[10px] font-bold rounded-xl border transition-all select-none ${
-                              !selectedCatForDetails
-                                ? 'bg-slate-50 text-slate-400 border-slate-150 dark:bg-slate-950 dark:text-slate-600 dark:border-slate-855 cursor-not-allowed'
-                                : isAssigned 
-                                  ? 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-950 dark:text-slate-650 dark:border-slate-855 cursor-not-allowed'
-                                  : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-indigo-100 hover:border-indigo-200 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30 cursor-pointer'
-                            }`}
-                          >
-                            {lbl}
-                          </button>
-                        );
-                      });
-                    })()}
-                  </div>
-                </>
-              )}
+              </>
             </div>
           </div>
         </div>

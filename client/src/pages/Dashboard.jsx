@@ -1615,6 +1615,18 @@ export default function Dashboard() {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                           <div className="flex flex-col gap-4">
                                             <div className="flex flex-col gap-1 text-[11px]">
+                                              <label htmlFor="photoTitle" className="font-semibold text-slate-400">Photo Title *</label>
+                                              <input
+                                                id="photoTitle"
+                                                type="text"
+                                                required
+                                                value={title}
+                                                onChange={(e) => setTitle(e.target.value)}
+                                                placeholder="Enter photo title"
+                                                className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-xs font-semibold text-slate-800 dark:text-slate-100"
+                                              />
+                                            </div>
+                                            <div className="flex flex-col gap-1 text-[11px]">
                                               <label htmlFor="photoCategory" className="font-semibold text-slate-400">Category *</label>
                                               <select
                                                 id="photoCategory"

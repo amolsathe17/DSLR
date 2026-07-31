@@ -1718,12 +1718,13 @@ export default function Dashboard() {
                                                   <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white line-clamp-1">
                                                     {photo.title}
                                                   </h4>
-                                                  {(photo.status === 'Approved' || photo.status === 'Rejected') && (
+                                                  {(photo.status === 'Approved' || photo.status === 'Rejected' || photo.scores?.some(s => s.approvalStatus === 'Disapproved')) && (
                                                     <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase shrink-0 ${
-                                                      photo.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-500' :
-                                                      'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400'
+                                                      (photo.status === 'Approved' && !photo.scores?.some(s => s.approvalStatus === 'Disapproved'))
+                                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-500' 
+                                                        : 'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400'
                                                     }`}>
-                                                      {photo.status === 'Rejected' ? 'Disapproved' : 'Approved'}
+                                                      {(photo.status === 'Rejected' || photo.scores?.some(s => s.approvalStatus === 'Disapproved')) ? 'Disapproved' : 'Approved'}
                                                     </span>
                                                   )}
                                                 </div>
@@ -1744,6 +1745,23 @@ export default function Dashboard() {
                                                      EXIF: {photo.cameraBrand} {photo.cameraModel} | {photo.lensUsed || 'Standard Lens'}
                                                    </p>
                                                  ) : null}
+
+                                                 {/* Jury disapproval remarks */}
+                                                 {(() => {
+                                                   const disapprovedScore = photo.scores?.find(s => s.approvalStatus === 'Disapproved');
+                                                   if (disapprovedScore) {
+                                                     return (
+                                                       <div className="mt-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/30 p-3 rounded-2xl text-[10px] text-red-800 dark:text-red-350 leading-relaxed font-semibold">
+                                                         <div className="flex items-center gap-1.5 font-bold mb-1 text-red-900 dark:text-red-300">
+                                                           <AlertTriangle size={14} className="text-red-650 shrink-0" />
+                                                           <span>Jury Disapproval Feedback</span>
+                                                         </div>
+                                                         <p className="italic">"{disapprovedScore.remarks || 'No remarks provided.'}"</p>
+                                                       </div>
+                                                     );
+                                                   }
+                                                   return null;
+                                                 })()}
                                               </div>
 
                                               {!isFinalized && (
@@ -1924,12 +1942,25 @@ export default function Dashboard() {
                             ) : (
                               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 {sub.photographs.map((photo) => {
+                                  const isDisapproved = photo.status === 'Rejected' || 
+                                    photo.score?.approvalStatus === 'Disapproved' || 
+                                    photo.scores?.some(s => s.approvalStatus === 'Disapproved');
+                                  const disapprovedRemarks = photo.score?.approvalStatus === 'Disapproved'
+                                    ? photo.score.remarks
+                                    : photo.scores?.find(s => s.approvalStatus === 'Disapproved')?.remarks;
                                   return (
                                     <div key={photo.id} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
                                       <WatermarkPreview src={getBackendUrl(photo.fileUrl)} className="aspect-video w-full" />
                                       <div className="p-3.5 flex flex-col gap-2.5">
                                         <div>
-                                          <h5 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">{photo.title}</h5>
+                                          <div className="flex justify-between items-start gap-2">
+                                            <h5 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">{photo.title}</h5>
+                                            {isDisapproved && (
+                                              <span className="px-2 py-0.5 rounded text-[8px] font-extrabold uppercase shrink-0 bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400">
+                                                Disapproved
+                                              </span>
+                                            )}
+                                          </div>
                                           <span className="text-[9px] text-indigo-500 font-extrabold uppercase mt-0.5 block">{photo.category}</span>
                                         </div>
                                         {photo.customFields && photo.customFields.length > 0 ? (
@@ -1946,6 +1977,17 @@ export default function Dashboard() {
                                             EXIF: {photo.cameraBrand} {photo.cameraModel}
                                           </p>
                                         ) : null}
+
+                                        {isDisapproved && disapprovedRemarks && (
+                                          <div className="mt-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/30 p-3 rounded-2xl text-[10px] text-red-800 dark:text-red-350 leading-relaxed font-semibold">
+                                            <div className="flex items-center gap-1.5 font-bold mb-1 text-red-900 dark:text-red-300">
+                                              <AlertTriangle size={14} className="text-red-655 shrink-0" />
+                                              <span>Jury Disapproval Feedback</span>
+                                            </div>
+                                            <p className="italic">"{disapprovedRemarks}"</p>
+                                          </div>
+                                        )}
+
                                         {/* Ratings and Jury comments if available */}
                                         {photo.score ? (
                                           <div className="mt-1 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 p-2.5 rounded-lg text-[10px] leading-relaxed">
@@ -1953,16 +1995,18 @@ export default function Dashboard() {
                                               <span>Jury Rating:</span>
                                               <span>{photo.score.averageScore} / 10</span>
                                             </div>
-                                            {photo.score.remarks && (
+                                            {photo.score.remarks && !isDisapproved && (
                                               <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-1 italic leading-snug">
-                                                "${photo.score.remarks}"
+                                                "{photo.score.remarks}"
                                               </p>
                                             )}
                                           </div>
                                         ) : (
-                                          <div className="mt-1 bg-slate-100 dark:bg-slate-950 p-2 rounded-lg text-[10px] text-slate-400 italic">
-                                            No scores available.
-                                          </div>
+                                          !isDisapproved && (
+                                            <div className="mt-1 bg-slate-100 dark:bg-slate-950 p-2 rounded-lg text-[10px] text-slate-400 italic">
+                                              No scores available.
+                                            </div>
+                                          )
                                         )}
                                       </div>
                                     </div>

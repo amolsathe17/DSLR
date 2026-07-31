@@ -31,6 +31,11 @@ export default function JudgeDashboard() {
   const [approvalStatus, setApprovalStatus] = useState('Approved');
 
   const [offlineAverageScore, setOfflineAverageScore] = useState(5);
+  const [offlineCreativity, setOfflineCreativity] = useState(5);
+  const [offlineComposition, setOfflineComposition] = useState(5);
+  const [offlineTechnicalQuality, setOfflineTechnicalQuality] = useState(5);
+  const [offlineStorytelling, setOfflineStorytelling] = useState(5);
+  const [offlineOverallImpact, setOfflineOverallImpact] = useState(5);
   const [offlineRemarks, setOfflineRemarks] = useState('');
   const [offlineApprovalStatus, setOfflineApprovalStatus] = useState('Approved');
   const [selectedSubmissionId, setSelectedSubmissionId] = useState('all');
@@ -275,15 +280,23 @@ export default function JudgeDashboard() {
 
   const handleOpenOfflineScoring = (photo) => {
     setOfflineZoomPhoto(photo);
-    const existing = photo.score || {
-      averageScore: 5,
-      remarks: '',
-      approvalStatus: 'Approved'
-    };
-    const avg = existing.averageScore ? Math.round(existing.averageScore) : 5;
-    setOfflineAverageScore(avg);
-    setOfflineRemarks(existing.remarks || '');
-    setOfflineApprovalStatus(existing.approvalStatus || 'Approved');
+    if (photo.score) {
+      setOfflineCreativity(photo.score.creativity || 5);
+      setOfflineComposition(photo.score.composition || 5);
+      setOfflineTechnicalQuality(photo.score.technicalQuality || 5);
+      setOfflineStorytelling(photo.score.storytelling || 5);
+      setOfflineOverallImpact(photo.score.overallImpact || 5);
+      setOfflineRemarks(photo.score.remarks || '');
+      setOfflineApprovalStatus(photo.score.approvalStatus || 'Approved');
+    } else {
+      setOfflineCreativity(5);
+      setOfflineComposition(5);
+      setOfflineTechnicalQuality(5);
+      setOfflineStorytelling(5);
+      setOfflineOverallImpact(5);
+      setOfflineRemarks('');
+      setOfflineApprovalStatus('Approved');
+    }
   };
 
   const handleSaveOfflineScoring = async (e) => {
@@ -302,11 +315,11 @@ export default function JudgeDashboard() {
         body: JSON.stringify({
           submissionId: offlineZoomPhoto.submissionId,
           photoId: offlineZoomPhoto.photoId,
-          creativity: offlineAverageScore,
-          composition: offlineAverageScore,
-          technicalQuality: offlineAverageScore,
-          storytelling: offlineAverageScore,
-          overallImpact: offlineAverageScore,
+          creativity: offlineCreativity,
+          composition: offlineComposition,
+          technicalQuality: offlineTechnicalQuality,
+          storytelling: offlineStorytelling,
+          overallImpact: offlineOverallImpact,
           remarks: offlineRemarks,
           approvalStatus: offlineApprovalStatus
         })
@@ -1414,121 +1427,92 @@ export default function JudgeDashboard() {
       )}
 
       {/* Offline Zoom & Scoring Modal */}
-      {offlineZoomPhoto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-auto max-h-[90vh] md:h-[90vh] overflow-y-auto md:overflow-hidden">
-            
-            {/* Left Column: Photograph (zooms on hover) */}
-            <div className="w-full md:flex-grow bg-slate-950 relative overflow-hidden flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 h-auto shrink-0">
-              <div className="absolute top-4 left-4 z-10 flex gap-2">
-                <span className="bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
-                  Offline Zoom Mode
-                </span>
-                <span className={`bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm ${
-                  offlineZoomPhoto.graded ? 'text-emerald-500' : 'text-amber-500'
-                }`}>
-                  {offlineZoomPhoto.graded ? 'Assessment Completed' : 'Pending Review'}
-                </span>
-              </div>
-
-              {/* Hover Zoom preview container */}
-              <div className="flex-grow flex items-center justify-center p-4">
-                <div className="relative w-full h-64 sm:h-80 md:h-full md:max-h-[68vh] flex items-center justify-center group cursor-zoom-in">
-                  <WatermarkPreview
-                    src={getBackendUrl(offlineZoomPhoto.fileUrl)}
-                    className="w-full h-full max-h-[40vh] md:max-h-[68vh] object-contain rounded-lg shadow-lg"
-                    enableZoom={true}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Metadata details / sidebar & scoring fields */}
-            <div className="w-full md:w-[380px] bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-auto md:h-full md:overflow-y-auto">
+      {offlineZoomPhoto && (() => {
+        const isOfflineDisapproved = offlineApprovalStatus === 'Disapproved';
+        const offlineTotalScore = isOfflineDisapproved ? 0 : (offlineCreativity + offlineComposition + offlineTechnicalQuality + offlineStorytelling + offlineOverallImpact);
+        const offlineAverageScoreCalculated = isOfflineDisapproved ? '0.0' : ((offlineCreativity + offlineComposition + offlineTechnicalQuality + offlineStorytelling + offlineOverallImpact) / 5).toFixed(1);
+        const isReadOnly = user?.role === 'Admin' || hasConfirmed || offlineZoomPhoto.graded;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
+            <div className="relative w-full max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col lg:flex-row my-8 h-auto max-h-[90vh] lg:h-[90vh] overflow-y-auto lg:overflow-hidden">
               
-              {/* Header */}
-              <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
-                <div>
-                  <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Photograph Details</h3>
-                  <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">Assigned entry metadata</span>
-                </div>
-                <button
-                  onClick={() => setOfflineZoomPhoto(null)}
-                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg cursor-pointer transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
+              {/* Close button */}
+              <button
+                onClick={() => setOfflineZoomPhoto(null)}
+                className="absolute top-4 right-4 z-10 p-2 bg-slate-950/60 hover:bg-slate-950 text-white rounded-full cursor-pointer transition-colors"
+              >
+                <X size={20} />
+              </button>
 
-              {/* Scrollable Content (Metadata + Evaluation) */}
-              <div className="p-6 flex-grow flex flex-col gap-5 text-xs overflow-y-auto">
+              {/* Left Side: Photo Zoom Detailed View */}
+              <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden">
+                <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
+                  <WatermarkPreview src={offlineZoomPhoto.fileUrl} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
+                </div>
                 
-                {/* Title and Category */}
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Title & Category</span>
-                  <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white leading-snug">
-                    {offlineZoomPhoto.title}
-                  </h4>
-                  <span className="text-[10px] text-indigo-500 font-extrabold uppercase mt-0.5 block">
-                    {offlineZoomPhoto.category}
-                  </span>
-                </div>
-
-                {/* Photographer name */}
-                <div className="flex flex-col gap-1 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Photographer</span>
-                  <p className="font-extrabold text-slate-700 dark:text-slate-300">{offlineZoomPhoto.participantName}</p>
-                </div>
-
-                {/* Camera configuration parameters / Custom fields */}
-                <div className="flex flex-col gap-2 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">
-                    {offlineZoomPhoto.customFields && offlineZoomPhoto.customFields.length > 0 ? 'Category Specifications' : 'Camera Parameters'}
-                  </span>
-                  <div className="bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl p-4 flex flex-col gap-2 leading-relaxed text-[10px]">
+                <div className="w-full mt-4 flex flex-col md:flex-row justify-between items-start gap-6 text-xs text-slate-300 pb-6 pr-2">
+                  {/* Left: Metadata details */}
+                  <div className="flex flex-col gap-1 text-left">
+                    <h4 className="font-display font-extrabold text-sm text-white">{offlineZoomPhoto.title}</h4>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-400">
+                      <span>Category: <span className="font-bold text-slate-350">{offlineZoomPhoto.category}</span></span>
+                      <span>•</span>
+                      <span>Photographer: <span className="font-bold text-slate-350">{offlineZoomPhoto.participantName}</span></span>
+                    </div>
+                    
                     {offlineZoomPhoto.customFields && offlineZoomPhoto.customFields.length > 0 ? (
-                      offlineZoomPhoto.customFields.map((cf, idx) => (
-                        <div key={idx} className="flex justify-between gap-4">
-                          <span className="text-slate-400 truncate shrink-0">{cf.label}:</span>
-                          <strong className="text-slate-800 dark:text-slate-200 font-extrabold break-all text-right">{cf.value || 'N/A'}</strong>
-                        </div>
-                      ))
+                      <div className="grid grid-cols-2 gap-3 mt-2 text-[10px] text-slate-400 bg-slate-900/60 p-3 rounded-2xl border border-white/5">
+                        {offlineZoomPhoto.customFields.map((cf, idx) => (
+                          <div key={idx} className="flex flex-col gap-0.5 min-w-0 text-left">
+                            <span className="text-slate-500 uppercase text-[8px] font-bold">{cf.label}</span>
+                            <span className="font-extrabold text-slate-300 break-words">{cf.value || 'N/A'}</span>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Camera Brand:</span>
-                          <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{offlineZoomPhoto.cameraBrand || 'N/A'}</strong>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2 text-[10px] text-slate-400 bg-slate-900/60 p-3 rounded-2xl border border-white/5">
+                        <div className="flex flex-col gap-0.5 text-left">
+                          <span className="text-slate-500 uppercase text-[8px] font-bold">Camera brand</span>
+                          <span className="font-extrabold truncate text-slate-300">{offlineZoomPhoto.cameraBrand || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Camera Model:</span>
-                          <strong className="text-slate-800 dark:text-slate-200 font-extrabold">{offlineZoomPhoto.cameraModel || 'N/A'}</strong>
+                        <div className="flex flex-col gap-0.5 text-left">
+                          <span className="text-slate-500 uppercase text-[8px] font-bold">Camera model</span>
+                          <span className="font-extrabold truncate text-slate-300">{offlineZoomPhoto.cameraModel || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Lens Model:</span>
-                          <strong className="text-slate-800 dark:text-slate-200 font-semibold truncate max-w-[150px]" title={offlineZoomPhoto.lensUsed}>{offlineZoomPhoto.lensUsed || 'N/A'}</strong>
+                        <div className="flex flex-col gap-0.5 text-left">
+                          <span className="text-slate-500 uppercase text-[8px] font-bold">Lens configuration</span>
+                          <span className="font-semibold truncate text-slate-300">{offlineZoomPhoto.lensUsed || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Date Captured:</span>
-                          <strong className="text-slate-800 dark:text-slate-200 font-semibold">
+                        <div className="flex flex-col gap-0.5 text-left">
+                          <span className="text-slate-500 uppercase text-[8px] font-bold">Date captured</span>
+                          <span className="font-semibold text-slate-300">
                             {offlineZoomPhoto.dateCaptured ? new Date(offlineZoomPhoto.dateCaptured).toLocaleDateString() : 'N/A'}
-                          </strong>
+                          </span>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
+
+                  {/* Right: Description */}
+                  <div className="max-w-[320px] lg:max-w-[420px] text-left md:text-right flex flex-col gap-1 md:items-end shrink-0">
+                    <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
+                      Photo Description
+                    </span>
+                    <p className="text-[11px] text-slate-350 leading-relaxed font-medium italic">
+                      "{offlineZoomPhoto.description || 'No description shared.'}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Grading Sheet Card */}
+              <div className="w-full lg:w-[380px] shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 p-6 h-auto lg:h-full lg:overflow-y-auto text-left flex flex-col gap-5 bg-slate-50/30 dark:bg-slate-900/30">
+                <div>
+                  <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Grading Sheet (Offline)</h3>
+                  <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{offlineZoomPhoto.title}"</span>
                 </div>
 
-                {/* Description & Story */}
-                <div className="flex flex-col gap-1.5 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Photo Description & Story</span>
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed italic bg-white dark:bg-slate-950 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 max-h-[120px] overflow-y-auto">
-                    "{offlineZoomPhoto.description || 'No description shared.'}"
-                  </p>
-                </div>
-
-                {/* Jury Evaluation Section */}
-                <div className="flex flex-col gap-3.5 border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Jury Evaluation</span>
+                <form onSubmit={handleSaveOfflineScoring} className="flex flex-col gap-4 text-xs">
                   
                   {error && (
                     <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 p-2.5 rounded-xl text-[10px] font-semibold leading-relaxed">
@@ -1536,90 +1520,104 @@ export default function JudgeDashboard() {
                     </div>
                   )}
 
-                  {/* Approval Status switches */}
-                  <div className="flex border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-                    <button
-                      type="button"
-                      disabled={user?.role !== 'Judge' || user?.isSuspended}
-                      onClick={() => setOfflineApprovalStatus('Approved')}
-                      className={`flex-1 py-1.5 font-display font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${
-                        offlineApprovalStatus === 'Approved' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-slate-600'
-                      }`}
-                    >
-                      Approve Frame
-                    </button>
-                    <button
-                      type="button"
-                      disabled={user?.role !== 'Judge' || user?.isSuspended}
-                      onClick={() => setOfflineApprovalStatus('Disapproved')}
-                      className={`flex-1 py-1.5 font-display font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${
-                        offlineApprovalStatus === 'Disapproved' ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-slate-600'
-                      }`}
-                    >
-                      Reject Frame
-                    </button>
+                  {/* Scoring criteria sliders */}
+                  {[
+                    { label: 'Creativity (1-10)', val: offlineCreativity, set: setOfflineCreativity, desc: 'Originality, artistic expression, and concept.' },
+                    { label: 'Composition (1-10)', val: offlineComposition, set: setOfflineComposition, desc: 'Rule of thirds, balance, visual framing.' },
+                    { label: 'Technical Quality (1-10)', val: offlineTechnicalQuality, set: setOfflineTechnicalQuality, desc: 'Focus, exposure, lighting, noise control.' },
+                    { label: 'Storytelling (1-10)', val: offlineStorytelling, set: setOfflineStorytelling, desc: 'Narrative element, emotional evoke.' },
+                    { label: 'Overall Impact (1-10)', val: offlineOverallImpact, set: setOfflineOverallImpact, desc: 'First impression, visual stun factor.' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-slate-700 dark:text-slate-200">{item.label}</span>
+                        <span className="font-display font-black text-sm text-indigo-600 dark:text-indigo-400">{item.val}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={1}
+                        max={10}
+                        value={item.val}
+                        onChange={(e) => item.set(Number(e.target.value))}
+                        className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-75"
+                        disabled={isReadOnly}
+                      />
+                      <span className="text-[9px] text-slate-400 leading-snug">{item.desc}</span>
+                    </div>
+                  ))}
+
+                  {/* Score summary */}
+                  <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl flex justify-between items-center text-center mt-2">
+                    <div>
+                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Total Score</span>
+                      <p className="font-display font-black text-xl text-slate-800 dark:text-slate-100">{offlineTotalScore} <span className="text-slate-400 text-xs">/ 50</span></p>
+                    </div>
+                    <div className="w-px h-8 bg-slate-200 dark:bg-slate-850"></div>
+                    <div>
+                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">Average Score</span>
+                      <p className="font-display font-black text-xl text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-0.5">
+                        <Star size={16} className="fill-current text-indigo-600 dark:text-indigo-400 shrink-0" />
+                        {offlineAverageScoreCalculated}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Average Grade Dropdown */}
-                  {offlineApprovalStatus !== 'Disapproved' && (
-                    <div className="flex flex-col gap-1">
-                      <label className="font-semibold text-slate-400 text-[10px]">Average Grade *</label>
-                      <select
-                        disabled={user?.role !== 'Judge' || user?.isSuspended}
-                        value={offlineAverageScore}
-                        onChange={(e) => setOfflineAverageScore(parseInt(e.target.value))}
-                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-indigo-500 font-bold dark:text-white cursor-pointer"
-                      >
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(val => (
-                          <option key={val} value={val}>{val} / 10</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Remarks Comments */}
                   <div className="flex flex-col gap-1">
-                    <label className="font-semibold text-slate-400 text-[10px]">
-                      {offlineApprovalStatus === 'Disapproved' ? 'Explanation (Required) *' : 'Remarks (Optional)'}
-                    </label>
+                    <label className="font-bold text-slate-700 dark:text-slate-200">Approval Status</label>
+                    <select
+                      value={offlineApprovalStatus}
+                      onChange={(e) => setOfflineApprovalStatus(e.target.value)}
+                      disabled={isReadOnly}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600 text-[11px] font-semibold"
+                    >
+                      <option value="Approved">Approved</option>
+                      <option value="Disapproved">Disapproved</option>
+                    </select>
+                    {offlineApprovalStatus === 'Disapproved' && (
+                      <span className="text-[9px] text-red-500 font-semibold mt-0.5">⚠️ An explanation/remarks is required when disapproving.</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="font-bold text-slate-700 dark:text-slate-200">Remarks / Explanation</label>
                     <textarea
-                      rows={2}
-                      disabled={user?.role !== 'Judge' || user?.isSuspended}
                       value={offlineRemarks}
                       onChange={(e) => setOfflineRemarks(e.target.value)}
-                      placeholder={offlineApprovalStatus === 'Disapproved' ? "Please explain rejection reason..." : "Add comments or jury feedback..."}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-1 focus:ring-indigo-500 font-medium dark:text-white"
+                      placeholder={offlineApprovalStatus === 'Disapproved' ? 'Please provide explanation for disapproval...' : user?.role === 'Admin' ? 'No remarks provided yet.' : 'Provide constructive feedback for the photographer...'}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-20 focus:outline-none focus:border-indigo-600 text-[11px]"
+                      required={user?.role !== 'Admin' && offlineApprovalStatus === 'Disapproved'}
+                      disabled={isReadOnly}
                     />
                   </div>
 
-                </div>
-
+                  {isReadOnly ? (
+                    <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold py-2.5 rounded-xl text-center text-[10px] flex flex-col gap-1 items-center justify-center">
+                      {offlineZoomPhoto.score?.approvalStatus === 'Disapproved' && (
+                        <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider mb-0.5">Disapproved Entry</span>
+                      )}
+                      <span>
+                        {hasConfirmed 
+                          ? 'Evaluation Read-Only (Signed Off)' 
+                          : offlineZoomPhoto.score?.approvalStatus === 'Disapproved'
+                            ? 'Evaluation Read-Only (Disapproved)'
+                            : 'Evaluation Read-Only (Admin Mode)'}
+                      </span>
+                    </div>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer transition-colors text-center"
+                    >
+                      Submit Grade Evaluation
+                    </button>
+                  )}
+                </form>
               </div>
 
-              {/* Footer action buttons */}
-              <div className="p-6 border-t border-slate-200 dark:border-slate-800 shrink-0 flex flex-col gap-2 font-bold">
-                {user?.role === 'Judge' && !user?.isSuspended && (
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={handleSaveOfflineScoring}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
-                  >
-                    {loading ? 'Saving Evaluation...' : 'Save Evaluation'}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setOfflineZoomPhoto(null)}
-                  className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
-                >
-                  Close Details
-                </button>
-              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* SIGN OFF CONFIRMATION MODAL */}
       {showSignOffModal && (

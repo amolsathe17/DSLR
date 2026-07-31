@@ -45,7 +45,7 @@ export default function AdminDashboard() {
   const getBackendUrl = (path) => {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const baseUrl = import.meta.env.VITE_API_URL || '';
     return `${baseUrl}${path}`;
   };
   const { apiFetch, user, updateProfile } = useAuth();
@@ -961,7 +961,7 @@ export default function AdminDashboard() {
 
     setUploadingBg(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}/api/events/upload-bg`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/events/upload-bg`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -991,7 +991,7 @@ export default function AdminDashboard() {
 
     setUploadingEditBg(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}/api/events/upload-bg`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/events/upload-bg`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1015,7 +1015,7 @@ export default function AdminDashboard() {
   const handleDownloadBackup = async (backup) => {
     const fileUrl = backup.backupPath.startsWith('http') 
       ? backup.backupPath 
-      : `${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}${backup.backupPath}`;
+      : `${import.meta.env.VITE_API_URL || ''}${backup.backupPath}`;
     window.open(fileUrl, '_blank');
 
     try {
@@ -1312,7 +1312,7 @@ export default function AdminDashboard() {
 
   const handleExportCSV = (reportType, eventId = '') => {
     const token = localStorage.getItem('token');
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app';
+    const baseUrl = import.meta.env.VITE_API_URL || '';
     const path = `${baseUrl}/api/reports/${reportType}${eventId ? '/' + eventId : ''}`;
     
     // Trigger download with headers
@@ -3073,7 +3073,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Right Column: Predefined & Configured Custom Field Labels (Common Pool) */}
-            <div className="flex flex-col gap-4 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 md:pl-6 pt-4 md:pt-0 self-start w-full">
+            <div className="flex flex-col gap-4 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 md:pl-6 pt-1 md:pt-0 self-start w-full">
               <div className="pb-2 border-b border-slate-100 dark:border-slate-850">
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-350 flex items-center gap-1.5">
                   <Sparkles size={12} className="text-amber-500" />

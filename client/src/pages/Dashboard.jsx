@@ -42,7 +42,7 @@ export default function Dashboard() {
   const getBackendUrl = (path) => {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const baseUrl = import.meta.env.VITE_API_URL || '';
     return `${baseUrl}${path}`;
   };
   const [dashboardTab, setDashboardTab] = useState("entries");
@@ -370,7 +370,7 @@ export default function Dashboard() {
         formData.append("rawFile", rawFile);
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || "https://dslr-production-45ef.up.railway.app";
+      const API_URL = import.meta.env.VITE_API_URL || "";
 
       console.log("VITE_API_URL:", API_URL);
       console.log("Upload API URL:", API_URL);
@@ -814,7 +814,7 @@ export default function Dashboard() {
       {dashboardTab === "overview" && (
         <div className="flex flex-col gap-8 animate-in fade-in duration-200">
           {/* Welcome profile header */}
-          <div className="bg-gradient-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-linear-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex flex-col gap-2 text-left">
               <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">
                 Participant Dashboard
@@ -876,7 +876,7 @@ export default function Dashboard() {
 
                 if (totalPhotos === 0) {
                   return (
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center min-h-[260px] shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center min-h-65 shadow-sm">
                       <ImageIcon className="w-8 h-8 mb-2 text-slate-300 dark:text-slate-700" />
                       <span>Upload photos in the entries tab to view metrics charts.</span>
                     </div>
@@ -991,7 +991,7 @@ export default function Dashboard() {
 
                 if (catData.length === 0) {
                   return (
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center min-h-[260px] shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center min-h-65 shadow-sm">
                       <ImageIcon className="w-8 h-8 mb-2 text-slate-300 dark:text-slate-700" />
                       <span>Upload photos under categories to view distribution bar chart.</span>
                     </div>
@@ -1089,11 +1089,11 @@ export default function Dashboard() {
                 }
 
                 return (
-                  <div className="flex flex-col gap-6 pl-4 border-l border-slate-100 dark:border-slate-800 max-h-[320px] overflow-y-auto pr-2">
+                  <div className="flex flex-col gap-6 pl-4 border-l border-slate-100 dark:border-slate-800 max-h-80 overflow-y-auto pr-2">
                     {timelineEvents.slice(0, 8).map((evt, idx) => (
                       <div key={idx} className="relative flex flex-col gap-1 text-xs">
                         {/* Circle dot marker */}
-                        <span className="absolute -left-[22px] top-1 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-500" />
+                        <span className="absolute -left-5.5 top-1 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-500" />
                         <span className="text-[10px] text-slate-400 font-semibold">
                           {evt.date.toLocaleDateString()} {evt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
@@ -1113,14 +1113,14 @@ export default function Dashboard() {
                 const refundedSubs = allSubmissions.filter(s => s.paymentStatus === 'Refunded' || s.paymentStatus === 'Withdrawn');
                 if (refundedSubs.length === 0) {
                   return (
-                    <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-[220px]">
+                    <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-55">
                       <span>No refunded or withdrawn entry packages.</span>
                     </div>
                   );
                 }
 
                 return (
-                  <div className="flex flex-col gap-3 overflow-y-auto max-h-[320px] pr-2">
+                  <div className="flex flex-col gap-3 overflow-y-auto max-h-80 pr-2">
                     {refundedSubs.map((sub, idx) => (
                       <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl flex flex-col gap-2 text-xs">
                         <div className="flex justify-between items-center">
@@ -1205,7 +1205,7 @@ export default function Dashboard() {
                         const certTemplateName = isFirst ? '1st-Prize.png' : isSecond ? '2nd-Prize.png' : '3rd-Prize.png';
                         
                         return (
-                          <div key={index} className="bg-gradient-to-br from-amber-500/5 to-amber-600/5 border-2 border-amber-500/35 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center relative overflow-hidden">
+                          <div key={index} className="bg-linear-to-br from-amber-500/5 to-amber-600/5 border-2 border-amber-500/35 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center relative overflow-hidden">
                             
                             {/* Certificate Thumbnail Preview */}
                             <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-amber-500/20 shadow-sm cursor-pointer animate-in zoom-in-95 relative select-none"
@@ -1681,7 +1681,7 @@ export default function Dashboard() {
                                             {/* Photo Upload Zone */}
                                             <div className="flex flex-col gap-1 text-[11px]">
                                               <label className="font-semibold text-slate-400">
-                                                DSLR Photograph File (Max 10MB) *
+                                                DSLR Photograph File (Max 800 KB) *
                                               </label>
                                               <DragDropUpload
                                                 onUpload={async (photo, raw) => {

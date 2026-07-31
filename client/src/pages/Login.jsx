@@ -108,7 +108,7 @@ export default function Login() {
     } catch (err) {
       if (err.message.includes('verification') || err.message.includes('not verified')) {
         // Fetch unverified login payload directly to get OTP
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}/api/auth/login`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -198,7 +198,7 @@ export default function Login() {
           event?.loginBgUrl
             ? event.loginBgUrl.startsWith('http')
               ? event.loginBgUrl
-              : `${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}${event.loginBgUrl.startsWith('/') ? '' : '/'}${event.loginBgUrl}`
+              : `${import.meta.env.VITE_API_URL || ''}${event.loginBgUrl.startsWith('/') ? '' : '/'}${event.loginBgUrl}`
             : '/login_bg.jpg'
         }')`
       }}

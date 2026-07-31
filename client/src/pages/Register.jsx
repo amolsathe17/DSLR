@@ -165,7 +165,7 @@ export default function Register() {
           event?.loginBgUrl
             ? event.loginBgUrl.startsWith('http')
               ? event.loginBgUrl
-              : `${import.meta.env.VITE_API_URL || 'https://dslr-production-45ef.up.railway.app'}${event.loginBgUrl.startsWith('/') ? '' : '/'}${event.loginBgUrl}`
+              : `${import.meta.env.VITE_API_URL || ''}${event.loginBgUrl.startsWith('/') ? '' : '/'}${event.loginBgUrl}`
             : '/login_bg.jpg'
         }')`
       }}

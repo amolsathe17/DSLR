@@ -1518,8 +1518,12 @@ export default function JudgeDashboard() {
 
               {/* Left Side: Photo Zoom Detailed View */}
               <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden">
-                <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
-                  <WatermarkPreview src={getBackendUrl(offlineZoomPhoto.fileUrl)} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
+                <div className="relative w-full h-64 sm:h-80 lg:h-full lg:max-h-[68vh] flex items-center justify-center overflow-hidden">
+                  <WatermarkPreview 
+                    src={getBackendUrl(offlineZoomPhoto.fileUrl)} 
+                    className="w-full h-full max-h-[40vh] lg:max-h-[68vh] object-contain rounded-lg shadow-lg" 
+                    enableZoom={true} 
+                  />
                 </div>
                 
                 <div className="w-full mt-4 flex flex-col md:flex-row justify-between items-start gap-6 text-xs text-slate-300 pb-6 pr-2">

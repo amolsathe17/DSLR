@@ -673,10 +673,10 @@ export default function JudgeDashboard() {
                       return (
                         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
                           <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Assigned Categories Distribution</h3>
-                          <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
+                          <div className="flex flex-row items-center justify-center gap-4 sm:gap-12 py-2">
                             {totalCatPhotos > 0 ? (
                               <>
-                                <div className="relative w-32 h-32">
+                                <div className="relative w-24 h-24 sm:w-32 sm:h-32 shrink-0">
                                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
                                     {catData.map((item, idx) => {
                                       const pct = item.count / totalCatPhotos;
@@ -705,18 +705,18 @@ export default function JudgeDashboard() {
                                     })}
                                   </svg>
                                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="font-display font-black text-2xl text-slate-900 dark:text-white">
+                                    <span className="font-display font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
                                       {totalCatPhotos}
                                     </span>
-                                    <span className="text-[8px] text-slate-400 font-extrabold uppercase">Photos</span>
+                                    <span className="text-[7px] sm:text-[8px] text-slate-400 font-extrabold uppercase">Photos</span>
                                   </div>
                                 </div>
 
-                                <div className="flex flex-col gap-2 text-[11px] max-h-32 overflow-y-auto pr-1">
+                                <div className="flex flex-col gap-2 text-[10px] sm:text-[11px] max-h-32 overflow-y-auto pr-1 shrink-0 text-left justify-center">
                                   {catData.map((item, idx) => (
                                     <div key={item.name} className="flex items-center gap-2">
                                       <span
-                                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                                        className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shrink-0"
                                         style={{ backgroundColor: colors[idx % colors.length] }}
                                       />
                                       <span className="font-semibold text-slate-500 dark:text-slate-400">

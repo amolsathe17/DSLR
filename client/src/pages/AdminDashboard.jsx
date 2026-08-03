@@ -2507,8 +2507,8 @@ export default function AdminDashboard() {
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
                       {newEventPackages.map((pkg, idx) => (
-                        <div key={idx} className={`flex flex-row gap-2 sm:gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
-                          <div className="flex-1 min-w-[60px] flex flex-col gap-1">
+                        <div key={idx} className={`flex flex-row gap-1.5 sm:gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
+                          <div className="flex-1 min-w-0 flex flex-col gap-1">
                             <label className="text-[10px] text-slate-400 font-semibold truncate">Package Name</label>
                             <input
                               type="text"
@@ -2525,7 +2525,7 @@ export default function AdminDashboard() {
                           </div>
                           
                           <div className="w-14 sm:w-24 flex flex-col gap-1 shrink-0">
-                            <label className="text-[10px] text-slate-400 font-semibold truncate">Price (₹)</label>
+                            <label className="text-[10px] text-slate-400 font-semibold truncate">Price <span className="hidden sm:inline">(₹)</span></label>
                             <input
                               type="number"
                               value={pkg.price || ''}
@@ -2540,8 +2540,8 @@ export default function AdminDashboard() {
                             />
                           </div>
 
-                          <div className="w-14 sm:w-20 flex flex-col gap-1 shrink-0">
-                            <label className="text-[10px] text-slate-400 font-semibold truncate">Max Uploads</label>
+                          <div className="w-12 sm:w-20 flex flex-col gap-1 shrink-0">
+                            <label className="text-[10px] text-slate-400 font-semibold truncate">Max <span className="hidden sm:inline">Uploads</span></label>
                             <input
                               type="number"
                               value={pkg.maxPhotos || ''}
@@ -4563,8 +4563,8 @@ export default function AdminDashboard() {
                   
                   <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
                     {editEventPackages.map((pkg, idx) => (
-                      <div key={idx} className={`flex flex-row gap-2 sm:gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
-                        <div className="flex-1 min-w-[60px] flex flex-col gap-1">
+                      <div key={idx} className={`flex flex-row gap-1.5 sm:gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
+                        <div className="flex-1 min-w-0 flex flex-col gap-1">
                           <label className="text-[10px] text-slate-400 font-semibold truncate">Package Name</label>
                           <input
                             type="text"
@@ -4581,7 +4581,7 @@ export default function AdminDashboard() {
                         </div>
                         
                         <div className="w-14 sm:w-24 flex flex-col gap-1 shrink-0">
-                          <label className="text-[10px] text-slate-400 font-semibold truncate">Price (₹)</label>
+                          <label className="text-[10px] text-slate-400 font-semibold truncate">Price <span className="hidden sm:inline">(₹)</span></label>
                           <input
                             type="number"
                             value={pkg.price || ''}
@@ -4596,8 +4596,8 @@ export default function AdminDashboard() {
                           />
                         </div>
 
-                        <div className="w-14 sm:w-20 flex flex-col gap-1 shrink-0">
-                          <label className="text-[10px] text-slate-400 font-semibold truncate">Max Uploads</label>
+                        <div className="w-12 sm:w-20 flex flex-col gap-1 shrink-0">
+                          <label className="text-[10px] text-slate-400 font-semibold truncate">Max <span className="hidden sm:inline">Uploads</span></label>
                           <input
                             type="number"
                             value={pkg.maxPhotos || ''}

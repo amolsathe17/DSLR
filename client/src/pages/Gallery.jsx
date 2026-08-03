@@ -100,45 +100,50 @@ export default function Gallery() {
         </div>
 
         {/* Tab switchers */}
-        <div className="flex justify-center mb-8">
-          <div className="flex flex-wrap justify-center bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto gap-1">
-            <button
-              onClick={() => setActiveTab('gallery')}
-              className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'gallery'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              <Camera size={14} />
-              Approved Entries
-            </button>
-            <button
-              onClick={() => setActiveTab('disapproved')}
-              className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'disapproved'
-                  ? 'bg-red-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              <Flag size={14} />
-              Disapproved Entries
-            </button>
-            {(!user || user.role !== 'Participant' || event?.winnersPublished) && (
-              <button
-                onClick={() => setActiveTab('winners')}
-                className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === 'winners'
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                <Award size={14} />
-                Winners Circle
-              </button>
-            )}
-          </div>
-        </div>
+        {(() => {
+          const showWinnersTab = !user || user.role !== 'Participant' || event?.winnersPublished;
+          return (
+            <div className="flex justify-center mb-8 w-full">
+              <div className={`grid ${showWinnersTab ? 'grid-cols-3' : 'grid-cols-2'} bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto sm:flex sm:flex-wrap sm:justify-center gap-1`}>
+                <button
+                  onClick={() => setActiveTab('gallery')}
+                  className={`flex items-center justify-center gap-1 py-2.5 px-2 sm:px-5 rounded-xl font-display text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'gallery'
+                      ? 'bg-indigo-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <Camera size={13} className="shrink-0" />
+                  <span className="truncate">Approved</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('disapproved')}
+                  className={`flex items-center justify-center gap-1 py-2.5 px-2 sm:px-5 rounded-xl font-display text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'disapproved'
+                      ? 'bg-red-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <Flag size={13} className="shrink-0" />
+                  <span className="truncate">Disapproved</span>
+                </button>
+                {showWinnersTab && (
+                  <button
+                    onClick={() => setActiveTab('winners')}
+                    className={`flex items-center justify-center gap-1 py-2.5 px-2 sm:px-5 rounded-xl font-display text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'winners'
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <Award size={13} className="shrink-0" />
+                    <span className="truncate">Winners</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* TAB 1: APPROVED SUBMISSIONS */}
         {activeTab === 'gallery' && (

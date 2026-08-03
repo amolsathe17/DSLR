@@ -606,8 +606,8 @@ export default function JudgeDashboard() {
                       return (
                         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
                           <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Grading Completion Progress</h3>
-                          <div className="flex flex-row items-center justify-around gap-4 sm:gap-6 py-2">
-                            <div className="relative w-32 h-32">
+                          <div className="flex flex-row items-center justify-around gap-2 sm:gap-6 py-2">
+                            <div className="relative w-24 h-24 sm:w-32 sm:h-32 shrink-0">
                               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
                                 <circle cx="70" cy="70" r={radius} fill="transparent" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="12" />
                                 <circle
@@ -624,20 +624,20 @@ export default function JudgeDashboard() {
                                 />
                               </svg>
                               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="font-display font-black text-2xl text-slate-900 dark:text-white">
+                                <span className="font-display font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
                                   {Math.round(gradedPct * 100)}%
                                 </span>
-                                <span className="text-[8px] text-slate-400 font-extrabold uppercase">Done</span>
+                                <span className="text-[7px] sm:text-[8px] text-slate-400 font-extrabold uppercase">Done</span>
                               </div>
                             </div>
 
-                            <div className="flex flex-col gap-2.5 text-[11px]">
-                              <div className="flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0" />
+                            <div className="flex flex-col gap-2 text-[10px] sm:text-[11px] shrink-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-indigo-600 shrink-0" />
                                 <span className="font-semibold text-slate-500 dark:text-slate-400">Graded: <strong className="text-slate-900 dark:text-white">{gradedCount}</strong></span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
                                 <span className="font-semibold text-slate-500 dark:text-slate-400">Ungraded: <strong className="text-slate-900 dark:text-white">{pendingCount}</strong></span>
                               </div>
                             </div>

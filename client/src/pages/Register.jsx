@@ -172,15 +172,27 @@ export default function Register() {
   }
   return (
     <div 
-      className="min-h-[calc(100vh-4rem)] w-full flex items-center bg-cover bg-center relative"
+      className="min-h-[calc(100vh-4rem)] w-full flex items-center bg-cover bg-center relative login-bg-responsive"
       style={{
-        backgroundImage: `url('${
+        '--login-bg': `url('${
           event?.loginBgUrl
             ? getBackendUrl(event.loginBgUrl)
             : '/login_bg.jpg'
         }')`
       }}
     >
+      <style>{`
+        @media (min-width: 640px) {
+          .login-bg-responsive {
+            background-image: var(--login-bg) !important;
+          }
+        }
+        @media (max-width: 639px) {
+          .login-bg-responsive {
+            background-image: linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%) !important;
+          }
+        }
+      `}</style>
       {/* DEADLINE BLOCK MODAL */}
       {event && new Date(event.deadline) < new Date() && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">

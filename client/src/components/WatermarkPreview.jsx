@@ -37,11 +37,37 @@ export default function WatermarkPreview({ src, className = "", enableZoom = fal
     });
   };
 
+  const handleTouchMove = (e) => {
+    if (!enableZoom || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((touch.clientX - left) / width) * 100;
+    const y = ((touch.clientY - top) / height) * 100;
+    setZoomStyle({
+      transform: 'scale(2.5)',
+      transformOrigin: `${x}% ${y}%`,
+      transition: 'transform 0.05s ease-out'
+    });
+  };
+
+  const handleTouchEnd = () => {
+    if (!enableZoom) return;
+    setZoomStyle({
+      transform: 'scale(1)',
+      transformOrigin: 'center',
+      transition: 'transform 0.15s ease-in-out'
+    });
+  };
+
   return (
     <div 
-      className={`relative overflow-hidden bg-slate-900 rounded-lg ${enableZoom ? 'cursor-zoom-in' : ''} ${className}`}
+      className={`relative overflow-hidden bg-slate-900 rounded-lg ${enableZoom ? 'cursor-zoom-in touch-none select-none' : ''} ${className}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchMove}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
     >
       <img 
         src={src} 

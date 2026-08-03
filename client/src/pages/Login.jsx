@@ -222,7 +222,13 @@ export default function Login() {
         }
         @media (max-width: 639px) {
           .login-bg-responsive {
-            background-image: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%) !important;
+            background-image: ${
+              loginRole === 'Admin'
+                ? 'linear-gradient(135deg, #d97706 0%, #78350f 100%)'
+                : loginRole === 'Judge'
+                  ? 'linear-gradient(135deg, #059669 0%, #064e3b 100%)'
+                  : 'linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%)'
+            } !important;
           }
         }
       `}</style>

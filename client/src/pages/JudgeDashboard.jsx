@@ -2,14 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Camera, ShieldAlert, Award, Star, Star as StarIcon, CheckCircle2, ChevronRight, X, Check, AlertTriangle, Clock, XCircle, ListChecks, Layers, BarChart2 } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
+import { getBackendUrl } from '../utils/url';
 
 export default function JudgeDashboard() {
-  const getBackendUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const baseUrl = import.meta.env.VITE_API_URL || '';
-    return `${baseUrl}${path}`;
-  };
   const { apiFetch, user } = useAuth();
   
   const [event, setEvent] = useState(null);

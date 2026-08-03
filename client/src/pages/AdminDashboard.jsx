@@ -40,14 +40,9 @@ import {
   ArrowDown
 } from 'lucide-react';
 import StatsCharts from '../components/StatsCharts';
+import { getBackendUrl, getApiBaseUrl } from '../utils/url';
 
 export default function AdminDashboard() {
-  const getBackendUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const baseUrl = import.meta.env.VITE_API_URL || '';
-    return `${baseUrl}${path}`;
-  };
   const { apiFetch, user, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -1086,7 +1081,7 @@ export default function AdminDashboard() {
 
     setUploadingBg(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/events/upload-bg`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/events/upload-bg`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1116,7 +1111,7 @@ export default function AdminDashboard() {
 
     setUploadingEditBg(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/events/upload-bg`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/events/upload-bg`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1138,9 +1133,7 @@ export default function AdminDashboard() {
   };
 
   const handleDownloadBackup = async (backup) => {
-    const fileUrl = backup.backupPath.startsWith('http') 
-      ? backup.backupPath 
-      : `${import.meta.env.VITE_API_URL || ''}${backup.backupPath}`;
+    const fileUrl = getBackendUrl(backup.backupPath);
     window.open(fileUrl, '_blank');
 
     try {
@@ -1437,7 +1430,7 @@ export default function AdminDashboard() {
 
   const handleExportCSV = (reportType, eventId = '') => {
     const token = localStorage.getItem('token');
-    const baseUrl = import.meta.env.VITE_API_URL || '';
+    const baseUrl = getApiBaseUrl();
     const path = `${baseUrl}/api/reports/${reportType}${eventId ? '/' + eventId : ''}`;
     
     // Trigger download with headers

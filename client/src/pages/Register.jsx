@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getBackendUrl } from '../utils/url';
 import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, ShieldCheck, Key, Calendar, MapPin, Clock } from 'lucide-react';
 
 export default function Register() {
@@ -163,9 +164,7 @@ export default function Register() {
       style={{
         backgroundImage: `url('${
           event?.loginBgUrl
-            ? event.loginBgUrl.startsWith('http')
-              ? event.loginBgUrl
-              : `${import.meta.env.VITE_API_URL || ''}${event.loginBgUrl.startsWith('/') ? '' : '/'}${event.loginBgUrl}`
+            ? getBackendUrl(event.loginBgUrl)
             : '/login_bg.jpg'
         }')`
       }}

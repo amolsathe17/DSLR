@@ -35,16 +35,10 @@ import DragDropUpload from "../components/DragDropUpload";
 import WatermarkPreview from "../components/WatermarkPreview";
 import QRInvoice from "../components/QRInvoice";
 import Certificate from "../components/Certificate";
+import { getBackendUrl, getApiBaseUrl } from "../utils/url";
 
 export default function Dashboard() {
   const { apiFetch, user, token } = useAuth();
-
-  const getBackendUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const baseUrl = import.meta.env.VITE_API_URL || '';
-    return `${baseUrl}${path}`;
-  };
 
   const COMMON_LABELS = [
     "Designer / Brand",
@@ -391,7 +385,7 @@ export default function Dashboard() {
         formData.append("rawFile", rawFile);
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || "";
+      const API_URL = getApiBaseUrl();
 
       console.log("VITE_API_URL:", API_URL);
       console.log("Upload API URL:", API_URL);

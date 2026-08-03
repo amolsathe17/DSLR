@@ -2,16 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Camera, Search, Filter, Award, Sparkles, X, Maximize2, ShieldCheck, HelpCircle, Flag, MessageSquare, AlertTriangle, Trophy, Eye, Download, Lock } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
+import { getBackendUrl } from '../utils/url';
 
 export default function Gallery() {
   const { apiFetch, user, loading: authLoading } = useAuth();
-
-  const getBackendUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const baseUrl = import.meta.env.VITE_API_URL || '';
-    return `${baseUrl}${path}`;
-  };
 
   const [certAlertMsg, setCertAlertMsg] = useState(null);
 

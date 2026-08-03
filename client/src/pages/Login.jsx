@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getBackendUrl, getApiBaseUrl } from '../utils/url';
 import { Camera, LogIn, Mail, Lock, ShieldAlert, ArrowRight, Phone, Key, Calendar, MapPin, Clock } from 'lucide-react';
 
 export default function Login() {
@@ -108,7 +109,7 @@ export default function Login() {
     } catch (err) {
       if (err.message.includes('verification') || err.message.includes('not verified')) {
         // Fetch unverified login payload directly to get OTP
-        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/login`, {
+        const res = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -196,9 +197,7 @@ export default function Login() {
       style={{
         '--login-bg': `url('${
           event?.loginBgUrl
-            ? event.loginBgUrl.startsWith('http')
-              ? event.loginBgUrl
-              : `${import.meta.env.VITE_API_URL || ''}${event.loginBgUrl.startsWith('/') ? '' : '/'}${event.loginBgUrl}`
+            ? getBackendUrl(event.loginBgUrl)
             : '/login_bg.jpg'
         }')`
       }}

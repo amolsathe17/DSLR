@@ -1517,64 +1517,78 @@ export default function JudgeDashboard() {
               </button>
 
               {/* Left Side: Photo Zoom Detailed View */}
-              <div className="w-full lg:flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden shrink-0 lg:shrink">
-                <div className="relative w-full h-64 sm:h-80 lg:h-full lg:max-h-[68vh] flex items-center justify-center overflow-hidden shrink-0">
-                  <WatermarkPreview 
-                    src={getBackendUrl(offlineZoomPhoto.fileUrl)} 
-                    className="w-full h-full max-h-[40vh] lg:max-h-[68vh] object-contain rounded-lg shadow-lg" 
-                    enableZoom={true} 
-                  />
+              <div className="w-full lg:flex-1 bg-slate-950 relative overflow-hidden flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800 h-auto shrink-0">
+                <div className="absolute top-4 left-4 z-10 flex gap-2">
+                  <span className="bg-slate-900/80 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
+                    Offline Zoom Mode
+                  </span>
+                  <span className={`bg-slate-900/85 backdrop-blur text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm ${
+                    offlineZoomPhoto.graded ? 'text-emerald-500' : 'text-amber-500'
+                  }`}>
+                    {offlineZoomPhoto.graded ? 'Assessment Completed' : 'Pending Review'}
+                  </span>
                 </div>
-                
-                <div className="w-full mt-4 flex flex-col md:flex-row justify-between items-start gap-6 text-xs text-slate-300 pb-6 pr-2">
-                  {/* Left: Metadata details */}
-                  <div className="flex flex-col gap-1 text-left">
-                    <h4 className="font-display font-extrabold text-sm text-white">{offlineZoomPhoto.title}</h4>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-400">
-                      <span>Category: <span className="font-bold text-slate-350">{offlineZoomPhoto.category}</span></span>
-                      <span>•</span>
-                      <span>Photographer: <span className="font-bold text-slate-350">{offlineZoomPhoto.participantName}</span></span>
+
+                <div className="flex-grow flex items-center justify-center p-4 shrink-0">
+                  <div className="relative w-full h-64 sm:h-80 lg:h-full lg:max-h-[68vh] flex items-center justify-center group cursor-zoom-in shrink-0">
+                    <WatermarkPreview 
+                      src={getBackendUrl(offlineZoomPhoto.fileUrl)} 
+                      className="w-full h-full max-h-[40vh] lg:max-h-[68vh] object-contain rounded-lg shadow-lg" 
+                      enableZoom={true} 
+                    />
+                  </div>
+                </div>
+
+                {/* Photo parameters / EXIF overlay at bottom */}
+                <div className="bg-slate-900/90 backdrop-blur border-t border-white/5 p-4 sm:p-5 flex flex-col gap-3 text-white">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex flex-col gap-0.5 text-left">
+                      <h3 className="font-display font-extrabold text-sm tracking-wide">{offlineZoomPhoto.title}</h3>
+                      <span className="text-[10px] text-indigo-400 font-extrabold uppercase tracking-wider">{offlineZoomPhoto.category}</span>
                     </div>
-                    
-                    {offlineZoomPhoto.customFields && offlineZoomPhoto.customFields.length > 0 ? (
-                      <div className="grid grid-cols-2 gap-3 mt-2 text-[10px] text-slate-400 bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-                        {offlineZoomPhoto.customFields.map((cf, idx) => (
-                          <div key={idx} className="flex flex-col gap-0.5 min-w-0 text-left">
-                            <span className="text-slate-500 uppercase text-[8px] font-bold">{cf.label}</span>
-                            <span className="font-extrabold text-slate-300 break-words">{cf.value || 'N/A'}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2 text-[10px] text-slate-400 bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-                        <div className="flex flex-col gap-0.5 text-left">
-                          <span className="text-slate-500 uppercase text-[8px] font-bold">Camera brand</span>
-                          <span className="font-extrabold truncate text-slate-300">{offlineZoomPhoto.cameraBrand || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5 text-left">
-                          <span className="text-slate-500 uppercase text-[8px] font-bold">Camera model</span>
-                          <span className="font-extrabold truncate text-slate-300">{offlineZoomPhoto.cameraModel || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5 text-left">
-                          <span className="text-slate-500 uppercase text-[8px] font-bold">Lens configuration</span>
-                          <span className="font-semibold truncate text-slate-300">{offlineZoomPhoto.lensUsed || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5 text-left">
-                          <span className="text-slate-500 uppercase text-[8px] font-bold">Date captured</span>
-                          <span className="font-semibold text-slate-300">
-                            {offlineZoomPhoto.dateCaptured ? new Date(offlineZoomPhoto.dateCaptured).toLocaleDateString() : 'N/A'}
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                    <div className="text-[9px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded uppercase shrink-0">
+                      By: {offlineZoomPhoto.participantName}
+                    </div>
                   </div>
 
-                  {/* Right: Description */}
-                  <div className="w-full max-w-full md:max-w-[320px] lg:max-w-[420px] text-left md:text-right flex flex-col gap-1 md:items-end shrink-0">
-                    <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
+                  {offlineZoomPhoto.customFields && offlineZoomPhoto.customFields.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3 bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px]">
+                      {offlineZoomPhoto.customFields.map((cf, idx) => (
+                        <div key={idx} className="flex flex-col gap-0.5 min-w-0 text-left">
+                          <span className="text-slate-500 uppercase text-[8px] font-bold">{cf.label}</span>
+                          <span className="font-extrabold text-slate-300 break-words">{cf.value || 'N/A'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px]">
+                      <div className="flex flex-col gap-0.5 text-left">
+                        <span className="text-slate-500 uppercase text-[8px] font-bold">Camera brand</span>
+                        <span className="font-extrabold truncate">{offlineZoomPhoto.cameraBrand || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5 text-left">
+                        <span className="text-slate-500 uppercase text-[8px] font-bold">Camera model</span>
+                        <span className="font-extrabold truncate">{offlineZoomPhoto.cameraModel || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5 text-left">
+                        <span className="text-slate-500 uppercase text-[8px] font-bold">Lens configuration</span>
+                        <span className="font-semibold truncate">{offlineZoomPhoto.lensUsed || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5 text-left">
+                        <span className="text-slate-500 uppercase text-[8px] font-bold">Date captured</span>
+                        <span className="font-semibold">
+                          {offlineZoomPhoto.dateCaptured ? new Date(offlineZoomPhoto.dateCaptured).toLocaleDateString() : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  <div className="w-full text-left flex flex-col gap-1 shrink-0 border-t border-white/5 pt-2.5">
+                    <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-wider">
                       Photo Description
                     </span>
-                    <p className="text-[11px] text-slate-350 leading-relaxed font-medium italic">
+                    <p className="text-[10px] text-slate-300 leading-relaxed font-medium italic text-left">
                       "{offlineZoomPhoto.description || 'No description shared.'}"
                     </p>
                   </div>

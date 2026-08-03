@@ -43,10 +43,29 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), as
         if (photo.status === 'Rejected') return;
         if (isAssignedToEvent || (photo.assignedJudges && photo.assignedJudges.includes(judgeId))) {
           // If Admin, the "existingScore" can be the average score of all judges, or the first judge's score
+          const isUnpaid = (sub.paymentStatus === 'Unpaid' || !sub.paymentStatus);
+          
           const existingScore = isAdmin 
             ? (photo.scores && photo.scores.length > 0 ? photo.scores[0] : null) 
             : (photo.scores || []).find(s => s.judgeId === judgeId);
+
+          let gradedVal = isAdmin ? (photo.scores && photo.scores.length > 0) : !!existingScore;
+          let scoreVal = existingScore || null;
           
+          if (isUnpaid) {
+            gradedVal = true;
+            scoreVal = {
+              creativity: 0,
+              composition: 0,
+              technicalQuality: 0,
+              storytelling: 0,
+              overallImpact: 0,
+              averageScore: 0,
+              remarks: 'Automatically assigned Grade 0 due to pending payment.',
+              approvalStatus: 'Approved'
+            };
+          }
+
           assignedPhotos.push({
             submissionId: sub._id,
             participantName: sub.userName,
@@ -64,8 +83,8 @@ router.get('/assigned-photos/:eventId', protect, authorize('Judge', 'Admin'), as
             fileSizeBytes: photo.fileSizeBytes,
             status: photo.status,
             paymentStatus: sub.paymentStatus || 'Unpaid',
-            graded: isAdmin ? (photo.scores && photo.scores.length > 0) : !!existingScore,
-            score: existingScore || null,
+            graded: gradedVal,
+            score: scoreVal,
             allScores: photo.scores || [] // Expose all scores for the Admin to review
           });
         }

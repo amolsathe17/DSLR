@@ -434,14 +434,14 @@ export default function JudgeDashboard() {
   const isFormDisapproved = approvalStatus === 'Disapproved';
   const totalScore = isFormDisapproved ? 0 : (creativity + composition + technicalQuality + storytelling + overallImpact);
   const averageScore = isFormDisapproved ? '0.0' : ((creativity + composition + technicalQuality + storytelling + overallImpact) / 5).toFixed(1);
-  const activePhotos = photographs.filter(p => p.paymentStatus !== 'Unpaid');
+  const activePhotos = photographs;
   const allGraded = activePhotos.length > 0 && activePhotos.every(p => p.graded);
   const hasConfirmed = event?.confirmedJudges?.includes(user?.id);
  
   const participants = [];
   const seenSubmissions = new Set();
   photographs.forEach(p => {
-    if (p.paymentStatus !== 'Unpaid' && !seenSubmissions.has(p.submissionId)) {
+    if (!seenSubmissions.has(p.submissionId)) {
       seenSubmissions.add(p.submissionId);
       participants.push({
         submissionId: p.submissionId,
@@ -455,13 +455,13 @@ export default function JudgeDashboard() {
     : photographs.filter(p => p.submissionId === selectedSubmissionId);
  
   if (filterGradingStatus === 'all') {
-    displayedPhotos = displayedPhotos.filter(p => p.paymentStatus !== 'Unpaid');
+    // Show all photographs including unpaid
   } else if (filterGradingStatus === 'graded') {
-    displayedPhotos = displayedPhotos.filter(p => p.graded && p.paymentStatus !== 'Unpaid');
+    displayedPhotos = displayedPhotos.filter(p => p.graded);
   } else if (filterGradingStatus === 'ungraded') {
-    displayedPhotos = displayedPhotos.filter(p => !p.graded && p.paymentStatus !== 'Unpaid');
+    displayedPhotos = displayedPhotos.filter(p => !p.graded);
   } else if (filterGradingStatus === 'disapproved') {
-    displayedPhotos = displayedPhotos.filter(p => p.graded && p.score?.approvalStatus === 'Disapproved' && p.paymentStatus !== 'Unpaid');
+    displayedPhotos = displayedPhotos.filter(p => p.graded && p.score?.approvalStatus === 'Disapproved');
   } else if (filterGradingStatus === 'unpaid') {
     displayedPhotos = displayedPhotos.filter(p => p.paymentStatus === 'Unpaid');
   }
@@ -552,12 +552,14 @@ export default function JudgeDashboard() {
             const totalEvents = events.length;
             const allPhotos = Object.values(allPhotographsByEvent).reduce((acc, arr) => [...acc, ...(arr || [])], []);
             const totalPhotos = allPhotos.length;
-            const gradedCount = allPhotos.filter(p => p.graded).length;
-            const pendingCount = totalPhotos - gradedCount;
+            const unpaidCount = allPhotos.filter(p => p.paymentStatus === 'Unpaid').length;
+            const paidPhotos = allPhotos.filter(p => p.paymentStatus !== 'Unpaid');
+            const gradedCount = paidPhotos.filter(p => p.graded).length;
+            const pendingCount = paidPhotos.filter(p => !p.graded).length;
 
             return (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
                     <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Assigned Contests</span>
                     <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalEvents}</h3>
@@ -577,6 +579,12 @@ export default function JudgeDashboard() {
                   </div>
 
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Unpaid Photos</span>
+                    <h3 className="font-display font-extrabold text-2xl text-rose-600 dark:text-rose-400">{unpaidCount}</h3>
+                    <span className="text-[10px] text-slate-400">Payment pending entries</span>
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
                     <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Total Photographs</span>
                     <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalPhotos}</h3>
                     <span className="text-[10px] text-slate-400">Total assigned photo frames</span>
@@ -589,7 +597,8 @@ export default function JudgeDashboard() {
                     
                     {/* Donut Progress chart */}
                     {(() => {
-                      const gradedPct = totalPhotos ? (gradedCount / totalPhotos) : 0;
+                      const totalPaid = paidPhotos.length;
+                      const gradedPct = totalPaid ? (gradedCount / totalPaid) : 0;
                       const radius = 50;
                       const circumference = 2 * Math.PI * radius;
                       const strokeDashoffset = circumference - (circumference * gradedPct);
@@ -1037,7 +1046,16 @@ export default function JudgeDashboard() {
                             <span className="text-[10px] text-slate-500 font-bold block">
                               By: {photo.participantName}
                             </span>
-                            {photo.score && (
+                            {photo.paymentStatus === 'Unpaid' ? (
+                              <div className="mt-2 flex items-center gap-1.5">
+                                <span className="px-2 py-0.5 rounded text-[8px] font-extrabold uppercase bg-rose-500/10 text-rose-600 dark:bg-rose-950/20 dark:text-rose-450">
+                                  Unpaid
+                                </span>
+                                <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                  Grade: 0
+                                </span>
+                              </div>
+                            ) : photo.score && (
                               <div className="mt-2 flex items-center gap-1">
                                 <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
                                   photo.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
@@ -1052,9 +1070,13 @@ export default function JudgeDashboard() {
                           </div>
 
                           {photo.paymentStatus === 'Unpaid' ? (
-                            <div className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-center text-xs">
-                              Payment Pending
-                            </div>
+                            <button
+                              type="button"
+                              disabled
+                              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-center text-xs cursor-not-allowed opacity-60 flex items-center justify-center gap-1.5"
+                            >
+                              Evaluation Disabled
+                            </button>
                           ) : (
                             photo.score?.approvalStatus !== 'Disapproved' && (
                               <button
@@ -1091,13 +1113,14 @@ export default function JudgeDashboard() {
                         >
                           {/* Thumbnail / Click handler */}
                           <div 
-                            onClick={() => handleOpenOfflineScoring(photo)}
-                            className="w-full h-48 bg-slate-950 relative overflow-hidden flex items-center justify-center cursor-zoom-in"
+                            onClick={() => photo.paymentStatus !== 'Unpaid' && handleOpenOfflineScoring(photo)}
+                            className={`w-full h-48 bg-slate-950 relative overflow-hidden flex items-center justify-center ${photo.paymentStatus === 'Unpaid' ? 'cursor-not-allowed' : 'cursor-zoom-in'}`}
                           >
                             <WatermarkPreview
                               src={getBackendUrl(photo.fileUrl)}
                               className="w-full h-full object-contain"
-                            />
+                            >
+                            </WatermarkPreview>
                             <span className={`absolute top-3 left-3 px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full shadow-sm ${
                               photo.paymentStatus === 'Unpaid'
                                 ? 'bg-rose-500 text-white'
@@ -1120,7 +1143,16 @@ export default function JudgeDashboard() {
                               <span className="text-[10px] text-slate-500 font-bold block">
                                 By: {photo.participantName}
                               </span>
-                              {photo.score && (
+                              {photo.paymentStatus === 'Unpaid' ? (
+                                <div className="mt-2 flex items-center gap-1.5">
+                                  <span className="px-2 py-0.5 rounded text-[8px] font-extrabold uppercase bg-rose-500/10 text-rose-600 dark:bg-rose-950/20 dark:text-rose-450">
+                                    Unpaid
+                                  </span>
+                                  <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                    Grade: 0
+                                  </span>
+                                </div>
+                              ) : photo.score && (
                                 <div className="mt-2 flex items-center gap-1.5">
                                   <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
                                     photo.score.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
@@ -1135,9 +1167,13 @@ export default function JudgeDashboard() {
                             </div>
 
                             {photo.paymentStatus === 'Unpaid' ? (
-                              <div className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-center text-xs">
-                                Payment Pending
-                              </div>
+                              <button
+                                type="button"
+                                disabled
+                                className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-center text-xs cursor-not-allowed opacity-60 flex items-center justify-center gap-1.5"
+                              >
+                                Evaluation Disabled
+                              </button>
                             ) : (
                               photo.score?.approvalStatus !== 'Disapproved' && (
                                 <button

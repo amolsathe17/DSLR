@@ -1245,8 +1245,8 @@ export default function JudgeDashboard() {
                 </span>
               </div>
 
-              <div className="flex-grow flex items-center justify-center p-4">
-                <div className="relative w-full h-64 sm:h-80 md:h-full md:max-h-[68vh] flex items-center justify-center group cursor-zoom-in">
+              <div className="flex-grow flex items-center justify-center p-4 shrink-0">
+                <div className="relative w-full h-64 sm:h-80 md:h-full md:max-h-[68vh] flex items-center justify-center group cursor-zoom-in shrink-0">
                   <WatermarkPreview
                     src={getBackendUrl(activePhoto.fileUrl)}
                     className="w-full h-full max-h-[40vh] md:max-h-[68vh] object-contain rounded-lg shadow-lg"
@@ -1517,8 +1517,8 @@ export default function JudgeDashboard() {
               </button>
 
               {/* Left Side: Photo Zoom Detailed View */}
-              <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden">
-                <div className="relative w-full h-64 sm:h-80 lg:h-full lg:max-h-[68vh] flex items-center justify-center overflow-hidden">
+              <div className="w-full lg:flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden shrink-0 lg:shrink">
+                <div className="relative w-full h-64 sm:h-80 lg:h-full lg:max-h-[68vh] flex items-center justify-center overflow-hidden shrink-0">
                   <WatermarkPreview 
                     src={getBackendUrl(offlineZoomPhoto.fileUrl)} 
                     className="w-full h-full max-h-[40vh] lg:max-h-[68vh] object-contain rounded-lg shadow-lg" 

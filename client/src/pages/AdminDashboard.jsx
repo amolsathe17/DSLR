@@ -1944,7 +1944,54 @@ export default function AdminDashboard() {
                   )}
                 </div>
 
-
+                {/* Disapproved photos section */}
+                {disapprovedPhotos.length > 0 && (
+                  <div className="glass-panel border border-red-250 dark:border-red-900/40 rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
+                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                      <ThumbsDown size={16} className="text-red-500" />
+                      <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm">Disapproved by Judges ({disapprovedPhotos.length})</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                      {disapprovedPhotos.map((photo) => {
+                        const avgScore = photo.scores.length > 0
+                          ? (photo.scores.reduce((a, s) => a + (s.averageScore || 0), 0) / photo.scores.length).toFixed(1)
+                          : '0.0';
+                        return (
+                          <div 
+                            key={photo.photoId}
+                            onClick={() => setSelectedPhoto(photo)}
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-zoom-in flex flex-col justify-between group"
+                          >
+                            <div className="w-full aspect-video bg-slate-950 relative overflow-hidden flex items-center justify-center">
+                              <img 
+                                src={getBackendUrl(photo.fileUrl)} 
+                                alt={photo.title} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                crossOrigin="anonymous"
+                                referrerPolicy="no-referrer"
+                              />
+                              <span className="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm">
+                                Disapproved
+                              </span>
+                            </div>
+                            <div className="p-3 flex flex-col gap-0.5 text-left">
+                              <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate font-black">
+                                {photo.title}
+                              </h4>
+                              <p className="text-[10px] text-slate-500 font-semibold truncate">
+                                By: {photo.participantName}
+                              </p>
+                              <p className="text-[9px] text-indigo-500 font-semibold truncate uppercase tracking-wider">
+                                {photo.cameraModel}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Pending Evaluation section */}
                 {pendingPhotos.length > 0 && (

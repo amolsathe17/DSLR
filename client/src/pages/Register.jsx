@@ -5,8 +5,20 @@ import { getBackendUrl } from '../utils/url';
 import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, ShieldCheck, Key, Calendar, MapPin, Clock } from 'lucide-react';
 
 export default function Register() {
-  const { register, verifyOtp, requestMobileOtp, verifyMobileOtp, apiFetch } = useAuth();
+  const { user, register, verifyOtp, requestMobileOtp, verifyMobileOtp, apiFetch } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'Admin') {
+        navigate('/admin');
+      } else if (user.role === 'Judge') {
+        navigate('/judge');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [user, navigate]);
 
   const [event, setEvent] = useState(null);
 

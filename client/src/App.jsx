@@ -65,13 +65,14 @@ function MainLayout() {
       <main className="flex-grow">
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Register />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/info" element={<Landing />} />
           <Route path="/about" element={<About />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+
 
           {/* Protected Routes (Any logged-in user) */}
           <Route 

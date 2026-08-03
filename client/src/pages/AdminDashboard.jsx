@@ -1522,9 +1522,8 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* Tabs list */}
-      <div className="flex mb-8 overflow-x-auto justify-center sm:justify-start">
-        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 overflow-x-auto whitespace-nowrap min-w-max gap-1">
+      <div className="flex mb-8 overflow-x-auto justify-start w-full">
+        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 whitespace-nowrap min-w-max gap-1 mx-auto sm:mx-0">
           {[
             { id: 'overview', label: 'Overview', icon: BarChart },
             { id: 'participants', label: 'Participants', icon: Users },

@@ -640,6 +640,10 @@ export default function JudgeDashboard() {
                                 <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
                                 <span className="font-semibold text-slate-500 dark:text-slate-400">Ungraded: <strong className="text-slate-900 dark:text-white">{pendingCount}</strong></span>
                               </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-rose-500 shrink-0" />
+                                <span className="font-semibold text-slate-500 dark:text-slate-400">Unpaid: <strong className="text-slate-900 dark:text-white">{unpaidCount}</strong></span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -756,12 +760,29 @@ export default function JudgeDashboard() {
                                 </span>
                               </div>
                               
-                              {/* Visual Progress bar */}
-                              <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                <div
-                                  style={{ width: `${total ? (evaluated / total) * 100 : 0}%` }}
-                                  className="bg-indigo-600 h-full rounded-full transition-all duration-1000 ease-out"
-                                />
+                              {/* Stacked Horizontal Bar Chart */}
+                              <div className="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden flex">
+                                {total > 0 ? (
+                                  <>
+                                    <div
+                                      style={{ width: `${(approved / total) * 100}%` }}
+                                      className="bg-emerald-500 h-full transition-all duration-500 ease-out"
+                                      title={`Approved: ${approved}`}
+                                    />
+                                    <div
+                                      style={{ width: `${(disapproved / total) * 100}%` }}
+                                      className="bg-rose-500 h-full transition-all duration-500 ease-out"
+                                      title={`Disapproved: ${disapproved}`}
+                                    />
+                                    <div
+                                      style={{ width: `${((total - evaluated) / total) * 100}%` }}
+                                      className="bg-slate-350 dark:bg-slate-700 h-full transition-all duration-500 ease-out"
+                                      title={`Pending: ${total - evaluated}`}
+                                    />
+                                  </>
+                                ) : (
+                                  <div className="w-full bg-slate-200 dark:bg-slate-800 h-full" />
+                                )}
                               </div>
 
                               <div className="flex justify-between text-[9px] text-slate-400 mt-0.5 border-t border-slate-100 dark:border-slate-850 pt-1">
@@ -887,13 +908,13 @@ export default function JudgeDashboard() {
             </div>
 
             {events.length > 0 && (
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-500">Contest:</span>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto animate-in fade-in duration-150">
+                <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+                  <span className="text-xs font-semibold text-slate-500 shrink-0">Contest:</span>
                   <select
                     value={event?._id || ''}
                     onChange={(e) => handleEventChange(e.target.value)}
-                    className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                    className="flex-grow sm:flex-grow-0 px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-[200px] sm:max-w-xs truncate"
                   >
                     {events.map(e => (
                       <option key={e._id} value={e._id}>{e.title}</option>
@@ -902,14 +923,14 @@ export default function JudgeDashboard() {
                 </div>
 
                 {participants.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-500">Participant:</span>
+                  <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+                    <span className="text-xs font-semibold text-slate-500 shrink-0">Participant:</span>
                     <select
                       value={selectedSubmissionId}
                       onChange={(e) => setSelectedSubmissionId(e.target.value)}
-                      className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                      className="flex-grow sm:flex-grow-0 px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-[200px] sm:max-w-xs truncate"
                     >
-                      <option value="all">All Participants ({participants.length})</option>
+                      <option value="all">All ({participants.length})</option>
                       {participants.map(p => (
                         <option key={p.submissionId} value={p.submissionId}>{p.name}</option>
                       ))}
@@ -1209,7 +1230,7 @@ export default function JudgeDashboard() {
       {/* Online Evaluation Grade Sheet / Modal popup */}
       {activePhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-auto max-h-[90vh] md:h-[90vh] overflow-y-auto md:overflow-hidden">
+          <div className="relative w-full max-w-[95%] md:max-w-5xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left my-8 h-auto max-h-[90vh] md:h-[90vh] overflow-y-auto md:overflow-hidden mx-auto">
             
             {/* Left Column: Watermarked Zoom Preview */}
             <div className="w-full md:flex-1 bg-slate-950 relative overflow-hidden flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 h-auto shrink-0">
@@ -1485,7 +1506,7 @@ export default function JudgeDashboard() {
         const isReadOnly = user?.role === 'Admin' || hasConfirmed || offlineZoomPhoto.graded;
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-            <div className="relative w-full max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col lg:flex-row my-8 h-auto max-h-[90vh] lg:h-[90vh] overflow-y-auto lg:overflow-hidden">
+            <div className="relative w-full max-w-[95%] lg:max-w-7xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col lg:flex-row my-8 h-auto max-h-[90vh] lg:h-[90vh] overflow-y-auto lg:overflow-hidden mx-auto">
               
               {/* Close button */}
               <button
@@ -1498,7 +1519,7 @@ export default function JudgeDashboard() {
               {/* Left Side: Photo Zoom Detailed View */}
               <div className="flex-1 bg-slate-950 flex flex-col justify-between p-6 relative min-h-[300px] lg:min-h-[580px] overflow-hidden">
                 <div className="w-full flex-grow flex items-center justify-center overflow-hidden">
-                  <WatermarkPreview src={offlineZoomPhoto.fileUrl} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
+                  <WatermarkPreview src={getBackendUrl(offlineZoomPhoto.fileUrl)} className="w-full h-full max-h-[68vh] object-contain rounded-lg shadow-lg" enableZoom={true} />
                 </div>
                 
                 <div className="w-full mt-4 flex flex-col md:flex-row justify-between items-start gap-6 text-xs text-slate-300 pb-6 pr-2">
@@ -1545,7 +1566,7 @@ export default function JudgeDashboard() {
                   </div>
 
                   {/* Right: Description */}
-                  <div className="max-w-[320px] lg:max-w-[420px] text-left md:text-right flex flex-col gap-1 md:items-end shrink-0">
+                  <div className="w-full max-w-full md:max-w-[320px] lg:max-w-[420px] text-left md:text-right flex flex-col gap-1 md:items-end shrink-0">
                     <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
                       Photo Description
                     </span>
@@ -1680,7 +1701,7 @@ export default function JudgeDashboard() {
       {/* SIGN OFF CONFIRMATION MODAL */}
       {showSignOffModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-[95%] sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 mx-auto animate-in fade-in zoom-in-95 duration-200">
             <div className="text-center flex flex-col gap-2 items-center">
               <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-2xl mb-2">
                 <AlertTriangle size={28} />
@@ -1716,7 +1737,7 @@ export default function JudgeDashboard() {
       {/* SUCCESS MESSAGE MODAL */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-[95%] sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 mx-auto">
             <div className="text-center flex flex-col gap-2 items-center">
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-2xl mb-2">
                 <CheckCircle2 size={28} />
@@ -1743,7 +1764,7 @@ export default function JudgeDashboard() {
       {/* SIGNED OFF BLOCK MODAL */}
       {showSignedOffBlockModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md shadow-2xl text-center flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200 mx-auto">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-950/30 rounded-full flex items-center justify-center text-red-500 text-3xl font-bold">
               🛑
             </div>

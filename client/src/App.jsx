@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { EventProvider } from './context/EventContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -134,7 +135,9 @@ export default function App() {
     <Router>
       <ThemeProvider>
         <AuthProvider>
-          <MainLayout />
+          <EventProvider>
+            <MainLayout />
+          </EventProvider>
         </AuthProvider>
       </ThemeProvider>
     </Router>

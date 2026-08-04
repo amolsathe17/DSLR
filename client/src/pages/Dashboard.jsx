@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useEvent } from "../context/EventContext";
 import ExifReader from "exifreader";
 import confetti from "canvas-confetti";
 import {
@@ -30,6 +31,7 @@ import {
   Trophy,
   Eye,
   RotateCcw,
+  History,
 } from "lucide-react";
 import DragDropUpload from "../components/DragDropUpload";
 import WatermarkPreview from "../components/WatermarkPreview";
@@ -39,6 +41,7 @@ import { getBackendUrl, getApiBaseUrl } from "../utils/url";
 
 export default function Dashboard() {
   const { apiFetch, user, token } = useAuth();
+  const { allEvents: globalEvents } = useEvent();
 
   const COMMON_LABELS = [
     "Designer / Brand",
@@ -822,6 +825,16 @@ export default function Dashboard() {
             }`}
           >
             Digital Certificates
+          </button>
+          <button
+            onClick={() => setDashboardTab("event_history")}
+            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              dashboardTab === "event_history"
+                ? "bg-indigo-600 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            Event History
           </button>
         </div>
       </div>
@@ -2390,6 +2403,92 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+      {dashboardTab === "event_history" && (
+        <div className="animate-in fade-in duration-200 flex flex-col gap-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 rounded-2xl">
+              <History size={20} />
+            </div>
+            <div>
+              <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">My Event History</h2>
+              <p className="text-[10px] text-slate-400">All contests you have participated in or are currently enrolled in</p>
+            </div>
+          </div>
+
+          {allSubmissions.length === 0 && eventsList.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
+              <Calendar size={36} className="text-slate-300" />
+              <p className="text-xs font-semibold">You haven't participated in any events yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {eventsList.map(ev => {
+                const sub = allSubmissions.find(s => s.eventId === ev._id);
+                const statusColor = ev.status === 'Active' ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20' :
+                  ev.status === 'Completed' ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20' :
+                  ev.status === 'Closed' ? 'text-red-600 bg-red-50 dark:bg-red-950/20' :
+                  'text-slate-500 bg-slate-100 dark:bg-slate-800';
+                return (
+                  <div key={ev._id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">{ev.title}</h3>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Theme: {ev.theme || 'N/A'} • Type: {ev.eventType || 'N/A'}</p>
+                      </div>
+                      <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shrink-0 ${statusColor}`}>
+                        {ev.status}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
+                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Photos</span>
+                        <span className="text-base font-black text-slate-900 dark:text-white">{sub ? sub.photographs?.length || 0 : '—'}</span>
+                      </div>
+                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
+                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Payment</span>
+                        <span className={`text-[10px] font-black mt-0.5 block ${
+                          sub?.paymentStatus === 'Paid' ? 'text-emerald-600' :
+                          sub?.paymentStatus === 'Refunded' ? 'text-amber-500' : 'text-slate-400'
+                        }`}>{sub?.paymentStatus || 'None'}</span>
+                      </div>
+                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
+                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Status</span>
+                        <span className={`text-[10px] font-black mt-0.5 block ${
+                          sub?.isFinalSubmitted ? 'text-indigo-600' : 'text-slate-400'
+                        }`}>{sub ? (sub.isFinalSubmitted ? 'Finalized' : 'Draft') : 'Not Enrolled'}</span>
+                      </div>
+                    </div>
+
+                    {ev.winnersPublished && ev.winners?.length > 0 && (
+                      <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-indigo-600 mb-2 flex items-center gap-1">
+                          <Trophy size={10} /> Winners Declared
+                        </p>
+                        <div className="flex flex-col gap-1.5">
+                          {ev.winners.slice(0, 3).map((w, i) => (
+                            <div key={i} className="flex justify-between items-center text-[10px]">
+                              <span className="font-bold text-slate-700 dark:text-slate-300">{w.rank}</span>
+                              <span className="text-slate-400 truncate max-w-[60%]">{w.photoTitle || w.userName}</span>
+                              <span className="font-bold text-slate-900 dark:text-white">{w.score}/10</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="text-[9px] text-slate-400 flex justify-between">
+                      <span>Deadline: {ev.deadline ? new Date(ev.deadline).toLocaleDateString() : 'N/A'}</span>
+                      {sub?.entryNumber && <span className="font-mono">Entry #{sub.entryNumber}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }

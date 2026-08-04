@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useEvent } from '../context/EventContext';
 import {
   BarChart,
   Users,
@@ -44,6 +45,7 @@ import { getBackendUrl, getApiBaseUrl } from '../utils/url';
 
 export default function AdminDashboard() {
   const { apiFetch, user, updateProfile } = useAuth();
+  const { allEvents, selectedEvent, selectedEventId, setSelectedEventId, refreshEvents } = useEvent();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Stats states
@@ -436,7 +438,8 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const data = await apiFetch('/api/admin/dashboard-stats');
+      const eidParam = selectedEventId ? `&eventId=${selectedEventId}` : '';
+      const data = await apiFetch(`/api/admin/dashboard-stats?_t=${Date.now()}${eidParam}`);
       if (data.success) {
         setStats(data.stats);
         setCharts(data.charts);
@@ -449,7 +452,8 @@ export default function AdminDashboard() {
 
   const fetchParticipants = async () => {
     try {
-      const url = `/api/admin/participants?search=${partSearch}&city=${partCity}&isSuspended=${partSuspended}`;
+      const eidParam = selectedEventId ? `&eventId=${selectedEventId}` : '';
+      const url = `/api/admin/participants?search=${partSearch}&city=${partCity}&isSuspended=${partSuspended}${eidParam}`;
       const data = await apiFetch(url);
       if (data.success) {
         setParticipants(data.participants);
@@ -461,7 +465,8 @@ export default function AdminDashboard() {
 
   const fetchPhotographs = async () => {
     try {
-      const url = `/api/admin/photographs?search=${photoSearch}&category=${photoCategory}&status=${photoStatus}&dslrStatus=${photoDslrStatus}`;
+      const eidParam = selectedEventId ? `&eventId=${selectedEventId}` : '';
+      const url = `/api/admin/photographs?search=${photoSearch}&category=${photoCategory}&status=${photoStatus}&dslrStatus=${photoDslrStatus}${eidParam}`;
       const data = await apiFetch(url);
       if (data.success) {
         setPhotographs(data.photographs);
@@ -549,6 +554,15 @@ export default function AdminDashboard() {
   useEffect(() => {
     refreshAll();
   }, []);
+
+  // Re-fetch event-scoped data when selectedEventId changes
+  useEffect(() => {
+    if (selectedEventId) {
+      fetchStats();
+      fetchParticipants();
+      fetchPhotographs();
+    }
+  }, [selectedEventId]);
 
   // Watch filters
   useEffect(() => {
@@ -1510,16 +1524,35 @@ export default function AdminDashboard() {
           <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">Admin Dashboard</h1>
           <p className="text-xs text-slate-400">Total operational control and performance ledger analytics</p>
         </div>
-        <button
-          onClick={() => {
-            fetchEventHistory();
-            setShowHistoryModal(true);
-          }}
-          className="bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-semibold text-xs py-2 px-4 rounded-xl cursor-pointer shadow-sm transition-all flex items-center gap-1.5"
-        >
-          <History size={14} />
-          View Events History
-        </button>
+        {/* Event Selector */}
+        <div className="flex items-center gap-3">
+          {allEvents.length > 0 && (
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 shadow-sm">
+              <Calendar size={14} className="text-amber-500 shrink-0" />
+              <select
+                value={selectedEventId}
+                onChange={e => setSelectedEventId(e.target.value)}
+                className="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-transparent border-none outline-none cursor-pointer max-w-[200px]"
+              >
+                {allEvents.map(ev => (
+                  <option key={ev._id} value={ev._id}>
+                    {ev.title} ({ev.status})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <button
+            onClick={() => {
+              fetchEventHistory();
+              setActiveTab('event_history');
+            }}
+            className="bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-semibold text-xs py-2 px-4 rounded-xl cursor-pointer shadow-sm transition-all flex items-center gap-1.5"
+          >
+            <History size={14} />
+            Event History
+          </button>
+        </div>
       </div>
 
       <div className="flex mb-8 overflow-x-auto justify-start w-full">
@@ -1531,11 +1564,15 @@ export default function AdminDashboard() {
             { id: 'judges', label: 'Judges & Results', icon: Award },
             { id: 'events', label: 'Contests & Configuration', icon: Calendar },
             { id: 'categories_config', label: 'Categories', icon: Layers },
+            { id: 'event_history', label: 'Event History', icon: History },
             { id: 'profile_settings', label: 'Profile Settings & Notifications', icon: User }
           ].map(t => (
             <button
               key={t.id}
-              onClick={() => setActiveTab(t.id)}
+              onClick={() => {
+                setActiveTab(t.id);
+                if (t.id === 'event_history') fetchEventHistory();
+              }}
               className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
                 activeTab === t.id
                   ? 'bg-amber-600 text-white shadow-md'
@@ -3443,6 +3480,269 @@ export default function AdminDashboard() {
         </div>
       </>
     )}
+      {/* TAB: EVENT HISTORY */}
+      {activeTab === 'event_history' && (
+        <div className="animate-in fade-in duration-200 flex flex-col gap-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 rounded-2xl">
+              <History size={20} />
+            </div>
+            <div>
+              <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">Contest Ledger & Events History</h2>
+              <p className="text-[10px] text-slate-400">Complete historical financial audits, judges sign-off status, and winner lists</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-6 min-h-[600px]">
+            {/* Left Column: Events List */}
+            <div className="w-full md:w-1/3 flex flex-col gap-4">
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  value={historySearch}
+                  onChange={(e) => setHistorySearch(e.target.value)}
+                  placeholder="Search contests by name..."
+                  className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-600"
+                />
+              </div>
+
+              {historyLoading ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2 text-slate-400">
+                  <RefreshCw size={24} className="animate-spin text-indigo-600" />
+                  <span className="text-[10px] uppercase font-bold tracking-wider">Loading history data...</span>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2.5 overflow-y-auto max-h-[600px] pr-1">
+                  {eventHistory
+                    .filter(e => e.title.toLowerCase().includes(historySearch.toLowerCase()))
+                    .map(e => (
+                      <div
+                        key={e.id}
+                        onClick={() => setActiveHistoryEvent(e)}
+                        className={`p-3 border rounded-2xl cursor-pointer transition-all text-xs ${
+                          activeHistoryEvent?.id === e.id
+                            ? 'border-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/10'
+                            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-extrabold text-slate-900 dark:text-white line-clamp-2 leading-tight">
+                            {e.title}
+                          </span>
+                          <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${
+                            e.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' :
+                            e.status === 'Closed' ? 'bg-red-50 text-red-600 dark:bg-red-950/20' :
+                            e.status === 'Active' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' :
+                            'bg-slate-100 text-slate-500'
+                          }`}>
+                            {e.status}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-[9px] text-slate-400 mt-2">
+                          <span>Deadline: {new Date(e.deadline).toLocaleDateString()}</span>
+                          <span>Created: {new Date(e.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  {eventHistory.length === 0 && (
+                    <div className="text-center text-slate-400 py-12 text-xs">No contests found.</div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Detail View */}
+            <div className="flex-grow overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+              {activeHistoryEvent ? (
+                <div className="flex flex-col gap-6">
+                  {/* Event Title & status */}
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                      <h4 className="text-base font-extrabold text-slate-900 dark:text-white font-display">
+                        {activeHistoryEvent.title}
+                      </h4>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Theme: {activeHistoryEvent.theme}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${
+                        activeHistoryEvent.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' :
+                        activeHistoryEvent.status === 'Closed' ? 'bg-red-50 text-red-600 dark:bg-red-950/20' :
+                        activeHistoryEvent.status === 'Active' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' :
+                        'bg-slate-100 text-slate-500'
+                      }`}>
+                        {activeHistoryEvent.status}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setEventToDeleteId(activeHistoryEvent.id);
+                          setEventToDeleteTitle(activeHistoryEvent.title);
+                          setShowDeleteEventModal(true);
+                        }}
+                        className="p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 rounded-lg cursor-pointer transition-colors"
+                        data-tooltip="Archive & Delete Contest"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Quick stats grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl text-center">
+                      <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">Participants</span>
+                      <span className="text-lg font-black text-slate-950 dark:text-white mt-0.5 block">
+                        {activeHistoryEvent.participantsCount}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl text-center">
+                      <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">Total Photos</span>
+                      <span className="text-lg font-black text-slate-950 dark:text-white mt-0.5 block">
+                        {activeHistoryEvent.totalPhotos}
+                      </span>
+                      <span className="text-[8px] text-slate-400 mt-0.5 block">
+                        {activeHistoryEvent.approvedPhotos} Approved • {activeHistoryEvent.rejectedPhotos} Rejected
+                      </span>
+                    </div>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl text-center">
+                      <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">Total Payments</span>
+                      <span className="text-lg font-black text-slate-950 dark:text-white mt-0.5 block">
+                        {activeHistoryEvent.totalPaymentsCount}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100/50 dark:border-emerald-900/20 rounded-2xl text-center">
+                      <span className="text-[9px] text-emerald-600 dark:text-emerald-500 font-bold block uppercase tracking-wider">Total Revenue</span>
+                      <span className="text-lg font-black text-emerald-700 dark:text-emerald-400 mt-0.5 block font-display">
+                        ₹{activeHistoryEvent.totalRevenue?.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Winners section */}
+                  <div>
+                    <h5 className="font-display font-extrabold text-slate-900 dark:text-white text-[11px] mb-3 flex items-center gap-1.5 uppercase tracking-wide">
+                      <Award size={13} className="text-indigo-600" />
+                      Winners Circle
+                    </h5>
+                    {activeHistoryEvent.winnersPublished && activeHistoryEvent.winners?.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {activeHistoryEvent.winners.map((win, index) => (
+                          <div key={index} className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl flex flex-col gap-1.5">
+                            <span className="text-[8px] font-black uppercase tracking-wider text-indigo-600">{win.rank}</span>
+                            <p className="font-bold text-[11px] text-slate-900 dark:text-white line-clamp-1">{win.photoTitle || 'Untitled'}</p>
+                            <div className="text-[9px] text-slate-400 flex flex-col gap-0.5">
+                              <span>By: {win.userName}</span>
+                              <span>Reward: {win.reward}</span>
+                              <span className="font-bold text-slate-600 dark:text-slate-300">Grade: {win.score}/10</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] text-slate-400 p-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center">
+                        Winners rankings have not been declared/published for this contest yet.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Judges Section */}
+                  <div>
+                    <h5 className="font-display font-extrabold text-slate-900 dark:text-white text-[11px] mb-3 flex items-center gap-1.5 uppercase tracking-wide">
+                      <Users size={13} className="text-indigo-600" />
+                      Evaluation Judges Panel
+                    </h5>
+                    {activeHistoryEvent.judgeDetails?.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {activeHistoryEvent.judgeDetails.map((j) => (
+                          <div key={j.id} className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-xl flex justify-between items-center text-xs">
+                            <div>
+                              <p className="font-bold text-[11px] text-slate-900 dark:text-white">{j.name}</p>
+                              <p className="text-[9px] text-slate-400">{j.email} • {j.city}</p>
+                            </div>
+                            <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
+                              j.hasConfirmed 
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' 
+                                : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
+                            }`}>
+                              {j.hasConfirmed ? 'Signed Off' : 'Pending'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] text-slate-400 p-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center">
+                        No judges assigned to this event.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Split lists: Participants vs Payments */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Participants List */}
+                    <div>
+                      <h5 className="font-display font-extrabold text-slate-900 dark:text-white text-[11px] mb-3 uppercase tracking-wide">
+                        Contestants ({activeHistoryEvent.participantDetails?.length || 0})
+                      </h5>
+                      <div className="max-h-60 overflow-y-auto border border-slate-100 dark:border-slate-800 rounded-2xl divide-y divide-slate-100 dark:divide-slate-800">
+                        {activeHistoryEvent.participantDetails?.map((p) => (
+                          <div key={p.userId} className="p-2.5 flex justify-between items-center text-[10px] bg-slate-50/50 dark:bg-slate-950/30">
+                            <div>
+                              <p className="font-bold text-slate-900 dark:text-white">{p.name}</p>
+                              <p className="text-[9px] text-slate-400">{p.email}</p>
+                            </div>
+                            <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${
+                              p.isFinalSubmitted 
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' 
+                                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                            }`}>
+                              {p.isFinalSubmitted ? 'Finalized' : 'Draft'}
+                            </span>
+                          </div>
+                        ))}
+                        {(!activeHistoryEvent.participantDetails || activeHistoryEvent.participantDetails.length === 0) && (
+                          <div className="text-[10px] text-slate-400 p-6 text-center">No participants registered yet.</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Payments List */}
+                    <div>
+                      <h5 className="font-display font-extrabold text-slate-900 dark:text-white text-[11px] mb-3 uppercase tracking-wide">
+                        Revenue Transactions ({activeHistoryEvent.paymentDetails?.length || 0})
+                      </h5>
+                      <div className="max-h-60 overflow-y-auto border border-slate-100 dark:border-slate-800 rounded-2xl divide-y divide-slate-100 dark:divide-slate-800">
+                        {activeHistoryEvent.paymentDetails?.map((pay, pIdx) => (
+                          <div key={pIdx} className="p-2.5 text-[10px] bg-slate-50/50 dark:bg-slate-950/30 flex justify-between items-start">
+                            <div>
+                              <p className="font-bold text-slate-950 dark:text-white">{pay.userName}</p>
+                              <p className="text-[8px] text-slate-400 font-mono mt-0.5">TXN: {pay.transactionId}</p>
+                              <p className="text-[8px] text-slate-400 mt-0.5">Date: {new Date(pay.paymentDate).toLocaleDateString()}</p>
+                            </div>
+                            <div className="text-right">
+                              <span className="font-black text-emerald-600 dark:text-emerald-400 font-display block">
+                                ₹{pay.amount}
+                              </span>
+                              <span className="text-[8px] text-slate-400 mt-0.5 block">{pay.packageName}</span>
+                            </div>
+                          </div>
+                        ))}
+                        {(!activeHistoryEvent.paymentDetails || activeHistoryEvent.paymentDetails.length === 0) && (
+                          <div className="text-[10px] text-slate-400 p-6 text-center">No payment transactions processed yet.</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 p-12">
+                  <History size={36} className="text-slate-300 mb-2 animate-pulse" />
+                  <p className="text-xs font-semibold">Select a contest from the left to view complete history details.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TAB 7: PROFILE SETTINGS */}
       {activeTab === 'profile_settings' && (

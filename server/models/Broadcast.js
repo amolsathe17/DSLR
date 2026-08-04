@@ -10,6 +10,14 @@ const BroadcastSchema = new mongoose.Schema({
     enum: ['Participant', 'Judge', 'Both'],
     required: true
   },
+  eventId: {
+    type: String,
+    default: null
+  },
+  eventTitle: {
+    type: String,
+    default: null
+  },
   sentBy: {
     type: String,
     default: 'Admin'

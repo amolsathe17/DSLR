@@ -124,41 +124,55 @@ router.get('/events-history', protect, authorize('Admin'), async (req, res) => {
 router.get('/dashboard-stats', protect, authorize('Admin'), async (req, res) => {
   try {
     const todayStart = getStartOfDay(new Date());
+    const { eventId } = req.query;
 
-    // 1. Total Counts
-    const totalParticipants = await User.countDocuments({ role: 'Participant' });
-    const totalEntries = await Submission.countDocuments({ isFinalSubmitted: true });
-    
-    // Count total uploaded photos across all submissions
-    const submissions = await Submission.find({});
+    // Base filters scoped to event when provided
+    const submissionFilter = eventId ? { eventId } : {};
+    const paymentFilter = eventId ? { eventId } : {};
+
+    const submissions = await Submission.find(submissionFilter);
+
+    // 1. Total Counts — scoped to event
+    let totalParticipants;
+    if (eventId) {
+      const uniqueUserIds = [...new Set(submissions.map(s => s.userId))];
+      totalParticipants = uniqueUserIds.length;
+    } else {
+      totalParticipants = await User.countDocuments({ role: 'Participant' });
+    }
+
+    const totalEntries = eventId
+      ? submissions.filter(s => s.isFinalSubmitted).length
+      : await Submission.countDocuments({ isFinalSubmitted: true });
+
     let totalPhotos = 0;
-    submissions.forEach(s => {
-      totalPhotos += s.photographs.length;
-    });
+    submissions.forEach(s => { totalPhotos += s.photographs.length; });
 
-    // Registrations today
+    // Today registrations (global — not event-scoped)
     const todayRegistrations = await User.countDocuments({
       role: 'Participant',
       createdAt: { $gte: todayStart }
     });
 
-    // Revenue and payments stats
-    const successfulPayments = await Payment.find({ status: 'Success' });
+    // Revenue and payments stats — scoped to event
+    const successfulPayments = await Payment.find({ ...paymentFilter, status: 'Success' });
     const totalRevenue = successfulPayments.reduce((acc, curr) => acc + curr.amount, 0);
 
     const todayPaymentsCount = await Payment.countDocuments({
+      ...paymentFilter,
       status: 'Success',
       paymentDate: { $gte: todayStart }
     });
 
     const todayRevenue = (await Payment.find({
+      ...paymentFilter,
       status: 'Success',
       paymentDate: { $gte: todayStart }
     })).reduce((acc, curr) => acc + curr.amount, 0);
 
-    const pendingPaymentsCount = await Payment.countDocuments({ status: 'Pending' });
+    const pendingPaymentsCount = await Payment.countDocuments({ ...paymentFilter, status: 'Pending' });
 
-    // 2. Category-wise statistics
+    // 2. Category-wise statistics — scoped to event
     const categoryStatsMap = {};
     submissions.forEach(s => {
       s.photographs.forEach(p => {
@@ -170,7 +184,7 @@ router.get('/dashboard-stats', protect, authorize('Admin'), async (req, res) => 
       value: categoryStatsMap[name]
     }));
 
-    // 3. Daily Registrations & Revenue charts data (last 7 days)
+    // 3. Daily Registrations & Revenue charts data (last 7 days) — payments scoped to event
     const dailyStats = [];
     for (let i = 6; i >= 0; i--) {
       const day = new Date();
@@ -185,6 +199,7 @@ router.get('/dashboard-stats', protect, authorize('Admin'), async (req, res) => 
       });
 
       const dayPayments = await Payment.find({
+        ...paymentFilter,
         status: 'Success',
         paymentDate: { $gte: dayStart, $lt: dayEnd }
       });
@@ -225,9 +240,23 @@ router.get('/dashboard-stats', protect, authorize('Admin'), async (req, res) => 
 // @access  Private/Admin
 router.get('/participants', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { search, city, isSuspended, limit = 100, page = 1 } = req.query;
-    
+    const { search, city, isSuspended, limit = 100, page = 1, eventId } = req.query;
+
+    let userIds = null;
+    let eventSubmissionsMap = {}; // userId -> submission for this event
+
+    // If eventId provided, scope to participants who have submitted to that event
+    if (eventId) {
+      const eventSubs = await Submission.find({ eventId });
+      userIds = eventSubs.map(s => s.userId);
+      eventSubs.forEach(s => { eventSubmissionsMap[s.userId] = s; });
+      if (userIds.length === 0) {
+        return res.json({ success: true, participants: [], total: 0, pages: 0 });
+      }
+    }
+
     const filter = { role: 'Participant' };
+    if (userIds) filter._id = { $in: userIds };
     if (city) filter.city = city;
     if (isSuspended) filter.isSuspended = isSuspended === 'true';
 
@@ -248,9 +277,16 @@ router.get('/participants', protect, authorize('Admin'), async (req, res) => {
 
     // Fetch submission packages and payment statuses for each participant
     const detailedParticipants = await Promise.all(participants.map(async (p) => {
-      const submission = await Submission.findOne({ userId: p._id.toString() });
-      const payment = await Payment.findOne({ userId: p._id.toString() }).sort({ createdAt: -1 });
-      
+      // Use event-specific submission when eventId is provided
+      const submission = eventId
+        ? (eventSubmissionsMap[p._id.toString()] || null)
+        : await Submission.findOne({ userId: p._id.toString() });
+
+      const paymentQuery = eventId
+        ? { userId: p._id.toString(), eventId }
+        : { userId: p._id.toString() };
+      const payment = await Payment.findOne(paymentQuery).sort({ createdAt: -1 });
+
       let computedPaymentStatus = 'Unpaid';
       if (submission && submission.paymentStatus) {
         computedPaymentStatus = submission.paymentStatus;
@@ -277,7 +313,6 @@ router.get('/participants', protect, authorize('Admin'), async (req, res) => {
         isFinalSubmitted: submission ? submission.isFinalSubmitted : false,
         paymentStatus: computedPaymentStatus,
         photosCount: submission ? submission.photographs.length : 0,
-        // Entry metadata
         entryNumber: submission ? submission.entryNumber : 'N/A',
         amount: submission ? submission.amount : 0,
         photoLimit: submission ? submission.photoLimit : 0,
@@ -438,10 +473,10 @@ router.delete('/judges/:id', protect, authorize('Admin'), async (req, res) => {
 // @access  Private/Admin
 router.get('/photographs', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { search, category, status, dslrStatus } = req.query;
+    const { search, category, status, dslrStatus, eventId } = req.query;
     
-    // Find all submissions containing photographs
-    const query = {};
+    // Find submissions — scoped to event when provided
+    const query = eventId ? { eventId } : {};
     const submissions = await Submission.find(query);
 
     let allPhotos = [];
@@ -641,7 +676,9 @@ router.post('/photographs/assign-judges', protect, authorize('Admin'), async (re
 // @access  Private/Admin
 router.get('/transactions', protect, authorize('Admin'), async (req, res) => {
   try {
-    const transactions = await Payment.find({}).sort({ createdAt: -1 });
+    const { eventId } = req.query;
+    const filter = eventId ? { eventId } : {};
+    const transactions = await Payment.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, transactions });
   } catch (error) {
     console.error(error);
@@ -708,7 +745,7 @@ router.post('/participants/:id/refund', protect, authorize('Admin'), async (req,
 // @access  Private/Admin
 router.post('/broadcasts', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { message, recipientType } = req.body;
+    const { message, recipientType, eventId } = req.body;
     if (!message || !message.trim()) {
       return res.status(400).json({ success: false, message: 'Notification message is required' });
     }
@@ -721,10 +758,11 @@ router.post('/broadcasts', protect, authorize('Admin'), async (req, res) => {
     const broadcast = await Broadcast.create({
       message: message.trim(),
       recipientType,
-      sentBy: req.user.name || 'Admin'
+      sentBy: req.user.name || 'Admin',
+      ...(eventId ? { eventId } : {})
     });
 
-    // 2. Query target users
+    // 2. Query target users — scoped to event participants when eventId provided
     const User = require('../models/User');
     let targetRoles = [];
     if (recipientType === 'Participant') {
@@ -735,7 +773,25 @@ router.post('/broadcasts', protect, authorize('Admin'), async (req, res) => {
       targetRoles = ['Participant', 'Judge'];
     }
 
-    const users = await User.find({ role: { $in: targetRoles } });
+    let users;
+    if (eventId) {
+      // Only notify users enrolled in this event (participants via submissions, judges via event.assignedJudges)
+      const eventDoc = await Event.findById(eventId);
+      if (recipientType === 'Judge' || recipientType === 'Both') {
+        const judgeIds = eventDoc?.assignedJudges || [];
+        const judges = await User.find({ _id: { $in: judgeIds }, role: 'Judge' });
+        const participantSubs = recipientType !== 'Judge' ? await Submission.find({ eventId }) : [];
+        const participantIds = [...new Set(participantSubs.map(s => s.userId))];
+        const participants = recipientType !== 'Judge' ? await User.find({ _id: { $in: participantIds }, role: 'Participant' }) : [];
+        users = [...judges, ...participants];
+      } else {
+        const subs = await Submission.find({ eventId });
+        const participantIds = [...new Set(subs.map(s => s.userId))];
+        users = await User.find({ _id: { $in: participantIds }, role: 'Participant' });
+      }
+    } else {
+      users = await User.find({ role: { $in: targetRoles } });
+    }
 
     // 3. Push to each user's notifications array
     for (const u of users) {

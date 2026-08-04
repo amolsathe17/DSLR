@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Camera, ShieldAlert, Award, Star, Star as StarIcon, CheckCircle2, ChevronRight, X, Check, AlertTriangle, Clock, XCircle, ListChecks, Layers, BarChart2 } from 'lucide-react';
+import { Camera, ShieldAlert, Award, Star, Star as StarIcon, CheckCircle2, ChevronRight, X, Check, AlertTriangle, Clock, XCircle, ListChecks, Layers, BarChart2, History } from 'lucide-react';
 import WatermarkPreview from '../components/WatermarkPreview';
 import { getBackendUrl } from '../utils/url';
 
@@ -516,6 +516,16 @@ export default function JudgeDashboard() {
             }`}
           >
             Evaluation Portal Workspace
+          </button>
+          <button
+            onClick={() => setJudgeDashboardTab("event_history")}
+            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              judgeDashboardTab === "event_history"
+                ? "bg-emerald-600 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            Event History
           </button>
         </div>
       </div>
@@ -1799,6 +1809,139 @@ export default function JudgeDashboard() {
               Close
             </button>
           </div>
+        </div>
+      )}
+
+      {judgeDashboardTab === "event_history" && (
+        <div className="animate-in fade-in duration-200 flex flex-col gap-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-2xl">
+              <History size={20} />
+            </div>
+            <div>
+              <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">My Judging History</h2>
+              <p className="text-[10px] text-slate-400">All contests you have been assigned to evaluate as a jury member</p>
+            </div>
+          </div>
+
+          {events.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
+              <History size={36} className="text-slate-300" />
+              <p className="text-xs font-semibold">You haven't been assigned to any events yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {events.map(ev => {
+                const evPhotos = allPhotographsByEvent[ev._id] || [];
+                const totalPhotos = evPhotos.length;
+                const gradedPhotos = evPhotos.filter(p => p.graded).length;
+                const disapprovedPhotos = evPhotos.filter(p => p.graded && p.score?.approvalStatus === 'Disapproved').length;
+                const avgScore = totalPhotos > 0
+                  ? (evPhotos.reduce((sum, p) => sum + (p.score?.averageScore || 0), 0) / totalPhotos).toFixed(1)
+                  : '—';
+                const isActive = ev._id === event?._id;
+                const judgeEntry = ev.assignedJudges?.find ? ev.judgeDetails?.find(j => j.id === user?.id) : null;
+                const hasSignedOff = ev.confirmedJudges?.includes(user?.id) || false;
+
+                const statusColor = ev.status === 'Active' ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20' :
+                  ev.status === 'Completed' ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20' :
+                  ev.status === 'Closed' ? 'text-red-600 bg-red-50 dark:bg-red-950/20' :
+                  'text-slate-500 bg-slate-100 dark:bg-slate-800';
+
+                return (
+                  <div
+                    key={ev._id}
+                    className={`bg-white dark:bg-slate-900 border rounded-3xl p-5 flex flex-col gap-4 shadow-sm transition-all ${
+                      isActive
+                        ? 'border-emerald-400 dark:border-emerald-700'
+                        : 'border-slate-200 dark:border-slate-800'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">{ev.title}</h3>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Theme: {ev.theme || 'N/A'}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {isActive && (
+                          <span className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">
+                            Current
+                          </span>
+                        )}
+                        <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${statusColor}`}>
+                          {ev.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Evaluation stats */}
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
+                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Assigned</span>
+                        <span className="text-base font-black text-slate-900 dark:text-white">{totalPhotos}</span>
+                      </div>
+                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
+                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Graded</span>
+                        <span className="text-base font-black text-emerald-600 dark:text-emerald-400">{gradedPhotos}</span>
+                      </div>
+                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
+                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Disapproved</span>
+                        <span className="text-base font-black text-red-500">{disapprovedPhotos}</span>
+                      </div>
+                      <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100/50 dark:border-emerald-900/20 rounded-xl text-center">
+                        <span className="text-[8px] text-emerald-600 font-bold block uppercase tracking-wider">Avg Score</span>
+                        <span className="text-base font-black text-emerald-700 dark:text-emerald-400">{avgScore}</span>
+                      </div>
+                    </div>
+
+                    {/* Progress bar */}
+                    {totalPhotos > 0 && (
+                      <div>
+                        <div className="flex justify-between text-[9px] text-slate-400 mb-1">
+                          <span>Evaluation Progress</span>
+                          <span>{gradedPhotos}/{totalPhotos} ({Math.round((gradedPhotos/totalPhotos)*100)}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
+                          <div
+                            className="bg-emerald-500 h-1.5 rounded-full transition-all"
+                            style={{ width: `${Math.round((gradedPhotos / totalPhotos) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Sign-off status */}
+                    <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3">
+                      <div className="text-[9px] text-slate-400">
+                        Deadline: {ev.deadline ? new Date(ev.deadline).toLocaleDateString() : 'N/A'}
+                      </div>
+                      <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 ${
+                        hasSignedOff
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                          : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
+                      }`}>
+                        {hasSignedOff ? (
+                          <><Check size={9} /> Signed Off</>
+                        ) : (
+                          <><Clock size={9} /> Pending Sign-Off</>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Switch to this event button */}
+                    {!isActive && ev.status === 'Active' && (
+                      <button
+                        onClick={() => handleEventChange(ev._id)}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-2 rounded-xl cursor-pointer transition-colors"
+                      >
+                        Switch to This Event
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

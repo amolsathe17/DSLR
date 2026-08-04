@@ -1,819 +1,289 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  Camera, Calendar, Award, Users, ChevronRight, ArrowRight,
-  Sparkles, MapPin, Star, Palette, PenLine, Scissors,
-  Trophy, CheckCircle2, Zap, Shield, Globe, Image, Play,
-  ChevronDown, BarChart2, BookOpen, Layers, Clock, Lock,
-  TrendingUp, Gift, Target, Flame, AlertCircle
-} from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-
-// ── Event type helpers ────────────────────────────────────────────────────────
-
-const EVENT_ICONS = {
-  Photography: Camera,
-  Painting: Palette,
-  Drawing: PenLine,
-  'Paper Craft': Scissors,
-  default: Image,
-};
-
-const EVENT_COLORS = {
-  Photography: {
-    bg: 'bg-indigo-50 border-indigo-200/60',
-    badge: 'bg-indigo-100 text-indigo-700',
-    icon: 'text-indigo-600',
-    btn: 'bg-indigo-600 hover:bg-indigo-700',
-    glow: 'from-indigo-400/20',
-    countdown: 'text-indigo-600',
-    header: 'from-indigo-600 to-violet-700',
-  },
-  Painting: {
-    bg: 'bg-rose-50 border-rose-200/60',
-    badge: 'bg-rose-100 text-rose-700',
-    icon: 'text-rose-500',
-    btn: 'bg-rose-500 hover:bg-rose-600',
-    glow: 'from-rose-400/20',
-    countdown: 'text-rose-500',
-    header: 'from-rose-500 to-pink-600',
-  },
-  Drawing: {
-    bg: 'bg-amber-50 border-amber-200/60',
-    badge: 'bg-amber-100 text-amber-700',
-    icon: 'text-amber-500',
-    btn: 'bg-amber-500 hover:bg-amber-600',
-    glow: 'from-amber-400/20',
-    countdown: 'text-amber-500',
-    header: 'from-amber-500 to-orange-600',
-  },
-  'Paper Craft': {
-    bg: 'bg-emerald-50 border-emerald-200/60',
-    badge: 'bg-emerald-100 text-emerald-700',
-    icon: 'text-emerald-600',
-    btn: 'bg-emerald-600 hover:bg-emerald-700',
-    glow: 'from-emerald-400/20',
-    countdown: 'text-emerald-600',
-    header: 'from-emerald-600 to-teal-700',
-  },
-  default: {
-    bg: 'bg-slate-50 border-slate-200/60',
-    badge: 'bg-slate-100 text-slate-600',
-    icon: 'text-slate-500',
-    btn: 'bg-slate-700 hover:bg-slate-800',
-    glow: 'from-slate-400/20',
-    countdown: 'text-slate-700',
-    header: 'from-slate-600 to-slate-800',
-  },
-};
-
-function getColors(type) {
-  return EVENT_COLORS[type] || EVENT_COLORS.default;
-}
-
-// ── Countdown hook ─────────────────────────────────────────────────────────────
-
-function useCountdown(deadline) {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
-  useEffect(() => {
-    if (!deadline) return;
-    const tick = () => {
-      const diff = +new Date(deadline) - +new Date();
-      if (diff <= 0) {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true });
-        return;
-      }
-      setTimeLeft({
-        days:    Math.floor(diff / 86400000),
-        hours:   Math.floor((diff / 3600000) % 24),
-        minutes: Math.floor((diff / 60000) % 60),
-        seconds: Math.floor((diff / 1000) % 60),
-        expired: false,
-      });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [deadline]);
-  return timeLeft;
-}
-
-// ── Countdown Unit ─────────────────────────────────────────────────────────────
-
-function CountdownUnit({ value, label, colorClass }) {
-  return (
-    <div className="flex flex-col items-center bg-slate-100 border border-slate-200/60 px-2.5 py-1.5 rounded-xl min-w-[44px]">
-      <span className={`font-display font-black text-lg tabular-nums leading-none ${colorClass}`}>
-        {String(value).padStart(2, '0')}
-      </span>
-      <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5 text-slate-400">{label}</span>
-    </div>
-  );
-}
-
-// ── Prize Row ─────────────────────────────────────────────────────────────────
-
-function PrizeRow({ prize, idx, faded }) {
-  const medals = ['🥇', '🥈', '🥉'];
-  const base = faded
-    ? 'bg-slate-50 border-slate-100 text-slate-400'
-    : idx === 0
-      ? 'bg-amber-50 border-amber-200/70 text-amber-800'
-      : idx === 1
-        ? 'bg-slate-50 border-slate-200 text-slate-600'
-        : 'bg-orange-50 border-orange-100 text-orange-700';
-
-  return (
-    <div className={`flex items-center gap-3 px-3 py-2 rounded-xl border text-xs font-semibold ${base}`}>
-      <span className="text-base shrink-0">{medals[idx] || '🏅'}</span>
-      <div className="flex-1 min-w-0">
-        <p className={`font-bold text-[10px] uppercase tracking-wider ${faded ? 'opacity-60' : 'opacity-70'}`}>{prize.rank}</p>
-        <p className="font-black text-sm truncate">{prize.reward}</p>
-        {prize.description && (
-          <p className={`text-[10px] truncate mt-0.5 ${faded ? 'opacity-40' : 'opacity-60'}`}>{prize.description}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Active Event Card ─────────────────────────────────────────────────────────
-
-function ActiveEventCard({ event, onEnroll }) {
-  const colors    = getColors(event.eventType);
-  const Icon      = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
-  const countdown = useCountdown(event.deadline);
-
-  return (
-    <div className={`group relative flex flex-col rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 bg-white border ${colors.bg}`}>
-      <div className={`absolute inset-0 bg-gradient-to-br ${colors.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-
-      {/* Coloured header */}
-      <div className={`relative bg-gradient-to-br ${colors.header} px-5 pt-5 pb-10 text-white`}>
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
-            <Icon size={20} className="text-white" />
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              Live · Active
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
-              {event.eventType}
-            </span>
-          </div>
-        </div>
-        <h3 className="font-display font-black text-lg leading-tight line-clamp-2">{event.title}</h3>
-        {event.theme && <p className="text-white/70 text-[11px] mt-1 italic">"{event.theme}"</p>}
-      </div>
-
-      {/* Countdown overlaps header */}
-      <div className="relative mx-4 -mt-6 z-10">
-        <div className="bg-white border border-slate-100 rounded-2xl px-4 py-3 shadow-md">
-          {countdown.expired ? (
-            <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Submissions Closed</p>
-          ) : (
-            <>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest text-center mb-2">Time Remaining</p>
-              <div className="flex items-center justify-center gap-1.5">
-                <CountdownUnit value={countdown.days}    label="Days" colorClass={colors.countdown} />
-                <span className="text-slate-200 font-black">:</span>
-                <CountdownUnit value={countdown.hours}   label="Hrs"  colorClass={colors.countdown} />
-                <span className="text-slate-200 font-black">:</span>
-                <CountdownUnit value={countdown.minutes} label="Min"  colorClass={colors.countdown} />
-                <span className="text-slate-200 font-black">:</span>
-                <CountdownUnit value={countdown.seconds} label="Sec"  colorClass={colors.countdown} />
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {event.description && (
-        <p className="relative px-5 pt-3 text-xs text-slate-500 leading-relaxed line-clamp-2">{event.description}</p>
-      )}
-
-      {/* Prizes */}
-      {event.prizes?.length > 0 && (
-        <div className="relative px-5 pt-4 flex flex-col gap-1.5">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Top Prizes</p>
-          {event.prizes.slice(0, 3).map((p, i) => (
-            <PrizeRow key={i} prize={p} idx={i} faded={false} />
-          ))}
-        </div>
-      )}
-
-      {/* Meta */}
-      <div className="relative px-5 pt-4 pb-3 flex flex-col gap-1.5 text-[10px] text-slate-500 flex-grow">
-        <div className="flex items-center gap-1.5">
-          <Calendar size={11} className="shrink-0 text-slate-400" />
-          <span>Deadline: <strong className="text-slate-700">{new Date(event.deadline).toLocaleDateString(undefined, { dateStyle: 'medium' })}</strong></span>
-        </div>
-        {event.venue && (
-          <div className="flex items-center gap-1.5">
-            <MapPin size={11} className="shrink-0 text-slate-400" />
-            <span className="truncate">{event.venue}</span>
-          </div>
-        )}
-        {event.exhibitionFromDate && (
-          <div className="flex items-center gap-1.5">
-            <Calendar size={11} className="shrink-0 text-slate-400" />
-            <span>Exhibition: <strong className="text-slate-700">{new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}</strong>
-              {event.exhibitionToDate && ` – ${new Date(event.exhibitionToDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}`}
-            </span>
-          </div>
-        )}
-        {event.packages?.length > 0 && (
-          <div className="flex items-center gap-1.5">
-            <Star size={11} className="shrink-0 text-slate-400" />
-            <span>From <strong className="text-slate-700">₹{Math.min(...event.packages.map(p => p.price))}</strong> · {event.packages.length} package{event.packages.length > 1 ? 's' : ''}</span>
-          </div>
-        )}
-      </div>
-
-      {/* CTA */}
-      <div className="relative px-5 pb-5 pt-1">
-        <button
-          onClick={() => onEnroll(event)}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-white shadow-sm transition-all cursor-pointer ${colors.btn}`}
-        >
-          Enroll in This Event <ArrowRight size={13} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Upcoming Event Card ────────────────────────────────────────────────────────
-
-function UpcomingEventCard({ event, onEnroll }) {
-  const colors = getColors(event.eventType);
-  const Icon   = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
-
-  return (
-    <div className={`group relative flex flex-col rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white border ${colors.bg}`}>
-      <div className={`absolute inset-0 bg-gradient-to-br ${colors.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-
-      {/* Header */}
-      <div className={`relative bg-gradient-to-br ${colors.header} px-5 pt-5 pb-8 text-white`}>
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
-            <Icon size={20} className="text-white" />
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="px-2 py-0.5 rounded-full bg-blue-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
-              <Clock size={8} /> Upcoming
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
-              {event.eventType}
-            </span>
-          </div>
-        </div>
-        <h3 className="font-display font-black text-lg leading-tight line-clamp-2">{event.title}</h3>
-        {event.theme && <p className="text-white/70 text-[11px] mt-1 italic">"{event.theme}"</p>}
-      </div>
-
-      {/* "Opens Soon" pill */}
-      <div className="relative mx-4 -mt-4 z-10">
-        <div className="bg-white border border-blue-100 rounded-xl px-4 py-2.5 shadow-sm flex items-center gap-2">
-          <Clock size={13} className="text-blue-500 shrink-0" />
-          <div>
-            <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest">Registration Opens Soon</p>
-            {event.deadline && (
-              <p className="text-[10px] text-slate-500 font-semibold mt-0.5">
-                Event Deadline: {new Date(event.deadline).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {event.description && (
-        <p className="relative px-5 pt-3 text-xs text-slate-500 leading-relaxed line-clamp-2">{event.description}</p>
-      )}
-
-      {/* Prize preview */}
-      {event.prizes?.length > 0 && (
-        <div className="relative px-5 pt-4 flex flex-col gap-1.5">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Prizes (Preview)</p>
-          {event.prizes.slice(0, 3).map((p, i) => (
-            <PrizeRow key={i} prize={p} idx={i} faded={false} />
-          ))}
-        </div>
-      )}
-
-      {/* Meta */}
-      <div className="relative px-5 pt-4 pb-3 flex flex-col gap-1.5 text-[10px] text-slate-500 flex-grow">
-        {event.venue && (
-          <div className="flex items-center gap-1.5">
-            <MapPin size={11} className="shrink-0 text-slate-400" />
-            <span className="truncate">{event.venue}</span>
-          </div>
-        )}
-        {event.exhibitionFromDate && (
-          <div className="flex items-center gap-1.5">
-            <Calendar size={11} className="shrink-0 text-slate-400" />
-            <span>Exhibition: <strong className="text-slate-700">{new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}</strong>
-              {event.exhibitionToDate && ` – ${new Date(event.exhibitionToDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}`}
-            </span>
-          </div>
-        )}
-        {event.packages?.length > 0 && (
-          <div className="flex items-center gap-1.5">
-            <Star size={11} className="shrink-0 text-slate-400" />
-            <span>From <strong className="text-slate-700">₹{Math.min(...event.packages.map(p => p.price))}</strong> · {event.packages.length} package{event.packages.length > 1 ? 's' : ''}</span>
-          </div>
-        )}
-      </div>
-
-      {/* CTA */}
-      <div className="relative px-5 pb-5 pt-1">
-        <button
-          onClick={() => onEnroll(event)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold border-2 border-blue-300 text-blue-600 hover:bg-blue-50 transition-all cursor-pointer"
-        >
-          Register to Get Notified <ChevronRight size={13} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Closed Event Card ─────────────────────────────────────────────────────────
-
-function ClosedEventCard({ event }) {
-  const colors = getColors(event.eventType);
-  const Icon   = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
-
-  return (
-    <div className="group relative flex flex-col rounded-3xl overflow-hidden border border-slate-200/60 bg-white shadow-sm hover:shadow-md transition-all duration-300">
-      <div className="absolute inset-0 bg-slate-50/40 pointer-events-none rounded-3xl" />
-
-      {/* Header – desaturated */}
-      <div className="relative bg-gradient-to-br from-slate-500 to-slate-700 px-5 pt-5 pb-8 text-white">
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
-            <Icon size={20} className="text-white/80" />
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="px-2 py-0.5 rounded-full bg-slate-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
-              <Lock size={8} /> Closed
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-white/20 text-white/70 text-[9px] font-bold uppercase tracking-wider">
-              {event.eventType}
-            </span>
-          </div>
-        </div>
-        <h3 className="font-display font-black text-lg leading-tight line-clamp-2 text-white/90">{event.title}</h3>
-        {event.theme && <p className="text-white/50 text-[11px] mt-1 italic">"{event.theme}"</p>}
-      </div>
-
-      {/* Closed banner */}
-      <div className="relative mx-4 -mt-4 z-10">
-        <div className="bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 shadow-sm flex items-center gap-2">
-          <Lock size={13} className="text-slate-400 shrink-0" />
-          <div>
-            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Submissions Closed</p>
-            {event.deadline && (
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
-                Closed: {new Date(event.deadline).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {event.description && (
-        <p className="relative px-5 pt-3 text-xs text-slate-400 leading-relaxed line-clamp-2">{event.description}</p>
-      )}
-
-      {/* Prizes – faded */}
-      {event.prizes?.length > 0 && (
-        <div className="relative px-5 pt-4 flex flex-col gap-1.5">
-          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Prize Structure</p>
-          {event.prizes.slice(0, 3).map((p, i) => (
-            <PrizeRow key={i} prize={p} idx={i} faded={true} />
-          ))}
-        </div>
-      )}
-
-      {/* Meta */}
-      <div className="relative px-5 pt-4 pb-3 flex flex-col gap-1.5 text-[10px] text-slate-400 flex-grow">
-        {event.venue && (
-          <div className="flex items-center gap-1.5">
-            <MapPin size={11} className="shrink-0 text-slate-300" />
-            <span className="truncate">{event.venue}</span>
-          </div>
-        )}
-        {event.exhibitionFromDate && (
-          <div className="flex items-center gap-1.5">
-            <Calendar size={11} className="shrink-0 text-slate-300" />
-            <span>Exhibition: {new Date(event.exhibitionFromDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-              {event.exhibitionToDate && ` – ${new Date(event.exhibitionToDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}`}
-            </span>
-          </div>
-        )}
-        {event.winnersPublished && (
-          <div className="flex items-center gap-1.5">
-            <Trophy size={11} className="shrink-0 text-amber-400" />
-            <span className="text-amber-600 font-bold">Winners have been announced!</span>
-          </div>
-        )}
-        {event.packages?.length > 0 && (
-          <div className="flex items-center gap-1.5">
-            <Star size={11} className="shrink-0 text-slate-300" />
-            <span className="line-through">From ₹{Math.min(...event.packages.map(p => p.price))}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="relative px-5 pb-5 pt-1">
-        <div className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-400 border border-slate-200 select-none">
-          <Lock size={12} /> Registration Closed
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Stats Strip ───────────────────────────────────────────────────────────────
-
-function StatStrip({ events }) {
-  const totalActive   = events.filter(e => e.status === 'Active').length;
-  const totalUpcoming = events.filter(e => e.status === 'Draft').length;
-  const totalClosed   = events.filter(e => ['Closed', 'Completed', 'Archived'].includes(e.status)).length;
-  const types         = [...new Set(events.map(e => e.eventType))];
-
-  const stats = [
-    { icon: Flame,      label: 'Active Events',   value: totalActive   || '0', color: 'text-indigo-500' },
-    { icon: TrendingUp, label: 'Upcoming Events',  value: totalUpcoming || '0', color: 'text-blue-500'   },
-    { icon: Trophy,     label: 'Past Events',      value: totalClosed   || '0', color: 'text-amber-500'  },
-    { icon: Layers,     label: 'Art Categories',   value: types.length  || '0', color: 'text-emerald-500'},
-  ];
-
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {stats.map(({ icon: Icon, label, value, color }) => (
-        <div key={label} className="flex flex-col items-center gap-2 bg-white border border-slate-100 rounded-2xl py-5 px-4 shadow-sm text-center hover:shadow-md transition-all">
-          <Icon size={18} className={color} />
-          <span className="font-display font-black text-2xl text-slate-900">{value}</span>
-          <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">{label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
+  Camera,
+  Award,
+  Users,
+  ChevronRight,
+  ArrowRight,
+  Sparkles,
+  Star,
+  Trophy,
+  CheckCircle2,
+  Shield,
+  Image,
+  ChevronDown,
+  BarChart2,
+  Layers,
+  Target,
+  Flame,
+  TrendingUp,
+  Gift,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 // ── How It Works steps ────────────────────────────────────────────────────────
 
 const STEPS = [
-  { num: '01', icon: Target,   title: 'Choose an Event',   desc: 'Browse active, upcoming, and past events across all art categories and pick the one for you.' },
-  { num: '02', icon: Users,    title: 'Register / Login',  desc: 'Create your participant account or log in to your existing profile to get started.' },
-  { num: '03', icon: Image,    title: 'Submit Your Work',  desc: 'Upload your entries through the secure portal within the submission deadline.' },
-  { num: '04', icon: Trophy,   title: 'Get Judged & Win',  desc: 'Expert judges review your work and the best entries win exciting prizes and certificates.' },
+  {
+    num: "01",
+    icon: Target,
+    title: "Choose an Event",
+    desc: "Browse active, upcoming, and past events across all art categories and pick the one for you.",
+  },
+  {
+    num: "02",
+    icon: Users,
+    title: "Register / Login",
+    desc: "Create your participant account or log in to your existing profile to get started.",
+  },
+  {
+    num: "03",
+    icon: Image,
+    title: "Submit Your Work",
+    desc: "Upload your entries through the secure portal within the submission deadline.",
+  },
+  {
+    num: "04",
+    icon: Trophy,
+    title: "Get Judged & Win",
+    desc: "Expert judges review your work and the best entries win exciting prizes and certificates.",
+  },
 ];
 
-// ── Hero Event Preview card (inside hero section) ─────────────────────────────
+// ── Why Participate cards ─────────────────────────────────────────────────────
 
-function HeroEventPreview({ event, onEnroll }) {
-  const colors = getColors(event.eventType);
-  return (
-    <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl overflow-hidden">
-      <div className={`bg-gradient-to-r ${colors.header} px-6 py-5 text-white`}>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full">
-            Featured · {event.eventType}
-          </span>
-          <span className="flex items-center gap-1.5 text-[10px] font-bold">
-            <span className={`w-1.5 h-1.5 rounded-full ${event.status === 'Active' ? 'bg-emerald-400 animate-pulse' : 'bg-blue-400'}`} />
-            {event.status === 'Active' ? 'Live Now' : 'Opening Soon'}
-          </span>
-        </div>
-        <h2 className="font-display font-black text-xl leading-tight">{event.title}</h2>
-        {event.theme && <p className="text-white/70 text-xs mt-1">"{event.theme}"</p>}
-      </div>
-      <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {event.prizes?.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Top Prizes</p>
-            {event.prizes.slice(0, 3).map((p, i) => (
-              <div key={i} className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-semibold ${i === 0 ? 'bg-amber-50 border border-amber-200/60 text-amber-800' : 'bg-slate-50 border border-slate-100 text-slate-600'}`}>
-                <span className="font-bold">{p.rank}</span>
-                <span>{p.reward}</span>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="flex flex-col gap-2 justify-between">
-          <div className="flex flex-col gap-1.5 text-xs text-slate-500">
-            <div className="flex items-center gap-1.5">
-              <Calendar size={12} className="text-slate-400" />
-              Deadline: <strong className="text-slate-700 ml-0.5">{new Date(event.deadline).toLocaleDateString(undefined, { dateStyle: 'medium' })}</strong>
-            </div>
-            {event.venue && (
-              <div className="flex items-center gap-1.5">
-                <MapPin size={12} className="text-slate-400" />
-                <span className="truncate">{event.venue}</span>
-              </div>
-            )}
-            {event.packages?.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <Star size={12} className="text-amber-400" />
-                From <strong className="text-indigo-600 ml-0.5">₹{Math.min(...event.packages.map(p => p.price))}</strong>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={() => onEnroll(event)}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-white shadow-sm transition-all cursor-pointer ${colors.btn}`}
-          >
-            {event.status === 'Active' ? 'Enroll Now' : 'Get Notified'} <ArrowRight size={13} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+const WHY_CARDS = [
+  {
+    icon: Trophy,
+    color: "text-amber-500",
+    bg: "bg-amber-50",
+    title: "Cash Prizes & Awards",
+    desc: "Win exciting cash rewards, trophies, medals, and recognition across all categories.",
+  },
+  {
+    icon: Shield,
+    color: "text-indigo-500",
+    bg: "bg-indigo-50",
+    title: "Digital Certificates",
+    desc: "Every participant receives a personalized participation certificate. Winners get special honour certificates.",
+  },
+  {
+    icon: Star,
+    color: "text-rose-500",
+    bg: "bg-rose-50",
+    title: "Expert Judging Panel",
+    desc: "Your work is evaluated by seasoned professionals and domain experts ensuring fair, unbiased results.",
+  },
+  {
+    icon: Layers,
+    color: "text-emerald-500",
+    bg: "bg-emerald-50",
+    title: "Multiple Art Forms",
+    desc: "Photography, Painting, Drawing, Paper Craft and more — a platform for every creative artist.",
+  },
+  {
+    icon: Flame,
+    color: "text-orange-500",
+    bg: "bg-orange-50",
+    title: "Live Competitions",
+    desc: "Participate in real-time active contests with live countdowns and instant enrollment.",
+  },
+  {
+    icon: TrendingUp,
+    color: "text-violet-500",
+    bg: "bg-violet-50",
+    title: "Track Your Progress",
+    desc: "Monitor submission status, judging progress, and results all from your personal dashboard.",
+  },
+];
+
+// ── Art categories showcase ───────────────────────────────────────────────────
+
+const ART_CATEGORIES = [
+  { label: "Photography", icon: Camera, color: "bg-indigo-600" },
+  { label: "Painting", icon: Image, color: "bg-rose-500" },
+  { label: "Drawing", icon: Image, color: "bg-amber-500" },
+  { label: "Paper Craft", icon: Image, color: "bg-emerald-600" },
+];
 
 // ── Main Landing Page ─────────────────────────────────────────────────────────
 
 export default function Landing() {
-  const { apiFetch, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [allEvents,      setAllEvents]      = useState([]);
-  const [activeEvents,   setActiveEvents]   = useState([]);
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [closedEvents,   setClosedEvents]   = useState([]);
-  const [loading,        setLoading]        = useState(true);
-  const [heroEvent,      setHeroEvent]      = useState(null);
-  const [showAllActive,  setShowAllActive]  = useState(false);
+  const howItWorksRef = useRef(null);
 
-  const eventsRef   = useRef(null);
-  const upcomingRef = useRef(null);
-  const closedRef   = useRef(null);
+  const scrollTo = (ref) =>
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const data = await apiFetch('/api/events');
-        if (data.success && data.events?.length > 0) {
-          const all      = data.events;
-          const active   = all.filter(e => e.status === 'Active');
-          const upcoming = all.filter(e => e.status === 'Draft');
-          const closed   = all.filter(e => ['Closed', 'Completed', 'Archived'].includes(e.status));
-          setAllEvents(all);
-          setActiveEvents(active);
-          setUpcomingEvents(upcoming);
-          setClosedEvents(closed);
-          setHeroEvent(active[0] || upcoming[0] || all[0] || null);
-        }
-      } catch (err) {
-        console.error('Landing: failed to fetch events', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEvents();
-  }, []);
-
-  const handleEnroll = (event) => {
+  const handleCTA = () => {
     if (!user) {
-      navigate('/login', { state: { from: '/dashboard', eventId: event._id } });
-    } else if (user.role === 'Admin') {
-      navigate('/admin');
-    } else if (user.role === 'Judge') {
-      navigate('/judge');
+      navigate("/register");
+    } else if (user.role === "Admin") {
+      navigate("/admin");
+    } else if (user.role === "Judge") {
+      navigate("/judge");
     } else {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   };
 
-  const scrollTo = (ref) => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  const displayedActive = showAllActive ? activeEvents : activeEvents.slice(0, 6);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Loading Events...</span>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white min-h-screen text-slate-800">
+    <div className="relative min-h-screen text-slate-800">
 
-      {/* ══════════════════════════════════ HERO ═══════════════════════════════════ */}
-      <section
-        className="relative overflow-hidden border-b border-slate-100"
-        style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #ffffff 45%, #fff7ed 100%)' }}
-      >
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-[650px] h-[650px] rounded-full pointer-events-none opacity-25 -translate-y-1/3 translate-x-1/4"
-          style={{ background: 'radial-gradient(circle, #818cf8 0%, transparent 70%)' }} />
-        <div className="absolute bottom-0 left-0 w-[450px] h-[450px] rounded-full pointer-events-none opacity-20 translate-y-1/3 -translate-x-1/4"
-          style={{ background: 'radial-gradient(circle, #f59e0b 0%, transparent 70%)' }} />
-        <div className="absolute top-1/3 left-1/3 w-[350px] h-[350px] rounded-full pointer-events-none opacity-10"
-          style={{ background: 'radial-gradient(circle, #ec4899 0%, transparent 70%)' }} />
-        {/* Dot grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-50"
-          style={{ backgroundImage: 'radial-gradient(circle, #c7d2fe 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+      {/* ══════════════════════════════════════════════════════════════════════
+          FIXED HERO BACKGROUND — hero-bg.jpg scrolls beneath all content
+      ═══════════════════════════════════════════════════════════════════════ */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: "url('/hero-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
+        }}
+      />
+      {/* Dark overlay so text stays readable over the photo */}
+      <div className="fixed inset-0 -z-10 bg-black/55" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+      {/* ══════════════════════════════════ HERO ═══════════════════════════════ */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-24 text-white text-center">
+        {/* Subtle dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-10"
+          style={{
+            backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+            backgroundSize: "30px 30px",
+          }}
+        />
 
-            {/* Left: headline + CTAs */}
-            <div className="flex flex-col gap-7 text-center lg:text-left">
-              <div className="inline-flex self-center lg:self-start items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-600/10 border border-indigo-200/60 text-indigo-700 text-xs font-bold uppercase tracking-wider">
-                <Sparkles size={12} />
-                Multi-Event Competition Platform
+        <div className="relative max-w-4xl mx-auto flex flex-col items-center gap-8">
+          {/* Eyebrow badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+            <Sparkles size={13} />
+            Multi-Category Art Competition Platform
+          </div>
+
+          {/* Headline */}
+          <div className="flex flex-col gap-4">
+            <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight drop-shadow-lg">
+              Compete, Create &amp;
+              <span className="block bg-linear-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
+                Conquer
+              </span>
+            </h1>
+            <p className="text-base sm:text-lg text-white/80 leading-relaxed max-w-2xl mx-auto drop-shadow">
+              A unified platform for Photography, Painting, Drawing, Paper Craft &amp; more.
+              Discover active events, submit your work, and win recognition.
+            </p>
+          </div>
+
+          {/* Trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-5">
+            {[
+              { icon: CheckCircle2, label: "Expert Judging Panel", color: "text-emerald-400" },
+              { icon: Gift, label: "Cash Prizes & Awards", color: "text-amber-400" },
+              { icon: Shield, label: "Digital Certificates", color: "text-indigo-400" },
+            ].map(({ icon: I, label, color }) => (
+              <div key={label} className="flex items-center gap-1.5 text-sm font-semibold text-white/85">
+                <I size={15} className={color} /> {label}
               </div>
+            ))}
+          </div>
 
-              <div className="flex flex-col gap-4">
-                <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.1] tracking-tight text-slate-900">
-                  Compete, Create &amp;
-                  <span className="relative block">
-                    <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                      Conquer
-                    </span>
-                    <span className="absolute -bottom-1 left-0 w-32 h-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full opacity-40" />
-                  </span>
-                </h1>
-                <p className="text-base text-slate-500 leading-relaxed max-w-lg mx-auto lg:mx-0">
-                  A unified platform for Photography, Painting, Drawing, Paper Craft &amp; more.
-                  Discover active events, submit your work, and win recognition.
-                </p>
-              </div>
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+            <button
+              onClick={handleCTA}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all shadow-xl shadow-indigo-900/40"
+            >
+              {user ? "Go to My Dashboard" : "Get Started Free"} <ArrowRight size={16} />
+            </button>
+            <Link
+              to="/info"
+              className="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all backdrop-blur-sm"
+            >
+              View All Events <ChevronRight size={16} />
+            </Link>
+          </div>
 
-              {/* Action buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
-                {!user ? (
-                  <>
-                    <Link
-                      to="/register"
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-7 py-3 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
-                    >
-                      Register Free <ChevronRight size={15} />
-                    </Link>
-                    <Link
-                      to="/login"
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm px-7 py-3 rounded-xl transition-all cursor-pointer"
-                    >
-                      Login
-                    </Link>
-                  </>
-                ) : (
-                  <Link
-                    to={user.role === 'Admin' ? '/admin' : user.role === 'Judge' ? '/judge' : '/dashboard'}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-7 py-3 rounded-xl shadow-md transition-all cursor-pointer"
-                  >
-                    Go to Dashboard <ChevronRight size={15} />
-                  </Link>
-                )}
-                <button
-                  onClick={() => scrollTo(eventsRef)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold text-sm px-4 py-3 rounded-xl transition-all cursor-pointer"
-                >
-                  <Play size={13} className="fill-current" />
-                  View Events
-                </button>
-              </div>
-
-              {/* Trust badges */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1">
-                {[
-                  { icon: CheckCircle2, label: 'Expert Judging Panel', color: 'text-emerald-500' },
-                  { icon: Gift,         label: 'Cash Prizes & Awards',  color: 'text-amber-500'  },
-                  { icon: Shield,       label: 'Digital Certificates',  color: 'text-indigo-500' },
-                ].map(({ icon: I, label, color }) => (
-                  <div key={label} className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                    <I size={13} className={color} /> {label}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: featured event card */}
-            <div className="flex flex-col gap-5">
-              {heroEvent ? (
-                <HeroEventPreview event={heroEvent} onEnroll={handleEnroll} />
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(EVENT_ICONS).filter(([k]) => k !== 'default').map(([type, Icon]) => {
-                    const c = getColors(type);
-                    return (
-                      <div key={type} className={`flex flex-col items-center gap-2 border rounded-2xl p-5 ${c.bg}`}>
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.badge}`}>
-                          <Icon size={18} className={c.icon} />
-                        </div>
-                        <span className="text-xs font-bold text-slate-700">{type}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
+          {/* Art category pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+            {ART_CATEGORIES.map(({ label, icon: Icon, color }) => (
+              <span
+                key={label}
+                className={`flex items-center gap-1.5 ${color} text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full`}
+              >
+                <Icon size={11} /> {label}
+              </span>
+            ))}
           </div>
         </div>
 
         {/* Scroll cue */}
-        <div className="flex justify-center pb-6">
-          <button onClick={() => scrollTo(eventsRef)} className="flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-500 transition-colors cursor-pointer animate-bounce">
-            <ChevronDown size={20} />
-          </button>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/50 animate-bounce">
+          <ChevronDown size={22} />
         </div>
       </section>
 
-      {/* ══════════════════════════════ STATS STRIP ════════════════════════════════ */}
-      <section className="py-10 bg-slate-50 border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <StatStrip events={allEvents} />
-        </div>
-      </section>
-
-      {/* ══════════════════════════════ ACTIVE EVENTS ══════════════════════════════ */}
-      <section ref={eventsRef} className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[10px] font-black uppercase tracking-widest mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Open for Registration
+      {/* ══════════════════════════════ WHY PARTICIPATE ════════════════════════ */}
+      <section className="relative py-20 bg-white/95 backdrop-blur-sm border-y border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/60 text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-3">
+              <Sparkles size={11} /> Why Join Us
             </div>
-            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 leading-tight">Active Events</h2>
-            <p className="text-sm text-slate-500 mt-1.5">Select any event below to enroll and start your artistic journey.</p>
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900">
+              Why Participate?
+            </h2>
+            <p className="text-sm text-slate-500 mt-2 max-w-xl mx-auto">
+              Join thousands of artists competing on a platform built to showcase creativity and reward talent.
+            </p>
           </div>
-          {activeEvents.length > 6 && (
-            <button
-              onClick={() => setShowAllActive(!showAllActive)}
-              className="shrink-0 flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold text-sm border border-indigo-200 hover:border-indigo-400 rounded-xl px-4 py-2 transition-all cursor-pointer"
-            >
-              {showAllActive ? 'Show Less' : `View All ${activeEvents.length}`}
-              <ChevronRight size={14} className={`transition-transform ${showAllActive ? 'rotate-90' : ''}`} />
-            </button>
-          )}
-        </div>
 
-        {activeEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-20 text-center bg-slate-50 rounded-3xl border border-slate-100">
-            <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center">
-              <AlertCircle size={28} className="text-slate-300" />
-            </div>
-            <h3 className="font-display font-bold text-lg text-slate-700">No Active Events Right Now</h3>
-            <p className="text-sm text-slate-400 max-w-sm">Check upcoming events below or register to get notified when new competitions open.</p>
-            {!user && (
-              <Link to="/register" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl cursor-pointer transition-all">
-                Register to Get Notified
-              </Link>
-            )}
-          </div>
-        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayedActive.map(event => (
-              <ActiveEventCard key={event._id} event={event} onEnroll={handleEnroll} />
+            {WHY_CARDS.map(({ icon: Icon, color, bg, title, desc }) => (
+              <div
+                key={title}
+                className="flex flex-col gap-4 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all group"
+              >
+                <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center`}>
+                  <Icon size={22} className={color} />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-sm text-slate-900 mb-1.5">{title}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+                </div>
+              </div>
             ))}
           </div>
-        )}
+        </div>
       </section>
 
-      {/* ══════════════════════════════ UPCOMING EVENTS ════════════════════════════ */}
-      {upcomingEvents.length > 0 && (
-        <section ref={upcomingRef} className="py-16 bg-gradient-to-b from-blue-50/50 to-white border-y border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-blue-700 text-[10px] font-black uppercase tracking-widest mb-3">
-                <Clock size={10} /> Coming Soon
-              </div>
-              <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 leading-tight">Upcoming Events</h2>
-              <p className="text-sm text-slate-500 mt-1.5 max-w-lg">
-                These events are opening soon — prizes announced, details confirmed. Register now to be first in line.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map(event => (
-                <UpcomingEventCard key={event._id} event={event} onEnroll={handleEnroll} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ══════════════════════════════ HOW IT WORKS ═══════════════════════════════ */}
-      <section className="py-16 border-y border-slate-100">
+      {/* ══════════════════════════════ HOW IT WORKS ═══════════════════════════ */}
+      <section ref={howItWorksRef} className="relative py-20 bg-slate-50/95 backdrop-blur-sm border-b border-slate-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/60 text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-3">
               <BarChart2 size={11} /> Simple Process
             </div>
-            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900">How It Works</h2>
-            <p className="text-sm text-slate-500 mt-2">Four easy steps from registration to winning.</p>
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900">
+              How It Works
+            </h2>
+            <p className="text-sm text-slate-500 mt-2">
+              Four easy steps from registration to winning.
+            </p>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {STEPS.map(({ num, icon: Icon, title, desc }, i) => (
-              <div key={num} className="relative flex flex-col gap-4 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all group">
+              <div
+                key={num}
+                className="relative flex flex-col gap-4 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all group"
+              >
                 {i < STEPS.length - 1 && (
                   <div className="hidden lg:block absolute top-10 -right-3 w-6 border-t-2 border-dashed border-slate-200 z-10" />
                 )}
@@ -833,66 +303,54 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══════════════════════════════ CLOSED EVENTS ══════════════════════════════ */}
-      {closedEvents.length > 0 && (
-        <section ref={closedRef} className="py-16 bg-slate-50/60 border-b border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-widest mb-3">
-                <Lock size={10} /> Submissions Closed
-              </div>
-              <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 leading-tight">Past Events</h2>
-              <p className="text-sm text-slate-500 mt-1.5 max-w-lg">
-                These competitions have concluded. Winners were announced and certificates issued to all participants.
-              </p>
+      {/* ══════════════════════════════ CTA BANNER ═════════════════════════════ */}
+      <section className="relative py-20">
+        {/* semi-transparent dark card sitting above the fixed hero-bg */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="bg-linear-to-br from-indigo-600 to-violet-700 rounded-3xl px-8 py-14 text-center flex flex-col items-center gap-6 shadow-2xl shadow-indigo-900/40 overflow-hidden relative">
+            {/* decorative blob */}
+            <div
+              className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none opacity-20"
+              style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }}
+            />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest">
+              <Award size={12} /> Join the Competition
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {closedEvents.map(event => (
-                <ClosedEventCard key={event._id} event={event} />
-              ))}
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-white leading-tight">
+              Ready to Showcase<br />Your Talent?
+            </h2>
+            <p className="text-indigo-100 text-sm max-w-md leading-relaxed">
+              Register today and enter any of our active competitions. Cash prizes, certificates, and recognition await!
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+              {!user ? (
+                <>
+                  <Link
+                    to="/register"
+                    className="flex items-center gap-2 bg-white text-indigo-700 font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                  >
+                    Create Account <ArrowRight size={15} />
+                  </Link>
+                  <Link
+                    to="/info"
+                    className="flex items-center gap-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all"
+                  >
+                    View Events <ChevronRight size={15} />
+                  </Link>
+                </>
+              ) : (
+                <button
+                  onClick={handleCTA}
+                  className="flex items-center gap-2 bg-white text-indigo-700 font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  Go to My Dashboard <ArrowRight size={15} />
+                </button>
+              )}
             </div>
-          </div>
-        </section>
-      )}
-
-
-
-      {/* ══════════════════════════════ CTA BANNER ═════════════════════════════════ */}
-      <section className="py-14 bg-gradient-to-br from-indigo-600 to-violet-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center gap-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest">
-            <Award size={12} /> Join the Competition
-          </div>
-          <h2 className="font-display font-black text-3xl sm:text-4xl text-white leading-tight">
-            Ready to Showcase Your Talent?
-          </h2>
-          <p className="text-indigo-100 text-sm max-w-md">
-            Register for free, pick an active event that excites you, and compete with artists for exciting awards and recognition.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            {!user ? (
-              <>
-                <Link to="/register" className="flex items-center gap-2 bg-white hover:bg-indigo-50 text-indigo-700 font-bold text-sm px-8 py-3 rounded-xl shadow-md transition-all cursor-pointer">
-                  Create Account Free <ChevronRight size={14} />
-                </Link>
-                <Link to="/login" className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold text-sm px-8 py-3 rounded-xl transition-all cursor-pointer">
-                  Login
-                </Link>
-              </>
-            ) : (
-              <Link
-                to={user.role === 'Admin' ? '/admin' : user.role === 'Judge' ? '/judge' : '/dashboard'}
-                className="flex items-center gap-2 bg-white hover:bg-indigo-50 text-indigo-700 font-bold text-sm px-8 py-3 rounded-xl shadow-md transition-all cursor-pointer"
-              >
-                Go to Dashboard <ChevronRight size={14} />
-              </Link>
-            )}
-            <button onClick={() => scrollTo(eventsRef)} className="flex items-center gap-2 text-white/70 hover:text-white font-semibold text-sm transition-all cursor-pointer">
-              Browse Events <ChevronDown size={13} />
-            </button>
           </div>
         </div>
       </section>
+
     </div>
   );
 }

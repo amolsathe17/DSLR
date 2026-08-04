@@ -177,9 +177,20 @@ export default function Navbar() {
   };
 
   const isActive = (path) => location.pathname === path;
+  const isLandingPage = location.pathname === '/';
+
+  // Link color helper — white on hero bg, normal slate elsewhere
+  const navLinkClass = (path) =>
+    `text-sm font-medium transition-colors ${
+      isActive(path)
+        ? isLandingPage ? 'text-white font-bold' : 'text-indigo-600 dark:text-indigo-400'
+        : isLandingPage
+          ? 'text-white/80 hover:text-white'
+          : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+    }`;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-md transition-all">
+    <nav className={`sticky top-0 z-50 transition-all ${location.pathname === '/' ? 'bg-black/30 backdrop-blur-md border-b border-white/10' : 'bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-md'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -195,92 +206,39 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            <Link
-              to="/about"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/about') 
-                  ? 'text-indigo-600 dark:text-indigo-400' 
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-              }`}
-            >
+            <Link to="/about" className={navLinkClass('/about')}>
               About Us
             </Link>
 
-            <Link
-              to="/info"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/info') 
-                  ? 'text-indigo-600 dark:text-indigo-400' 
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-              }`}
-            >
+            <Link to="/info" className={navLinkClass('/info')}>
               Event Info
             </Link>
 
-            <Link
-              to="/gallery"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/gallery') 
-                  ? 'text-indigo-600 dark:text-indigo-400' 
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-              }`}
-            >
-              Gallery & Results
+            <Link to="/gallery" className={navLinkClass('/gallery')}>
+              Gallery &amp; Results
             </Link>
 
             {(!user || user.role === 'Admin') && (
-              <Link
-                to="/admin"
-                state={{ forceAdmin: true }}
-                onClick={handleAdminClick}
-                className={`text-sm font-medium transition-colors ${
-                  isActive('/admin') 
-                    ? 'text-indigo-600 dark:text-indigo-400' 
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-                }`}
-              >
+              <Link to="/admin" state={{ forceAdmin: true }} onClick={handleAdminClick} className={navLinkClass('/admin')}>
                 Admin Portal
               </Link>
             )}
 
             {(!user || user.role === 'Judge' || user.role === 'Admin') && (
-              <Link
-                to="/judge"
-                state={{ forceJudge: true }}
-                onClick={handleJudgeClick}
-                className={`text-sm font-medium transition-colors ${
-                  isActive('/judge') 
-                    ? 'text-indigo-600 dark:text-indigo-400' 
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-                }`}
-              >
+              <Link to="/judge" state={{ forceJudge: true }} onClick={handleJudgeClick} className={navLinkClass('/judge')}>
                 Judges Portal
               </Link>
             )}
             
             {user && user.role === 'Participant' && (
-              <Link
-                to="/dashboard"
-                className={`text-sm font-medium flex items-center gap-1.5 transition-colors ${
-                  isActive('/dashboard') 
-                    ? 'text-indigo-600 dark:text-indigo-400' 
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-                }`}
-              >
+              <Link to="/dashboard" className={`flex items-center gap-1.5 ${navLinkClass('/dashboard')}`}>
                 <LayoutDashboard size={16} />
                 Dashboard
               </Link>
             )}
 
             {user && user.role === 'Judge' && (
-              <Link
-                to="/judge"
-                className={`text-sm font-medium flex items-center gap-1.5 transition-colors ${
-                  isActive('/judge') 
-                    ? 'text-indigo-600 dark:text-indigo-400' 
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-                }`}
-              >
+              <Link to="/judge" className={`flex items-center gap-1.5 ${navLinkClass('/judge')}`}>
                 <LayoutDashboard size={16} />
                 Dashboard
               </Link>
@@ -292,14 +250,14 @@ export default function Navbar() {
               <div className="flex items-center gap-4">
                 {renderNotificationBell()}
                 {user.role === 'Admin' ? (
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 py-1.5 px-3 rounded-lg select-none cursor-default">
+                  <div className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg select-none cursor-default ${isLandingPage ? 'text-white/80' : 'text-slate-700 dark:text-slate-300'}`}>
                     <User size={16} />
                     <span>{user.name.split(' ')[0]}</span>
                   </div>
                 ) : (
                   <Link
                     to="/profile"
-                    className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 py-1.5 px-3 rounded-lg transition-colors"
+                    className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors ${isLandingPage ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                   >
                     <User size={16} />
                     <span>{user.name.split(' ')[0]}</span>

@@ -263,21 +263,25 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══════════════════════════════ HOW IT WORKS ═══════════════════════════ */}
-      <section ref={howItWorksRef} className="relative py-20 bg-slate-50/95 backdrop-blur-sm border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/60 text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-3">
-              <BarChart2 size={11} /> Simple Process
+      {/* ══════════════════════════════ CTA BANNER ═════════════════════════════ */}
+      <section className="relative py-20">
+        {/* semi-transparent dark card sitting above the fixed hero-bg */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="bg-linear-to-br from-indigo-600 to-violet-700 rounded-3xl px-8 py-14 text-center flex flex-col items-center gap-6 shadow-2xl shadow-indigo-900/40 overflow-hidden relative">
+            {/* decorative blob */}
+            <div
+              className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none opacity-20"
+              style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }}
+            />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest">
+              <Award size={12} /> Simple Process
             </div>
-            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900">
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-white leading-tight">
               How It Works
             </h2>
-            <p className="text-sm text-slate-500 mt-2">
-              Four easy steps from registration to winning.
+            <p className="text-indigo-100 text-sm max-w-md leading-relaxed">
+             Four easy steps from registration to winning.
             </p>
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {STEPS.map(({ num, icon: Icon, title, desc }, i) => (
               <div
@@ -300,28 +304,8 @@ export default function Landing() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ══════════════════════════════ CTA BANNER ═════════════════════════════ */}
-      <section className="relative py-20">
-        {/* semi-transparent dark card sitting above the fixed hero-bg */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="bg-linear-to-br from-indigo-600 to-violet-700 rounded-3xl px-8 py-14 text-center flex flex-col items-center gap-6 shadow-2xl shadow-indigo-900/40 overflow-hidden relative">
-            {/* decorative blob */}
-            <div
-              className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none opacity-20"
-              style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }}
-            />
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest">
-              <Award size={12} /> Join the Competition
-            </div>
-            <h2 className="font-display font-black text-3xl sm:text-4xl text-white leading-tight">
-              Ready to Showcase<br />Your Talent?
-            </h2>
-            <p className="text-indigo-100 text-sm max-w-md leading-relaxed">
-              Register today and enter any of our active competitions. Cash prizes, certificates, and recognition await!
-            </p>
+
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
               {!user ? (
                 <>

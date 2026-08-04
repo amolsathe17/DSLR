@@ -469,10 +469,10 @@ function StatStrip({ events }) {
 // ── How It Works steps ────────────────────────────────────────────────────────
 
 const STEPS = [
-  { num: '01', icon: Users,    title: 'Register / Login',  desc: 'Create your participant account or log in to your existing profile to get started.' },
-  { num: '02', icon: Target,   title: 'Choose an Event',   desc: 'Browse active, upcoming, and past events across all art categories.' },
+  { num: '01', icon: Target,   title: 'Choose an Event',   desc: 'Browse active, upcoming, and past events across all art categories and pick the one for you.' },
+  { num: '02', icon: Users,    title: 'Register / Login',  desc: 'Create your participant account or log in to your existing profile to get started.' },
   { num: '03', icon: Image,    title: 'Submit Your Work',  desc: 'Upload your entries through the secure portal within the submission deadline.' },
-  { num: '04', icon: Trophy,   title: 'Get Judged & Win',  desc: 'Expert judges review your work and the best entries win exciting prizes.' },
+  { num: '04', icon: Trophy,   title: 'Get Judged & Win',  desc: 'Expert judges review your work and the best entries win exciting prizes and certificates.' },
 ];
 
 // ── Hero Event Preview card (inside hero section) ─────────────────────────────
@@ -623,99 +623,102 @@ export default function Landing() {
         <div className="absolute inset-0 pointer-events-none opacity-50"
           style={{ backgroundImage: 'radial-gradient(circle, #c7d2fe 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10 md:pt-24 md:pb-14">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
 
-          {/* Centre headline */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-600/10 border border-indigo-200/60 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-6">
-              <Sparkles size={12} />
-              Multi-Event Art Competition Platform
-            </div>
+            {/* Left: headline + CTAs */}
+            <div className="flex flex-col gap-7 text-center lg:text-left">
+              <div className="inline-flex self-center lg:self-start items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-600/10 border border-indigo-200/60 text-indigo-700 text-xs font-bold uppercase tracking-wider">
+                <Sparkles size={12} />
+                Multi-Event Competition Platform
+              </div>
 
-            <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] tracking-tight text-slate-900 mb-5">
-              Compete, Create
-              <br />
-              <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-500 bg-clip-text text-transparent">
-                  &amp; Conquer
-                </span>
-                <span className="absolute -bottom-2 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 rounded-full opacity-50" />
-              </span>
-            </h1>
+              <div className="flex flex-col gap-4">
+                <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.1] tracking-tight text-slate-900">
+                  Compete, Create &amp;
+                  <span className="relative block">
+                    <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                      Conquer
+                    </span>
+                    <span className="absolute -bottom-1 left-0 w-32 h-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full opacity-40" />
+                  </span>
+                </h1>
+                <p className="text-base text-slate-500 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                  A unified platform for Photography, Painting, Drawing, Paper Craft &amp; more.
+                  Discover active events, submit your work, and win recognition.
+                </p>
+              </div>
 
-            <p className="text-base sm:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed mb-8">
-              A unified platform for Photography, Painting, Drawing, Paper Craft &amp; more.
-              Discover active events, submit your work, and win recognition from expert judges.
-            </p>
-
-            {/* CTA buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
-              {!user ? (
-                <>
-                  <Link to="/register" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer">
-                    Register Free <ChevronRight size={15} />
-                  </Link>
-                  <Link to="/login" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm px-8 py-3.5 rounded-xl shadow-sm transition-all cursor-pointer">
-                    Login to Account
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  to={user.role === 'Admin' ? '/admin' : user.role === 'Judge' ? '/judge' : '/dashboard'}
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-8 py-3.5 rounded-xl shadow-lg transition-all cursor-pointer"
-                >
-                  Go to Dashboard <ChevronRight size={15} />
-                </Link>
-              )}
-              <button onClick={() => scrollTo(eventsRef)} className="w-full sm:w-auto flex items-center justify-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold text-sm px-6 py-3.5 rounded-xl transition-all cursor-pointer">
-                <Play size={13} className="fill-current" /> Explore Events
-              </button>
-            </div>
-
-            {/* Trust badges */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mb-10">
-              {[
-                { icon: CheckCircle2, label: 'Expert Judging Panel', color: 'text-emerald-500' },
-                { icon: Gift,         label: 'Cash Prizes & Awards',  color: 'text-amber-500'  },
-                { icon: Shield,       label: 'Digital Certificates',  color: 'text-indigo-500' },
-              ].map(({ icon: I, label, color }) => (
-                <div key={label} className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                  <I size={13} className={color} /> {label}
-                </div>
-              ))}
-            </div>
-
-            {/* Event category pill strip */}
-            <div className="flex items-center justify-center gap-3 flex-wrap mb-10">
-              {[
-                { type: 'Photography', targetRef: eventsRef,   status: 'Active',   dotCls: 'bg-emerald-500 animate-pulse', pillCls: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
-                { type: 'Painting',    targetRef: upcomingRef, status: 'Upcoming', dotCls: 'bg-blue-400',                   pillCls: 'bg-rose-50   border-rose-200   text-rose-700'   },
-                { type: 'Drawing',     targetRef: upcomingRef, status: 'Upcoming', dotCls: 'bg-blue-400',                   pillCls: 'bg-amber-50  border-amber-200  text-amber-700'  },
-                { type: 'Paper Craft', targetRef: closedRef,   status: 'Closed',   dotCls: 'bg-slate-400',                  pillCls: 'bg-slate-50  border-slate-200  text-slate-500'  },
-              ].map(({ type, targetRef, status, dotCls, pillCls }) => {
-                const Icon = EVENT_ICONS[type] || EVENT_ICONS.default;
-                return (
-                  <button
-                    key={type}
-                    onClick={() => scrollTo(targetRef)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold cursor-pointer hover:shadow-md transition-all hover:-translate-y-0.5 ${pillCls}`}
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+                {!user ? (
+                  <>
+                    <Link
+                      to="/register"
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-7 py-3 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
+                    >
+                      Register Free <ChevronRight size={15} />
+                    </Link>
+                    <Link
+                      to="/login"
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm px-7 py-3 rounded-xl transition-all cursor-pointer"
+                    >
+                      Login
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to={user.role === 'Admin' ? '/admin' : user.role === 'Judge' ? '/judge' : '/dashboard'}
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-7 py-3 rounded-xl shadow-md transition-all cursor-pointer"
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${dotCls} shrink-0`} />
-                    <Icon size={13} />
-                    {type}
-                    <span className="opacity-60 font-normal">· {status}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                    Go to Dashboard <ChevronRight size={15} />
+                  </Link>
+                )}
+                <button
+                  onClick={() => scrollTo(eventsRef)}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold text-sm px-4 py-3 rounded-xl transition-all cursor-pointer"
+                >
+                  <Play size={13} className="fill-current" />
+                  View Events
+                </button>
+              </div>
 
-          {/* Featured event card */}
-          {heroEvent && (
-            <div className="max-w-2xl mx-auto">
-              <HeroEventPreview event={heroEvent} onEnroll={handleEnroll} />
+              {/* Trust badges */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1">
+                {[
+                  { icon: CheckCircle2, label: 'Expert Judging Panel', color: 'text-emerald-500' },
+                  { icon: Gift,         label: 'Cash Prizes & Awards',  color: 'text-amber-500'  },
+                  { icon: Shield,       label: 'Digital Certificates',  color: 'text-indigo-500' },
+                ].map(({ icon: I, label, color }) => (
+                  <div key={label} className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                    <I size={13} className={color} /> {label}
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
+
+            {/* Right: featured event card */}
+            <div className="flex flex-col gap-5">
+              {heroEvent ? (
+                <HeroEventPreview event={heroEvent} onEnroll={handleEnroll} />
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(EVENT_ICONS).filter(([k]) => k !== 'default').map(([type, Icon]) => {
+                    const c = getColors(type);
+                    return (
+                      <div key={type} className={`flex flex-col items-center gap-2 border rounded-2xl p-5 ${c.bg}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.badge}`}>
+                          <Icon size={18} className={c.icon} />
+                        </div>
+                        <span className="text-xs font-bold text-slate-700">{type}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
 
         {/* Scroll cue */}
@@ -852,45 +855,7 @@ export default function Landing() {
         </section>
       )}
 
-      {/* ══════════════════════════════ CATEGORIES ═════════════════════════════════ */}
-      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 text-[10px] font-black uppercase tracking-widest mb-3">
-            <BookOpen size={11} /> Event Categories
-          </div>
-          <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900">What We Organize</h2>
-          <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto">
-            From lens-based photography to hand-crafted paper art — competitions for every artistic discipline.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {Object.entries(EVENT_ICONS).filter(([k]) => k !== 'default').map(([type, Icon]) => {
-            const c      = getColors(type);
-            const count  = allEvents.filter(e => e.eventType === type).length;
-            const active = allEvents.filter(e => e.eventType === type && e.status === 'Active').length;
-            return (
-              <button
-                key={type}
-                onClick={() => scrollTo(eventsRef)}
-                className={`group flex flex-col items-center gap-3 border rounded-3xl py-8 px-5 text-center transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer ${c.bg} w-full`}
-              >
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${c.badge} group-hover:scale-110 transition-transform`}>
-                  <Icon size={24} className={c.icon} />
-                </div>
-                <div>
-                  <p className="font-display font-black text-sm text-slate-900">{type}</p>
-                  {count > 0 && (
-                    <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
-                      {count} event{count > 1 ? 's' : ''}
-                      {active > 0 && <span className="text-emerald-600 ml-1">· {active} active</span>}
-                    </p>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+
 
       {/* ══════════════════════════════ CTA BANNER ═════════════════════════════════ */}
       <section className="py-14 bg-gradient-to-br from-indigo-600 to-violet-700">

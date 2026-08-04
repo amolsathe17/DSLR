@@ -1,15 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Camera,
   Award,
   Users,
-  ChevronRight,
   ArrowRight,
   Sparkles,
   Star,
   Trophy,
-  CheckCircle2,
   Shield,
   Image,
   ChevronDown,
@@ -18,7 +15,6 @@ import {
   Target,
   Flame,
   TrendingUp,
-  Gift,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -98,25 +94,12 @@ const WHY_CARDS = [
   },
 ];
 
-// ── Art categories showcase ───────────────────────────────────────────────────
-
-const ART_CATEGORIES = [
-  { label: "Photography", icon: Camera, color: "bg-indigo-600" },
-  { label: "Painting", icon: Image, color: "bg-rose-500" },
-  { label: "Drawing", icon: Image, color: "bg-amber-500" },
-  { label: "Paper Craft", icon: Image, color: "bg-emerald-600" },
-];
-
 // ── Main Landing Page ─────────────────────────────────────────────────────────
 
 export default function Landing() {
   const { user } = useAuth();
   const navigate = useNavigate();
-
   const howItWorksRef = useRef(null);
-
-  const scrollTo = (ref) =>
-    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const handleCTA = () => {
     if (!user) {
@@ -133,9 +116,7 @@ export default function Landing() {
   return (
     <div className="relative min-h-screen text-slate-800">
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          FIXED HERO BACKGROUND — hero-bg.jpg scrolls beneath all content
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* ── FIXED HERO BACKGROUND ─────────────────────────────────────────── */}
       <div
         className="fixed inset-0 -z-10"
         style={{
@@ -146,12 +127,12 @@ export default function Landing() {
           backgroundAttachment: "fixed",
         }}
       />
-      {/* Dark overlay so text stays readable over the photo */}
+      {/* Dark overlay */}
       <div className="fixed inset-0 -z-10 bg-black/55" />
 
       {/* ══════════════════════════════════ HERO ═══════════════════════════════ */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-24 text-white text-center">
-        {/* Subtle dot grid */}
+        {/* Dot grid texture */}
         <div
           className="absolute inset-0 pointer-events-none opacity-10"
           style={{
@@ -179,47 +160,6 @@ export default function Landing() {
               A unified platform for Photography, Painting, Drawing, Paper Craft &amp; more.
               Discover active events, submit your work, and win recognition.
             </p>
-          </div>
-
-          {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-5">
-            {[
-              { icon: CheckCircle2, label: "Expert Judging Panel", color: "text-emerald-400" },
-              { icon: Gift, label: "Cash Prizes & Awards", color: "text-amber-400" },
-              { icon: Shield, label: "Digital Certificates", color: "text-indigo-400" },
-            ].map(({ icon: I, label, color }) => (
-              <div key={label} className="flex items-center gap-1.5 text-sm font-semibold text-white/85">
-                <I size={15} className={color} /> {label}
-              </div>
-            ))}
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
-            <button
-              onClick={handleCTA}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all shadow-xl shadow-indigo-900/40"
-            >
-              {user ? "Go to My Dashboard" : "Get Started Free"} <ArrowRight size={16} />
-            </button>
-            <Link
-              to="/info"
-              className="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all backdrop-blur-sm"
-            >
-              View All Events <ChevronRight size={16} />
-            </Link>
-          </div>
-
-          {/* Art category pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-            {ART_CATEGORIES.map(({ label, icon: Icon, color }) => (
-              <span
-                key={label}
-                className={`flex items-center gap-1.5 ${color} text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full`}
-              >
-                <Icon size={11} /> {label}
-              </span>
-            ))}
           </div>
         </div>
 
@@ -263,25 +203,22 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══════════════════════════════ CTA BANNER ═════════════════════════════ */}
-      <section className="relative py-20">
-        {/* semi-transparent dark card sitting above the fixed hero-bg */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="bg-linear-to-br from-indigo-600 to-violet-700 rounded-3xl px-8 py-14 text-center flex flex-col items-center gap-6 shadow-2xl shadow-indigo-900/40 overflow-hidden relative">
-            {/* decorative blob */}
-            <div
-              className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none opacity-20"
-              style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }}
-            />
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest">
-              <Award size={12} /> Simple Process
+      {/* ══════════════════════════════ HOW IT WORKS ═══════════════════════════ */}
+      {/* 79% transparent white — hero-bg shows faintly through */}
+      <section ref={howItWorksRef} className="relative py-20 bg-white/[0.79] backdrop-blur-sm border-b border-slate-100/60">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/60 text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-3">
+              <BarChart2 size={11} /> Simple Process
             </div>
-            <h2 className="font-display font-black text-3xl sm:text-4xl text-white leading-tight">
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900">
               How It Works
             </h2>
-            <p className="text-indigo-100 text-sm max-w-md leading-relaxed">
-             Four easy steps from registration to winning.
+            <p className="text-sm text-slate-500 mt-2">
+              Four easy steps from registration to winning.
             </p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {STEPS.map(({ num, icon: Icon, title, desc }, i) => (
               <div
@@ -304,24 +241,35 @@ export default function Landing() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-
-            <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+      {/* ══════════════════════════════ CTA BANNER ═════════════════════════════ */}
+      <section className="relative py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="bg-linear-to-br from-indigo-600 to-violet-700 rounded-3xl px-8 py-14 text-center flex flex-col items-center gap-6 shadow-2xl shadow-indigo-900/40 overflow-hidden relative">
+            {/* Decorative blob */}
+            <div
+              className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none opacity-20"
+              style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }}
+            />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest">
+              <Award size={12} /> Join the Competition
+            </div>
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-white leading-tight">
+              Ready to Showcase<br />Your Talent?
+            </h2>
+            <p className="text-indigo-100 text-sm max-w-md leading-relaxed">
+              Register today and enter any of our active competitions. Cash prizes, certificates, and recognition await!
+            </p>
+            <div className="flex items-center gap-4 pt-2">
               {!user ? (
-                <>
-                  <Link
-                    to="/register"
-                    className="flex items-center gap-2 bg-white text-indigo-700 font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-                  >
-                    Create Account <ArrowRight size={15} />
-                  </Link>
-                  <Link
-                    to="/info"
-                    className="flex items-center gap-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all"
-                  >
-                    View Events <ChevronRight size={15} />
-                  </Link>
-                </>
+                <Link
+                  to="/register"
+                  className="flex items-center gap-2 bg-white text-indigo-700 font-bold text-sm py-3.5 px-8 rounded-2xl cursor-pointer transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  Create Account <ArrowRight size={15} />
+                </Link>
               ) : (
                 <button
                   onClick={handleCTA}

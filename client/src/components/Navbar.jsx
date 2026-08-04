@@ -10,6 +10,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const notifRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +25,13 @@ export default function Navbar() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, []);
+
+  // Scroll detection — used to reveal logo + white navbar on landing page
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -179,26 +187,41 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
   const isLandingPage = location.pathname === '/';
 
-  // Link color helper — white on hero bg, normal slate elsewhere
+  // Link color helper — white on hero (landing-at-top), normal elsewhere
   const navLinkClass = (path) =>
     `text-sm font-medium transition-colors ${
       isActive(path)
-        ? isLandingPage ? 'text-white font-bold' : 'text-indigo-600 dark:text-indigo-400'
-        : isLandingPage
+        ? onHero ? 'text-white font-bold' : 'text-indigo-600 dark:text-indigo-400'
+        : onHero
           ? 'text-white/80 hover:text-white'
           : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
     }`;
 
+  // On landing: glassy at top, solid white once scrolled
+  const navBg = isLandingPage
+    ? scrolled
+      ? 'bg-white shadow-md border-b border-slate-200'
+      : 'bg-transparent border-b border-transparent'
+    : 'bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-md';
+
+  // Link colors: on landing-at-top → white; on landing-scrolled or other pages → normal
+  const onHero = isLandingPage && !scrolled;
+
   return (
-    <nav className={`sticky top-0 z-50 transition-all ${location.pathname === '/' ? 'bg-black/30 backdrop-blur-md border-b border-white/10' : 'bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-md'}`}>
+    <nav className={`sticky top-0 z-50 transition-all duration-300 ${navBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo — hidden on landing until user scrolls */}
           <div className="flex items-center">
-            <Link to="/login" state={{ forceContestant: true }} className="flex items-center gap-2 group">
-              <img 
-                src="/sumbacontest.jpg" 
-                alt="SumbaContest Logo" 
+            <Link
+              to="/"
+              className={`flex items-center gap-2 group transition-all duration-300 ${
+                isLandingPage && !scrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}
+            >
+              <img
+                src="/sumbacontest.jpg"
+                alt="SumbaContest Logo"
                 className="h-16 w-auto object-contain rounded-lg transition-transform group-hover:scale-102"
               />
             </Link>
@@ -250,14 +273,14 @@ export default function Navbar() {
               <div className="flex items-center gap-4">
                 {renderNotificationBell()}
                 {user.role === 'Admin' ? (
-                  <div className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg select-none cursor-default ${isLandingPage ? 'text-white/80' : 'text-slate-700 dark:text-slate-300'}`}>
+                  <div className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg select-none cursor-default ${onHero ? 'text-white/80' : 'text-slate-700 dark:text-slate-300'}`}>
                     <User size={16} />
                     <span>{user.name.split(' ')[0]}</span>
                   </div>
                 ) : (
                   <Link
                     to="/profile"
-                    className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors ${isLandingPage ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                    className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors ${onHero ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                   >
                     <User size={16} />
                     <span>{user.name.split(' ')[0]}</span>

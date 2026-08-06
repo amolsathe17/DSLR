@@ -7,9 +7,27 @@ const { protect, authorize } = require('../middleware/auth');
 // @desc    Get all events
 // @route   GET /api/events
 // @access  Public
+// @desc    Get all events
+// @route   GET /api/events
+// @access  Public
 router.get('/', async (req, res) => {
   try {
     const { includeDrafts } = req.query;
+
+    // Auto-transition events whose start date is within 1 month (or past) to Active
+    const now = new Date();
+    const oneMonthFromNow = new Date(now);
+    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+    await Event.updateMany(
+      {
+        status: { $in: ['Draft', 'Upcoming'] },
+        startDate: { $exists: true, $ne: null, $lte: oneMonthFromNow },
+        deadline: { $gte: now }
+      },
+      { $set: { status: 'Active' } }
+    );
+
     let query = {};
     if (includeDrafts !== 'true') {
       query.status = { $ne: 'Draft' };
@@ -90,15 +108,41 @@ router.get('/:id', async (req, res) => {
 // @desc    Create a new event
 // @route   POST /api/events
 // @access  Private/Admin
-// @desc    Create a new event
-// @route   POST /api/events
-// @access  Private/Admin
 router.post('/', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { title, eventType, theme, description, rules, deadline, eventDate, prizes, faqs, terms, packages, assignedCategories } = req.body;
+    const { title, eventType, theme, description, rules, deadline, startDate, eventDate, prizes, faqs, terms, packages, assignedCategories, hasExhibition, exhibitionFromDate, exhibitionToDate, loginBgUrl, venue } = req.body;
 
     if (!assignedCategories || !Array.isArray(assignedCategories) || assignedCategories.length === 0) {
       return res.status(400).json({ success: false, message: 'At least one category must be assigned to this Contest Type' });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (deadline && new Date(deadline) < today) {
+      return res.status(400).json({ success: false, message: 'Submission deadline cannot be a back-dated or past date.' });
+    }
+
+    if (startDate && new Date(startDate) < today) {
+      return res.status(400).json({ success: false, message: 'Event start date cannot be a back-dated or past date.' });
+    }
+
+    // Auto classification: if start date is > 4 months from current date, classify as Upcoming Event (status: Draft/Upcoming)
+    // If start date is <= 1 month from now or today, set initial status as Active
+    const stDate = startDate ? new Date(startDate) : new Date();
+    const fourMonthsFromNow = new Date();
+    fourMonthsFromNow.setMonth(fourMonthsFromNow.getMonth() + 4);
+
+    const oneMonthFromNow = new Date();
+    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+    let initialStatus = 'Active';
+    if (stDate > fourMonthsFromNow) {
+      initialStatus = 'Draft'; // Appears in Upcoming events
+    } else if (stDate <= oneMonthFromNow) {
+      initialStatus = 'Active';
+    } else {
+      initialStatus = 'Draft';
     }
 
     const event = await Event.create({
@@ -108,12 +152,18 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
       description,
       rules,
       deadline,
+      startDate: stDate,
       eventDate,
+      hasExhibition,
+      exhibitionFromDate,
+      exhibitionToDate,
+      loginBgUrl,
+      venue,
       prizes,
       faqs,
       terms,
       packages,
-      status: 'Draft',
+      status: initialStatus,
       assignedJudges: []
     });
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { jsPDF } from 'jspdf';
 import { useAuth } from '../context/AuthContext';
 import { useEvent } from '../context/EventContext';
 import {
@@ -125,6 +126,7 @@ export default function AdminDashboard() {
   // Create Event Form states
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventTheme, setNewEventTheme] = useState('');
+  const [newEventStartDate, setNewEventStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [newEventDeadline, setNewEventDeadline] = useState('');
   const [newEventRules, setNewEventRules] = useState('');
   const [eventType, setEventType] = useState('Photography');
@@ -417,6 +419,143 @@ export default function AdminDashboard() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [activeHistoryEvent, setActiveHistoryEvent] = useState(null);
   const [historySearch, setHistorySearch] = useState('');
+
+  const downloadEventPDF = (e) => {
+    if (!e) return;
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Header Banner
+      doc.setFillColor(30, 27, 75);
+      doc.rect(0, 0, 210, 38, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('COMPLETED EVENT AUDIT REPORT', 14, 20);
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on: ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} | DSLR Platform`, 14, 28);
+
+      // Event Metas Box
+      doc.setFillColor(248, 250, 252);
+      doc.rect(14, 44, 182, 36, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(14, 44, 182, 36, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text(e.title || 'Untitled Contest', 18, 53);
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Status: ${e.status}   |   Submission Deadline: ${new Date(e.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, 18, 61);
+      doc.text(`Theme: ${(e.theme || 'N/A').slice(0, 85)}`, 18, 67);
+      doc.text(`Venue: ${e.venue || 'Bal-Gandharv Art Gallery, Pune'}`, 18, 73);
+
+      // Quick Stats Cards
+      let y = 88;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text('EVENT STATS & REVENUE SUMMARY', 14, y);
+      y += 5;
+
+      doc.setFillColor(224, 231, 255);
+      doc.rect(14, y, 42, 18, 'F');
+      doc.rect(60, y, 42, 18, 'F');
+      doc.rect(106, y, 42, 18, 'F');
+      doc.rect(152, y, 44, 18, 'F');
+
+      doc.setFontSize(7.5);
+      doc.setTextColor(55, 48, 163);
+      doc.text('PARTICIPANTS', 18, y + 5);
+      doc.text('TOTAL PHOTOS', 64, y + 5);
+      doc.text('PAYMENTS', 110, y + 5);
+      doc.text('TOTAL REVENUE', 156, y + 5);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+      doc.text(String(e.participantsCount || 0), 18, y + 13);
+      doc.text(String(e.totalPhotos || 0), 64, y + 13);
+      doc.text(String(e.totalPaymentsCount || 0), 110, y + 13);
+      doc.text(`Rs. ${(e.totalRevenue || 0).toLocaleString()}`, 156, y + 13);
+
+      y += 26;
+
+      // Winners Circle
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text('WINNERS CIRCLE', 14, y);
+      y += 6;
+
+      if (e.winners && e.winners.length > 0) {
+        e.winners.forEach((w, idx) => {
+          doc.setFillColor(idx === 0 ? 254 : idx === 1 ? 241 : 255, idx === 0 ? 243 : idx === 1 ? 245 : 237, idx === 0 ? 199 : idx === 1 ? 249 : 213);
+          doc.rect(14, y, 182, 12, 'F');
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(15, 23, 42);
+          doc.text(`${w.rank}: ${w.userName || 'Artist'} - "${w.photoTitle || 'Entry'}"`, 18, y + 8);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Grade: ${w.score || 0}/10  |  Reward: ${w.reward || 'Award'}`, 125, y + 8);
+          y += 15;
+        });
+      } else {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(148, 163, 184);
+        doc.text('Winners rankings have not been declared/published yet.', 18, y + 4);
+        y += 12;
+      }
+
+      y += 4;
+
+      // Evaluation Judges Panel
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text('EVALUATION JUDGES PANEL', 14, y);
+      y += 6;
+
+      if (e.judgeDetails && e.judgeDetails.length > 0) {
+        e.judgeDetails.forEach((j) => {
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(51, 65, 85);
+          doc.text(`- ${j.name} (${j.email}) - Sign-off Status: ${j.hasConfirmed ? 'Signed Off' : 'Pending'}`, 18, y);
+          y += 5;
+        });
+      } else {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(148, 163, 184);
+        doc.text('No judges assigned to this event.', 18, y);
+        y += 5;
+      }
+
+      // Footer
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(148, 163, 184);
+      doc.text('Official Completed Event Summary - DSLR Competition Platform', 14, 285);
+
+      const filename = `${(e.title || 'Event').replace(/[^a-zA-Z0-9]/g, '_')}_Completed_Report.pdf`;
+      doc.save(filename);
+    } catch (err) {
+      console.error('Error generating event PDF:', err);
+      alert('Could not generate PDF for this event.');
+    }
+  };
   
   // Selection/Modals
   const [selectedPhoto, setSelectedPhoto] = useState(null); // zoom / detail
@@ -1226,6 +1365,20 @@ export default function AdminDashboard() {
         return;
       }
 
+      const todayStr = new Date().toISOString().split('T')[0];
+      if (newEventStartDate < todayStr) {
+        alert('Event start date cannot be a back-dated / past date.');
+        return;
+      }
+      if (newEventDeadline < todayStr) {
+        alert('Submission deadline cannot be a back-dated / past date.');
+        return;
+      }
+      if (newEventDeadline < newEventStartDate) {
+        alert('Submission deadline must be on or after the event start date.');
+        return;
+      }
+
       const data = await apiFetch('/api/events', {
         method: 'POST',
         body: JSON.stringify({
@@ -1236,6 +1389,7 @@ export default function AdminDashboard() {
           description: newEventDescription,
           venue: newEventVenue,
           rules: newEventRules.split('\n').filter(r => r.trim() !== ''),
+          startDate: newEventStartDate,
           deadline: newEventDeadline,
           eventDate: hasExhibition && exhibitionFromDate 
             ? new Date(exhibitionFromDate) 
@@ -1542,16 +1696,6 @@ export default function AdminDashboard() {
               </select>
             </div>
           )}
-          <button
-            onClick={() => {
-              fetchEventHistory();
-              setActiveTab('event_history');
-            }}
-            className="bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-semibold text-xs py-2 px-4 rounded-xl cursor-pointer shadow-sm transition-all flex items-center gap-1.5"
-          >
-            <History size={14} />
-            Event History
-          </button>
         </div>
       </div>
 
@@ -2467,14 +2611,30 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Submission Deadline</label>
+                    <label className="text-xs text-slate-500 font-semibold">
+                      Event Start Date <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="date"
+                      min={new Date().toISOString().split('T')[0]}
+                      value={newEventStartDate}
+                      onChange={(e) => setNewEventStartDate(e.target.value)}
+                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-semibold">
+                      Submission Deadline <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      min={newEventStartDate || new Date().toISOString().split('T')[0]}
                       value={newEventDeadline}
                       onChange={(e) => setNewEventDeadline(e.target.value)}
-                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
                       required
                     />
                   </div>
@@ -3573,6 +3733,14 @@ export default function AdminDashboard() {
                       }`}>
                         {activeHistoryEvent.status}
                       </span>
+                      <button
+                        onClick={() => downloadEventPDF(activeHistoryEvent)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
+                        title="Download Completed Event PDF"
+                      >
+                        <Download size={14} />
+                        Download Event PDF
+                      </button>
                       <button
                         onClick={() => {
                           setEventToDeleteId(activeHistoryEvent.id);

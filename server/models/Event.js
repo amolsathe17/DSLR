@@ -8,6 +8,7 @@ const eventSchema = new mongoose.Schema({
   description: { type: String },
   rules: [{ type: String }],
   deadline: { type: Date, required: true },
+  startDate: { type: Date },
   eventDate: { type: Date },
   exhibitionFromDate: { type: Date },
   exhibitionToDate: { type: Date },

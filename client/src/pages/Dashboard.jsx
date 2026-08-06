@@ -55,12 +55,14 @@ export default function Dashboard() {
   ];
 
   const getActiveCustomLabels = (catObj) => {
-    if (!catObj) return [];
-    const labels = catObj.customLabels || [];
-    if (catObj.customLabelsMode === 'contest_type') {
-      return labels.filter(lbl => !COMMON_LABELS.includes(lbl));
+    if (catObj && catObj.customLabels && catObj.customLabels.length > 0) {
+      return catObj.customLabels;
     }
-    return labels;
+    if (categories && categories.length > 0) {
+      const catWithLabels = categories.find(c => c.customLabels && c.customLabels.length > 0);
+      if (catWithLabels) return catWithLabels.customLabels;
+    }
+    return [];
   };
 
   const [dashboardTab, setDashboardTab] = useState("entries");
@@ -250,20 +252,18 @@ export default function Dashboard() {
   }, [selectedTypeTab]);
 
   useEffect(() => {
-    if (category && categories.length > 0) {
-      const selectedCat = categories.find(c => c.name === category);
+    if (categories.length > 0) {
+      const selectedCat = categories.find(c => c.name === category) || categories.find(c => c.customLabels && c.customLabels.length > 0) || categories[0];
       if (selectedCat) {
         const labels = getActiveCustomLabels(selectedCat);
-        const initialVals = {};
+        const initialVals = { ...customFieldValues };
         labels.forEach(l => {
-          initialVals[l] = '';
+          if (initialVals[l] === undefined) {
+            initialVals[l] = '';
+          }
         });
         setCustomFieldValues(initialVals);
-      } else {
-        setCustomFieldValues({});
       }
-    } else {
-      setCustomFieldValues({});
     }
   }, [category, categories]);
 
@@ -360,6 +360,11 @@ export default function Dashboard() {
       setError("Photograph file size must be below 800 KB.");
       return;
     }
+    if (!title || !title.trim()) {
+      setError("Photo Title is mandatory. Please enter a title for your photograph.");
+      return;
+    }
+
     setUploading(true);
     setError("");
 
@@ -367,7 +372,7 @@ export default function Dashboard() {
       const formData = new FormData();
 
       formData.append("eventId", event._id);
-      formData.append("title", title || "Untitled");
+      formData.append("title", title.trim());
       formData.append("category", category || "General");
       formData.append("cameraBrand", cameraBrand || "");
       formData.append("cameraModel", cameraModel || "");
@@ -632,6 +637,12 @@ export default function Dashboard() {
   const handleUpdatePhoto = async (e) => {
     e.preventDefault();
     if (!editingPhoto) return;
+
+    if (!editTitle || !editTitle.trim()) {
+      setError("Photo Title is mandatory. Please enter a title for your photograph.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -645,7 +656,7 @@ export default function Dashboard() {
         method: "PUT",
         body: JSON.stringify({
           eventId: event._id,
-          title: editTitle,
+          title: editTitle.trim(),
           category: editCategory,
           cameraBrand: editCameraBrand,
           cameraModel: editCameraModel,
@@ -2094,7 +2105,21 @@ export default function Dashboard() {
             <form onSubmit={handleUpdatePhoto} className="flex flex-col gap-5 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
-
+                {/* Edit Title */}
+                <div className="flex flex-col gap-1.5 md:col-span-2">
+                  <label htmlFor="editPhotoTitle" className="font-extrabold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-wider">
+                    Photo Title *
+                  </label>
+                  <input
+                    type="text"
+                    id="editPhotoTitle"
+                    required
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="Enter photo title (Required)"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-800 dark:text-slate-100 text-xs"
+                  />
+                </div>
 
                 {/* Edit Category */}
                 <div className="flex flex-col gap-1.5">

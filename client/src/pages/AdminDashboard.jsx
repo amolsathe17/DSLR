@@ -2560,11 +2560,11 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Login Page Background Image</label>
+                    <label className="text-xs text-slate-500 font-semibold">Event Image (Login & Register Background)</label>
                     <div className="flex items-center gap-2">
                       <label className="flex-1 flex items-center justify-center px-3 py-2 bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
                         <span className="text-[11px] text-slate-500 truncate">
-                          {uploadingBg ? 'Uploading...' : loginBgUrl ? 'Image Uploaded ✓' : 'Upload Image (PNG/JPG)'}
+                          {uploadingBg ? 'Uploading...' : loginBgUrl ? 'Event Image Uploaded ✓' : 'Upload Event Image (PNG/JPG)'}
                         </span>
                         <input
                           type="file"
@@ -4961,11 +4961,11 @@ export default function AdminDashboard() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="font-bold text-slate-700 dark:text-slate-300">Login Page Background Image</label>
+                <label className="font-bold text-slate-700 dark:text-slate-300">Event Image (Login & Register Background)</label>
                 <div className="flex items-center gap-2">
                   <label className="flex-1 flex items-center justify-center px-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-350 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
                     <span className="text-[11px] text-slate-500 truncate">
-                      {uploadingEditBg ? 'Uploading...' : editLoginBgUrl ? 'Image Uploaded ✓' : 'Upload Image (PNG/JPG)'}
+                      {uploadingEditBg ? 'Uploading...' : editLoginBgUrl ? 'Event Image Uploaded ✓' : 'Upload Event Image (PNG/JPG)'}
                     </span>
                     <input
                       type="file"

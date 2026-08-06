@@ -21,22 +21,32 @@ export default function Login() {
     }
   }, [user, navigate]);
 
-  const [event, setEvent] = useState(null);
+  const [event, setEvent] = useState(location.state?.event || null);
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         const data = await apiFetch('/api/events');
         if (data.success && data.events.length > 0) {
-          const active = data.events.find(e => e.status === 'Active') || data.events[0];
-          setEvent(active);
+          const targetId = location.state?.eventId || localStorage.getItem('selectedEventId_Participant') || localStorage.getItem('selectedEventId');
+          let selected = null;
+          if (targetId) {
+            selected = data.events.find(e => e._id === targetId);
+          }
+          if (!selected && location.state?.event) {
+            selected = location.state.event;
+          }
+          if (!selected) {
+            selected = data.events.find(e => e.status === 'Active') || data.events[0];
+          }
+          setEvent(selected);
         }
       } catch (err) {
         console.error('Error fetching event in Login page:', err);
       }
     };
     fetchEvent();
-  }, []);
+  }, [location.state?.eventId]);
 
   const [loginMethod, setLoginMethod] = useState('email'); // 'email' or 'mobile'
   const [email, setEmail] = useState('');
@@ -208,8 +218,8 @@ export default function Login() {
       className="min-h-[calc(100vh-4rem)] w-full flex items-center bg-cover bg-center relative login-bg-responsive"
       style={{
         '--login-bg': `url('${
-          event?.loginBgUrl
-            ? getBackendUrl(event.loginBgUrl)
+          (event?.loginBgUrl || event?.imageUrl || event?.image || event?.coverImage)
+            ? getBackendUrl(event.loginBgUrl || event.imageUrl || event.image || event.coverImage)
             : '/login_bg.jpg'
         }')`
       }}

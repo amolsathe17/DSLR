@@ -201,6 +201,7 @@ function ActiveEventDetailCard({ event, onEnroll }) {
   const Icon = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
   const countdown = useCountdown(event.deadline);
   const [expanded, setExpanded] = useState(false);
+  const [themeExpanded, setThemeExpanded] = useState(false);
 
   return (
     <div
@@ -210,33 +211,46 @@ function ActiveEventDetailCard({ event, onEnroll }) {
         className={`absolute inset-0 bg-linear-to-br ${colors.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}
       />
 
-      {/* Coloured header */}
+      {/* Coloured header — uniform height */}
       <div
-        className={`relative bg-linear-to-br ${colors.header} px-6 pt-6 pb-5 text-white`}
+        className={`relative bg-linear-to-br ${colors.header} px-6 pt-6 pb-5 text-white flex flex-col justify-between min-h-[180px]`}
       >
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/20">
-            <Icon size={24} className="text-white" />
+        <div>
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/20">
+              <Icon size={24} className="text-white" />
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="px-2.5 py-1 rounded-full bg-emerald-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                Live · Active
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
+                {event.eventType}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              Live · Active
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
-              {event.eventType}
-            </span>
-          </div>
+          <h3 className="font-display font-black text-2xl leading-tight">
+            {event.title}
+          </h3>
         </div>
-        <h3 className="font-display font-black text-2xl leading-tight">
-          {event.title}
-        </h3>
-        {event.theme && (
-          <p className="text-white/70 text-xs mt-1.5 italic min-h-10">
-            "{event.theme}"
+
+        {event.theme ? (
+          <p className="text-white/75 text-xs mt-1.5 italic leading-relaxed">
+            "{themeExpanded ? event.theme : (event.theme.length > 70 ? event.theme.slice(0, 70) + "..." : event.theme)}"
+            {event.theme.length > 70 && (
+              <button
+                type="button"
+                onClick={() => setThemeExpanded(!themeExpanded)}
+                className="ml-1 text-white underline font-bold hover:text-white/80 cursor-pointer text-xs"
+              >
+                {themeExpanded ? "less" : "more"}
+              </button>
+            )}
           </p>
+        ) : (
+          <div />
         )}
-        {!event.theme && <div className="min-h-10" />}
       </div>
 
       {/* Description — fixed height so countdown aligns across cards */}
@@ -400,6 +414,7 @@ function ActiveEventDetailCard({ event, onEnroll }) {
 function UpcomingEventCard({ event, onEnroll }) {
   const colors = getColors(event.eventType);
   const Icon = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
+  const [themeExpanded, setThemeExpanded] = useState(false);
 
   return (
     <div
@@ -410,28 +425,42 @@ function UpcomingEventCard({ event, onEnroll }) {
       />
 
       <div
-        className={`relative bg-linear-to-br ${colors.header} px-5 pt-5 pb-8 text-white`}
+        className={`relative bg-linear-to-br ${colors.header} px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-[165px]`}
       >
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
-            <Icon size={20} className="text-white" />
+        <div>
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
+              <Icon size={20} className="text-white" />
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="px-2 py-0.5 rounded-full bg-blue-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+                <Clock size={8} /> Upcoming
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
+                {event.eventType}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="px-2 py-0.5 rounded-full bg-blue-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
-              <Clock size={8} /> Upcoming
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
-              {event.eventType}
-            </span>
-          </div>
+          <h3 className="font-display font-black text-lg leading-tight line-clamp-2">
+            {event.title}
+          </h3>
         </div>
-        <h3 className="font-display font-black text-lg leading-tight line-clamp-2">
-          {event.title}
-        </h3>
-        {event.theme && (
-          <p className="text-white/70 text-[11px] mt-1 italic">
-            "{event.theme}"
+
+        {event.theme ? (
+          <p className="text-white/75 text-[11px] mt-1 italic leading-relaxed">
+            "{themeExpanded ? event.theme : (event.theme.length > 70 ? event.theme.slice(0, 70) + "..." : event.theme)}"
+            {event.theme.length > 70 && (
+              <button
+                type="button"
+                onClick={() => setThemeExpanded(!themeExpanded)}
+                className="ml-1 text-white underline font-bold hover:text-white/80 cursor-pointer text-xs"
+              >
+                {themeExpanded ? "less" : "more"}
+              </button>
+            )}
           </p>
+        ) : (
+          <div />
         )}
       </div>
 
@@ -509,31 +538,46 @@ function UpcomingEventCard({ event, onEnroll }) {
 
 function ClosedEventCard({ event }) {
   const Icon = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
+  const [themeExpanded, setThemeExpanded] = useState(false);
 
   return (
     <div className="group relative flex flex-col rounded-3xl overflow-hidden border border-slate-200/60 bg-white shadow-sm hover:shadow-md transition-all duration-300">
       <div className="absolute inset-0 bg-slate-50/40 pointer-events-none rounded-3xl" />
-      <div className="relative bg-linear-to-br from-slate-500 to-slate-700 px-5 pt-5 pb-8 text-white">
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
-            <Icon size={20} className="text-white/80" />
+      <div className="relative bg-linear-to-br from-slate-500 to-slate-700 px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-[165px]">
+        <div>
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
+              <Icon size={20} className="text-white/80" />
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="px-2 py-0.5 rounded-full bg-slate-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+                <Lock size={8} /> Closed
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-white/20 text-white/70 text-[9px] font-bold uppercase tracking-wider">
+                {event.eventType}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="px-2 py-0.5 rounded-full bg-slate-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
-              <Lock size={8} /> Closed
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-white/20 text-white/70 text-[9px] font-bold uppercase tracking-wider">
-              {event.eventType}
-            </span>
-          </div>
+          <h3 className="font-display font-black text-lg leading-tight line-clamp-2 text-white/90">
+            {event.title}
+          </h3>
         </div>
-        <h3 className="font-display font-black text-lg leading-tight line-clamp-2 text-white/90">
-          {event.title}
-        </h3>
-        {event.theme && (
-          <p className="text-white/50 text-[11px] mt-1 italic">
-            "{event.theme}"
+
+        {event.theme ? (
+          <p className="text-white/70 text-[11px] mt-1 italic leading-relaxed">
+            "{themeExpanded ? event.theme : (event.theme.length > 70 ? event.theme.slice(0, 70) + "..." : event.theme)}"
+            {event.theme.length > 70 && (
+              <button
+                type="button"
+                onClick={() => setThemeExpanded(!themeExpanded)}
+                className="ml-1 text-white underline font-bold hover:text-white/80 cursor-pointer text-xs"
+              >
+                {themeExpanded ? "less" : "more"}
+              </button>
+            )}
           </p>
+        ) : (
+          <div />
         )}
       </div>
 

@@ -218,10 +218,13 @@ export default function Navbar() {
           : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
     }`;
 
-  // On landing: glassy at top, solid white once scrolled
+  // Position: fixed on landing page so navbar overlays hero background directly; sticky elsewhere
+  const navPosition = isLandingPage ? 'fixed top-0 left-0 right-0' : 'sticky top-0';
+
+  // On landing: transparent at top, solid white once scrolled
   const navBg = isLandingPage
     ? scrolled
-      ? 'bg-white shadow-md border-b border-slate-200'
+      ? 'bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-800'
       : 'bg-transparent border-b border-transparent'
     : 'bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-md';
 
@@ -229,7 +232,7 @@ export default function Navbar() {
   const onHero = isLandingPage && !scrolled;
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${navBg}`}>
+    <nav className={`${navPosition} z-50 transition-all duration-300 ${navBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo — hidden on landing until user scrolls */}

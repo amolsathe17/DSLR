@@ -334,23 +334,21 @@ function ActiveEventDetailCard({ event, onEnroll }) {
           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
             <Star size={10} /> Entry Packages
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {event.packages.map((pkg, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs ${i === 0 ? "border-indigo-200 bg-indigo-50/60" : "border-slate-100 bg-slate-50"}`}
+                className="flex items-center justify-between px-4 py-3 rounded-2xl border border-indigo-200/80 bg-indigo-50/60 text-xs shadow-xs"
               >
                 <div>
-                  <p className="font-bold text-slate-800">{pkg.name}</p>
+                  <p className="font-bold text-slate-900 text-sm">{pkg.name}</p>
                   {pkg.description && (
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-slate-500 font-medium mt-0.5">
                       {pkg.description}
                     </p>
                   )}
                 </div>
-                <span
-                  className={`font-black text-sm ${i === 0 ? "text-indigo-600" : "text-slate-700"}`}
-                >
+                <span className="font-black text-base text-indigo-600">
                   ₹{pkg.price}
                 </span>
               </div>

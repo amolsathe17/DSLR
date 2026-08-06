@@ -76,34 +76,36 @@ export default function Landing() {
       </section>
 
       {/* ══════════════════════════════ CTA BANNER ═════════════════════════════ */}
-      <section className="relative py-16 bg-white dark:bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="bg-linear-to-br from-blue-600 to-black-700 rounded-3xl px-8 py-14 text-center flex flex-col items-center gap-6 shadow-2xl shadow-black-900/90 overflow-hidden relative">
-            {/* Decorative blob */}
-            <div
-              className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none opacity-20"
-              style={{ background: "radial-gradient(circle, #a78bfa 50%, transparent 80%)" }}
-            />
-            <h2 className="font-display font-black text-3xl sm:text-4xl text-white leading-tight">
+      <section className="py-4 bg-slate-200 border-y border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-1">
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900">
               Ready to Showcase Your Talent?
             </h2>
-            <p className="text-indigo-100 text-sm leading-relaxed">
-              Explore Events and enter any of our active competitions. Cash prizes, certificates, and recognition await!
+            <p className="text-sm text-slate-500 mt-2 max-w-xl mx-auto">
+              Ready to compete? Create your account and start participating
+              today.
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap mt-3">
               {!user ? (
                 <>
                   <Link
-                    to="/info"
-                    className="bg-white hover:bg-red-700 text-black hover:text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
+                    to="/register"
+                    className="bg-indigo-600 hover:bg-red-700 text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
                   >
-                    Explore Events
+                    Create Account
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="bg-indigo-600 hover:bg-red-700 text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
+                  >
+                    Sign In
                   </Link>
                 </>
               ) : (
                 <button
                   onClick={() => navigate("/dashboard")}
-                  className="bg-white hover:bg-red-700 text-black hover:text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
                 >
                   Go to My Dashboard
                 </button>

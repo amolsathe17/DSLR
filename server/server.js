@@ -120,21 +120,35 @@ process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
 });
 
+let initPromise = null;
+const initDB = async () => {
+  if (!initPromise) {
+    initPromise = (async () => {
+      try {
+        await connectDB();
+        await seedData();
+      } catch (err) {
+        console.error("DB Initialization Error:", err.message);
+      }
+    })();
+  }
+  return initPromise;
+};
+
+// Middleware to ensure DB is initialized before processing API requests
+app.use(async (req, res, next) => {
+  await initDB();
+  next();
+});
+
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  try {
-    await connectDB();
-
-    await seedData();
-
+if (require.main === module) {
+  initDB().then(() => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-};
+  });
+}
 
-startServer();
+module.exports = app;

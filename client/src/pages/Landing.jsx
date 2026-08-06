@@ -114,11 +114,11 @@ export default function Landing() {
   };
 
   return (
-    <div className="relative min-h-screen text-slate-800">
+    <div className="relative min-h-screen text-slate-800 overflow-hidden">
 
-      {/* ── FIXED HERO BACKGROUND ─────────────────────────────────────────── */}
+      {/* ── HERO BACKGROUND ─────────────────────────────────────────── */}
       <div
-        className="fixed inset-0 -z-10"
+        className="absolute inset-0 -z-10"
         style={{
           backgroundImage: "url('/hero-bg.jpg')",
           backgroundSize: "cover",
@@ -128,7 +128,7 @@ export default function Landing() {
         }}
       />
       {/* Dark overlay */}
-      <div className="fixed inset-0 -z-10 bg-black/55" />
+      <div className="absolute inset-0 -z-10 bg-black/55" />
 
       {/* ══════════════════════════════════ HERO ═══════════════════════════════ */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-24 text-white text-center">

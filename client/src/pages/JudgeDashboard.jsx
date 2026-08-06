@@ -39,6 +39,7 @@ export default function JudgeDashboard() {
   const [offlineScores, setOfflineScores] = useState({});
   const [judgeDashboardTab, setJudgeDashboardTab] = useState('overview');
   const [allPhotographsByEvent, setAllPhotographsByEvent] = useState({});
+  const [historySelectedEventId, setHistorySelectedEventId] = useState('');
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successTitle, setSuccessTitle] = useState('');
@@ -65,6 +66,7 @@ export default function JudgeDashboard() {
         if (assigned.length > 0) {
           const active = assigned.find(e => e.status === 'Active') || assigned[0];
           setEvent(active);
+          setHistorySelectedEventId(active._id);
           
           // Fetch assigned photos for ALL assigned events to populate overview statistics
           const photoByEventData = {};
@@ -1812,138 +1814,269 @@ export default function JudgeDashboard() {
         </div>
       )}
 
-      {judgeDashboardTab === "event_history" && (
-        <div className="animate-in fade-in duration-200 flex flex-col gap-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-2xl">
-              <History size={20} />
-            </div>
-            <div>
-              <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">My Judging History</h2>
-              <p className="text-[10px] text-slate-400">All contests you have been assigned to evaluate as a jury member</p>
-            </div>
-          </div>
+      {judgeDashboardTab === "event_history" && (() => {
+        const selectedHistoryEvent = events.find(e => e._id === (historySelectedEventId || events[0]?._id)) || events[0];
+        const historyPhotos = selectedHistoryEvent ? (allPhotographsByEvent[selectedHistoryEvent._id] || []) : [];
+        const totalHistoryPhotos = historyPhotos.length;
+        const gradedHistoryPhotos = historyPhotos.filter(p => p.graded).length;
+        const disapprovedHistoryPhotos = historyPhotos.filter(p => p.graded && p.score?.approvalStatus === 'Disapproved').length;
+        const approvedHistoryPhotos = historyPhotos.filter(p => p.graded && p.score?.approvalStatus !== 'Disapproved').length;
+        const avgHistoryScore = totalHistoryPhotos > 0 && gradedHistoryPhotos > 0
+          ? (historyPhotos.reduce((sum, p) => sum + (p.score?.averageScore || 0), 0) / gradedHistoryPhotos).toFixed(1)
+          : '—';
+        const isHistorySignedOff = selectedHistoryEvent ? (selectedHistoryEvent.confirmedJudges?.includes(user?.id) || false) : false;
 
-          {events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
-              <History size={36} className="text-slate-300" />
-              <p className="text-xs font-semibold">You haven't been assigned to any events yet.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {events.map(ev => {
-                const evPhotos = allPhotographsByEvent[ev._id] || [];
-                const totalPhotos = evPhotos.length;
-                const gradedPhotos = evPhotos.filter(p => p.graded).length;
-                const disapprovedPhotos = evPhotos.filter(p => p.graded && p.score?.approvalStatus === 'Disapproved').length;
-                const avgScore = totalPhotos > 0
-                  ? (evPhotos.reduce((sum, p) => sum + (p.score?.averageScore || 0), 0) / totalPhotos).toFixed(1)
-                  : '—';
-                const isActive = ev._id === event?._id;
-                const judgeEntry = ev.assignedJudges?.find ? ev.judgeDetails?.find(j => j.id === user?.id) : null;
-                const hasSignedOff = ev.confirmedJudges?.includes(user?.id) || false;
+        return (
+          <div className="animate-in fade-in duration-200 flex flex-col gap-6">
+            {/* Header & Event Selector ("My Judging History & Details" card) */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center gap-3.5">
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-2xl shrink-0">
+                  <History size={24} />
+                </div>
+                <div>
+                  <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">My Judging History & Details</h2>
+                  <p className="text-xs text-slate-400">View complete evaluation statistics, graded photographs, scores breakdown, and sign-off status event-wise</p>
+                </div>
+              </div>
 
-                const statusColor = ev.status === 'Active' ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20' :
-                  ev.status === 'Completed' ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20' :
-                  ev.status === 'Closed' ? 'text-red-600 bg-red-50 dark:bg-red-950/20' :
-                  'text-slate-500 bg-slate-100 dark:bg-slate-800';
-
-                return (
-                  <div
-                    key={ev._id}
-                    className={`bg-white dark:bg-slate-900 border rounded-3xl p-5 flex flex-col gap-4 shadow-sm transition-all ${
-                      isActive
-                        ? 'border-emerald-400 dark:border-emerald-700'
-                        : 'border-slate-200 dark:border-slate-800'
-                    }`}
+              {events.length > 0 && (
+                <div className="w-full md:w-auto shrink-0">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Select Assigned Event ({events.length})
+                  </label>
+                  <select
+                    value={historySelectedEventId || selectedHistoryEvent?._id || ''}
+                    onChange={(e) => setHistorySelectedEventId(e.target.value)}
+                    className="w-full md:w-80 px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-emerald-200 dark:border-emerald-900/50 rounded-2xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-xs"
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">{ev.title}</h3>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Theme: {ev.theme || 'N/A'}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {isActive && (
-                          <span className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">
-                            Current
-                          </span>
-                        )}
-                        <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${statusColor}`}>
-                          {ev.status}
+                    {events.map(ev => (
+                      <option key={ev._id} value={ev._id}>
+                        {ev.title} ({ev.eventType || 'Contest'}) - {ev.status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {/* Empty State: No Assigned Events */}
+            {events.length === 0 || !selectedHistoryEvent ? (
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center flex flex-col items-center gap-4 shadow-sm">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-400 rounded-full">
+                  <History size={40} />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-base text-slate-900 dark:text-white">No Assigned Events Found</h3>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
+                    You haven't been assigned as a jury member to any events yet.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-6">
+                
+                {/* 1. Status Overview & Event Metrics */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-6">
+                  
+                  {/* Event Title Banner */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-5">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400">
+                          {selectedHistoryEvent.eventType || 'Photography'}
+                        </span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                          selectedHistoryEvent.status === 'Active' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30' :
+                          selectedHistoryEvent.status === 'Completed' ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/30' :
+                          selectedHistoryEvent.status === 'Closed' ? 'bg-red-50 text-red-600 dark:bg-red-950/30' :
+                          'bg-slate-100 text-slate-600 dark:bg-slate-800'
+                        }`}>
+                          {selectedHistoryEvent.status}
                         </span>
                       </div>
+                      <h3 className="font-display font-black text-xl text-slate-900 dark:text-white">
+                        {selectedHistoryEvent.title}
+                      </h3>
+                      {selectedHistoryEvent.theme && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-3xl">
+                          <span className="font-semibold">Theme:</span> {selectedHistoryEvent.theme}
+                        </p>
+                      )}
                     </div>
 
-                    {/* Evaluation stats */}
-                    <div className="grid grid-cols-4 gap-2">
-                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
-                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Assigned</span>
-                        <span className="text-base font-black text-slate-900 dark:text-white">{totalPhotos}</span>
-                      </div>
-                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
-                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Graded</span>
-                        <span className="text-base font-black text-emerald-600 dark:text-emerald-400">{gradedPhotos}</span>
-                      </div>
-                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
-                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Disapproved</span>
-                        <span className="text-base font-black text-red-500">{disapprovedPhotos}</span>
-                      </div>
-                      <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100/50 dark:border-emerald-900/20 rounded-xl text-center">
-                        <span className="text-[8px] text-emerald-600 font-bold block uppercase tracking-wider">Avg Score</span>
-                        <span className="text-base font-black text-emerald-700 dark:text-emerald-400">{avgScore}</span>
-                      </div>
-                    </div>
-
-                    {/* Progress bar */}
-                    {totalPhotos > 0 && (
-                      <div>
-                        <div className="flex justify-between text-[9px] text-slate-400 mb-1">
-                          <span>Evaluation Progress</span>
-                          <span>{gradedPhotos}/{totalPhotos} ({Math.round((gradedPhotos/totalPhotos)*100)}%)</span>
-                        </div>
-                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
-                          <div
-                            className="bg-emerald-500 h-1.5 rounded-full transition-all"
-                            style={{ width: `${Math.round((gradedPhotos / totalPhotos) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Sign-off status */}
-                    <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3">
-                      <div className="text-[9px] text-slate-400">
-                        Deadline: {ev.deadline ? new Date(ev.deadline).toLocaleDateString() : 'N/A'}
-                      </div>
-                      <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 ${
-                        hasSignedOff
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
-                          : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
+                    {/* Sign Off Status / Action */}
+                    <div className="flex flex-col sm:items-end gap-2 shrink-0">
+                      <span className={`px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 ${
+                        isHistorySignedOff
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                          : 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
                       }`}>
-                        {hasSignedOff ? (
-                          <><Check size={9} /> Signed Off</>
+                        {isHistorySignedOff ? (
+                          <><Check size={14} /> Signed Off & Locked</>
                         ) : (
-                          <><Clock size={9} /> Pending Sign-Off</>
+                          <><Clock size={14} /> Pending Sign-Off</>
                         )}
                       </span>
+                      <span className="text-[10px] text-slate-400">
+                        Deadline: {selectedHistoryEvent.deadline ? new Date(selectedHistoryEvent.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 4 Metric Cards for Selected Event */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-2xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assigned Entries</span>
+                      <span className="text-2xl font-black text-slate-900 dark:text-white">{totalHistoryPhotos}</span>
+                      <span className="text-[10px] text-slate-400">Total photos assigned</span>
                     </div>
 
-                    {/* Switch to this event button */}
-                    {!isActive && ev.status === 'Active' && (
-                      <button
-                        onClick={() => handleEventChange(ev._id)}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-2 rounded-xl cursor-pointer transition-colors"
-                      >
-                        Switch to This Event
-                      </button>
-                    )}
+                    <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Graded Entries</span>
+                      <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{gradedHistoryPhotos}</span>
+                      <span className="text-[10px] text-emerald-600/70">{totalHistoryPhotos > 0 ? `${Math.round((gradedHistoryPhotos / totalHistoryPhotos) * 100)}% completed` : '0%'}</span>
+                    </div>
+
+                    <div className="p-4 bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-2xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Disapproved</span>
+                      <span className="text-2xl font-black text-red-500">{disapprovedHistoryPhotos}</span>
+                      <span className="text-[10px] text-red-400">{approvedHistoryPhotos} Approved</span>
+                    </div>
+
+                    <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Average Score</span>
+                      <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{avgHistoryScore} <span className="text-xs font-normal text-slate-400">/ 10</span></span>
+                      <span className="text-[10px] text-indigo-500/70">Your average score</span>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+
+                  {/* Progress Bar */}
+                  {totalHistoryPhotos > 0 && (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex justify-between text-xs font-bold text-slate-500">
+                        <span>Evaluation Completion</span>
+                        <span>{gradedHistoryPhotos} / {totalHistoryPhotos} ({Math.round((gradedHistoryPhotos / totalHistoryPhotos) * 100)}%)</span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.round((gradedHistoryPhotos / totalHistoryPhotos) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Evaluated Photographs Details Table */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-5">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                      <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white">
+                        Evaluated Entries & Score Breakdown ({gradedHistoryPhotos})
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Detailed breakdown of scores, criteria, remarks, and approval statuses given by you for {selectedHistoryEvent.title}
+                      </p>
+                    </div>
+                  </div>
+
+                  {gradedHistoryPhotos === 0 ? (
+                    <div className="p-10 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center text-slate-400 text-xs flex flex-col items-center gap-2">
+                      <ListChecks size={28} className="text-slate-300" />
+                      <span>No evaluated photographs found for this event yet. Get started in the Evaluation Workspace tab!</span>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto w-full border border-slate-200/60 dark:border-slate-800 rounded-2xl">
+                      <table className="w-full text-xs text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                            <th className="py-3.5 px-4">Photograph</th>
+                            <th className="py-3.5 px-4">Title & Details</th>
+                            <th className="py-3.5 px-4 text-center">Individual Criteria</th>
+                            <th className="py-3.5 px-4 text-center">Avg Score</th>
+                            <th className="py-3.5 px-4 text-center">Status</th>
+                            <th className="py-3.5 px-4">Graded Date</th>
+                            <th className="py-3.5 px-4">Remarks / Notes</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                          {historyPhotos.filter(p => p.graded).map((item, idx) => {
+                            const sc = item.score || {};
+                            const isDisapproved = sc.approvalStatus === 'Disapproved';
+                            return (
+                              <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
+                                <td className="py-3.5 px-4 whitespace-nowrap">
+                                  <div className="w-20 h-14 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
+                                    <img src={getBackendUrl(item.fileUrl)} alt={item.title} className="w-full h-full object-cover" />
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className="font-extrabold text-slate-900 dark:text-white block text-sm max-w-60 truncate">
+                                    {item.title || 'Untitled'}
+                                  </span>
+                                  <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold block mt-0.5">
+                                    {item.category || item.contestType || 'General Category'}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <div className="flex flex-wrap justify-center gap-1.5 max-w-48 mx-auto">
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-bold rounded text-slate-600 dark:text-slate-300">
+                                      Tech: {sc.technicalQuality ?? '—'}
+                                    </span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-bold rounded text-slate-600 dark:text-slate-300">
+                                      Comp: {sc.composition ?? '—'}
+                                    </span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-bold rounded text-slate-600 dark:text-slate-300">
+                                      Creat: {sc.creativity ?? '—'}
+                                    </span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-bold rounded text-slate-600 dark:text-slate-300">
+                                      Imp: {sc.overallImpact ?? '—'}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className={`text-sm font-black ${isDisapproved ? 'text-slate-400 line-through' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                    {sc.averageScore?.toFixed(1) || '0.0'}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${
+                                    isDisapproved 
+                                      ? 'bg-red-50 text-red-600 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50' 
+                                      : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50'
+                                  }`}>
+                                    {isDisapproved ? <XCircle size={10} /> : <CheckCircle2 size={10} />}
+                                    {sc.approvalStatus || 'Approved'}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 text-[10px] text-slate-500 whitespace-nowrap font-medium">
+                                  {sc.updatedAt || sc.createdAt 
+                                    ? new Date(sc.updatedAt || sc.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                    : 'N/A'
+                                  }
+                                </td>
+                                <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-56">
+                                  {sc.remarks ? (
+                                    <span className="italic text-[11px]">"{sc.remarks}"</span>
+                                  ) : (
+                                    <span className="text-slate-400 text-[10px]">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
     </div>
   );

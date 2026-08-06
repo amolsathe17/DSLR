@@ -19,13 +19,13 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.tiff', '.tif', '.cr2', '.nef', '.arw', '.dng', '.raf', '.orf'];
+  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.svg', '.pdf', '.tiff', '.tif', '.cr2', '.nef', '.arw', '.dng', '.raf', '.orf'];
   const ext = path.extname(file.originalname).toLowerCase();
   
   if (allowedExtensions.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only JPEG, PNG, TIFF and RAW files (.cr2, .nef, .arw, .dng, etc.) are allowed!'), false);
+    cb(new Error('Only JPG, PNG, WEBP, SVG, PDF, TIFF and RAW files are allowed!'), false);
   }
 };
 

@@ -12,10 +12,17 @@ export const AuthProvider = ({ children }) => {
 
   // Common API Fetch Function
   const apiFetch = async (url, options = {}) => {
+    const isFormData = options.body instanceof FormData;
     const headers = {
-      "Content-Type": "application/json",
       ...options.headers,
     };
+
+    if (!isFormData && !headers["Content-Type"] && !headers["content-type"]) {
+      headers["Content-Type"] = "application/json";
+    } else if (isFormData) {
+      delete headers["Content-Type"];
+      delete headers["content-type"];
+    }
 
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -29,10 +36,16 @@ export const AuthProvider = ({ children }) => {
 
       let data = {};
 
-      try {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
         data = await response.json();
-      } catch {
-        throw new Error(`Server Error (${response.status})`);
+      } else {
+        const text = await response.text();
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { success: false, message: text || `Server Error (${response.status})` };
+        }
       }
 
       if (!response.ok) {

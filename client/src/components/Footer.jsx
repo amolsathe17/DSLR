@@ -121,11 +121,12 @@ export default function Footer() {
             <div className="w-full h-53.25 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
               <iframe
                 title="Google Map Location"
-                src="https://maps.google.com/maps?q=Trio%20Chambers,%20Sadashiv%20Peth,%20Pune%20-%20411030&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3783.2758197779774!2d73.847844!3d18.511904!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c069b2d86121%3A0xb30f6b3e9d80d2d3!2sSadashiv%20Peth%2C%20Pune%2C%20Maharashtra%20411030!5e0!3m2!1sen!2sin"
                 className="w-full h-full border-0"
                 allowFullScreen=""
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
+                referrerPolicy="no-referrer"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               ></iframe>
             </div>
           </div>

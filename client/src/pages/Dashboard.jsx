@@ -42,7 +42,7 @@ import Certificate from "../components/Certificate";
 import { getBackendUrl, getApiBaseUrl } from "../utils/url";
 
 export default function Dashboard() {
-  const { apiFetch, user, token } = useAuth();
+  const { apiFetch, user, token, refreshUser } = useAuth();
   const { allEvents: globalEvents } = useEvent();
 
   const COMMON_LABELS = [

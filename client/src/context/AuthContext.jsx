@@ -49,7 +49,15 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (!response.ok) {
-        throw new Error(data.message || `Server Error (${response.status})`);
+        let msg = data?.message;
+        if (!msg || typeof msg !== 'string' || msg.includes('<html') || msg.includes('Application failed to respond')) {
+          if (response.status === 502 || response.status === 503 || response.status === 504) {
+            msg = "Backend server is temporarily unavailable or restarting. Please refresh or try again in a few moments.";
+          } else {
+            msg = `Server Error (${response.status})`;
+          }
+        }
+        throw new Error(msg);
       }
 
       return data;

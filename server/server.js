@@ -112,6 +112,14 @@ app.use((err, req, res, next) => {
   });
 });
 
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+});
+
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {

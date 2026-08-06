@@ -130,21 +130,41 @@ const getMockModel = (modelName, schema) => {
           filtered = filtered.slice(n);
           return chain;
         },
+        lean: () => chain,
+        populate: () => chain,
+        select: () => chain,
         exec: async () => filtered.map(i => new MockModel(i)),
         then: function(onresolve, onreject) {
           return Promise.resolve(filtered.map(i => new MockModel(i))).then(onresolve, onreject);
+        },
+        catch: function(onreject) {
+          return Promise.resolve(filtered.map(i => new MockModel(i))).catch(onreject);
         }
       };
       return chain;
     }
 
-    static async findOne(filter = {}) {
+    static findOne(filter = {}) {
       const items = readData();
       const found = items.find(i => matchFilter(i, filter));
-      return found ? new MockModel(found) : null;
+      const resDoc = found ? new MockModel(found) : null;
+
+      const chain = {
+        lean: () => chain,
+        populate: () => chain,
+        select: () => chain,
+        exec: async () => resDoc,
+        then: function(onresolve, onreject) {
+          return Promise.resolve(resDoc).then(onresolve, onreject);
+        },
+        catch: function(onreject) {
+          return Promise.resolve(resDoc).catch(onreject);
+        }
+      };
+      return chain;
     }
 
-    static async findById(id) {
+    static findById(id) {
       return this.findOne({ _id: id });
     }
 
@@ -180,18 +200,91 @@ const getMockModel = (modelName, schema) => {
     static async updateOne(filter, update) {
       const items = readData();
       const index = items.findIndex(i => matchFilter(i, filter));
-      if (index === -1) return { nModified: 0 };
+      if (index === -1) return { nModified: 0, modifiedCount: 0 };
       
       let updatedData = { ...items[index] };
       if (update.$set) {
         updatedData = { ...updatedData, ...update.$set };
-      } else {
+      }
+      if (update.$addToSet) {
+        for (const key in update.$addToSet) {
+          if (!Array.isArray(updatedData[key])) updatedData[key] = [];
+          const val = update.$addToSet[key];
+          if (!updatedData[key].includes(val)) {
+            updatedData[key].push(val);
+          }
+        }
+      }
+      if (update.$pull) {
+        for (const key in update.$pull) {
+          if (Array.isArray(updatedData[key])) {
+            const val = update.$pull[key];
+            updatedData[key] = updatedData[key].filter(v => v !== val);
+          }
+        }
+      }
+      if (update.$push) {
+        for (const key in update.$push) {
+          if (!Array.isArray(updatedData[key])) updatedData[key] = [];
+          updatedData[key].push(update.$push[key]);
+        }
+      }
+      if (!update.$set && !update.$addToSet && !update.$pull && !update.$push) {
         updatedData = { ...updatedData, ...update };
       }
+
       updatedData.updatedAt = new Date().toISOString();
       items[index] = updatedData;
       writeData(items);
-      return { nModified: 1 };
+      return { nModified: 1, modifiedCount: 1 };
+    }
+
+    static async updateMany(filter, update) {
+      const items = readData();
+      let modifiedCount = 0;
+
+      items.forEach((item, index) => {
+        if (matchFilter(item, filter)) {
+          let updatedData = { ...item };
+          
+          if (update.$set) {
+            updatedData = { ...updatedData, ...update.$set };
+          }
+          if (update.$addToSet) {
+            for (const key in update.$addToSet) {
+              if (!Array.isArray(updatedData[key])) updatedData[key] = [];
+              const val = update.$addToSet[key];
+              if (!updatedData[key].includes(val)) {
+                updatedData[key].push(val);
+              }
+            }
+          }
+          if (update.$pull) {
+            for (const key in update.$pull) {
+              if (Array.isArray(updatedData[key])) {
+                const val = update.$pull[key];
+                updatedData[key] = updatedData[key].filter(v => v !== val);
+              }
+            }
+          }
+          if (update.$push) {
+            for (const key in update.$push) {
+              if (!Array.isArray(updatedData[key])) updatedData[key] = [];
+              updatedData[key].push(update.$push[key]);
+            }
+          }
+          if (!update.$set && !update.$addToSet && !update.$pull && !update.$push) {
+            updatedData = { ...updatedData, ...update };
+          }
+
+          updatedData.updatedAt = new Date().toISOString();
+          items[index] = updatedData;
+          modifiedCount++;
+        }
+      });
+
+      writeData(items);
+      return { modifiedCount, nModified: modifiedCount };
     }
 
     static async deleteOne(filter) {

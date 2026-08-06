@@ -1532,7 +1532,7 @@ export default function AdminDashboard() {
               <select
                 value={selectedEventId}
                 onChange={e => setSelectedEventId(e.target.value)}
-                className="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-transparent border-none outline-none cursor-pointer max-w-[200px]"
+                className="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-transparent border-none outline-none cursor-pointer max-w-50"
               >
                 {allEvents.map(ev => (
                   <option key={ev._id} value={ev._id}>
@@ -1961,7 +1961,7 @@ export default function AdminDashboard() {
                               </span>
                             </div>
                             <div className="p-3 flex flex-col gap-0.5 text-left">
-                              <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate font-black">
+                              <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate">
                                 {photo.title}
                               </h4>
                               <p className="text-[10px] text-slate-500 font-semibold truncate">
@@ -2012,7 +2012,7 @@ export default function AdminDashboard() {
                               </span>
                             </div>
                             <div className="p-3 flex flex-col gap-0.5 text-left">
-                              <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate font-black">
+                              <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate">
                                 {photo.title}
                               </h4>
                               <p className="text-[10px] text-slate-500 font-semibold truncate">
@@ -2057,7 +2057,7 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                           <div className="p-3 flex flex-col gap-0.5 text-left">
-                            <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate font-black">
+                            <h4 className="font-display font-extrabold text-xs text-slate-900 dark:text-white truncate">
                               {photo.title}
                             </h4>
                             <p className="text-[10px] text-slate-500 font-semibold truncate">
@@ -2578,7 +2578,7 @@ export default function AdminDashboard() {
 
                   {/* Right Side: Packages */}
                   <div className="flex flex-col gap-2">
-                    <div className="flex justify-between items-center h-[18px]">
+                    <div className="flex justify-between items-center h-4.5">
                       <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs">Package Entry Fees (INR)</h4>
                       <button
                         type="button"
@@ -2836,7 +2836,7 @@ export default function AdminDashboard() {
                       value={editContestTypeName}
                       onChange={(e) => setEditContestTypeName(e.target.value)}
                       placeholder="e.g. Dance"
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 font-medium"
                       required
                     />
                   </div>
@@ -2882,7 +2882,7 @@ export default function AdminDashboard() {
                       value={newContestTypeName}
                       onChange={(e) => setNewContestTypeName(e.target.value)}
                       placeholder="e.g. Dance"
-                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                      className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100"
                       required
                     />
                   </div>
@@ -2979,7 +2979,7 @@ export default function AdminDashboard() {
                         value={editCatName}
                         onChange={(e) => setEditCatName(e.target.value)}
                         placeholder="e.g. Sketching"
-                        className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                        className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100"
                         required
                       />
                     </div>
@@ -3048,7 +3048,7 @@ export default function AdminDashboard() {
                         value={newCatName}
                         onChange={(e) => setNewCatName(e.target.value)}
                         placeholder="e.g. Wildlife"
-                        className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 font-medium"
+                        className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100"
                         required
                       />
                     </div>
@@ -3143,7 +3143,7 @@ export default function AdminDashboard() {
                           </span>
                         </div>
 
-                        <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px] pr-1">
+                        <div className="flex flex-col gap-2 overflow-y-auto max-h-55 pr-1">
                           {filteredCats.map(c => (
                             <div key={c._id} className="flex justify-between items-start text-[11px] p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl hover:shadow-sm transition-shadow">
                               <div className="flex flex-col gap-0.5 min-w-0 flex-1">
@@ -3350,7 +3350,7 @@ export default function AdminDashboard() {
                       No custom fields configured yet. Add labels using the button above or quick-assign common ones from the right.
                     </p>
                   ) : (
-                    <div className="flex flex-col gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                    <div className="flex flex-col gap-2.5 max-h-75 overflow-y-auto pr-1">
                       {catLabelsLocal.map((label, idx) => (
                         <div key={idx} className="flex gap-2 items-center">
                           <input
@@ -3396,7 +3396,7 @@ export default function AdminDashboard() {
                     type="button"
                     disabled={isSavingCatLabels}
                     onClick={handleSaveCategoryLabels}
-                    className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-xs cursor-pointer transition-all shadow-md disabled:opacity-50 font-bold"
+                    className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-xs cursor-pointer transition-all shadow-md disabled:opacity-50"
                   >
                     {isSavingCatLabels ? 'Saving...' : 'Save Configuration'}
                   </button>
@@ -3433,7 +3433,7 @@ export default function AdminDashboard() {
                   }
                 </p>
                 
-                <div className="flex flex-wrap gap-2 max-h-[350px] overflow-y-auto">
+                <div className="flex flex-wrap gap-2 max-h-87.5 overflow-y-auto">
                   {(() => {
                     const PREDEFINED_LABELS = [
                       "Designer / Brand",
@@ -3493,7 +3493,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-6 min-h-[600px]">
+          <div className="flex flex-col md:flex-row gap-6 min-h-150">
             {/* Left Column: Events List */}
             <div className="w-full md:w-1/3 flex flex-col gap-4">
               <div className="relative">
@@ -3513,7 +3513,7 @@ export default function AdminDashboard() {
                   <span className="text-[10px] uppercase font-bold tracking-wider">Loading history data...</span>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2.5 overflow-y-auto max-h-[600px] pr-1">
+                <div className="flex flex-col gap-2.5 overflow-y-auto max-h-150 pr-1">
                   {eventHistory
                     .filter(e => e.title.toLowerCase().includes(historySearch.toLowerCase()))
                     .map(e => (
@@ -3553,7 +3553,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Right Column: Detail View */}
-            <div className="flex-grow overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <div className="grow overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
               {activeHistoryEvent ? (
                 <div className="flex flex-col gap-6">
                   {/* Event Title & status */}
@@ -3892,7 +3892,7 @@ export default function AdminDashboard() {
                   value={broadcastMessage}
                   onChange={(e) => setBroadcastMessage(e.target.value)}
                   placeholder="Enter details about results, schedules, rules updates, or deadline changes..."
-                  className="w-full min-h-[90px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none resize-none"
+                  className="w-full min-h-22.5 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none resize-none"
                   required
                 />
               </div>
@@ -3900,7 +3900,7 @@ export default function AdminDashboard() {
               <button
                 type="submit"
                 disabled={broadcastSubmitting || !broadcastMessage.trim()}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 font-bold"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 <Send size={13} />
                 {broadcastSubmitting ? 'Dispatching Message...' : 'Send Broadcast Notification'}
@@ -3934,11 +3934,11 @@ export default function AdminDashboard() {
                 }
 
                 return (
-                  <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1">
+                  <div className="flex flex-col gap-3 max-h-75 overflow-y-auto pr-1">
                     {filtered.map((b) => (
                       <div key={b._id} className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-850 flex justify-between gap-4 items-start text-[11px] text-left">
                         <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                          <p className="font-semibold text-slate-700 dark:text-slate-300 leading-relaxed break-words">{b.message}</p>
+                          <p className="font-semibold text-slate-700 dark:text-slate-300 leading-relaxed wrap-break-word">{b.message}</p>
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-slate-400 font-semibold">
                             <span className="flex items-center gap-1">
                               <Users size={11} className="text-slate-400" />
@@ -4122,7 +4122,7 @@ export default function AdminDashboard() {
           <div className="relative w-full max-w-[80vw] h-[80vh] bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-200 text-left">
             
             {/* Left Column: Image Viewport */}
-            <div className="flex-grow bg-slate-950 flex items-center justify-center p-6 relative h-full">
+            <div className="grow bg-slate-950 flex items-center justify-center p-6 relative h-full">
               <img 
                 src={getBackendUrl(selectedPhoto.fileUrl)} 
                 alt={selectedPhoto.title}
@@ -4133,7 +4133,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Right Column: Information Panel */}
-            <div className="w-full md:w-[380px] bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
+            <div className="w-full md:w-95 bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
               {/* Sidebar Header */}
               <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 bg-white dark:bg-slate-950">
                 <div>
@@ -4149,7 +4149,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Sidebar Body */}
-              <div className="p-6 flex-grow flex flex-col gap-4 text-xs overflow-y-auto">
+              <div className="p-6 grow flex flex-col gap-4 text-xs overflow-y-auto">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Title & Category</span>
                   <h3 className="font-display font-black text-base text-slate-900 dark:text-white mt-0.5">{selectedPhoto.title}</h3>
@@ -4189,7 +4189,7 @@ export default function AdminDashboard() {
                       {selectedPhoto.customFields.map((cf, idx) => (
                         <div key={idx} className="min-w-0">
                           <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">{cf.label}:</span>
-                          <p className="font-bold text-slate-700 dark:text-slate-250 mt-0.5 break-words">{cf.value || 'N/A'}</p>
+                          <p className="font-bold text-slate-700 dark:text-slate-250 mt-0.5 wrap-break-word">{cf.value || 'N/A'}</p>
                         </div>
                       ))}
                     </div>
@@ -4286,7 +4286,7 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setSelectedPhoto(null)}
-                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer"
                 >
                   Close Details
                 </button>
@@ -4355,7 +4355,7 @@ export default function AdminDashboard() {
                     <p>Plan Selected: <span className="font-semibold text-slate-700 dark:text-slate-300">
                       {selectedParticipant.packageId === 'pkg-1' ? 'Starter (1 Photo)' : selectedParticipant.packageId === 'pkg-2' ? 'Amateur (2 Photos)' : selectedParticipant.packageId === 'pkg-3' ? 'Pro (5 Photos)' : 'None'}
                     </span></p>
-                    <p>Entry Amount: <span className="font-semibold text-slate-700 dark:text-slate-300 font-bold text-slate-950 dark:text-white">₹{selectedParticipant.amount}</span></p>
+                    <p>Entry Amount: <span className="font-semibold text-slate-700 dark:text-slate-300">₹{selectedParticipant.amount}</span></p>
                     <p>Slots Limit: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.photoLimit} photos</span></p>
                     <p>Uploaded Count: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.photosCount} photos</span></p>
                     <p>Remaining Slots: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedParticipant.remainingSlots}</span></p>
@@ -4896,7 +4896,7 @@ export default function AdminDashboard() {
 
                 {/* Right Side: Packages config */}
                 <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-center h-[18px]">
+                  <div className="flex justify-between items-center h-4.5">
                     <span className="font-bold text-slate-850 dark:text-white">Submission Entry Packages Fees</span>
                     <button
                       type="button"
@@ -5021,7 +5021,7 @@ export default function AdminDashboard() {
                   setShowActivateConfirmModal(false);
                   setActivateTargetId(null);
                 }}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
               >
                 Cancel
               </button>
@@ -5060,7 +5060,7 @@ export default function AdminDashboard() {
                   setShowPurgeConfirmModal(false);
                   setPurgeBackupTarget(null);
                 }}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
               >
                 Cancel
               </button>
@@ -5096,7 +5096,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setShowDeleteEventModal(false)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
               >
                 Cancel
               </button>
@@ -5132,7 +5132,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setShowDeleteCatModal(false)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
               >
                 Cancel
               </button>
@@ -5177,7 +5177,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => { setShowRefundModal(false); setParticipantToRefundId(null); setParticipantToRefundName(''); }}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
               >
                 Cancel
               </button>
@@ -5214,7 +5214,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setShowDeleteParticipantModal(false)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
               >
                 Cancel
               </button>
@@ -5250,7 +5250,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setShowDeleteJudgeModal(false)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
               >
                 Cancel
               </button>
@@ -5293,7 +5293,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-grow overflow-hidden flex flex-col md:flex-row min-h-0">
+            <div className="grow overflow-hidden flex flex-col md:flex-row min-h-0">
               
               {/* Left Column: Events List */}
               <div className="w-full md:w-1/3 border-r border-slate-100 dark:border-slate-800 p-4 flex flex-col gap-4 overflow-y-auto shrink-0 bg-slate-50/50 dark:bg-slate-950/20">
@@ -5355,7 +5355,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Right Column: Detail View */}
-              <div className="flex-grow overflow-y-auto p-6 bg-white dark:bg-slate-900">
+              <div className="grow overflow-y-auto p-6 bg-white dark:bg-slate-900">
                 {activeHistoryEvent ? (
                   <div className="flex flex-col gap-6">
                     {/* Event Title & status */}
@@ -5588,7 +5588,7 @@ export default function AdminDashboard() {
                   setSuspendTargetName('');
                   setSuspendRemarks('');
                 }}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
               >
                 Cancel
               </button>
@@ -5628,7 +5628,7 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={() => setShowGeneralSuccessModal(false)}
-              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center font-bold"
+              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
             >
               Awesome, Understood
             </button>

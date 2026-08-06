@@ -2478,7 +2478,7 @@ export default function Dashboard() {
         return (
           <div className="animate-in fade-in duration-200 flex flex-col gap-6">
             
-            {/* Header & Event Selector */}
+            {/* Header & Event Selector ("My Event History & Details" card) */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
               <div className="flex items-center gap-3.5">
                 <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-2xl shrink-0">
@@ -2532,7 +2532,59 @@ export default function Dashboard() {
             ) : (
               <div className="flex flex-col gap-6">
                 
-                {/* 1. Status Overview & Event Banner */}
+                {/* 1. Certificates Received Section - Displayed directly below My Event History & Details card */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+                  <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <Award size={16} className="text-amber-500" />
+                    Certificates & Accolades
+                  </h4>
+
+                  {isWinner ? (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="p-3 bg-amber-500 text-white rounded-2xl font-black text-lg">
+                          🏆
+                        </div>
+                        <div>
+                          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-full text-[9px] font-black uppercase tracking-wider">
+                            Winner - {winnerInfo?.rank}
+                          </span>
+                          <h5 className="font-display font-bold text-sm text-slate-900 dark:text-white mt-1">
+                            Official Winner Certificate Granted
+                          </h5>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Congratulations! You earned {winnerInfo?.rank} place in {selectedHistoryEvent?.title}.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : selectedHistoryEvent?.winnersPublished ? (
+                    <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 rounded-2xl font-black text-lg">
+                          🎖️
+                        </div>
+                        <div>
+                          <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-full text-[9px] font-black uppercase tracking-wider">
+                            Participant Certificate
+                          </span>
+                          <h5 className="font-display font-bold text-sm text-slate-900 dark:text-white mt-1">
+                            Certificate of Participation Available
+                          </h5>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Thank you for competing in {selectedHistoryEvent?.title}.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6 bg-slate-50/50 dark:bg-slate-950/30 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center text-slate-400 text-xs">
+                      ⏳ Certificates will be generated automatically once final results are published by the judging panel.
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Status Overview & Event Banner */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-6">
                   
                   {/* Event Title Banner */}
@@ -2649,7 +2701,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* 2. Uploaded Photographs Section */}
+                {/* 3. Uploaded Photographs Section */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
                   <div className="flex justify-between items-center">
                     <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
@@ -2709,70 +2761,6 @@ export default function Dashboard() {
                   )}
                 </div>
 
-                {/* 3. Certificates Received Section */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
-                  <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <Award size={16} className="text-amber-500" />
-                    Certificates & Accolades
-                  </h4>
-
-                  {isWinner ? (
-                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3.5">
-                        <div className="p-3 bg-amber-500 text-white rounded-2xl font-black text-lg">
-                          🏆
-                        </div>
-                        <div>
-                          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-full text-[9px] font-black uppercase tracking-wider">
-                            Winner - {winnerInfo?.rank}
-                          </span>
-                          <h5 className="font-display font-bold text-sm text-slate-900 dark:text-white mt-1">
-                            Official Winner Certificate Granted
-                          </h5>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Congratulations! You earned {winnerInfo?.rank} place in {selectedHistoryEvent?.title}.
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleShowCertificateAlert('Champion')}
-                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-xs"
-                      >
-                        View & Claim Certificate
-                      </button>
-                    </div>
-                  ) : selectedHistoryEvent?.winnersPublished ? (
-                    <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3.5">
-                        <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 rounded-2xl font-black text-lg">
-                          🎖️
-                        </div>
-                        <div>
-                          <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-full text-[9px] font-black uppercase tracking-wider">
-                            Participant Certificate
-                          </span>
-                          <h5 className="font-display font-bold text-sm text-slate-900 dark:text-white mt-1">
-                            Certificate of Participation Available
-                          </h5>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Thank you for competing in {selectedHistoryEvent?.title}.
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleShowCertificateAlert('Participation')}
-                        className="px-4 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-xs"
-                      >
-                        View Certificate
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="p-6 bg-slate-50/50 dark:bg-slate-950/30 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center text-slate-400 text-xs">
-                      ⏳ Certificates will be generated automatically once final results are published by the judging panel.
-                    </div>
-                  )}
-                </div>
-
                 {/* 4. Event Information & History Timeline */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-5">
                   <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
@@ -2798,6 +2786,9 @@ export default function Dashboard() {
 
                     <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Contest Location & Details</span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        <strong>Official Entry Code:</strong> <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">#{selectedHistorySub?.entryNumber || 'N/A'}</span>
+                      </p>
                       <p className="text-slate-700 dark:text-slate-300">
                         <strong>Venue:</strong> {selectedHistoryEvent?.venue || 'Online Portal'}
                       </p>

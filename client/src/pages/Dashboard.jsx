@@ -54,13 +54,22 @@ export default function Dashboard() {
     "Runway / Venue"
   ];
 
+  const [contestTypes, setContestTypes] = useState([]);
+
   const getActiveCustomLabels = (catObj) => {
-    if (catObj && catObj.customLabels && catObj.customLabels.length > 0) {
+    if (catObj && Array.isArray(catObj.customLabels) && catObj.customLabels.length > 0) {
       return catObj.customLabels;
     }
-    if (categories && categories.length > 0) {
-      const catWithLabels = categories.find(c => c.customLabels && c.customLabels.length > 0);
-      if (catWithLabels) return catWithLabels.customLabels;
+    if (Array.isArray(categories) && categories.length > 0) {
+      const catWithLabels = categories.find(c => Array.isArray(c.customLabels) && c.customLabels.length > 0);
+      if (catWithLabels && catWithLabels.customLabels.length > 0) return catWithLabels.customLabels;
+    }
+    if (Array.isArray(contestTypes) && contestTypes.length > 0) {
+      const currentTypeName = (selectedTypeTab || (event && event.eventType) || '').toLowerCase();
+      const matchedCt = contestTypes.find(ct => (ct.name || '').toLowerCase() === currentTypeName);
+      if (matchedCt && Array.isArray(matchedCt.customLabels) && matchedCt.customLabels.length > 0) {
+        return matchedCt.customLabels;
+      }
     }
     return [];
   };
@@ -196,13 +205,22 @@ export default function Dashboard() {
         }
       }
 
-      // 2. Fetch categories filtered by this event's type
-      const categoryData = await apiFetch(`/api/categories?contestType=${encodeURIComponent(activeEvent?.eventType || '')}`);
+      // 2. Fetch categories filtered by this event's type and all contest types
+      const categoryData = await apiFetch(`/api/categories?contestType=${encodeURIComponent(activeEvent?.eventType || activeType || '')}`);
       if (categoryData.success) {
         setCategories(categoryData.categories);
         if (categoryData.categories.length > 0) {
           setCategory("");
         }
+      }
+
+      try {
+        const ctData = await apiFetch('/api/contest-types');
+        if (ctData.success) {
+          setContestTypes(ctData.contestTypes);
+        }
+      } catch (ctErr) {
+        console.error("Error fetching contest types:", ctErr);
       }
 
       // 3. Fetch user's submission for this event
@@ -252,26 +270,24 @@ export default function Dashboard() {
   }, [selectedTypeTab]);
 
   useEffect(() => {
-    if (categories.length > 0) {
-      const selectedCat = categories.find(c => c.name === category) || categories.find(c => c.customLabels && c.customLabels.length > 0) || categories[0];
-      if (selectedCat) {
-        const labels = getActiveCustomLabels(selectedCat);
-        const initialVals = { ...customFieldValues };
-        labels.forEach(l => {
-          if (initialVals[l] === undefined) {
-            initialVals[l] = '';
-          }
-        });
-        setCustomFieldValues(initialVals);
-      }
+    const selectedCat = categories.find(c => c.name === category) || categories.find(c => c.customLabels && c.customLabels.length > 0) || (categories.length > 0 ? categories[0] : null);
+    const labels = getActiveCustomLabels(selectedCat);
+    if (labels && labels.length > 0) {
+      const initialVals = { ...customFieldValues };
+      labels.forEach(l => {
+        if (initialVals[l] === undefined) {
+          initialVals[l] = '';
+        }
+      });
+      setCustomFieldValues(initialVals);
     }
-  }, [category, categories]);
+  }, [category, categories, contestTypes, selectedTypeTab, event]);
 
   useEffect(() => {
-    if (editCategory && categories.length > 0) {
-      const selectedCat = categories.find(c => c.name === editCategory);
-      if (selectedCat) {
-        const labels = getActiveCustomLabels(selectedCat);
+    if (editCategory || categories.length > 0) {
+      const selectedCat = categories.find(c => c.name === editCategory) || (categories.length > 0 ? categories[0] : null);
+      const labels = getActiveCustomLabels(selectedCat);
+      if (labels && labels.length > 0) {
         const updatedVals = { ...editCustomFieldValues };
         
         Object.keys(updatedVals).forEach(key => {
@@ -293,7 +309,7 @@ export default function Dashboard() {
     } else {
       setEditCustomFieldValues({});
     }
-  }, [editCategory, categories, editingPhoto]);
+  }, [editCategory, categories, contestTypes, editingPhoto]);
 
   const handleStartSubmission = async (e) => {
     e.preventDefault();

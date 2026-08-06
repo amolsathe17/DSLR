@@ -14,18 +14,33 @@ router.get('/', async (req, res) => {
     if (contestType) {
       filter = { contestTypes: contestType };
     }
-    const categories = await Category.find(filter);
+    let categories = await Category.find(filter);
 
-    // Resolve custom labels dynamically if customLabelsMode is contest_type
     const ContestType = require('../models/ContestType');
     const allContestTypes = await ContestType.find({});
 
+    if (contestType && categories.length === 0) {
+      categories = await Category.find({
+        $or: [
+          { contestTypes: { $regex: new RegExp(`^${contestType}$`, 'i') } },
+          { customLabelsInheritedFrom: { $regex: new RegExp(`^${contestType}$`, 'i') } }
+        ]
+      });
+      if (categories.length === 0) {
+        categories = await Category.find({});
+      }
+    }
+
     const resolvedCategories = categories.map(cat => {
       const catObj = cat.toObject();
-      if (catObj.customLabelsMode === 'contest_type') {
-        const inheritedTypeName = catObj.customLabelsInheritedFrom || (catObj.contestTypes && catObj.contestTypes[0]);
-        const matchedCt = allContestTypes.find(ct => ct.name === inheritedTypeName);
-        catObj.customLabels = matchedCt ? matchedCt.customLabels : [];
+      if (catObj.customLabelsMode === 'contest_type' || !catObj.customLabels || catObj.customLabels.length === 0) {
+        const inheritedTypeName = catObj.customLabelsInheritedFrom || (catObj.contestTypes && catObj.contestTypes[0]) || contestType;
+        const matchedCt = allContestTypes.find(ct => 
+          ct.name.toLowerCase() === (inheritedTypeName || '').toLowerCase()
+        );
+        if (matchedCt && matchedCt.customLabels && matchedCt.customLabels.length > 0) {
+          catObj.customLabels = matchedCt.customLabels;
+        }
       }
       return catObj;
     });

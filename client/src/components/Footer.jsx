@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Camera, AlertCircle } from 'lucide-react';
+import { Camera, AlertCircle, MapPin, ExternalLink } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Footer() {

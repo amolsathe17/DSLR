@@ -156,6 +156,7 @@ export default function AdminDashboard() {
   const [editingEventId, setEditingEventId] = useState(null);
   const [editEventTitle, setEditEventTitle] = useState('');
   const [editEventTheme, setEditEventTheme] = useState('');
+  const [editEventStartDate, setEditEventStartDate] = useState('');
   const [editEventDeadline, setEditEventDeadline] = useState('');
   const [editEventRules, setEditEventRules] = useState('');
   const [editEventType, setEditEventType] = useState('Photography');
@@ -1493,6 +1494,9 @@ export default function AdminDashboard() {
     setEditEventVenue(e.venue || '');
     setEditEventRules(e.rules ? e.rules.join('\n') : '');
     
+    const sDate = e.startDate ? new Date(e.startDate).toISOString().split('T')[0] : (e.createdAt ? new Date(e.createdAt).toISOString().split('T')[0] : '');
+    setEditEventStartDate(sDate);
+    
     const dDate = e.deadline ? new Date(e.deadline).toISOString().split('T')[0] : '';
     setEditEventDeadline(dDate);
     setEditHasExhibition(!!e.hasExhibition);
@@ -1539,6 +1543,20 @@ export default function AdminDashboard() {
         return;
       }
 
+      const todayStr = new Date().toISOString().split('T')[0];
+      if (editEventStartDate && editEventStartDate < todayStr) {
+        alert('Event start date cannot be a back-dated / past date.');
+        return;
+      }
+      if (editEventDeadline && editEventDeadline < todayStr) {
+        alert('Submission deadline cannot be a back-dated / past date.');
+        return;
+      }
+      if (editEventStartDate && editEventDeadline && editEventDeadline < editEventStartDate) {
+        alert('Submission deadline must be on or after the event start date.');
+        return;
+      }
+
       const data = await apiFetch(`/api/events/${editingEventId}`, {
         method: 'PUT',
         body: JSON.stringify({
@@ -1549,6 +1567,7 @@ export default function AdminDashboard() {
           description: editEventDescription,
           venue: editEventVenue,
           rules: editEventRules.split('\n').filter(r => r.trim() !== ''),
+          startDate: editEventStartDate,
           deadline: editEventDeadline,
           eventDate: editHasExhibition && editExhibitionFromDate 
             ? new Date(editExhibitionFromDate) 
@@ -5022,14 +5041,26 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              <div className="flex flex-col gap-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">Contest Theme / Subtitle</label>
+                <input
+                  type="text"
+                  value={editEventTheme}
+                  onChange={(e) => setEditEventTheme(e.target.value)}
+                  className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600"
+                  required
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-300">Contest Theme / Subtitle</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Event Start Date</label>
                   <input
-                    type="text"
-                    value={editEventTheme}
-                    onChange={(e) => setEditEventTheme(e.target.value)}
-                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-600"
+                    type="date"
+                    value={editEventStartDate}
+                    onChange={(e) => setEditEventStartDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none cursor-pointer"
                     required
                   />
                 </div>
@@ -5040,6 +5071,7 @@ export default function AdminDashboard() {
                     type="date"
                     value={editEventDeadline}
                     onChange={(e) => setEditEventDeadline(e.target.value)}
+                    min={editEventStartDate || new Date().toISOString().split('T')[0]}
                     className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none cursor-pointer"
                     required
                   />

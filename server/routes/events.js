@@ -19,6 +19,7 @@ router.get('/', async (req, res) => {
     const oneMonthFromNow = new Date(now);
     oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
 
+    // 1. Move Upcoming/Draft events to Active if start date is within 1 month from now
     await Event.updateMany(
       {
         status: { $in: ['Draft', 'Upcoming'] },
@@ -28,8 +29,17 @@ router.get('/', async (req, res) => {
       { $set: { status: 'Active' } }
     );
 
+    // 2. Keep events starting > 1 month from now as Draft (Upcoming)
+    await Event.updateMany(
+      {
+        status: 'Active',
+        startDate: { $exists: true, $ne: null, $gt: oneMonthFromNow }
+      },
+      { $set: { status: 'Draft' } }
+    );
+
     let query = {};
-    if (includeDrafts !== 'true') {
+    if (includeDrafts === 'false') {
       query.status = { $ne: 'Draft' };
     }
     
@@ -127,22 +137,17 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Event start date cannot be a back-dated or past date.' });
     }
 
-    // Auto classification: if start date is > 4 months from current date, classify as Upcoming Event (status: Draft/Upcoming)
-    // If start date is <= 1 month from now or today, set initial status as Active
+    // Auto classification: if start date is > 1 month from now (e.g. 4 months), classify as Upcoming Event (status: Draft)
+    // If start date is <= 1 month from now, set initial status as Active
     const stDate = startDate ? new Date(startDate) : new Date();
-    const fourMonthsFromNow = new Date();
-    fourMonthsFromNow.setMonth(fourMonthsFromNow.getMonth() + 4);
-
     const oneMonthFromNow = new Date();
     oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
 
     let initialStatus = 'Active';
-    if (stDate > fourMonthsFromNow) {
-      initialStatus = 'Draft'; // Appears in Upcoming events
-    } else if (stDate <= oneMonthFromNow) {
-      initialStatus = 'Active';
+    if (stDate > oneMonthFromNow) {
+      initialStatus = 'Draft'; // Appears in Upcoming events tab
     } else {
-      initialStatus = 'Draft';
+      initialStatus = 'Active';
     }
 
     const event = await Event.create({
@@ -209,6 +214,19 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
 
     if (updateData.assignedJudges && Array.isArray(updateData.assignedJudges) && updateData.assignedJudges.length > 0) {
       if (event.status === 'Draft') {
+        updateData.status = 'Active';
+      }
+    }
+
+    const stDate = updateData.startDate ? new Date(updateData.startDate) : (event.startDate ? new Date(event.startDate) : null);
+    if (stDate && event.status !== 'Completed' && event.status !== 'Closed' && !updateData.status) {
+      const now = new Date();
+      const oneMonthFromNow = new Date(now);
+      oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+      if (stDate > oneMonthFromNow) {
+        updateData.status = 'Draft';
+      } else {
         updateData.status = 'Active';
       }
     }

@@ -15,6 +15,8 @@ export default function Gallery() {
     );
   };
   const [activeTab, setActiveTab] = useState('winners'); // Default to winners for guests
+  const [eventsList, setEventsList] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState('');
   const [event, setEvent] = useState(null);
   const [photographs, setPhotographs] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -26,21 +28,21 @@ export default function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Set default active tab to gallery for all visitors
-  useEffect(() => {
-    if (!authLoading) {
-      setActiveTab('gallery');
-    }
-  }, [authLoading]);
-
   useEffect(() => {
     const fetchGalleryData = async () => {
       try {
-        // Fetch active event
+        // Fetch all events
         const eData = await apiFetch('/api/events');
         if (eData.success && eData.events.length > 0) {
-          const active = eData.events.find(e => e.status === 'Active') || eData.events[0];
-          setEvent(active);
+          setEventsList(eData.events);
+          const publishedEvt = eData.events.find(e => e.winnersPublished && e.winners && e.winners.length > 0);
+          const activeEvt = eData.events.find(e => e.status === 'Active');
+          const defaultEvt = publishedEvt || activeEvt || eData.events[0];
+          setEvent(defaultEvt);
+          setSelectedEventId(defaultEvt._id);
+          if (publishedEvt || defaultEvt?.winnersPublished) {
+            setActiveTab('winners');
+          }
         }
 
         // Fetch categories
@@ -101,7 +103,9 @@ export default function Gallery() {
 
         {/* Tab switchers */}
         {(() => {
-          const showWinnersTab = !user || user.role !== 'Participant' || event?.winnersPublished;
+          const currentEvent = eventsList.find(e => e._id === selectedEventId) || event || eventsList.find(e => e.winnersPublished) || eventsList[0];
+          const hasAnyWinners = Boolean(eventsList.some(e => e.winnersPublished && e.winners && e.winners.length > 0));
+          const showWinnersTab = !user || user.role !== 'Participant' || hasAnyWinners || Boolean(currentEvent?.winnersPublished);
           return (
             <div className="flex justify-center mb-8 w-full">
               <div className={`grid ${showWinnersTab ? 'grid-cols-3' : 'grid-cols-2'} bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto sm:flex sm:flex-wrap sm:justify-center gap-1`}>
@@ -410,17 +414,41 @@ export default function Gallery() {
         )}
 
         {/* TAB 2: WINNERS CIRCLE */}
-        {activeTab === 'winners' && (
-          <div className="max-w-3xl mx-auto animate-in fade-in duration-200 flex flex-col gap-6">
-            {!event?.winnersPublished ? (
-              <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">
-                <Award size={36} className="mx-auto mb-2 text-slate-350 animate-bounce" />
-                <p className="text-sm font-semibold">Rankings pending publication.</p>
-                <p className="text-xs text-slate-500 mt-1">Judges are currently grading the entries. Winners will be declared shortly.</p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto">
-                {event.winners.map((w, idx) => {
+        {activeTab === 'winners' && (() => {
+          const currentEvent = eventsList.find(e => e._id === selectedEventId) || event || eventsList.find(e => e.winnersPublished) || eventsList[0];
+          const targetWinnerEvent = currentEvent?.winnersPublished ? currentEvent : (eventsList.find(e => e.winnersPublished && e.winners && e.winners.length > 0) || currentEvent);
+          return (
+            <div className="max-w-4xl mx-auto animate-in fade-in duration-200 flex flex-col gap-6">
+              {eventsList.length > 1 && (
+                <div className="flex justify-center items-center gap-2 mb-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Event:</label>
+                  <select
+                    value={selectedEventId}
+                    onChange={(e) => {
+                      setSelectedEventId(e.target.value);
+                      const found = eventsList.find(ev => ev._id === e.target.value);
+                      if (found) setEvent(found);
+                    }}
+                    className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-extrabold text-slate-800 dark:text-slate-100 cursor-pointer shadow-xs"
+                  >
+                    {eventsList.map(ev => (
+                      <option key={ev._id} value={ev._id}>
+                        {ev.title} {ev.winnersPublished ? '🏆 (Winners Published)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {!targetWinnerEvent?.winnersPublished || !targetWinnerEvent?.winners || targetWinnerEvent.winners.length === 0 ? (
+                <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">
+                  <Award size={36} className="mx-auto mb-2 text-slate-350 animate-bounce" />
+                  <p className="text-sm font-semibold">Rankings pending publication.</p>
+                  <p className="text-xs text-slate-500 mt-1">Judges are currently grading the entries. Winners will be declared shortly.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto">
+                  {targetWinnerEvent.winners.map((w, idx) => {
                   const isFirst = w.rank.toLowerCase().includes('1st') || w.rank.toLowerCase().includes('first');
                   const isSecond = w.rank.toLowerCase().includes('2nd') || w.rank.toLowerCase().includes('second');
                   
@@ -533,7 +561,8 @@ export default function Gallery() {
               </div>
             )}
           </div>
-        )}
+        );
+      })()}
 
       </div>
 

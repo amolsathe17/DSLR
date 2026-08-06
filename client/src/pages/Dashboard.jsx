@@ -1259,7 +1259,7 @@ export default function Dashboard() {
                         const isSecond = winInfo.rank.toLowerCase().includes('2nd') || winInfo.rank.toLowerCase().includes('second');
                         const certTemplateName = isFirst ? '1st-Prize.png' : isSecond ? '2nd-Prize.png' : '3rd-Prize.png';
                         const customCertUrl = isFirst ? evDetails?.certificates?.firstPrize : isSecond ? evDetails?.certificates?.secondPrize : evDetails?.certificates?.thirdPrize;
-                        const certImgSrc = getBackendUrl(winInfo.certificateImageUrl || customCertUrl || `/${certTemplateName}`);
+                        const certImgSrc = getBackendUrl(customCertUrl || winInfo.certificateImageUrl || `/${certTemplateName}`);
                         
                         return (
                           <div key={index} className="bg-linear-to-br from-amber-500/5 to-amber-600/5 border-2 border-amber-500/35 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center relative overflow-hidden">
@@ -1271,6 +1271,10 @@ export default function Dashboard() {
                                 src={certImgSrc}
                                 alt="Certificate Thumbnail"
                                 className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = `/${certTemplateName}`;
+                                }}
                                 onContextMenu={e => e.preventDefault()}
                               />
                               <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">
@@ -1354,6 +1358,10 @@ export default function Dashboard() {
                               src={participationCertSrc}
                               alt="Participation Certificate Thumbnail"
                               className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = '/participation-template.png';
+                              }}
                               onContextMenu={e => e.preventDefault()}
                             />
                             <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">

@@ -61,6 +61,8 @@ export default function Gallery() {
     fetchGalleryData();
   }, []);
 
+  const currentSelectedEvent = eventsList.find(e => e._id === selectedEventId) || event || eventsList[0];
+
   const filteredPhotos = photographs.filter(p => {
     const matchesSearch = 
       p.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -69,7 +71,10 @@ export default function Gallery() {
       p.cameraBrand.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = category ? p.category === category : true;
     const matchesParticipant = selectedParticipantFilter ? p.participantName === selectedParticipantFilter : true;
-    const matchesEvent = selectedEventId ? (p.eventId ? p.eventId === selectedEventId : true) : true;
+    const matchesEvent = !selectedEventId ? true : (
+      (p.eventId && p.eventId.toString() === selectedEventId.toString()) ||
+      (p.eventTitle && currentSelectedEvent && p.eventTitle.trim().toLowerCase() === currentSelectedEvent.title.trim().toLowerCase())
+    );
     return matchesSearch && matchesCategory && matchesParticipant && matchesEvent;
   });
 
@@ -434,8 +439,8 @@ export default function Gallery() {
 
         {/* TAB 2: WINNERS CIRCLE */}
         {activeTab === 'winners' && (() => {
-          const currentEvent = eventsList.find(e => e._id === selectedEventId) || event || eventsList.find(e => e.winnersPublished) || eventsList[0];
-          const targetWinnerEvent = currentEvent?.winnersPublished ? currentEvent : (eventsList.find(e => e.winnersPublished && e.winners && e.winners.length > 0) || currentEvent);
+          const currentEvent = eventsList.find(e => e._id === selectedEventId) || event || eventsList[0];
+          const targetWinnerEvent = currentEvent;
           return (
             <div className="max-w-4xl mx-auto animate-in fade-in duration-200 flex flex-col gap-6">
               {/* Winner content */}
@@ -443,7 +448,7 @@ export default function Gallery() {
               {!targetWinnerEvent?.winnersPublished || !targetWinnerEvent?.winners || targetWinnerEvent.winners.length === 0 ? (
                 <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">
                   <Award size={36} className="mx-auto mb-2 text-slate-350 animate-bounce" />
-                  <p className="text-sm font-semibold">Rankings pending publication.</p>
+                  <p className="text-sm font-semibold">Rankings pending publication for {targetWinnerEvent?.title || 'this event'}.</p>
                   <p className="text-xs text-slate-500 mt-1">Judges are currently grading the entries. Winners will be declared shortly.</p>
                 </div>
               ) : (
@@ -456,10 +461,10 @@ export default function Gallery() {
                   const badgeBg = isFirst ? 'bg-amber-500/10 text-amber-600' : isSecond ? 'bg-slate-300/20 text-slate-600 dark:text-slate-400' : 'bg-amber-700/10 text-amber-800 dark:text-amber-600';
                   const cardBorder = isFirst ? 'border-amber-500/40 bg-amber-500/5' : isSecond ? 'border-slate-300 dark:border-slate-700' : 'border-amber-750/30';
                   
-                  // Predefined certificate template preview
+                  // Predefined certificate template preview & Custom uploaded certificate support
                   const certTemplateName = isFirst ? '1st-Prize.png' : isSecond ? '2nd-Prize.png' : '3rd-Prize.png';
-                  const customCertUrl = isFirst ? targetWinnerEvent.certificates?.firstPrize : isSecond ? targetWinnerEvent.certificates?.secondPrize : targetWinnerEvent.certificates?.thirdPrize;
-                  const certImgSrc = getBackendUrl(w.certificateImageUrl || customCertUrl || `/${certTemplateName}`);
+                  const customCertUrl = isFirst ? targetWinnerEvent?.certificates?.firstPrize : isSecond ? targetWinnerEvent?.certificates?.secondPrize : targetWinnerEvent?.certificates?.thirdPrize;
+                  const certImgSrc = getBackendUrl(customCertUrl || w.certificateImageUrl || `/${certTemplateName}`);
                   
                   return (
                     <div
@@ -524,6 +529,10 @@ export default function Gallery() {
                             src={certImgSrc}
                             alt="Certificate Preview"
                             className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = `/${certTemplateName}`;
+                            }}
                             onContextMenu={e => e.preventDefault()}
                           />
                           <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center p-1 pointer-events-none">

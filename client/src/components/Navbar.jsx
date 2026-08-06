@@ -76,6 +76,16 @@ export default function Navbar() {
     }
   };
 
+  const deleteAllNotifs = async (e) => {
+    if (e) e.stopPropagation();
+    try {
+      await apiFetch('/api/auth/notifications/all', { method: 'DELETE' });
+      if (refreshUser) await refreshUser();
+    } catch (err) {
+      console.error("Failed to delete all notifications:", err.message);
+    }
+  };
+
   const renderNotificationBell = () => {
     if (!user) return null;
     return (
@@ -102,15 +112,26 @@ export default function Navbar() {
           <div className="absolute right-0 mt-2 w-[280px] sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
             <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
               <h4 className="font-display font-extrabold text-slate-900 dark:text-white text-xs">Notifications</h4>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="text-[10px] text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  <CheckCheck size={12} />
-                  Mark all as read
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-[10px] text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    <CheckCheck size={12} />
+                    Mark all as read
+                  </button>
+                )}
+                {user?.notifications && user.notifications.length > 0 && (
+                  <button
+                    onClick={deleteAllNotifs}
+                    className="p-1 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                    title="delete all"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
@@ -476,7 +497,7 @@ export default function Navbar() {
                 <Bell className="text-indigo-600 dark:text-indigo-400" size={20} />
                 <h3 className="font-display font-black text-slate-900 dark:text-white text-base">My Notifications ({unreadCount} unread)</h3>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
@@ -484,6 +505,15 @@ export default function Navbar() {
                   >
                     <CheckCheck size={14} />
                     Mark all as read
+                  </button>
+                )}
+                {user?.notifications && user.notifications.length > 0 && (
+                  <button
+                    onClick={deleteAllNotifs}
+                    className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
+                    title="delete all"
+                  >
+                    <Trash2 size={15} />
                   </button>
                 )}
                 <button

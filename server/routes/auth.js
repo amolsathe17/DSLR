@@ -327,6 +327,24 @@ router.post('/notifications/:notifId/read', protect, async (req, res) => {
 });
 
 // @desc    Delete a notification
+// @route   DELETE /api/auth/notifications/all
+// @access  Private
+router.delete('/notifications/all', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.notifications = [];
+    await user.save();
+    res.json({ success: true, message: 'All notifications deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @route   DELETE /api/auth/notifications/:notifId
 // @access  Private
 router.delete('/notifications/:notifId', protect, async (req, res) => {

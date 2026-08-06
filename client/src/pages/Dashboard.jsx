@@ -32,6 +32,7 @@ import {
   Eye,
   RotateCcw,
   History,
+  FileText,
 } from "lucide-react";
 import DragDropUpload from "../components/DragDropUpload";
 import WatermarkPreview from "../components/WatermarkPreview";
@@ -82,6 +83,7 @@ export default function Dashboard() {
   const [submission, setSubmission] = useState(null);
   const [categories, setCategories] = useState([]);
   const [selectedTypeTab, setSelectedTypeTab] = useState('Photography');
+  const [historySelectedEventId, setHistorySelectedEventId] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -2455,91 +2457,394 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {dashboardTab === "event_history" && (
-        <div className="animate-in fade-in duration-200 flex flex-col gap-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 rounded-2xl">
-              <History size={20} />
-            </div>
-            <div>
-              <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">My Event History</h2>
-              <p className="text-[10px] text-slate-400">All contests you have participated in or are currently enrolled in</p>
-            </div>
-          </div>
+      {dashboardTab === "event_history" && (() => {
+        // 1. Filter events to ONLY those the participant has enrolled in or paid for
+        const myEnrolledEvents = eventsList.filter(ev => {
+          return allSubmissions.some(s => 
+            s.eventId === ev._id || 
+            (s.eventTitle && s.eventTitle.trim().toLowerCase() === ev.title.trim().toLowerCase())
+          );
+        });
 
-          {allSubmissions.length === 0 && eventsList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
-              <Calendar size={36} className="text-slate-300" />
-              <p className="text-xs font-semibold">You haven't participated in any events yet.</p>
+        const selectedHistoryEvent = myEnrolledEvents.find(ev => ev._id === historySelectedEventId) || myEnrolledEvents[0];
+        const selectedHistorySub = allSubmissions.find(s => 
+          selectedHistoryEvent && (s.eventId === selectedHistoryEvent._id || (s.eventTitle && s.eventTitle.trim().toLowerCase() === selectedHistoryEvent.title.trim().toLowerCase()))
+        );
+
+        const uploadedPhotos = selectedHistorySub?.photographs || [];
+        const isWinner = selectedHistoryEvent?.winnersPublished && selectedHistoryEvent?.winners?.some(w => w.userId === user?._id || (w.userName && w.userName === user?.name));
+        const winnerInfo = isWinner ? selectedHistoryEvent?.winners?.find(w => w.userId === user?._id || (w.userName && w.userName === user?.name)) : null;
+
+        return (
+          <div className="animate-in fade-in duration-200 flex flex-col gap-6">
+            
+            {/* Header & Event Selector */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center gap-3.5">
+                <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-2xl shrink-0">
+                  <History size={24} />
+                </div>
+                <div>
+                  <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">My Event History & Details</h2>
+                  <p className="text-xs text-slate-400">View complete registration, payment, uploaded photos, and results for enrolled contests</p>
+                </div>
+              </div>
+
+              {myEnrolledEvents.length > 0 && (
+                <div className="w-full md:w-auto shrink-0">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Select Enrolled Event ({myEnrolledEvents.length})
+                  </label>
+                  <select
+                    value={selectedHistoryEvent?._id || ''}
+                    onChange={(e) => setHistorySelectedEventId(e.target.value)}
+                    className="w-full md:w-80 px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-indigo-200 dark:border-indigo-900/50 rounded-2xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
+                  >
+                    {myEnrolledEvents.map(ev => (
+                      <option key={ev._id} value={ev._id}>
+                        {ev.title} ({ev.eventType || 'Contest'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {eventsList.map(ev => {
-                const sub = allSubmissions.find(s => s.eventId === ev._id);
-                const statusColor = ev.status === 'Active' ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20' :
-                  ev.status === 'Completed' ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20' :
-                  ev.status === 'Closed' ? 'text-red-600 bg-red-50 dark:bg-red-950/20' :
-                  'text-slate-500 bg-slate-100 dark:bg-slate-800';
-                return (
-                  <div key={ev._id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">{ev.title}</h3>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Theme: {ev.theme || 'N/A'} • Type: {ev.eventType || 'N/A'}</p>
-                      </div>
-                      <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shrink-0 ${statusColor}`}>
-                        {ev.status}
-                      </span>
-                    </div>
 
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
-                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Photos</span>
-                        <span className="text-base font-black text-slate-900 dark:text-white">{sub ? sub.photographs?.length || 0 : '—'}</span>
+            {/* Empty State: No Enrolled Events */}
+            {myEnrolledEvents.length === 0 ? (
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center flex flex-col items-center gap-4 shadow-sm">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-400 rounded-full">
+                  <Calendar size={40} />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-base text-slate-900 dark:text-white">No Enrolled Events Found</h3>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
+                    You haven't enrolled or registered for any photography contests yet. Explore active contests and submit your entries today!
+                  </p>
+                </div>
+                <a
+                  href="/info"
+                  className="mt-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                >
+                  Explore Active Contests
+                </a>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-6">
+                
+                {/* 1. Status Overview & Event Banner */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-6">
+                  
+                  {/* Event Title Banner */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-5">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400">
+                          {selectedHistoryEvent?.eventType || 'Photography'}
+                        </span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                          selectedHistoryEvent?.status === 'Active' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30' :
+                          selectedHistoryEvent?.status === 'Completed' ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/30' :
+                          'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                        }`}>
+                          {selectedHistoryEvent?.status || 'Active'}
+                        </span>
                       </div>
-                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
-                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Payment</span>
-                        <span className={`text-[10px] font-black mt-0.5 block ${
-                          sub?.paymentStatus === 'Paid' ? 'text-emerald-600' :
-                          sub?.paymentStatus === 'Refunded' ? 'text-amber-500' : 'text-slate-400'
-                        }`}>{sub?.paymentStatus || 'None'}</span>
-                      </div>
-                      <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl text-center">
-                        <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Status</span>
-                        <span className={`text-[10px] font-black mt-0.5 block ${
-                          sub?.isFinalSubmitted ? 'text-indigo-600' : 'text-slate-400'
-                        }`}>{sub ? (sub.isFinalSubmitted ? 'Finalized' : 'Draft') : 'Not Enrolled'}</span>
-                      </div>
-                    </div>
-
-                    {ev.winnersPublished && ev.winners?.length > 0 && (
-                      <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-                        <p className="text-[9px] font-black uppercase tracking-wider text-indigo-600 mb-2 flex items-center gap-1">
-                          <Trophy size={10} /> Winners Declared
+                      <h3 className="font-display font-black text-lg text-slate-900 dark:text-white">
+                        {selectedHistoryEvent?.title}
+                      </h3>
+                      {selectedHistoryEvent?.theme && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                          <strong>Theme:</strong> {selectedHistoryEvent.theme}
                         </p>
-                        <div className="flex flex-col gap-1.5">
-                          {ev.winners.slice(0, 3).map((w, i) => (
-                            <div key={i} className="flex justify-between items-center text-[10px]">
-                              <span className="font-bold text-slate-700 dark:text-slate-300">{w.rank}</span>
-                              <span className="text-slate-400 truncate max-w-[60%]">{w.photoTitle || w.userName}</span>
-                              <span className="font-bold text-slate-900 dark:text-white">{w.score}/10</span>
-                            </div>
-                          ))}
-                        </div>
+                      )}
+                    </div>
+                    
+                    {selectedHistorySub?.entryNumber && (
+                      <div className="px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-right">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Official Entry Code</span>
+                        <span className="font-mono text-xs font-black text-indigo-600 dark:text-indigo-400">
+                          #{selectedHistorySub.entryNumber}
+                        </span>
                       </div>
                     )}
+                  </div>
 
-                    <div className="text-[9px] text-slate-400 flex justify-between">
-                      <span>Deadline: {ev.deadline ? new Date(ev.deadline).toLocaleDateString() : 'N/A'}</span>
-                      {sub?.entryNumber && <span className="font-mono">Entry #{sub.entryNumber}</span>}
+                  {/* 4 Status Metric Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    {/* 1. Registration Status */}
+                    <div className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Registration Status</span>
+                        <CheckCircle size={14} className="text-emerald-500" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">
+                          Enrolled & Confirmed
+                        </span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                          Enrolled: {selectedHistorySub?.createdAt ? new Date(selectedHistorySub.createdAt).toLocaleDateString() : 'Active'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 2. Payment Status */}
+                    <div className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Payment Status</span>
+                        <CreditCard size={14} className="text-indigo-500" />
+                      </div>
+                      <div>
+                        <span className={`text-xs font-black block ${
+                          selectedHistorySub?.paymentStatus === 'Paid' ? 'text-emerald-600 dark:text-emerald-400' :
+                          selectedHistorySub?.paymentStatus === 'Refunded' ? 'text-amber-500' : 'text-slate-400'
+                        }`}>
+                          {selectedHistorySub?.paymentStatus || 'Paid'} (₹{selectedHistorySub?.totalAmount || '200'})
+                        </span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5 truncate" title={selectedHistorySub?.transactionId}>
+                          Package: {selectedHistorySub?.packageName || 'Standard'} • Txn: #{selectedHistorySub?.transactionId || 'TXN-OK'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 3. Withdrawal Status */}
+                    <div className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Withdrawal Status</span>
+                        <ShieldCheck size={14} className="text-blue-500" />
+                      </div>
+                      <div>
+                        <span className={`text-xs font-black block ${
+                          selectedHistorySub?.isWithdrawn ? 'text-red-500' : 'text-blue-600 dark:text-blue-400'
+                        }`}>
+                          {selectedHistorySub?.isWithdrawn ? 'Withdrawn' : 'Active (Not Withdrawn)'}
+                        </span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                          {selectedHistorySub?.isWithdrawn ? 'Entry withdrawn by participant' : 'Entry eligible for judging'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 4. Judging / Result Status */}
+                    <div className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Judging / Results</span>
+                        <Award size={14} className="text-purple-500" />
+                      </div>
+                      <div>
+                        <span className={`text-xs font-black block ${
+                          selectedHistoryEvent?.winnersPublished ? 'text-purple-600 dark:text-purple-400' :
+                          selectedHistoryEvent?.status === 'Completed' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500'
+                        }`}>
+                          {selectedHistoryEvent?.winnersPublished ? 'Winners Declared' :
+                           selectedHistoryEvent?.status === 'Completed' ? 'Under Evaluation' : 'Pending Judging'}
+                        </span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                          {selectedHistoryEvent?.winnersPublished ? 'Final grades & ranks released' : 'Evaluating jury panel'}
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* 2. Uploaded Photographs Section */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                      <Camera size={16} className="text-indigo-600" />
+                      Uploaded Photographs ({uploadedPhotos.length})
+                    </h4>
+                    <span className="text-xs text-slate-400 font-medium">
+                      Submission Status: <strong className="text-indigo-600 dark:text-indigo-400">{selectedHistorySub?.isFinalSubmitted ? 'Finalized' : 'Draft'}</strong>
+                    </span>
+                  </div>
+
+                  {uploadedPhotos.length === 0 ? (
+                    <div className="p-8 bg-slate-50 dark:bg-slate-950 rounded-2xl text-center text-slate-400 text-xs">
+                      No photographs uploaded for this contest yet.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {uploadedPhotos.map((photo, pIdx) => {
+                        const imgUrl = getBackendUrl(photo.fileUrl);
+                        const hasScore = typeof photo.score === 'number' || (Array.isArray(photo.scores) && photo.scores.length > 0);
+                        const finalScore = typeof photo.score === 'number' ? photo.score : (photo.scores?.[0]?.score || 'N/A');
+
+                        return (
+                          <div key={pIdx} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex flex-col gap-3 shadow-2xs">
+                            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-slate-900 relative">
+                              <img
+                                src={imgUrl}
+                                alt={photo.title || `Photo ${pIdx+1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider bg-slate-900/80 text-white backdrop-blur-xs">
+                                {photo.category || 'Standard'}
+                              </div>
+                            </div>
+
+                            <div>
+                              <h5 className="font-display font-bold text-xs text-slate-900 dark:text-white truncate">
+                                {photo.title || 'Untitled Photo'}
+                              </h5>
+                              {(photo.cameraBrand || photo.cameraModel) && (
+                                <p className="text-[10px] text-slate-400 mt-0.5">
+                                  📷 {photo.cameraBrand} {photo.cameraModel}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex justify-between items-center pt-2 border-t border-slate-200/60 dark:border-slate-800 text-[10px]">
+                              <span className="text-slate-400 font-medium">Jury Rating:</span>
+                              <span className="font-black text-indigo-600 dark:text-indigo-400">
+                                {hasScore ? `${finalScore}/10` : 'Pending Grade'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Certificates Received Section */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+                  <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <Award size={16} className="text-amber-500" />
+                    Certificates & Accolades
+                  </h4>
+
+                  {isWinner ? (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="p-3 bg-amber-500 text-white rounded-2xl font-black text-lg">
+                          🏆
+                        </div>
+                        <div>
+                          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-full text-[9px] font-black uppercase tracking-wider">
+                            Winner - {winnerInfo?.rank}
+                          </span>
+                          <h5 className="font-display font-bold text-sm text-slate-900 dark:text-white mt-1">
+                            Official Winner Certificate Granted
+                          </h5>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Congratulations! You earned {winnerInfo?.rank} place in {selectedHistoryEvent?.title}.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleShowCertificateAlert('Champion')}
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-xs"
+                      >
+                        View & Claim Certificate
+                      </button>
+                    </div>
+                  ) : selectedHistoryEvent?.winnersPublished ? (
+                    <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 rounded-2xl font-black text-lg">
+                          🎖️
+                        </div>
+                        <div>
+                          <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-full text-[9px] font-black uppercase tracking-wider">
+                            Participant Certificate
+                          </span>
+                          <h5 className="font-display font-bold text-sm text-slate-900 dark:text-white mt-1">
+                            Certificate of Participation Available
+                          </h5>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Thank you for competing in {selectedHistoryEvent?.title}.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleShowCertificateAlert('Participation')}
+                        className="px-4 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-xs"
+                      >
+                        View Certificate
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-6 bg-slate-50/50 dark:bg-slate-950/30 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center text-slate-400 text-xs">
+                      ⏳ Certificates will be generated automatically once final results are published by the judging panel.
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Event Information & History Timeline */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-5">
+                  <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <FileText size={16} className="text-indigo-600" />
+                    Event Information & History Log
+                  </h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+                      <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Key Event Dates</span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        <strong>Start Date:</strong> {selectedHistoryEvent?.startDate ? new Date(selectedHistoryEvent.startDate).toLocaleDateString() : 'N/A'}
+                      </p>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        <strong>Submission Deadline:</strong> {selectedHistoryEvent?.deadline ? new Date(selectedHistoryEvent.deadline).toLocaleDateString() : 'N/A'}
+                      </p>
+                      {selectedHistoryEvent?.exhibitionFromDate && (
+                        <p className="text-slate-700 dark:text-slate-300">
+                          <strong>Exhibition Dates:</strong> {new Date(selectedHistoryEvent.exhibitionFromDate).toLocaleDateString()} - {new Date(selectedHistoryEvent.exhibitionToDate).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+                      <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Contest Location & Details</span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        <strong>Venue:</strong> {selectedHistoryEvent?.venue || 'Online Portal'}
+                      </p>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        <strong>Category Type:</strong> {selectedHistoryEvent?.eventType || 'Photography'}
+                      </p>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        <strong>Selected Entry Package:</strong> {selectedHistorySub?.packageName || 'Standard Entry'} (₹{selectedHistorySub?.totalAmount || '200'})
+                      </p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+
+                  {/* History Timeline */}
+                  <div className="mt-2 border-t border-slate-100 dark:border-slate-800 pt-4">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block mb-3">Activity History Timeline</span>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-3 text-xs">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">Event Enrollment:</span>
+                        <span className="text-slate-400">Successfully enrolled in contest ({selectedHistorySub?.createdAt ? new Date(selectedHistorySub.createdAt).toLocaleDateString() : 'Completed'})</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs">
+                        <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">Payment Processed:</span>
+                        <span className="text-slate-400">Payment status {selectedHistorySub?.paymentStatus || 'Paid'} (₹{selectedHistorySub?.totalAmount || '200'})</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">Photo Uploads:</span>
+                        <span className="text-slate-400">{uploadedPhotos.length} photograph(s) submitted to entry folder</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs">
+                        <div className={`w-2 h-2 rounded-full ${selectedHistoryEvent?.winnersPublished ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">Results & Certification:</span>
+                        <span className="text-slate-400">{selectedHistoryEvent?.winnersPublished ? 'Winners & certificates published' : 'Awaiting judging completion'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            )}
+
+          </div>
+        );
+      })()}
 
     </div>
   );

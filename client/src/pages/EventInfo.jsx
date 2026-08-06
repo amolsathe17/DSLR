@@ -202,6 +202,11 @@ function ActiveEventDetailCard({ event, onEnroll }) {
   const countdown = useCountdown(event.deadline);
   const [expanded, setExpanded] = useState(false);
   const [themeExpanded, setThemeExpanded] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
+
+  const rulesList = Array.isArray(event.rules)
+    ? event.rules.filter(r => r && String(r).trim() !== '')
+    : (event.rules ? String(event.rules).split('\n').filter(r => r.trim() !== '') : []);
 
   return (
     <div
@@ -396,6 +401,48 @@ function ActiveEventDetailCard({ event, onEnroll }) {
 
       {/* CTA */}
       <div className="relative px-6 pb-6 pt-2">
+        {/* Rules & Guidelines Collapsible */}
+        <div className="mb-3 border border-slate-200/80 rounded-2xl overflow-hidden bg-slate-50/80 shadow-xs">
+          <button
+            type="button"
+            onClick={() => setRulesOpen(!rulesOpen)}
+            className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-bold text-slate-800 hover:bg-slate-100/80 transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-2 text-slate-800 font-bold">
+              <FileText size={14} className="text-indigo-600" />
+              Rules & Guidelines
+              {rulesList.length > 0 && (
+                <span className="text-[10px] text-slate-400 font-semibold">
+                  ({rulesList.length} rules)
+                </span>
+              )}
+            </span>
+            <ChevronDown
+              size={14}
+              className={`text-slate-400 transition-transform duration-200 ${rulesOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {rulesOpen && (
+            <div className="px-4 pb-3.5 pt-2 border-t border-slate-200/60 bg-white text-xs text-slate-600 animate-in fade-in duration-150">
+              {rulesList.length > 0 ? (
+                <ul className="list-disc pl-4 space-y-1.5 text-[11px] leading-relaxed text-slate-700 font-medium">
+                  {rulesList.map((rule, idx) => (
+                    <li key={idx}>{rule}</li>
+                  ))}
+                </ul>
+              ) : (
+                <ul className="list-disc pl-4 space-y-1.5 text-[11px] leading-relaxed text-slate-600 font-medium">
+                  <li>Only DSLR or Mirrorless camera photographs are accepted.</li>
+                  <li>Entries must not contain watermarks, borders, or photographer signatures.</li>
+                  <li>Original EXIF data must be retained in uploaded image files.</li>
+                  <li>Participants retain copyright; organizer may showcase entries with credit.</li>
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+
         <button
           onClick={() => onEnroll(event)}
           className={`w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold text-white shadow-md transition-all cursor-pointer ${colors.btn}`}

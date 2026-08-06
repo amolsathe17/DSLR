@@ -37,7 +37,7 @@ export default function Landing() {
         <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-8">
           {/* Headline */}
           <div className="flex flex-col gap-4">
-            <h1 className="font-display font-black text-5xl sm:text-5xl lg:text-7xl lg:mt-30 sm:mt-40 leading-[1.1] tracking-tight drop-shadow-lg">
+            <h1 className="font-display font-black text-5xl sm:text-5xl lg:text-7xl lg:mt-30 sm:mt-40 leading-[1.1] tracking-tight drop-shadow-lg pt-28">
               Compete, Create &amp;
               <span className="block bg-linear-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
                 Conquer
@@ -54,7 +54,7 @@ export default function Landing() {
                     to="/info"
                     className="bg-white hover:bg-red-700 text-black hover:text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
                   >
-                    Explore Events
+                    Explore / Enroll  Events
                   </Link>
                 </>
               ) : (
@@ -70,18 +70,18 @@ export default function Landing() {
         </div>
 
         {/* Scroll cue */}
-        <div className="absolute bottom-25 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/50 animate-bounce">
+        <div className="absolute bottom-15 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/50 animate-bounce">
           <ChevronDown size={22} />
         </div>
       </section>
 
       {/* ══════════════════════════════ THE SUMBA STORY ═════════════════════════════ */}
-      <section className="py-20 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden">
+      <section className="py-5 bg-slate-300 dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden">
         {/* Decorative background glow */}
         <div className="absolute top-1/3 left-1/10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -z-10 pointer-events-none" />
         <div className="absolute bottom-1/3 right-1/10 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl -z-10 pointer-events-none" />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-12 sm:gap-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-12 sm:gap-16">
           
           {/* Header */}
           <div className="text-center flex flex-col items-center gap-4">
@@ -155,7 +155,7 @@ export default function Landing() {
       </section>
 
       {/* ══════════════════════════════ CTA BANNER ═════════════════════════════ */}
-      <section className="py-4 bg-slate-200 border-y border-slate-100">
+      <section className="py-14 bg-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-1">
             <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900">
@@ -169,22 +169,16 @@ export default function Landing() {
               {!user ? (
                 <>
                   <Link
-                    to="/register"
-                    className="bg-indigo-600 hover:bg-red-700 text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
+                    to="/info"
+                    className="bg-blue-600 hover:bg-red-700 text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
                   >
-                    Create Account
-                  </Link>
-                  <Link
-                    to="/login"
-                    className="bg-indigo-600 hover:bg-red-700 text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
-                  >
-                    Sign In
+                    Explore / Enroll  Events
                   </Link>
                 </>
               ) : (
                 <button
                   onClick={() => navigate("/dashboard")}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
+                  className="bg-white hover:bg-red-700 text-black hover:text-white font-bold text-sm py-3 px-8 rounded-2xl cursor-pointer transition-all shadow-md"
                 >
                   Go to My Dashboard
                 </button>

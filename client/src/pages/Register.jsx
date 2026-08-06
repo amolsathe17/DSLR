@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getBackendUrl } from '../utils/url';
 import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, ShieldCheck, Key, Calendar, MapPin, Clock } from 'lucide-react';
@@ -7,6 +7,7 @@ import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, Shi
 export default function Register() {
   const { user, register, verifyOtp, requestMobileOtp, verifyMobileOtp, apiFetch } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (user) {
@@ -15,27 +16,40 @@ export default function Register() {
       } else if (user.role === 'Judge') {
         navigate('/judge');
       } else {
-        navigate('/dashboard');
+        if (location.state?.eventId) {
+          localStorage.setItem(`selectedEventId_${user.role}`, location.state.eventId);
+        }
+        navigate('/dashboard', { state: { eventId: location.state?.eventId } });
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, location.state?.eventId]);
 
-  const [event, setEvent] = useState(null);
+  const [event, setEvent] = useState(location.state?.event || null);
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         const data = await apiFetch('/api/events');
         if (data.success && data.events.length > 0) {
-          const active = data.events.find(e => e.status === 'Active') || data.events[0];
-          setEvent(active);
+          const targetId = location.state?.eventId;
+          let selected = null;
+          if (targetId) {
+            selected = data.events.find(e => e._id === targetId);
+          }
+          if (!selected && location.state?.event) {
+            selected = location.state.event;
+          }
+          if (!selected) {
+            selected = data.events.find(e => e.status === 'Active') || data.events[0];
+          }
+          setEvent(selected);
         }
       } catch (err) {
         console.error('Error fetching event in Register page:', err);
       }
     };
     fetchEvent();
-  }, []);
+  }, [location.state?.eventId]);
 
   const [registerMethod, setRegisterMethod] = useState('email'); // 'email' or 'mobile'
   const [name, setName] = useState('');
@@ -470,28 +484,28 @@ export default function Register() {
 
         {/* Right Side: Exhibition Event Details in White Text */}
         {event && (
-          <div className="hidden md:flex flex-col gap-6 text-white max-w-md bg-slate-950/45 p-8 rounded-3xl border border-white/10 backdrop-blur-sm shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="flex flex-col gap-6 text-white max-w-md w-full bg-slate-950/60 p-6 sm:p-8 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300">
             {/* Block 1: Submission Deadline */}
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-white/10 rounded-2xl text-white">
+            <div className="flex items-center gap-4">
+              <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0">
                 <Clock size={28} className="text-indigo-400" />
               </div>
               <div>
-                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">SUBMISSION DEADLINE</p>
-                <p className="text-sm font-black font-display text-white">
+                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">SUBMISSION DEADLINE</p>
+                <p className="text-base font-black font-display text-white mt-0.5">
                   {new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>
             </div>
 
             {/* Block 2: Exhibition Date */}
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-white/10 rounded-2xl text-white">
+            <div className="flex items-center gap-4">
+              <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0">
                 <Calendar size={28} className="text-indigo-400" />
               </div>
               <div>
-                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">EXHIBITION DATE</p>
-                <p className="text-sm font-black font-display text-white">
+                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">EXHIBITION DATE</p>
+                <p className="text-base font-black font-display text-white mt-0.5">
                   {event.exhibitionFromDate ? (
                     new Date(event.exhibitionFromDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
                   ) : event.eventDate ? (
@@ -504,21 +518,21 @@ export default function Register() {
             </div>
             
             {/* Block 3: Exhibition Venue */}
-            <div className="flex items-start gap-3">
-              <div className="p-3 bg-white/10 rounded-2xl text-white mt-0.5">
+            <div className="flex items-start gap-4">
+              <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0 mt-0.5">
                 <MapPin size={28} className="text-indigo-400" />
               </div>
               <div>
-                <p className="text-[10px] uppercase text-slate-350 font-extrabold tracking-widest">EXHIBITION VENUE</p>
-                <p className="text-sm font-semibold leading-relaxed text-white">
+                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">EXHIBITION VENUE</p>
+                <p className="text-sm font-semibold leading-relaxed text-white mt-0.5">
                   {event.venue || 'Bal-Gandharv Art Gallery, Jangali Maharaj Road, Pune 411030'}
                 </p>
               </div>
             </div>
 
             {/* Divider and Event Title Only */}
-            <div className="border-t border-white/10 pt-4 mt-2">
-              <p className="text-xs text-slate-300/80 leading-relaxed font-semibold">
+            <div className="border-t border-white/15 pt-4 mt-2">
+              <p className="text-sm text-slate-200 leading-relaxed font-bold">
                 {event.title}.
               </p>
             </div>

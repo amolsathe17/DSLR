@@ -727,6 +727,8 @@ export default function EventInfo() {
   const rulesRef = useRef(null);
   const guidelinesRef = useRef(null);
 
+  const [activeTab, setActiveTab] = useState("active");
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -753,15 +755,7 @@ export default function EventInfo() {
   }, []);
 
   const handleEnroll = (event) => {
-    if (!user) {
-      navigate("/login", { state: { from: "/dashboard", eventId: event._id } });
-    } else if (user.role === "Admin") {
-      navigate("/admin");
-    } else if (user.role === "Judge") {
-      navigate("/judge");
-    } else {
-      navigate("/dashboard");
-    }
+    navigate("/register", { state: { eventId: event._id, event } });
   };
 
   const scrollTo = (ref) =>
@@ -807,9 +801,6 @@ export default function EventInfo() {
           }}
         />
         <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-5">
-          {/* <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-[10px] font-black uppercase tracking-widest">
-            <Info size={12} /> Competition Information Hub
-          </div> */}
           <h1 className="font-display font-black text-4xl sm:text-5xl leading-tight tracking-tight">
             Events &amp; Competition
             <br />
@@ -826,12 +817,6 @@ export default function EventInfo() {
           {/* Quick Nav */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             {[
-              // {
-              //   label: "Active Events",
-              //   ref: activeRef,
-              //   icon: Flame,
-              //   color: "bg-emerald-500 hover:bg-emerald-400",
-              // },
               {
                 label: "Rules & Regulations",
                 ref: rulesRef,
@@ -857,99 +842,233 @@ export default function EventInfo() {
         </div>
       </section>
 
-      {/* ══════════════════════════════ ACTIVE EVENTS ════════════════════════════ */}
+      {/* ══════════════════════════════ EVENTS TABS SECTION ════════════════════════════ */}
       <section
         ref={activeRef}
-        className="py-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
       >
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-3">
-          <div>
-            {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[10px] font-black uppercase tracking-widest mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{" "}
-              Open for Registration
-            </div> */}
-            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 leading-tight">
-              Active Events
-            </h2>
-            <p className="text-sm text-slate-500 mt-1.5">
-              Select any event below to enroll and start your artistic journey.
-            </p>
-          </div>
-          {activeEvents.length > 6 && (
+        {/* 3 Tabs Header */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex p-1.5 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm max-w-full overflow-x-auto">
             <button
-              onClick={() => setShowAllActive(!showAllActive)}
-              className="shrink-0 flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold text-sm border border-indigo-200 hover:border-indigo-400 rounded-xl px-4 py-2 transition-all cursor-pointer"
+              type="button"
+              onClick={() => setActiveTab("active")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === "active"
+                  ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-md border border-slate-200/60 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
             >
-              {showAllActive ? "Show Less" : `View All ${activeEvents.length}`}
-              <ChevronRight
-                size={14}
-                className={`transition-transform ${showAllActive ? "rotate-90" : ""}`}
+              <Flame
+                size={16}
+                className={
+                  activeTab === "active"
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-400"
+                }
               />
+              <span>Active Events</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+                  activeTab === "active"
+                    ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+                    : "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                }`}
+              >
+                {activeEvents.length}
+              </span>
             </button>
-          )}
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("upcoming")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === "upcoming"
+                  ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-md border border-slate-200/60 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <Clock
+                size={16}
+                className={
+                  activeTab === "upcoming"
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-400"
+                }
+              />
+              <span>Upcoming Events</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+                  activeTab === "upcoming"
+                    ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                    : "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                }`}
+              >
+                {upcomingEvents.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("past")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === "past"
+                  ? "bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-md border border-slate-200/60 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <Lock
+                size={16}
+                className={
+                  activeTab === "past"
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-slate-400"
+                }
+              />
+              <span>Past Events</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+                  activeTab === "past"
+                    ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                    : "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                }`}
+              >
+                {closedEvents.length}
+              </span>
+            </button>
+          </div>
         </div>
 
-        {activeEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-2 text-center bg-slate-50 rounded-3xl border border-slate-100">
-            <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center">
-              <AlertCircle size={28} className="text-slate-300" />
+        {/* Tab 1: Active Events */}
+        {activeTab === "active" && (
+          <div className="animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+              <div>
+                <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 leading-tight">
+                  Active Events
+                </h2>
+                <p className="text-sm text-slate-500 mt-1.5">
+                  Select any active event below to enroll and start your artistic journey.
+                </p>
+              </div>
+              {activeEvents.length > 6 && (
+                <button
+                  onClick={() => setShowAllActive(!showAllActive)}
+                  className="shrink-0 flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold text-sm border border-indigo-200 hover:border-indigo-400 rounded-xl px-4 py-2 transition-all cursor-pointer"
+                >
+                  {showAllActive ? "Show Less" : `View All ${activeEvents.length}`}
+                  <ChevronRight
+                    size={14}
+                    className={`transition-transform ${showAllActive ? "rotate-90" : ""}`}
+                  />
+                </button>
+              )}
             </div>
-            <h3 className="font-display font-bold text-lg text-slate-700">
-              No Active Events Right Now
-            </h3>
-            <p className="text-sm text-slate-400 max-w-sm">
-              Check upcoming events below or register to get notified when new
-              competitions open.
-            </p>
-            {!user && (
-              <Link
-                to="/register"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl cursor-pointer transition-all"
-              >
-                Register to Get Notified
-              </Link>
+
+            {activeEvents.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-4 py-12 text-center bg-slate-50 rounded-3xl border border-slate-100">
+                <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center">
+                  <AlertCircle size={28} className="text-slate-300" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-slate-700">
+                  No Active Events Right Now
+                </h3>
+                <p className="text-sm text-slate-400 max-w-sm">
+                  Check upcoming events tab or register to get notified when new competitions open.
+                </p>
+                <Link
+                  to="/register"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl cursor-pointer transition-all"
+                >
+                  Register to Get Notified
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
+                {displayedActive.map((event) => (
+                  <ActiveEventDetailCard
+                    key={event._id}
+                    event={event}
+                    onEnroll={handleEnroll}
+                  />
+                ))}
+              </div>
             )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
-            {displayedActive.map((event) => (
-              <ActiveEventDetailCard
-                key={event._id}
-                event={event}
-                onEnroll={handleEnroll}
-              />
-            ))}
-          </div>
         )}
-      </section>
 
-      {/* ══════════════════════════════ UPCOMING EVENTS ══════════════════════════ */}
-      {upcomingEvents.length > 0 && (
-        <section className="py-16 bg-linear-to-b from-blue-50/50 to-white border-y border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-blue-700 text-[10px] font-black uppercase tracking-widest mb-3">
-                <Clock size={10} /> Coming Soon
-              </div>
+        {/* Tab 2: Upcoming Events */}
+        {activeTab === "upcoming" && (
+          <div className="animate-in fade-in duration-200">
+            <div className="mb-6">
               <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 leading-tight">
                 Upcoming Events
               </h2>
               <p className="text-sm text-slate-500 mt-1.5 max-w-lg">
-                These events are opening soon. Register now to be first in line.
+                These events are opening soon. Select an event to register and be first in line.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event) => (
-                <UpcomingEventCard
-                  key={event._id}
-                  event={event}
-                  onEnroll={handleEnroll}
-                />
-              ))}
-            </div>
+
+            {upcomingEvents.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-4 py-12 text-center bg-slate-50 rounded-3xl border border-slate-100">
+                <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center">
+                  <Clock size={28} className="text-slate-300" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-slate-700">
+                  No Upcoming Events Right Now
+                </h3>
+                <p className="text-sm text-slate-400 max-w-sm">
+                  New events are announced regularly. Stay tuned!
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {upcomingEvents.map((event) => (
+                  <UpcomingEventCard
+                    key={event._id}
+                    event={event}
+                    onEnroll={handleEnroll}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </section>
-      )}
+        )}
+
+        {/* Tab 3: Past Events */}
+        {activeTab === "past" && (
+          <div className="animate-in fade-in duration-200">
+            <div className="mb-6">
+              <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 leading-tight">
+                Past Events
+              </h2>
+              <p className="text-sm text-slate-500 mt-1.5 max-w-lg">
+                These competitions have concluded. Winners were announced and certificates issued.
+              </p>
+            </div>
+
+            {closedEvents.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-4 py-12 text-center bg-slate-50 rounded-3xl border border-slate-100">
+                <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center">
+                  <Lock size={28} className="text-slate-300" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-slate-700">
+                  No Past Events
+                </h3>
+                <p className="text-sm text-slate-400 max-w-sm">
+                  No past completed competitions to display.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                {closedEvents.map((event) => (
+                  <ClosedEventCard key={event._id} event={event} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </section>
 
       {/* ══════════════════════════════ RULES & REGULATIONS ══════════════════════ */}
       <section
@@ -1103,30 +1222,6 @@ export default function EventInfo() {
         </div>
       </section>
 
-      {/* ══════════════════════════════ PAST EVENTS ══════════════════════════════ */}
-      {closedEvents.length > 0 && (
-        <section className="py-16 bg-slate-50/60 border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-widest mb-3">
-                <Lock size={10} /> Submissions Closed
-              </div>
-              <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 leading-tight">
-                Past Events
-              </h2>
-              <p className="text-sm text-slate-500 mt-1.5 max-w-lg">
-                These competitions have concluded. Winners were announced and
-                certificates issued.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-              {closedEvents.map((event) => (
-                <ClosedEventCard key={event._id} event={event} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   );
 }

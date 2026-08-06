@@ -69,7 +69,8 @@ export default function Gallery() {
       p.cameraBrand.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = category ? p.category === category : true;
     const matchesParticipant = selectedParticipantFilter ? p.participantName === selectedParticipantFilter : true;
-    return matchesSearch && matchesCategory && matchesParticipant;
+    const matchesEvent = selectedEventId ? (p.eventId ? p.eventId === selectedEventId : true) : true;
+    return matchesSearch && matchesCategory && matchesParticipant && matchesEvent;
   });
 
   if (loading) {
@@ -88,11 +89,7 @@ export default function Gallery() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="text-center flex flex-col gap-2 mb-12">
-          <div className="inline-flex self-center items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-indigo-700 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider">
-            <Sparkles size={12} />
-            Public Exhibition
-          </div>
+        <div className="text-center flex flex-col gap-2 mb-8">
           <h1 className="font-display font-black text-3xl sm:text-4xl text-slate-900 dark:text-white">
             Exhibition Gallery & Results
           </h1>
@@ -100,6 +97,28 @@ export default function Gallery() {
             Browse through approved DSLR photographs or view the champions' leaderboard.
           </p>
         </div>
+
+        {/* SELECT EVENT Dropdown - Placed BEFORE 3 tabs */}
+        {eventsList.length > 0 && (
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-3 mb-6">
+            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">SELECT EVENT:</label>
+            <select
+              value={selectedEventId}
+              onChange={(e) => {
+                setSelectedEventId(e.target.value);
+                const found = eventsList.find(ev => ev._id === e.target.value);
+                if (found) setEvent(found);
+              }}
+              className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-100 cursor-pointer shadow-xs focus:outline-none focus:border-indigo-500"
+            >
+              {eventsList.map(ev => (
+                <option key={ev._id} value={ev._id}>
+                  {ev.title} {ev.winnersPublished ? '🏆 (Winners Published)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Tab switchers */}
         {(() => {
@@ -419,26 +438,7 @@ export default function Gallery() {
           const targetWinnerEvent = currentEvent?.winnersPublished ? currentEvent : (eventsList.find(e => e.winnersPublished && e.winners && e.winners.length > 0) || currentEvent);
           return (
             <div className="max-w-4xl mx-auto animate-in fade-in duration-200 flex flex-col gap-6">
-              {eventsList.length > 1 && (
-                <div className="flex justify-center items-center gap-2 mb-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Event:</label>
-                  <select
-                    value={selectedEventId}
-                    onChange={(e) => {
-                      setSelectedEventId(e.target.value);
-                      const found = eventsList.find(ev => ev._id === e.target.value);
-                      if (found) setEvent(found);
-                    }}
-                    className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-extrabold text-slate-800 dark:text-slate-100 cursor-pointer shadow-xs"
-                  >
-                    {eventsList.map(ev => (
-                      <option key={ev._id} value={ev._id}>
-                        {ev.title} {ev.winnersPublished ? '🏆 (Winners Published)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              {/* Winner content */}
 
               {!targetWinnerEvent?.winnersPublished || !targetWinnerEvent?.winners || targetWinnerEvent.winners.length === 0 ? (
                 <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">

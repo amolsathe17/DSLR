@@ -2,7 +2,12 @@ export const getBackendUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
 
-  // Resolve VITE_API_URL dynamically to support local network/mobile access
+  // Non-upload paths (static public assets like certificate templates in client/public)
+  if (!path.includes('/uploads/') && !path.startsWith('uploads/')) {
+    return path.startsWith('/') ? path : `/${path}`;
+  }
+
+  // Resolve VITE_API_URL dynamically to support local network/mobile access for uploads
   const envUrl = import.meta.env.VITE_API_URL;
   let baseUrl = '';
 

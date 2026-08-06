@@ -587,6 +587,8 @@ router.get('/gallery', async (req, res) => {
           if (hasScores) {
             photos.push({
               photoId: photo.id,
+              eventId: sub.eventId ? sub.eventId.toString() : '',
+              eventTitle: sub.eventTitle || '',
               title: photo.title,
               category: photo.category,
               cameraBrand: photo.cameraBrand,

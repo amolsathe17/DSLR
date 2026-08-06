@@ -33,6 +33,7 @@ import {
   RotateCcw,
   History,
   FileText,
+  Hash,
 } from "lucide-react";
 import DragDropUpload from "../components/DragDropUpload";
 import WatermarkPreview from "../components/WatermarkPreview";
@@ -2613,11 +2614,18 @@ export default function Dashboard() {
                     </div>
                     
                     {selectedHistorySub?.entryNumber && (
-                      <div className="px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-right">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Official Entry Code</span>
-                        <span className="font-mono text-xs font-black text-indigo-600 dark:text-indigo-400">
-                          #{selectedHistorySub.entryNumber}
-                        </span>
+                      <div className="px-3.5 py-2 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 rounded-2xl flex items-center gap-2.5 shrink-0 whitespace-nowrap shadow-2xs">
+                        <div className="p-1.5 bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl shrink-0 shadow-2xs">
+                          <Hash size={14} />
+                        </div>
+                        <div className="flex flex-col whitespace-nowrap text-left">
+                          <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-400 whitespace-nowrap block leading-none mb-0.5">
+                            Official Entry Code
+                          </span>
+                          <span className="font-mono text-xs font-black text-indigo-600 dark:text-indigo-400 whitespace-nowrap block leading-tight">
+                            #{selectedHistorySub.entryNumber}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -2786,8 +2794,8 @@ export default function Dashboard() {
 
                     <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Contest Location & Details</span>
-                      <p className="text-slate-700 dark:text-slate-300">
-                        <strong>Official Entry Code:</strong> <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">#{selectedHistorySub?.entryNumber || 'N/A'}</span>
+                      <p className="text-slate-700 dark:text-slate-300 flex items-center gap-1.5 flex-wrap">
+                        <strong>Official Entry Code:</strong> <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/60 dark:border-indigo-800/40 rounded-lg text-xs">#{selectedHistorySub?.entryNumber || 'N/A'}</span>
                       </p>
                       <p className="text-slate-700 dark:text-slate-300">
                         <strong>Venue:</strong> {selectedHistoryEvent?.venue || 'Online Portal'}

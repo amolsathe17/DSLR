@@ -2940,32 +2940,31 @@ export default function AdminDashboard() {
                       <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{e.title}</h4>
                       <p className="text-[10px] text-slate-400 mt-0.5">Theme: "{e.theme}" • Deadline: {new Date(e.deadline).toLocaleDateString()}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
-                        e.status === 'Active' 
-                          ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' 
-                          : e.status === 'Draft' 
-                            ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/20' 
+                    <div className="flex items-center gap-2">
+                      {e.status === 'Draft' ? (
+                        <button
+                          onClick={() => handleActivateEvent(e._id)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                        >
+                          Activate
+                        </button>
+                      ) : (
+                        <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
+                          e.status === 'Active' 
+                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' 
                             : 'bg-slate-100 text-slate-500'
-                      }`}>
-                        {e.status}
-                      </span>
-                      {e.status === 'Draft' && (
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => handleEditClick(e)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleActivateEvent(e._id)}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
-                          >
-                            Activate
-                          </button>
-                        </div>
+                        }`}>
+                          {e.status}
+                        </span>
                       )}
+                      
+                      <button
+                        onClick={() => handleEditClick(e)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                      >
+                        Edit
+                      </button>
+
                       <button
                         onClick={() => {
                           setEventToDeleteId(e._id);

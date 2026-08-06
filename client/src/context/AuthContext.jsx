@@ -10,8 +10,8 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // Common API Fetch Function
-  const apiFetch = async (url, options = {}) => {
+  // Common API Fetch Function with automatic retry for server cold-starts/502s
+  const apiFetch = async (url, options = {}, retries = 2) => {
     const isFormData = options.body instanceof FormData;
     const headers = {
       ...options.headers,
@@ -28,43 +28,71 @@ export const AuthProvider = ({ children }) => {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}${url}`, {
-        ...options,
-        headers,
-      });
-
-      let data = {};
-
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = { success: false, message: text || `Server Error (${response.status})` };
+    let lastErr = null;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        if (attempt > 0) {
+          // Wait 500ms * attempt before retrying (e.g. 500ms, 1000ms)
+          await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
         }
-      }
 
-      if (!response.ok) {
-        let msg = data?.message;
-        if (!msg || typeof msg !== 'string' || msg.includes('<html') || msg.includes('Application failed to respond')) {
-          if (response.status === 502 || response.status === 503 || response.status === 504) {
-            msg = "Backend server is temporarily unavailable or restarting. Please refresh or try again in a few moments.";
-          } else {
-            msg = `Server Error (${response.status})`;
+        const response = await fetch(`${API_BASE_URL}${url}`, {
+          ...options,
+          headers,
+        });
+
+        let data = {};
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = { success: false, message: text || `Server Error (${response.status})` };
           }
         }
-        throw new Error(msg);
-      }
 
-      return data;
-    } catch (err) {
-      console.error("API Error:", err);
-      throw err;
+        if (!response.ok) {
+          let msg = data?.message;
+          if (!msg || typeof msg !== 'string' || msg.includes('<html') || msg.includes('Application failed to respond')) {
+            if (response.status === 502 || response.status === 503 || response.status === 504) {
+              msg = "Backend server is temporarily unavailable or restarting. Please refresh or try again in a few moments.";
+            } else {
+              msg = `Server Error (${response.status})`;
+            }
+          }
+
+          // If server returns 502, 503, or 504 and we have retries left, retry seamlessly
+          if ((response.status === 502 || response.status === 503 || response.status === 504) && attempt < retries) {
+            console.warn(`API returned status ${response.status}. Retrying attempt ${attempt + 1}/${retries}...`);
+            continue;
+          }
+
+          throw new Error(msg);
+        }
+
+        return data;
+      } catch (err) {
+        lastErr = err;
+        if (
+          attempt < retries &&
+          (err.name === "TypeError" ||
+            err.message?.includes("fetch") ||
+            err.message?.includes("temporarily unavailable") ||
+            err.message?.includes("502"))
+        ) {
+          console.warn(`Network/API error: ${err.message}. Retrying attempt ${attempt + 1}/${retries}...`);
+          continue;
+        }
+        break;
+      }
     }
+
+    console.error("API Error:", lastErr);
+    throw lastErr;
   };
 
   useEffect(() => {

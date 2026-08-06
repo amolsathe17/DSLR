@@ -14,7 +14,7 @@ export default function Landing() {
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-24 text-white text-center overflow-hidden">
         {/* Background Image - Scoped strictly to Hero section */}
         <div
-          className="absolute inset-0 -z-10"
+          className="absolute inset-0 z-0"
           style={{
             backgroundImage: "url('/hero-bg.jpg')",
             backgroundSize: "cover",
@@ -23,18 +23,18 @@ export default function Landing() {
           }}
         />
         {/* Dark overlay */}
-        <div className="absolute inset-0 -z-10 bg-black/55" />
+        <div className="absolute inset-0 z-0 bg-black/60" />
 
         {/* Dot grid texture */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-10"
+          className="absolute inset-0 z-0 pointer-events-none opacity-10"
           style={{
             backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
             backgroundSize: "30px 30px",
           }}
         />
 
-        <div className="relative max-w-4xl mx-auto flex flex-col items-center gap-8">
+        <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-8">
           {/* Headline */}
           <div className="flex flex-col gap-4">
             <h1 className="font-display font-black text-5xl sm:text-5xl lg:text-7xl lg:mt-30 sm:mt-40 leading-[1.1] tracking-tight drop-shadow-lg">

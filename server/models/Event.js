@@ -34,6 +34,12 @@ const eventSchema = new mongoose.Schema({
   status: { type: String, enum: ['Draft', 'Active', 'Closed', 'Completed', 'Archived'], default: 'Draft' },
   assignedJudges: [{ type: String }],
   confirmedJudges: [{ type: String }],
+  certificates: {
+    firstPrize: { type: String, default: '' },
+    secondPrize: { type: String, default: '' },
+    thirdPrize: { type: String, default: '' },
+    participation: { type: String, default: '' }
+  },
   winnersPublished: { type: Boolean, default: false },
   winners: [{
     submissionId: { type: String },

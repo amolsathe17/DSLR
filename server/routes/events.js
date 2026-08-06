@@ -110,7 +110,7 @@ router.get('/:id', async (req, res) => {
 // @access  Private/Admin
 router.post('/', protect, authorize('Admin'), async (req, res) => {
   try {
-    const { title, eventType, theme, description, rules, deadline, startDate, eventDate, prizes, faqs, terms, packages, assignedCategories, hasExhibition, exhibitionFromDate, exhibitionToDate, loginBgUrl, venue } = req.body;
+    const { title, eventType, theme, description, rules, deadline, startDate, eventDate, prizes, faqs, terms, packages, assignedCategories, hasExhibition, exhibitionFromDate, exhibitionToDate, loginBgUrl, venue, certificates } = req.body;
 
     if (!assignedCategories || !Array.isArray(assignedCategories) || assignedCategories.length === 0) {
       return res.status(400).json({ success: false, message: 'At least one category must be assigned to this Contest Type' });
@@ -163,6 +163,7 @@ router.post('/', protect, authorize('Admin'), async (req, res) => {
       faqs,
       terms,
       packages,
+      certificates: certificates || { firstPrize: '', secondPrize: '', thirdPrize: '', participation: '' },
       status: initialStatus,
       assignedJudges: []
     });
@@ -499,8 +500,8 @@ router.delete('/backups/:id/purge', protect, authorize('Admin'), async (req, res
   }
 });
 
-// Helper to generate a personalized PDF certificate for a winner
-const generateCertificatePDF = (winnerName, rankStr) => {
+// Helper to generate a personalized PDF certificate for a winner or participant
+const generateCertificatePDF = (winnerName, rankStr, customTemplateUrl = '', eventTitle = '') => {
   const path = require('path');
   const fs = require('fs');
   const PDFDocument = require('pdfkit');
@@ -516,14 +517,25 @@ const generateCertificatePDF = (winnerName, rankStr) => {
       } else if (rankStr.toLowerCase().includes('3rd') || rankStr.toLowerCase().includes('third')) {
         templateName = '3rd-Prize.png';
         prizeLabel = 'Third_Prize';
+      } else if (rankStr.toLowerCase().includes('participant') || rankStr.toLowerCase().includes('participation')) {
+        templateName = 'participation-template.png';
+        prizeLabel = 'Participation';
       }
 
-      const templatePath = path.join(__dirname, '..', 'uploads', templateName);
-      
-      // Filename exactly as requested:
-      // National_Modeling_Photography_Championship_2026_[First/Second/Third]_Prize_<WinnerName>.pdf
-      const cleanWinnerName = winnerName.replace(/[^a-zA-Z0-5]/g, '_');
-      const fileName = `National_Modeling_Photography_Championship_2026_${prizeLabel}_${cleanWinnerName}.pdf`;
+      let templatePath = path.join(__dirname, '..', 'uploads', templateName);
+      let activeImageUrl = customTemplateUrl || `/uploads/${templateName}`;
+
+      if (customTemplateUrl && customTemplateUrl.startsWith('/uploads/')) {
+        const localFile = customTemplateUrl.replace('/uploads/', '');
+        const checkPath = path.join(__dirname, '..', 'uploads', localFile);
+        if (fs.existsSync(checkPath)) {
+          templatePath = checkPath;
+        }
+      }
+
+      const cleanWinnerName = winnerName.replace(/[^a-zA-Z0-9]/g, '_');
+      const cleanEventTitle = (eventTitle || 'Contest').replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `${cleanEventTitle}_${prizeLabel}_${cleanWinnerName}.pdf`;
       const localPdfPath = path.join(__dirname, '..', 'uploads', fileName);
       
       const doc = new PDFDocument({
@@ -534,14 +546,11 @@ const generateCertificatePDF = (winnerName, rankStr) => {
       const writeStream = fs.createWriteStream(localPdfPath);
       doc.pipe(writeStream);
       
-      // Draw background template image (A4: 595.28 x 841.89)
-      // Passing { format: 'jpeg' } because the uploaded files are JPEGs renamed to PNG
-      doc.image(templatePath, 0, 0, { width: 595.28, height: 841.89, format: 'jpeg' });
+      if (fs.existsSync(templatePath)) {
+        doc.image(templatePath, 0, 0, { width: 595.28, height: 841.89 });
+      }
       
-      // Name below "PROUDLY PRESENTED TO"
       doc.font('Times-BoldItalic');
-      
-      // Auto-resize font size if name is long
       let fontSize = 34;
       if (winnerName.length > 25) {
         fontSize = 20;
@@ -549,9 +558,7 @@ const generateCertificatePDF = (winnerName, rankStr) => {
         fontSize = 26;
       }
       doc.fontSize(fontSize);
-      doc.fillColor('#8b6f23'); // Elegant dark gold
-      
-      // Center aligned name exactly on the name line placeholder
+      doc.fillColor('#8b6f23');
       doc.text(winnerName, 0, 362, {
         width: 595.28,
         align: 'center'
@@ -562,9 +569,8 @@ const generateCertificatePDF = (winnerName, rankStr) => {
       writeStream.on('finish', async () => {
         try {
           let pdfUrl = `/uploads/${fileName}`;
-          let imageUrl = `/uploads/${templateName}`;
+          let imageUrl = activeImageUrl;
           
-          // Upload raw PDF to Cloudinary if configured
           if (process.env.CLOUDINARY_CLOUD_NAME && !process.env.CLOUDINARY_CLOUD_NAME.includes('dummy')) {
             const cloudinary = require('../config/cloudinary');
             const result = await cloudinary.uploader.upload(localPdfPath, {
@@ -580,7 +586,7 @@ const generateCertificatePDF = (winnerName, rankStr) => {
           console.error("Cloudinary certificate upload error:", uploadError);
           resolve({
             pdfUrl: `/uploads/${fileName}`,
-            imageUrl: `/uploads/${templateName}`,
+            imageUrl: activeImageUrl,
             localPdfPath
           });
         }
@@ -613,7 +619,6 @@ router.post('/:id/publish-winners', protect, authorize('Admin'), async (req, res
     const rawWinners = req.body.winners || [];
 
     for (const raw of rawWinners) {
-      // Find submission and user ID
       const submission = await Submission.findById(raw.submissionId);
       if (!submission) {
         return res.status(404).json({ success: false, message: `Submission for winner not found: ${raw.userName}` });
@@ -624,10 +629,17 @@ router.post('/:id/publish-winners', protect, authorize('Admin'), async (req, res
         return res.status(404).json({ success: false, message: `User for winner not found: ${raw.userName}` });
       }
 
-      // Generate the PDF certificate
-      const { pdfUrl, imageUrl, localPdfPath } = await generateCertificatePDF(winnerUser.name, raw.rank);
+      // Determine event-specific certificate image for this rank
+      let customTemplateUrl = event.certificates?.thirdPrize || '';
+      if (raw.rank.toLowerCase().includes('1st') || raw.rank.toLowerCase().includes('first')) {
+        customTemplateUrl = event.certificates?.firstPrize || '';
+      } else if (raw.rank.toLowerCase().includes('2nd') || raw.rank.toLowerCase().includes('second')) {
+        customTemplateUrl = event.certificates?.secondPrize || '';
+      }
 
-      // Determine prize amount based on rank
+      // Generate the PDF certificate
+      const { pdfUrl, imageUrl, localPdfPath } = await generateCertificatePDF(winnerUser.name, raw.rank, customTemplateUrl, event.title);
+
       let prizeAmount = '₹20,000';
       if (raw.rank.toLowerCase().includes('1st') || raw.rank.toLowerCase().includes('first')) {
         prizeAmount = '₹50,000';
@@ -635,7 +647,6 @@ router.post('/:id/publish-winners', protect, authorize('Admin'), async (req, res
         prizeAmount = '₹30,000';
       }
 
-      // Add winner document
       const winnerDoc = {
         submissionId: raw.submissionId,
         photographId: raw.photographId,
@@ -653,19 +664,37 @@ router.post('/:id/publish-winners', protect, authorize('Admin'), async (req, res
       
       winnersList.push(winnerDoc);
 
-      // Save in-app notification
       if (!winnerUser.notifications) winnerUser.notifications = [];
       
       const prizeWord = raw.rank.toLowerCase().includes('1st') ? '1st' : raw.rank.toLowerCase().includes('2nd') ? '2nd' : '3rd';
       winnerUser.notifications.push({
-        message: `Congratulations! You have secured ${prizeWord} Prize in the National Modeling Photography Championship 2026. Your certificate is now available in your dashboard.`,
+        message: `Congratulations! You have secured ${prizeWord} Prize in "${event.title}". Your certificate is now available in your dashboard.`,
         type: 'success',
         isRead: false
       });
       await winnerUser.save();
+    }
 
-      // Log email sending to console
-      console.log(`[EMAIL SENT] To: ${winnerUser.email} | Subject: Certificate of Achievement - National Modeling Photography Championship 2026 | Attachment: ${localPdfPath}`);
+    // Also notify & generate participation certificates for non-winners who submitted entries to this event
+    const nonWinnerSubmissions = await Submission.find({ eventId: event._id });
+    const winnerUserIds = new Set(winnersList.map(w => w.userId.toString()));
+
+    for (const sub of nonWinnerSubmissions) {
+      if (!winnerUserIds.has(sub.userId.toString())) {
+        const participantUser = await User.findById(sub.userId);
+        if (participantUser) {
+          if (!participantUser.notifications) participantUser.notifications = [];
+          const notifMsg = `Contest results declared for "${event.title}". Your Participation Certificate is now available in your dashboard.`;
+          if (!participantUser.notifications.some(n => n.message === notifMsg)) {
+            participantUser.notifications.push({
+              message: notifMsg,
+              type: 'info',
+              isRead: false
+            });
+            await participantUser.save();
+          }
+        }
+      }
     }
 
     event.winners = winnersList;
@@ -819,6 +848,53 @@ router.post('/upload-bg', protect, authorize('Admin'), (req, res, next) => {
   } catch (error) {
     console.error('Upload background error:', error);
     res.status(500).json({ success: false, message: 'Server error during background upload: ' + error.message });
+  }
+});
+
+// @desc    Upload certificate template image
+// @route   POST /api/events/upload-certificate
+// @access  Private (Admin only)
+router.post('/upload-certificate', protect, authorize('Admin'), (req, res, next) => {
+  const upload = require('../middleware/upload');
+  upload.single('certificateImage')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload a certificate image' });
+    }
+
+    const fs = require('fs');
+    let fileUrl = `/uploads/${req.file.filename}`;
+
+    try {
+      const { cloudinary } = require('../config/cloudinary');
+      if (cloudinary && process.env.CLOUDINARY_CLOUD_NAME) {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'dslr_contest/certificates',
+          resource_type: 'image'
+        });
+        fileUrl = result.secure_url;
+        
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+      }
+    } catch (cloudinaryErr) {
+      console.warn('Cloudinary upload failed, falling back to local file:', cloudinaryErr.message);
+    }
+
+    res.json({
+      success: true,
+      fileUrl
+    });
+  } catch (error) {
+    console.error('Upload certificate error:', error);
+    res.status(500).json({ success: false, message: 'Server error during certificate upload: ' + error.message });
   }
 });
 

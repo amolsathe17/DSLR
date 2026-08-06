@@ -148,6 +148,8 @@ export default function AdminDashboard() {
     { name: 'Pro', price: 400, maxPhotos: 5 }
   ]);
   const [selectedEventCategories, setSelectedEventCategories] = useState([]);
+  const [newEventCertificates, setNewEventCertificates] = useState({ firstPrize: '', secondPrize: '', thirdPrize: '', participation: '' });
+  const [uploadingCert, setUploadingCert] = useState({ firstPrize: false, secondPrize: false, thirdPrize: false, participation: false });
 
   // Edit Event states
   const [showEditModal, setShowEditModal] = useState(false);
@@ -171,6 +173,36 @@ export default function AdminDashboard() {
     { name: 'Pro', price: 400, maxPhotos: 5 }
   ]);
   const [editEventCategories, setEditEventCategories] = useState([]);
+  const [editEventCertificates, setEditEventCertificates] = useState({ firstPrize: '', secondPrize: '', thirdPrize: '', participation: '' });
+  const [uploadingEditCert, setUploadingEditCert] = useState({ firstPrize: false, secondPrize: false, thirdPrize: false, participation: false });
+
+  const handleCertificateFileUpload = async (typeKey, file, isEdit = false) => {
+    if (!file) return;
+    const setUploading = isEdit ? setUploadingEditCert : setUploadingCert;
+    const setCerts = isEdit ? setEditEventCertificates : setNewEventCertificates;
+
+    setUploading(prev => ({ ...prev, [typeKey]: true }));
+    try {
+      const formData = new FormData();
+      formData.append('certificateImage', file);
+
+      const data = await apiFetch('/api/events/upload-certificate', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (data.success && data.fileUrl) {
+        setCerts(prev => ({ ...prev, [typeKey]: data.fileUrl }));
+      } else {
+        alert(data.message || 'Failed to upload certificate image.');
+      }
+    } catch (err) {
+      console.error('Certificate upload error:', err);
+      alert('Error uploading certificate image: ' + err.message);
+    } finally {
+      setUploading(prev => ({ ...prev, [typeKey]: false }));
+    }
+  };
 
   // Purge confirmation modal states
   const [showPurgeConfirmModal, setShowPurgeConfirmModal] = useState(false);
@@ -1418,7 +1450,8 @@ export default function AdminDashboard() {
             name: pkg.name,
             price: Number(pkg.price),
             maxPhotos: Number(pkg.maxPhotos)
-          }))
+          })),
+          certificates: newEventCertificates
         })
       });
       if (data.success) {
@@ -1435,6 +1468,7 @@ export default function AdminDashboard() {
         setExhibitionFromDate('');
         setExhibitionToDate('');
         setLoginBgUrl('');
+        setNewEventCertificates({ firstPrize: '', secondPrize: '', thirdPrize: '', participation: '' });
         setPrize1Reward('₹50,000 Cash + Gold Trophy');
         setPrize2Reward('₹30,000 Cash + Silver Trophy');
         setPrize3Reward('₹20,000 Cash + Bronze Trophy');
@@ -1490,6 +1524,7 @@ export default function AdminDashboard() {
         { name: 'Pro', price: 400, maxPhotos: 5 }
       ]);
     }
+    setEditEventCertificates(e.certificates || { firstPrize: '', secondPrize: '', thirdPrize: '', participation: '' });
     
     setShowEditModal(true);
   };
@@ -1532,7 +1567,8 @@ export default function AdminDashboard() {
             name: pkg.name,
             price: Number(pkg.price),
             maxPhotos: Number(pkg.maxPhotos)
-          }))
+          })),
+          certificates: editEventCertificates
         })
       });
       if (data.success) {
@@ -2817,6 +2853,61 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
+                </div>
+
+                {/* Event Certificate Templates Section */}
+                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4.5 rounded-2xl flex flex-col gap-3">
+                  <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-2">
+                    <Award className="text-amber-500" size={16} />
+                    <h4 className="font-display font-extrabold text-xs text-slate-850 dark:text-white uppercase tracking-wider">
+                      Event Certificate Templates (Linked to this Event)
+                    </h4>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Upload separate certificate images for 1st Prize, 2nd Prize, 3rd Prize, and Participation. These templates will be assigned only to participants of this event.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-1">
+                    {[
+                      { key: 'firstPrize', label: '1st Prize Certificate' },
+                      { key: 'secondPrize', label: '2nd Prize Certificate' },
+                      { key: 'thirdPrize', label: '3rd Prize Certificate' },
+                      { key: 'participation', label: 'Participation Certificate' }
+                    ].map(({ key, label }) => {
+                      const certs = newEventCertificates;
+                      const uploading = uploadingCert[key];
+                      const certUrl = certs[key];
+
+                      return (
+                        <div key={key} className="flex flex-col gap-1.5 bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                          <label className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{label}</label>
+                          <label className="flex flex-col items-center justify-center px-2 py-2.5 bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
+                            <span className="text-[10px] font-semibold text-slate-500 truncate text-center">
+                              {uploading ? 'Uploading...' : certUrl ? 'Template Uploaded ✓' : 'Choose Image'}
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => e.target.files?.[0] && handleCertificateFileUpload(key, e.target.files[0], false)}
+                              className="hidden"
+                              disabled={uploading}
+                            />
+                          </label>
+                          {certUrl && (
+                            <div className="flex items-center justify-between text-[10px] mt-1">
+                              <span className="text-emerald-600 font-bold truncate">Uploaded ✓</span>
+                              <button
+                                type="button"
+                                onClick={() => setNewEventCertificates(prev => ({ ...prev, [key]: '' }))}
+                                className="text-red-500 hover:underline font-bold cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800 pt-3">
@@ -5144,6 +5235,61 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
+              </div>
+
+              {/* Event Certificate Templates Section (Edit Modal) */}
+              <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4.5 rounded-2xl flex flex-col gap-3 mt-3">
+                <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-2">
+                  <Award className="text-amber-500" size={16} />
+                  <h4 className="font-display font-extrabold text-xs text-slate-850 dark:text-white uppercase tracking-wider">
+                    Event Certificate Templates (Linked to this Event)
+                  </h4>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Upload separate certificate images for 1st Prize, 2nd Prize, 3rd Prize, and Participation. These templates will be assigned only to participants of this event.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-1">
+                  {[
+                    { key: 'firstPrize', label: '1st Prize Certificate' },
+                    { key: 'secondPrize', label: '2nd Prize Certificate' },
+                    { key: 'thirdPrize', label: '3rd Prize Certificate' },
+                    { key: 'participation', label: 'Participation Certificate' }
+                  ].map(({ key, label }) => {
+                    const certs = editEventCertificates;
+                    const uploading = uploadingEditCert[key];
+                    const certUrl = certs[key];
+
+                    return (
+                      <div key={key} className="flex flex-col gap-1.5 bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                        <label className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{label}</label>
+                        <label className="flex flex-col items-center justify-center px-2 py-2.5 bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
+                          <span className="text-[10px] font-semibold text-slate-500 truncate text-center">
+                            {uploading ? 'Uploading...' : certUrl ? 'Template Uploaded ✓' : 'Choose Image'}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => e.target.files?.[0] && handleCertificateFileUpload(key, e.target.files[0], true)}
+                            className="hidden"
+                            disabled={uploading}
+                          />
+                        </label>
+                        {certUrl && (
+                          <div className="flex items-center justify-between text-[10px] mt-1">
+                            <span className="text-emerald-600 font-bold truncate">Uploaded ✓</span>
+                            <button
+                              type="button"
+                              onClick={() => setEditEventCertificates(prev => ({ ...prev, [key]: '' }))}
+                              className="text-red-500 hover:underline font-bold cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="flex gap-3 justify-end pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">

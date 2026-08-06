@@ -1242,6 +1242,8 @@ export default function Dashboard() {
                         const isFirst = winInfo.rank.toLowerCase().includes('1st') || winInfo.rank.toLowerCase().includes('first');
                         const isSecond = winInfo.rank.toLowerCase().includes('2nd') || winInfo.rank.toLowerCase().includes('second');
                         const certTemplateName = isFirst ? '1st-Prize.png' : isSecond ? '2nd-Prize.png' : '3rd-Prize.png';
+                        const customCertUrl = isFirst ? evDetails?.certificates?.firstPrize : isSecond ? evDetails?.certificates?.secondPrize : evDetails?.certificates?.thirdPrize;
+                        const certImgSrc = getBackendUrl(winInfo.certificateImageUrl || customCertUrl || `/${certTemplateName}`);
                         
                         return (
                           <div key={index} className="bg-linear-to-br from-amber-500/5 to-amber-600/5 border-2 border-amber-500/35 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center relative overflow-hidden">
@@ -1250,7 +1252,7 @@ export default function Dashboard() {
                             <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-amber-500/20 shadow-sm cursor-pointer animate-in zoom-in-95 relative select-none"
                                  onClick={() => handleShowCertificateAlert('Champion')}>
                               <img
-                                src={`/${certTemplateName}`}
+                                src={certImgSrc}
                                 alt="Certificate Thumbnail"
                                 className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
                                 onContextMenu={e => e.preventDefault()}
@@ -1278,7 +1280,7 @@ export default function Dashboard() {
                                   Reward: <strong className="text-amber-700 dark:text-amber-500 font-bold">{winInfo.prizeAmount || (isFirst ? '₹50,000' : isSecond ? '₹30,000' : '₹20,000')}</strong>
                                 </p>
                                 <p className="text-[10px] text-slate-500 leading-none mt-0.5 font-semibold">
-                                  Winning Entry: <span className="italic">"${winInfo.photoTitle}"</span> (Grade: {winInfo.score}/10)
+                                  Winning Entry: <span className="italic">"{winInfo.photoTitle}"</span> (Grade: {winInfo.score}/10)
                                 </p>
                               </div>
 
@@ -1325,6 +1327,7 @@ export default function Dashboard() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {standardCards.map(({ sub, evDetails, isDummy }, index) => {
+                      const participationCertSrc = getBackendUrl(evDetails?.certificates?.participation || '/participation-template.png');
                       return (
                         <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row gap-5 shadow-md justify-between items-center relative overflow-hidden">
                           
@@ -1332,7 +1335,7 @@ export default function Dashboard() {
                           <div className="shrink-0 w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer select-none relative"
                                onClick={() => handleShowCertificateAlert('Participation')}>
                             <img
-                              src="/participation-template.png"
+                              src={participationCertSrc}
                               alt="Participation Certificate Thumbnail"
                               className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
                               onContextMenu={e => e.preventDefault()}

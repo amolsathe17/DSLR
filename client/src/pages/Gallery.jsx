@@ -458,6 +458,8 @@ export default function Gallery() {
                   
                   // Predefined certificate template preview
                   const certTemplateName = isFirst ? '1st-Prize.png' : isSecond ? '2nd-Prize.png' : '3rd-Prize.png';
+                  const customCertUrl = isFirst ? targetWinnerEvent.certificates?.firstPrize : isSecond ? targetWinnerEvent.certificates?.secondPrize : targetWinnerEvent.certificates?.thirdPrize;
+                  const certImgSrc = getBackendUrl(w.certificateImageUrl || customCertUrl || `/${certTemplateName}`);
                   
                   return (
                     <div
@@ -519,7 +521,7 @@ export default function Gallery() {
                         <div className="relative group w-28 aspect-[1/1.414] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer select-none"
                              onClick={() => handleShowCertificateAlert('Champion')}>
                           <img
-                            src={`/${certTemplateName}`}
+                            src={certImgSrc}
                             alt="Certificate Preview"
                             className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
                             onContextMenu={e => e.preventDefault()}

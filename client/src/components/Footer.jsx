@@ -118,17 +118,22 @@ export default function Footer() {
             <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
               Our Location
             </h3>
-            <div className="w-full h-53.25 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="relative w-full h-53.25 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm group">
               <iframe
-                title="Google Map Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3783.2758197779774!2d73.847844!3d18.511904!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c069b2d86121%3A0xb30f6b3e9d80d2d3!2sSadashiv%20Peth%2C%20Pune%2C%20Maharashtra%20411030!5e0!3m2!1sen!2sin"
+                title="Location Map"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=73.8400%2C18.5080%2C73.8550%2C18.5150&layer=mapnik&marker=18.511904%2C73.847844"
                 className="w-full h-full border-0"
-                allowFullScreen=""
                 loading="lazy"
-                referrerPolicy="no-referrer"
-                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               ></iframe>
             </div>
+            <a
+              href="https://maps.google.com/?q=Trio+Chambers,+Sadashiv+Peth,+Pune+-+411030"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors self-start"
+            >
+              <MapPin size={13} /> Open in Google Maps <ExternalLink size={12} />
+            </a>
           </div>
 
           {/* Column 3: Support */}

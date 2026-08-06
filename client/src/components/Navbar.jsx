@@ -253,9 +253,9 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            <Link to="/about" className={navLinkClass('/about')}>
+            {/* <Link to="/about" className={navLinkClass('/about')}>
               About Us
-            </Link>
+            </Link> */}
 
             <Link to="/info" className={navLinkClass('/info')}>
               Event Info
@@ -354,7 +354,7 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden glass-panel border-t border-slate-200/50 dark:border-slate-800/50 animate-in fade-in slide-in-from-top-4 duration-200">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link
+            {/* <Link
               to="/about"
               onClick={() => setIsOpen(false)}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
@@ -362,7 +362,7 @@ export default function Navbar() {
               }`}
             >
               About Us
-            </Link>
+            </Link> */}
 
             <Link
               to="/info"

@@ -2728,7 +2728,7 @@ export default function AdminDashboard() {
                     value={newEventTheme}
                     onChange={(e) => setNewEventTheme(e.target.value)}
                     placeholder="The premier national photography competition designed exclusively for DSLR & Mirrorless camera enthusiasts. Show us your vision of nature, wildlife, and landscapes."
-                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none"
+                    className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none text-slate-900 dark:text-white placeholder:text-slate-400/70"
                     required
                   />
                 </div>
@@ -2810,12 +2810,12 @@ export default function AdminDashboard() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-slate-500 font-semibold">Contest Description</label>
+                <label className="text-xs text-slate-500 font-semibold">Detailed Contest Overview</label>
                 <textarea
                   value={newEventDescription}
                   onChange={(e) => setNewEventDescription(e.target.value)}
-                  placeholder="The premier national photography competition designed exclusively for DSLR & Mirrorless camera enthusiasts. Show us your vision of nature, wildlife, and landscapes."
-                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none"
+                  placeholder="Enter detailed contest overview, eligibility criteria, and submission guidelines..."
+                  className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none text-slate-900 dark:text-white placeholder:text-slate-400/70"
                   required
                 />
               </div>

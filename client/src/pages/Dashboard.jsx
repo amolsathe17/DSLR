@@ -913,15 +913,15 @@ export default function Dashboard() {
           {/* Stats Widgets */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Registered Contests */}
-            <div className="bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
-              <span className="text-[10px] text-indigo-900/70 dark:text-indigo-300 font-extrabold uppercase tracking-wider">Registered Contests</span>
+            <div className="bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/90 dark:border-indigo-800/80 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+              <span className="text-[10px] text-indigo-900/80 dark:text-indigo-300 font-extrabold uppercase tracking-wider">Registered Contests</span>
               <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{allSubmissions.length}</h3>
               <span className="text-[10px] text-indigo-600/70 dark:text-indigo-400/70 font-medium">Total events registered</span>
             </div>
             
             {/* Card 2: Total Uploads */}
-            <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
-              <span className="text-[10px] text-emerald-900/70 dark:text-emerald-300 font-extrabold uppercase tracking-wider">Total Uploads</span>
+            <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/90 dark:border-emerald-800/80 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+              <span className="text-[10px] text-emerald-900/80 dark:text-emerald-300 font-extrabold uppercase tracking-wider">Total Uploads</span>
               <h3 className="font-display font-extrabold text-2xl text-emerald-600 dark:text-emerald-400">
                 {allSubmissions.reduce((acc, s) => acc + (s.photographs || []).length, 0)}
               </h3>
@@ -929,8 +929,8 @@ export default function Dashboard() {
             </div>
 
             {/* Card 3: Fees Paid */}
-            <div className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
-              <span className="text-[10px] text-amber-900/70 dark:text-amber-300 font-extrabold uppercase tracking-wider">Fees Paid</span>
+            <div className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/90 dark:border-amber-800/80 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+              <span className="text-[10px] text-amber-900/80 dark:text-amber-300 font-extrabold uppercase tracking-wider">Fees Paid</span>
               <h3 className="font-display font-extrabold text-2xl text-amber-600 dark:text-amber-500">
                 INR {allSubmissions.reduce((acc, s) => acc + (s.paymentStatus === 'Paid' ? s.amount : 0), 0)}
               </h3>
@@ -940,11 +940,11 @@ export default function Dashboard() {
             {/* Card 4: Account Status */}
             <div className={`${
               user?.isSuspended
-                ? 'bg-red-50/70 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40'
-                : 'bg-teal-50/70 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900/40'
+                ? 'bg-red-50/70 dark:bg-red-950/30 border border-red-200/90 dark:border-red-800/80'
+                : 'bg-teal-50/70 dark:bg-teal-950/30 border border-teal-200/90 dark:border-teal-800/80'
             } rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm`}>
               <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
-                user?.isSuspended ? 'text-red-900/70 dark:text-red-300' : 'text-teal-900/70 dark:text-teal-300'
+                user?.isSuspended ? 'text-red-900/80 dark:text-red-300' : 'text-teal-900/80 dark:text-teal-300'
               }`}>Account Status</span>
               <h3 className={`font-display font-extrabold text-lg flex items-center gap-1.5 mt-1 ${
                 user?.isSuspended ? 'text-red-600 dark:text-red-400' : 'text-teal-600 dark:text-teal-400'

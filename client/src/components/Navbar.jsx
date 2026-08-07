@@ -369,7 +369,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     to="/register"
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm px-4 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm px-4 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
                   >
                     Register
                   </Link>

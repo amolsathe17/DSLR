@@ -1713,10 +1713,10 @@ export default function AdminDashboard() {
       });
   };
 
-  if (loading || !stats || !charts) {
+  if (loading && !stats) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center">
-        <Camera className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+      <div className="min-h-screen bg-slate-100/90 dark:bg-slate-950 flex flex-col items-center justify-center">
+        <RefreshCw className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
         <span className="text-sm text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
           Loading Admin Control Panel...
         </span>
@@ -1725,7 +1725,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
+    <div className="w-full bg-slate-100/90 dark:bg-slate-950 py-5 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
       
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -5981,6 +5982,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      </div>
     </div>
   );
 }

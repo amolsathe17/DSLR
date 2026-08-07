@@ -470,7 +470,7 @@ export default function JudgeDashboard() {
 
   if (loading && photographs.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-slate-100/90 dark:bg-slate-950 flex flex-col items-center justify-center">
         <Camera className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
         <span className="text-sm text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
           Loading assigned entries...
@@ -480,7 +480,8 @@ export default function JudgeDashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
+    <div className="w-full bg-slate-100/90 dark:bg-slate-950 py-5 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
       
       {user?.role === 'Admin' && (
         <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4 flex items-center gap-3 text-amber-600 dark:text-amber-400 mb-6 text-xs font-semibold">
@@ -497,13 +498,13 @@ export default function JudgeDashboard() {
       )}
 
       {/* Dashboard Sub-navigation Tabs */}
-      <div className="flex justify-center sm:justify-start mb-8">
-        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto">
+      <div className="w-full overflow-x-auto mb-3">
+        <div className="flex bg-white/90 dark:bg-slate-900/80 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs min-w-max overflow-x-auto gap-1">
           <button
             onClick={() => setJudgeDashboardTab("overview")}
-            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+            className={`shrink-0 whitespace-nowrap text-center py-2 px-4 sm:px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
               judgeDashboardTab === "overview"
-                ? "bg-emerald-600 text-white shadow-md"
+                ? "bg-indigo-600 text-white shadow-md"
                 : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             }`}
           >
@@ -511,9 +512,9 @@ export default function JudgeDashboard() {
           </button>
           <button
             onClick={() => setJudgeDashboardTab("portal")}
-            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+            className={`shrink-0 whitespace-nowrap text-center py-2 px-4 sm:px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
               judgeDashboardTab === "portal"
-                ? "bg-emerald-600 text-white shadow-md"
+                ? "bg-indigo-600 text-white shadow-md"
                 : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             }`}
           >
@@ -521,9 +522,9 @@ export default function JudgeDashboard() {
           </button>
           <button
             onClick={() => setJudgeDashboardTab("event_history")}
-            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+            className={`shrink-0 whitespace-nowrap text-center py-2 px-4 sm:px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
               judgeDashboardTab === "event_history"
-                ? "bg-emerald-600 text-white shadow-md"
+                ? "bg-indigo-600 text-white shadow-md"
                 : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             }`}
           >
@@ -533,7 +534,7 @@ export default function JudgeDashboard() {
       </div>
 
       {judgeDashboardTab === "overview" && (
-        <div className="flex flex-col gap-8 animate-in fade-in duration-200">
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           {/* Welcome header */}
           {user?.role !== 'Admin' && (
             <div className="bg-linear-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -559,7 +560,7 @@ export default function JudgeDashboard() {
             </div>
           )}
 
-          {/* Stats Widgets */}
+          {/* Stats Widgets - 5 Cards in a single row matching Participant Dashboard */}
           {(() => {
             const totalEvents = events.length;
             const allPhotos = Object.values(allPhotographsByEvent).reduce((acc, arr) => [...acc, ...(arr || [])], []);
@@ -571,35 +572,40 @@ export default function JudgeDashboard() {
 
             return (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Assigned Contests</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {/* Card 1: Assigned Contests */}
+                  <div className="bg-indigo-50/70 dark:bg-indigo-950/30 border-2 border-indigo-300 dark:border-indigo-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+                    <span className="text-[10px] text-indigo-900/80 dark:text-indigo-300 font-extrabold uppercase tracking-wider">Assigned Contests</span>
                     <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalEvents}</h3>
-                    <span className="text-[10px] text-slate-400">Total events panel seat</span>
+                    <span className="text-[10px] text-indigo-600/70 dark:text-indigo-400/70 font-medium">Total events panel seat</span>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Graded Photos</span>
+                  {/* Card 2: Graded Photos */}
+                  <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+                    <span className="text-[10px] text-emerald-900/80 dark:text-emerald-300 font-extrabold uppercase tracking-wider">Graded Photos</span>
                     <h3 className="font-display font-extrabold text-2xl text-emerald-600 dark:text-emerald-400">{gradedCount}</h3>
-                    <span className="text-[10px] text-slate-400">Completed assessments</span>
+                    <span className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70 font-medium">Completed assessments</span>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Ungraded Photos</span>
+                  {/* Card 3: Ungraded Photos */}
+                  <div className="bg-red-50/70 dark:bg-red-950/30 border-2 border-red-300 dark:border-red-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+                    <span className="text-[10px] text-red-900/80 dark:text-red-300 font-extrabold uppercase tracking-wider">Ungraded Photos</span>
                     <h3 className="font-display font-extrabold text-2xl text-red-600 dark:text-red-400">{pendingCount}</h3>
-                    <span className="text-[10px] text-slate-400">Assessments remaining</span>
+                    <span className="text-[10px] text-red-600/70 dark:text-red-400/70 font-medium">Assessments remaining</span>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Unpaid Photos</span>
+                  {/* Card 4: Unpaid Photos */}
+                  <div className="bg-rose-50/70 dark:bg-rose-950/30 border-2 border-rose-300 dark:border-rose-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+                    <span className="text-[10px] text-rose-900/80 dark:text-rose-300 font-extrabold uppercase tracking-wider">Unpaid Photos</span>
                     <h3 className="font-display font-extrabold text-2xl text-rose-600 dark:text-rose-400">{unpaidCount}</h3>
-                    <span className="text-[10px] text-slate-400">Payment pending entries</span>
+                    <span className="text-[10px] text-rose-600/70 dark:text-rose-400/70 font-medium">Payment pending entries</span>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Total Photographs</span>
-                    <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{totalPhotos}</h3>
-                    <span className="text-[10px] text-slate-400">Total assigned photo frames</span>
+                  {/* Card 5: Total Photographs */}
+                  <div className="bg-purple-50/70 dark:bg-purple-950/30 border-2 border-purple-300 dark:border-purple-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+                    <span className="text-[10px] text-purple-900/80 dark:text-purple-300 font-extrabold uppercase tracking-wider">Total Photographs</span>
+                    <h3 className="font-display font-extrabold text-2xl text-purple-600 dark:text-purple-400">{totalPhotos}</h3>
+                    <span className="text-[10px] text-purple-600/70 dark:text-purple-400/70 font-medium">Total assigned photo frames</span>
                   </div>
                 </div>
 
@@ -2078,6 +2084,7 @@ export default function JudgeDashboard() {
         );
       })()}
 
+      </div>
     </div>
   );
 }

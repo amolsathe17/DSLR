@@ -1734,15 +1734,15 @@ export default function AdminDashboard() {
           <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">Admin Dashboard</h1>
           <p className="text-xs text-slate-400">Total operational control and performance ledger analytics</p>
         </div>
-        {/* Event Selector */}
+        {/* Event Selector - Increased width */}
         <div className="flex items-center gap-3">
           {allEvents.length > 0 && (
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 shadow-sm">
-              <Calendar size={14} className="text-amber-500 shrink-0" />
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-2.5 shadow-xs w-full sm:w-80 md:w-96">
+              <Calendar size={15} className="text-amber-500 shrink-0" />
               <select
                 value={selectedEventId}
                 onChange={e => setSelectedEventId(e.target.value)}
-                className="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-transparent border-none outline-none cursor-pointer max-w-50"
+                className="w-full text-xs font-bold text-slate-800 dark:text-slate-100 bg-transparent border-none outline-none cursor-pointer"
               >
                 {allEvents.map(ev => (
                   <option key={ev._id} value={ev._id}>
@@ -1755,8 +1755,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="flex mb-8 overflow-x-auto justify-start w-full">
-        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 whitespace-nowrap min-w-max gap-1 mx-auto sm:mx-0">
+      <div className="w-full overflow-x-auto mb-3">
+        <div className="flex bg-white/90 dark:bg-slate-900/80 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs min-w-max overflow-x-auto gap-1">
           {[
             { id: 'overview', label: 'Overview', icon: BarChart },
             { id: 'participants', label: 'Participants', icon: Users },
@@ -1773,7 +1773,7 @@ export default function AdminDashboard() {
                 setActiveTab(t.id);
                 if (t.id === 'event_history') fetchEventHistory();
               }}
-              className={`flex items-center gap-1.5 py-2 px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 py-2 px-4 sm:px-5 rounded-xl font-display text-xs font-bold transition-all cursor-pointer ${
                 activeTab === t.id
                   ? 'bg-amber-600 text-white shadow-md'
                   : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
@@ -1788,22 +1788,45 @@ export default function AdminDashboard() {
 
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
-        <div className="flex flex-col gap-8 animate-in fade-in duration-200">
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           
-          {/* Key Stats Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { label: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, change: 'Overall Volume', color: 'text-emerald-500' },
-              { label: 'Total Participants', value: stats.totalParticipants, change: `${stats.todayRegistrations} added today`, color: 'text-indigo-600' },
-              { label: 'Active Entries', value: stats.totalEntries, change: 'Locked submission folders', color: 'text-amber-500' },
-              { label: 'Total Photographs', value: stats.totalPhotos, change: 'High-res image assets', color: 'text-purple-500' }
-            ].map((card, idx) => (
-              <div key={idx} className="glass-panel border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{card.label}</span>
-                <p className={`font-display font-black text-2xl sm:text-3xl ${card.color}`}>{card.value}</p>
-                <span className="text-[10px] text-slate-400 font-semibold">{card.change}</span>
-              </div>
-            ))}
+          {/* Key Stats Cards Grid - 4 distinct light backgrounds with 2px borders */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Total Revenue */}
+            <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+              <span className="text-[10px] text-emerald-900/80 dark:text-emerald-300 font-extrabold uppercase tracking-wider">Total Revenue</span>
+              <p className="font-display font-extrabold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400">
+                ₹{stats.totalRevenue.toLocaleString()}
+              </p>
+              <span className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70 font-medium">Overall Volume</span>
+            </div>
+
+            {/* Card 2: Total Participants */}
+            <div className="bg-indigo-50/70 dark:bg-indigo-950/30 border-2 border-indigo-300 dark:border-indigo-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+              <span className="text-[10px] text-indigo-900/80 dark:text-indigo-300 font-extrabold uppercase tracking-wider">Total Participants</span>
+              <p className="font-display font-extrabold text-2xl sm:text-3xl text-indigo-600 dark:text-indigo-400">
+                {stats.totalParticipants}
+              </p>
+              <span className="text-[10px] text-indigo-600/70 dark:text-indigo-400/70 font-medium">{stats.todayRegistrations} added today</span>
+            </div>
+
+            {/* Card 3: Active Entries */}
+            <div className="bg-amber-50/70 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+              <span className="text-[10px] text-amber-900/80 dark:text-amber-300 font-extrabold uppercase tracking-wider">Active Entries</span>
+              <p className="font-display font-extrabold text-2xl sm:text-3xl text-amber-600 dark:text-amber-500">
+                {stats.totalEntries}
+              </p>
+              <span className="text-[10px] text-amber-600/70 dark:text-amber-400/70 font-medium">Locked submission folders</span>
+            </div>
+
+            {/* Card 4: Total Photographs */}
+            <div className="bg-purple-50/70 dark:bg-purple-950/30 border-2 border-purple-300 dark:border-purple-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
+              <span className="text-[10px] text-purple-900/80 dark:text-purple-300 font-extrabold uppercase tracking-wider">Total Photographs</span>
+              <p className="font-display font-extrabold text-2xl sm:text-3xl text-purple-600 dark:text-purple-400">
+                {stats.totalPhotos}
+              </p>
+              <span className="text-[10px] text-purple-600/70 dark:text-purple-400/70 font-medium">High-res image assets</span>
+            </div>
           </div>
 
           {/* Recharts Analytics Panel */}
@@ -1812,34 +1835,32 @@ export default function AdminDashboard() {
             categoryStats={charts.categoryStats} 
           />
 
-
-
-          {/* Downloadable Reports Panel */}
-          <div className="glass-panel border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
+          {/* Downloadable Reports Panel - 3 distinct light background export buttons */}
+          <div className="bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xs">
             <div>
               <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Financial & Operational Exports</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">Download formatted CSV ledger books directly to local disk</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <button
                 onClick={() => handleExportCSV('participants')}
-                className="flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 p-2.5 rounded-xl text-xs font-semibold cursor-pointer"
+                className="flex items-center justify-center gap-2 bg-indigo-50/80 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-2 border-indigo-300 dark:border-indigo-700 p-3.5 rounded-2xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer"
               >
-                <Download size={14} />
+                <Download size={15} className="text-indigo-600 dark:text-indigo-400" />
                 Export Participants CSV
               </button>
               <button
                 onClick={() => handleExportCSV('revenue')}
-                className="flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 p-2.5 rounded-xl text-xs font-semibold cursor-pointer"
+                className="flex items-center justify-center gap-2 bg-emerald-50/80 hover:bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-2 border-emerald-300 dark:border-emerald-700 p-3.5 rounded-2xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer"
               >
-                <Download size={14} />
+                <Download size={15} className="text-emerald-600 dark:text-emerald-400" />
                 Export Revenue Ledger CSV
               </button>
               <button
                 onClick={() => handleExportCSV('submissions')}
-                className="flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 p-2.5 rounded-xl text-xs font-semibold cursor-pointer"
+                className="flex items-center justify-center gap-2 bg-purple-50/80 hover:bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-2 border-purple-300 dark:border-purple-700 p-3.5 rounded-2xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer"
               >
-                <Download size={14} />
+                <Download size={15} className="text-purple-600 dark:text-purple-400" />
                 Export Photos Metadata CSV
               </button>
             </div>

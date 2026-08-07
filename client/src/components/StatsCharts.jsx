@@ -50,10 +50,9 @@ export default function StatsCharts({ dailyStats = [], categoryStats = [] }) {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      {/* Registrations & Revenue Line/Bar Chart */}
-      <div className="lg:col-span-2 glass-panel border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 flex flex-col gap-4">
+    <div className="w-full">
+      {/* Registrations & Revenue Line/Bar Chart - Full Width */}
+      <div className="w-full bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xs">
         <div>
           <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">
             Registration & Revenue Trends
@@ -121,57 +120,6 @@ export default function StatsCharts({ dailyStats = [], categoryStats = [] }) {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Category distribution Pie Chart */}
-      <div className="glass-panel border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between gap-4">
-        <div>
-          <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">
-            Category Distribution
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Breakdown of uploaded submissions across event categories
-          </p>
-        </div>
-
-        <div className="w-full h-64 flex items-center justify-center">
-          {categoryStats.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryStats}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={4}
-                  dataKey="value"
-                >
-                  {categoryStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomPieTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="text-slate-400 text-sm">No photo uploads found yet.</div>
-          )}
-        </div>
-
-        {/* Legend labels grid */}
-        <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-600 dark:text-slate-400 font-medium">
-          {categoryStats.slice(0, 8).map((entry, index) => (
-            <div key={entry.name} className="flex items-center gap-1.5 line-clamp-1">
-              <span 
-                className="w-2.5 h-2.5 rounded-full shrink-0" 
-                style={{ backgroundColor: COLORS[index % COLORS.length] }}
-              ></span>
-              <span className="truncate">{entry.name} ({entry.value})</span>
-            </div>
-          ))}
-        </div>
-
       </div>
     </div>
   );

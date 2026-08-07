@@ -213,14 +213,16 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
   const isLandingPage = location.pathname === '/';
 
-  // Link color helper — white on hero (landing-at-top), normal elsewhere
+  // Link color helper — button pill style when scrolled, elegant medium text on hero
   const navLinkClass = (path) =>
-    `text-sm font-medium transition-colors ${
-      isActive(path)
-        ? onHero ? 'text-white font-bold' : 'text-indigo-600 dark:text-indigo-400'
-        : onHero
-          ? 'text-white/80 hover:text-white'
-          : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+    `text-sm font-medium transition-all ${
+      onHero
+        ? isActive(path)
+          ? 'text-white font-medium underline underline-offset-4'
+          : 'text-white/90 hover:text-white font-medium'
+        : isActive(path)
+          ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/40 px-3 py-1.5 rounded-lg font-medium shadow-2xs'
+          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:bg-slate-800/60 dark:text-slate-200 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 px-3 py-1.5 rounded-lg font-medium transition-all'
     }`;
 
   // Position: fixed on landing page so navbar overlays hero background directly; sticky elsewhere
@@ -255,7 +257,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Nav */}
-          <div className={`hidden md:flex items-center ${onHero ? 'justify-center gap-8 sm:gap-10 w-full' : 'gap-6'}`}>
+          <div className={`hidden md:flex items-center ${onHero ? 'justify-center gap-8 sm:gap-10 w-full' : 'gap-3'}`}>
             <Link to="/info" className={navLinkClass('/info')}>
               Event Info
             </Link>
@@ -290,102 +292,91 @@ export default function Navbar() {
               </Link>
             )}
 
+            {/* Auth Buttons — Hidden on hero page load, revealed on scroll or inner pages */}
+            {!onHero && (
+              user ? (
+                <div className="flex items-center gap-3 ml-2">
+                  {renderNotificationBell()}
+                  {user.role === 'Admin' ? (
+                    <div className="relative" ref={adminDropdownRef}>
+                      <button
+                        onClick={() => setShowAdminProfileDropdown(!showAdminProfileDropdown)}
+                        className="flex items-center gap-2 text-xs font-medium py-1.5 px-3 rounded-lg transition-all cursor-pointer border text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 bg-slate-50 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[11px] shrink-0 shadow-xs">
+                          {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                        </div>
+                        <span>{user.name ? user.name.split(' ')[0] : 'Admin'}</span>
+                        <ChevronDown size={14} className={`transition-transform duration-200 ${showAdminProfileDropdown ? 'rotate-180' : ''}`} />
+                      </button>
 
-            {/* Auth Buttons */}
-            {user ? (
-              <div className="flex items-center gap-4">
-                {renderNotificationBell()}
-                {user.role === 'Admin' ? (
-                  <div className="relative" ref={adminDropdownRef}>
-                    <button
-                      onClick={() => setShowAdminProfileDropdown(!showAdminProfileDropdown)}
-                      className={`flex items-center gap-2 text-xs font-semibold py-1.5 px-3 rounded-xl transition-all cursor-pointer border ${
-                        onHero 
-                          ? 'text-white border-white/20 hover:bg-white/10' 
-                          : 'text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
-                      }`}
+                      {showAdminProfileDropdown && (
+                        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
+                          <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+                            <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{user.name}</p>
+                            <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium truncate">{user.email}</p>
+                          </div>
+
+                          <div className="py-1">
+                            <button
+                              onClick={() => {
+                                setShowAdminProfileDropdown(false);
+                                navigate('/admin', { state: { tab: 'profile_settings' } });
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                            >
+                              <User size={15} className="text-indigo-600 dark:text-indigo-400" />
+                              <span>Profile Settings</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setShowAdminProfileDropdown(false);
+                                navigate('/admin', { state: { tab: 'notifications' } });
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                            >
+                              <Bell size={15} className="text-indigo-600 dark:text-indigo-400" />
+                              <span>Notifications</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white bg-slate-50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50"
                     >
-                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0 shadow-xs">
-                        {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
-                      </div>
-                      <span>{user.name ? user.name.split(' ')[0] : 'Admin'}</span>
-                      <ChevronDown size={14} className={`transition-transform duration-200 ${showAdminProfileDropdown ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {showAdminProfileDropdown && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
-                        <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
-                          <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold truncate">{user.email}</p>
-                        </div>
-
-                        <div className="py-1">
-                          <button
-                            onClick={() => {
-                              setShowAdminProfileDropdown(false);
-                              navigate('/admin', { state: { tab: 'profile_settings' } });
-                            }}
-                            className="w-full px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
-                          >
-                            <User size={15} className="text-indigo-600 dark:text-indigo-400" />
-                            <span>Profile Settings</span>
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setShowAdminProfileDropdown(false);
-                              navigate('/admin', { state: { tab: 'notifications' } });
-                            }}
-                            className="w-full px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
-                          >
-                            <Bell size={15} className="text-indigo-600 dark:text-indigo-400" />
-                            <span>Notifications</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    to="/profile"
-                    className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors ${onHero ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-slate-700 hover:text-slate-955 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                      <User size={16} />
+                      <span>{user.name.split(' ')[0]}</span>
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer border border-red-100 dark:border-red-900/30"
                   >
-                    <User size={16} />
-                    <span>{user.name.split(' ')[0]}</span>
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2.5 ml-2">
+                  <Link
+                    to="/login"
+                    state={{ forceContestant: true }}
+                    className="text-sm font-medium text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50 rounded-lg transition-all"
+                  >
+                    Login
                   </Link>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer"
-                >
-                  <LogOut size={16} />
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Link
-                  to="/login"
-                  state={{ forceContestant: true }}
-                  className={`font-medium transition-colors ${
-                    onHero 
-                      ? 'text-sm sm:text-base font-bold text-white hover:text-indigo-200' 
-                      : 'text-sm text-slate-700 hover:text-slate-955 dark:text-slate-300 dark:hover:text-white px-3.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg'
-                  }`}
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className={`bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all shadow-sm hover:shadow ${
-                    onHero 
-                      ? 'text-sm sm:text-base px-5 py-2 rounded-xl shadow-md' 
-                      : 'text-sm px-4 py-2 rounded-lg'
-                  }`}
-                >
-                  Register
-                </Link>
-              </div>
+                  <Link
+                    to="/register"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-1.5 rounded-lg shadow-sm hover:shadow transition-all"
+                  >
+                    Register
+                  </Link>
+                </div>
+              )
             )}
           </div>
 

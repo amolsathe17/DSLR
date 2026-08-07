@@ -9,11 +9,11 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showAdminProfileDropdown, setShowAdminProfileDropdown] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const notifRef = useRef(null);
-  const adminDropdownRef = useRef(null);
+  const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,8 +22,8 @@ export default function Navbar() {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
         setShowNotifications(false);
       }
-      if (adminDropdownRef.current && !adminDropdownRef.current.contains(event.target)) {
-        setShowAdminProfileDropdown(false);
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -297,41 +297,45 @@ export default function Navbar() {
               user ? (
                 <div className="flex items-center gap-3 ml-2">
                   {renderNotificationBell()}
-                  {user.role === 'Admin' ? (
-                    <div className="relative" ref={adminDropdownRef}>
-                      <button
-                        onClick={() => setShowAdminProfileDropdown(!showAdminProfileDropdown)}
-                        className="flex items-center gap-2 text-xs font-medium py-1.5 px-3 rounded-lg transition-all cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[11px] shrink-0 shadow-xs">
-                          {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                  <div className="relative" ref={profileDropdownRef}>
+                    <button
+                      onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                      className="flex items-center gap-2 text-xs font-medium py-1.5 px-3 rounded-lg transition-all cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[11px] shrink-0 shadow-xs">
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <span>{user.name ? user.name.split(' ')[0] : 'User'}</span>
+                      <ChevronDown size={14} className={`transition-transform duration-200 ${showProfileDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showProfileDropdown && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
+                        <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+                          <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{user.name}</p>
+                          <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium truncate">{user.email}</p>
                         </div>
-                        <span>{user.name ? user.name.split(' ')[0] : 'Admin'}</span>
-                        <ChevronDown size={14} className={`transition-transform duration-200 ${showAdminProfileDropdown ? 'rotate-180' : ''}`} />
-                      </button>
 
-                      {showAdminProfileDropdown && (
-                        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
-                          <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
-                            <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{user.name}</p>
-                            <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium truncate">{user.email}</p>
-                          </div>
-
-                          <div className="py-1">
-                            <button
-                              onClick={() => {
-                                setShowAdminProfileDropdown(false);
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              setShowProfileDropdown(false);
+                              if (user.role === 'Admin') {
                                 navigate('/admin', { state: { tab: 'profile_settings' } });
-                              }}
-                              className="w-full px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
-                            >
-                              <User size={15} className="text-indigo-600 dark:text-indigo-400" />
-                              <span>Profile Settings</span>
-                            </button>
+                              } else {
+                                navigate('/profile');
+                              }
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                          >
+                            <User size={15} className="text-indigo-600 dark:text-indigo-400" />
+                            <span>Profile Settings</span>
+                          </button>
 
+                          {user.role === 'Admin' && (
                             <button
                               onClick={() => {
-                                setShowAdminProfileDropdown(false);
+                                setShowProfileDropdown(false);
                                 navigate('/admin', { state: { tab: 'notifications' } });
                               }}
                               className="w-full px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
@@ -339,19 +343,11 @@ export default function Navbar() {
                               <Bell size={15} className="text-indigo-600 dark:text-indigo-400" />
                               <span>Notifications</span>
                             </button>
-                          </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
-                    >
-                      <User size={16} />
-                      <span>{user.name.split(' ')[0]}</span>
-                    </Link>
-                  )}
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/60 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer"
@@ -513,14 +509,16 @@ export default function Navbar() {
                       </button>
                     </div>
                   ) : (
-                    <Link
-                      to="/profile"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        navigate('/profile');
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
                     >
-                      <User size={18} />
-                      Profile ({user.name})
-                    </Link>
+                      <User size={16} className="text-indigo-600 dark:text-indigo-400" />
+                      Profile Settings
+                    </button>
                   )}
                   <button
                     onClick={handleLogout}

@@ -78,7 +78,7 @@ export default function Footer() {
             <h3 className="font-display font-semibold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
               Who We are..
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
+            <p className="text-xs text-black dark:text-slate-400  leading-relaxed text-justify">
               Sumba was created in memory of Late Prof. Raosaheb Gurav, whose life was shaped by art, mentorship, and an unbreakable bond with tradition. His work, especially the Dhangar series, carried the landscapes of his childhood and the honesty of rural life, and his guidance helped generations of young artists find their path. He believed that art should stay rooted in its people and that every artist deserves a stage.
             </p>
             {/* Social Media Icons */}

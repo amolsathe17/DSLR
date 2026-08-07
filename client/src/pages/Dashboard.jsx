@@ -843,10 +843,10 @@ export default function Dashboard() {
   const isFinalized = !!submission?.isFinalSubmitted || user?.isSuspended;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
+    <div className="max-w-7xl mx-auto px-4 pt-4 pb-8 sm:px-6 sm:pt-5 lg:px-8 text-slate-800 dark:text-slate-200">
       
       {/* Dashboard Sub-navigation Tabs */}
-      <div className="w-full overflow-x-auto mb-8 pb-1">
+      <div className="w-full overflow-x-auto mb-3">
         <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 min-w-max overflow-x-auto gap-1">
           <button
             onClick={() => setDashboardTab("overview")}

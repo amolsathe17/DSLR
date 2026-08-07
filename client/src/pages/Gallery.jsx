@@ -80,7 +80,7 @@ export default function Gallery() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-slate-100/90 dark:bg-slate-950 flex flex-col items-center justify-center">
         <Camera className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
         <span className="text-sm text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
           Loading Exhibition...
@@ -90,13 +90,13 @@ export default function Gallery() {
   }
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-200 py-12">
+    <div className="bg-slate-100/90 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-200 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="text-center flex flex-col gap-2 mb-8">
           <h1 className="font-display font-black text-3xl sm:text-4xl text-slate-900 dark:text-white">
-            Exhibition Gallery & Results
+            Gallery & Results
           </h1>
           <p className="text-sm text-slate-500 max-w-xl mx-auto">
             Browse through approved DSLR photographs or view the champions' leaderboard.
@@ -256,7 +256,7 @@ export default function Gallery() {
                         </button>
                       </div>
 
-                      <div className="p-4 flex flex-col gap-3 justify-between flex-grow">
+                      <div className="p-4 flex flex-col gap-3 justify-between grow">
                         <div>
                           <div className="flex justify-between items-start gap-2">
                             <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
@@ -387,7 +387,7 @@ export default function Gallery() {
                           </button>
                         </div>
 
-                        <div className="p-4 flex flex-col gap-3 justify-between flex-grow">
+                        <div className="p-4 flex flex-col gap-3 justify-between grow">
                           <div>
                             <div className="flex justify-between items-start gap-2">
                               <h3 className="font-display font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
@@ -402,7 +402,7 @@ export default function Gallery() {
                             </p>
 
                             {/* Disapproval reasons */}
-                            <div className="mt-2 pt-2 border-t border-red-200/40 dark:border-red-900/20 text-[10px] bg-red-50/50 dark:bg-red-950/10 p-2.5 rounded-lg border border-red-100 dark:border-red-900/10">
+                            <div className="mt-2 pt-2 border-t border-red-200/40 dark:border-red-900/20 text-[10px] bg-red-50/50 dark:bg-red-950/10 p-2.5 rounded-lg border">
                               <span className="font-extrabold text-red-600 dark:text-red-400 flex items-center gap-1">
                                 ⚠️ Entry Disapproved by Judge
                               </span>
@@ -588,11 +588,11 @@ export default function Gallery() {
               <X size={20} />
             </button>
             <div className="grid grid-cols-1 lg:grid-cols-12">
-              <div className="lg:col-span-8 bg-slate-950 flex items-center justify-center min-h-[300px] max-h-[500px]">
+              <div className="lg:col-span-8 bg-slate-950 flex items-center justify-center min-h-75 max-h-125">
                 {/* Custom Watermarked Preview component */}
                 <WatermarkPreview src={getBackendUrl(selectedPhoto.fileUrl)} className="w-full h-full" />
               </div>
-              <div className="lg:col-span-4 p-6 flex flex-col justify-between text-xs max-h-[500px] overflow-y-auto">
+              <div className="lg:col-span-4 p-6 flex flex-col justify-between text-xs max-h-125 overflow-y-auto">
                 <div className="flex flex-col gap-4">
                   <div>
                     <h3 className="font-display font-black text-lg text-slate-900 dark:text-white">{selectedPhoto.title}</h3>
@@ -654,7 +654,7 @@ export default function Gallery() {
 
       {/* Custom Certificate Preview Alert Modal */}
       {certAlertMsg && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border-2 border-indigo-500/20 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 text-center">
             <div className="flex flex-col gap-2 items-center">
               <div className="p-3 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl mb-2">

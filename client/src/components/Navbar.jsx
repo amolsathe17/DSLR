@@ -2,16 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Camera, Sun, Moon, Menu, X, LogOut, LayoutDashboard, User, Bell, CheckCheck, Check, Trash2 } from 'lucide-react';
+import { Camera, Sun, Moon, Menu, X, LogOut, LayoutDashboard, User, Bell, CheckCheck, Check, Trash2, ChevronDown } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout, refreshUser, apiFetch } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showAdminProfileDropdown, setShowAdminProfileDropdown] = useState(false);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const notifRef = useRef(null);
+  const adminDropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -19,6 +21,9 @@ export default function Navbar() {
     const handleClickOutside = (event) => {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
         setShowNotifications(false);
+      }
+      if (adminDropdownRef.current && !adminDropdownRef.current.contains(event.target)) {
+        setShowAdminProfileDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -297,9 +302,67 @@ export default function Navbar() {
               <div className="flex items-center gap-4">
                 {renderNotificationBell()}
                 {user.role === 'Admin' ? (
-                  <div className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg select-none cursor-default ${onHero ? 'text-white/80' : 'text-slate-700 dark:text-slate-300'}`}>
-                    <User size={16} />
-                    <span>{user.name.split(' ')[0]}</span>
+                  <div className="relative" ref={adminDropdownRef}>
+                    <button
+                      onClick={() => setShowAdminProfileDropdown(!showAdminProfileDropdown)}
+                      className={`flex items-center gap-2 text-xs font-semibold py-1.5 px-3 rounded-xl transition-all cursor-pointer border ${
+                        onHero 
+                          ? 'text-white border-white/20 hover:bg-white/10' 
+                          : 'text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0 shadow-xs">
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                      </div>
+                      <span>{user.name ? user.name.split(' ')[0] : 'Admin'}</span>
+                      <ChevronDown size={14} className={`transition-transform duration-200 ${showAdminProfileDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showAdminProfileDropdown && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
+                        <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
+                          <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold truncate">{user.email}</p>
+                        </div>
+
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              setShowAdminProfileDropdown(false);
+                              navigate('/admin', { state: { tab: 'profile_settings' } });
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                          >
+                            <User size={15} className="text-indigo-600 dark:text-indigo-400" />
+                            <span>Profile Settings</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setShowAdminProfileDropdown(false);
+                              navigate('/admin', { state: { tab: 'notifications' } });
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                          >
+                            <Bell size={15} className="text-indigo-600 dark:text-indigo-400" />
+                            <span>Notifications</span>
+                          </button>
+                        </div>
+
+                        <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
+                          <button
+                            onClick={() => {
+                              setShowAdminProfileDropdown(false);
+                              handleLogout();
+                            }}
+                            className="w-full px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2.5 transition-colors cursor-pointer"
+                          >
+                            <LogOut size={15} />
+                            <span>Logout</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <Link
@@ -444,9 +507,30 @@ export default function Navbar() {
               {user ? (
                 <div className="space-y-1">
                   {user.role === 'Admin' ? (
-                    <div className="flex items-center gap-2 px-3 py-2 text-base font-medium text-slate-700 dark:text-slate-300 select-none cursor-default">
-                      <User size={18} />
-                      Admin Profile ({user.name})
+                    <div className="space-y-1">
+                      <div className="px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-left">
+                        Admin ({user.name})
+                      </div>
+                      <button
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate('/admin', { state: { tab: 'profile_settings' } });
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                      >
+                        <User size={16} className="text-indigo-600 dark:text-indigo-400" />
+                        Profile Settings
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate('/admin', { state: { tab: 'notifications' } });
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                      >
+                        <Bell size={16} className="text-indigo-600 dark:text-indigo-400" />
+                        Notifications
+                      </button>
                     </div>
                   ) : (
                     <Link

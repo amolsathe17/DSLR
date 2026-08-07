@@ -41,13 +41,21 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import StatsCharts from '../components/StatsCharts';
 import { getBackendUrl, getApiBaseUrl } from '../utils/url';
 
 export default function AdminDashboard() {
   const { apiFetch, user, updateProfile } = useAuth();
   const { allEvents, selectedEvent, selectedEventId, setSelectedEventId, refreshEvents } = useEvent();
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'overview');
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
 
   // Stats states
   const [stats, setStats] = useState(null);
@@ -348,7 +356,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (user && activeTab === 'profile_settings') {
+    if (user && (activeTab === 'profile_settings' || activeTab === 'notifications')) {
       setProfileName(user.name || '');
       setProfileEmail(user.email || '');
       setProfileMobile(user.mobile || '');
@@ -1765,7 +1773,8 @@ export default function AdminDashboard() {
             { id: 'events', label: 'Contests & Configuration', icon: Calendar },
             { id: 'categories_config', label: 'Categories', icon: Layers },
             { id: 'event_history', label: 'Event History', icon: History },
-            { id: 'profile_settings', label: 'Profile Settings & Notifications', icon: User }
+            { id: 'profile_settings', label: 'Profile Settings', icon: User },
+            { id: 'notifications', label: 'Notifications', icon: Bell }
           ].map(t => (
             <button
               key={t.id}
@@ -4116,7 +4125,7 @@ export default function AdminDashboard() {
 
       {/* TAB 7: PROFILE SETTINGS */}
       {activeTab === 'profile_settings' && (
-        <div className="max-w-6xl mx-auto animate-in fade-in duration-200 text-left grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="max-w-2xl mx-auto animate-in fade-in duration-200 text-left">
           <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
             <div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">Profile Settings</h3>
@@ -4205,8 +4214,12 @@ export default function AdminDashboard() {
               </button>
             </form>
           </div>
+        </div>
+      )}
 
-          {/* Broadcast Notification Management Card */}
+      {/* TAB 8: NOTIFICATIONS */}
+      {activeTab === 'notifications' && (
+        <div className="max-w-3xl mx-auto animate-in fade-in duration-200 text-left">
           <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
             <div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">
@@ -4220,7 +4233,7 @@ export default function AdminDashboard() {
               <div className="flex flex-col gap-1.5">
                 <label className="font-bold text-slate-500">Recipient Audience</label>
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-305 select-none">
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-300 select-none">
                     <input
                       type="radio"
                       name="broadcastRecipient"
@@ -4231,7 +4244,7 @@ export default function AdminDashboard() {
                     />
                     Contestants Only
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-305 select-none">
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-300 select-none">
                     <input
                       type="radio"
                       name="broadcastRecipient"
@@ -4242,7 +4255,7 @@ export default function AdminDashboard() {
                     />
                     Judges Only
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-305 select-none">
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-300 select-none">
                     <input
                       type="radio"
                       name="broadcastRecipient"
@@ -4262,7 +4275,7 @@ export default function AdminDashboard() {
                   value={broadcastMessage}
                   onChange={(e) => setBroadcastMessage(e.target.value)}
                   placeholder="Enter details about results, schedules, rules updates, or deadline changes..."
-                  className="w-full min-h-22.5 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none resize-none"
+                  className="w-full min-h-24 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 font-semibold focus:outline-none resize-none"
                   required
                 />
               </div>
@@ -4284,7 +4297,7 @@ export default function AdminDashboard() {
                 <select
                   value={broadcastFilter}
                   onChange={(e) => setBroadcastFilter(e.target.value)}
-                  className="px-3 py-1.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-semibold text-slate-600 cursor-pointer focus:outline-none"
+                  className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer focus:outline-none"
                 >
                   <option value="all">All Recipients</option>
                   <option value="Participant">Contestants Only</option>

@@ -1,13 +1,7 @@
 export const getBackendUrl = (path) => {
   if (!path) return '';
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
 
-  // Non-upload paths (static public assets like certificate templates in client/public)
-  if (!path.includes('/uploads/') && !path.startsWith('uploads/')) {
-    return path.startsWith('/') ? path : `/${path}`;
-  }
-
-  // Resolve VITE_API_URL dynamically to support local network/mobile access for uploads
+  // Resolve VITE_API_URL dynamically to support local network/mobile access for uploads & proxy
   const envUrl = import.meta.env.VITE_API_URL;
   let baseUrl = '';
 
@@ -21,6 +15,18 @@ export const getBackendUrl = (path) => {
       // Relative URL for same host/port serving
       baseUrl = '';
     }
+  }
+
+  // If path is an external URL (e.g. Cloudinary), proxy it through our backend server
+  // to serve it as a first-party resource and permanently eliminate Tracking Prevention browser warnings!
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    if (path.includes('/api/image-proxy?url=')) return path;
+    return `${baseUrl}/api/image-proxy?url=${encodeURIComponent(path)}`;
+  }
+
+  // Non-upload paths (static public assets like certificate templates in client/public)
+  if (!path.includes('/uploads/') && !path.startsWith('uploads/')) {
+    return path.startsWith('/') ? path : `/${path}`;
   }
 
   // Remove duplicate slashes

@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const https = require("https");
+const http = require("http");
 require("dotenv").config();
 
 const { connectDB } = require("./config/db");
@@ -70,6 +72,66 @@ app.use("/api/judges", judgeRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/contest-types", contestTypeRoutes);
+
+// Image proxy route to eliminate cross-origin third-party Tracking Prevention browser warnings permanently
+app.get("/api/image-proxy", (req, res) => {
+  const imageUrl = req.query.url;
+  if (!imageUrl) {
+    return res.status(400).send("Missing image url");
+  }
+
+  try {
+    const parsedUrl = new URL(imageUrl);
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      return res.status(400).send("Invalid protocol");
+    }
+
+    const clientModule = parsedUrl.protocol === "https:" ? https : http;
+
+    const proxyReq = clientModule.get(imageUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+      }
+    }, (proxyRes) => {
+      // Follow HTTP 301/302 redirects if Cloudinary redirects
+      if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
+        return res.redirect(proxyRes.headers.location);
+      }
+
+      res.status(proxyRes.statusCode || 200);
+      if (proxyRes.headers["content-type"]) {
+        res.setHeader("Content-Type", proxyRes.headers["content-type"]);
+      } else {
+        res.setHeader("Content-Type", "image/jpeg");
+      }
+      
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      res.setHeader("Access-Control-Allow-Origin", "*");
+
+      proxyRes.pipe(res);
+    });
+
+    proxyReq.on("error", (err) => {
+      console.error("Image proxy request error:", err.message);
+      if (!res.headersSent) {
+        res.status(500).send("Failed to fetch image");
+      }
+    });
+
+    proxyReq.setTimeout(12000, () => {
+      proxyReq.destroy();
+      if (!res.headersSent) {
+        res.status(504).send("Image proxy request timeout");
+      }
+    });
+  } catch (err) {
+    console.error("Invalid proxy URL:", err.message);
+    if (!res.headersSent) {
+      res.status(400).send("Invalid image URL");
+    }
+  }
+});
 
 // Favicon handler to prevent console 404 errors
 app.get("/favicon.ico", (req, res) => {

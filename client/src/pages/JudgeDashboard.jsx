@@ -1834,27 +1834,30 @@ export default function JudgeDashboard() {
 
         return (
           <div className="animate-in fade-in duration-200 flex flex-col gap-6">
-            {/* Header & Event Selector ("My Judging History & Details" card) */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            {/* Header & Event Selector ("My Judging History & Details" card - Prominent style) */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-linear-to-r from-emerald-50 via-teal-50/60 to-indigo-50/40 dark:from-emerald-950/50 dark:via-teal-950/30 dark:to-slate-900/80 p-6 sm:p-7 rounded-3xl border-2 border-emerald-300 dark:border-emerald-700 shadow-md">
               <div className="flex items-center gap-3.5">
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-2xl shrink-0">
+                <div className="p-3.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-2xl shrink-0 shadow-sm">
                   <History size={24} />
                 </div>
-                <div>
-                  <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">My Judging History & Details</h2>
-                  <p className="text-xs text-slate-400">View complete evaluation statistics, graded photographs, scores breakdown, and sign-off status event-wise</p>
+                <div className="text-left">
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold uppercase tracking-widest block mb-0.5">
+                    Jury Archives
+                  </span>
+                  <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">My Judging History & Details</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">View complete evaluation statistics, graded photographs, scores breakdown, and sign-off status event-wise</p>
                 </div>
               </div>
 
               {events.length > 0 && (
-                <div className="w-full md:w-auto shrink-0">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <div className="w-full sm:w-auto shrink-0 text-left sm:text-right">
+                  <label className="text-[10px] font-extrabold text-emerald-900/70 dark:text-emerald-300 uppercase tracking-wider block mb-1">
                     Select Assigned Event ({events.length})
                   </label>
                   <select
                     value={historySelectedEventId || selectedHistoryEvent?._id || ''}
                     onChange={(e) => setHistorySelectedEventId(e.target.value)}
-                    className="w-full md:w-80 px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-emerald-200 dark:border-emerald-900/50 rounded-2xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-xs"
+                    className="w-full sm:w-72 md:w-80 px-4 py-2.5 bg-white dark:bg-slate-950 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-xs"
                   >
                     {events.map(ev => (
                       <option key={ev._id} value={ev._id}>

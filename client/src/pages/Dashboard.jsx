@@ -946,161 +946,147 @@ export default function Dashboard() {
           {allSubmissions.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* Chart 1: Donut Chart for status */}
+              {/* Chart 1: Donut Chart for Submission Status */}
               {(() => {
                 const photosList = allSubmissions.reduce((acc, s) => [...acc, ...(s.photographs || [])], []);
                 const totalPhotos = photosList.length;
                 const approvedCount = photosList.filter(p => p.status === 'Approved').length;
-                const rejectedCount = photosList.filter(p => p.status === 'Rejected').length;
+                const rejectedCount = photosList.filter(p => p.status === 'Rejected' || p.status === 'Disapproved').length;
                 const pendingCount = totalPhotos - approvedCount - rejectedCount;
 
-                if (totalPhotos === 0) {
-                  return (
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center min-h-65 shadow-sm">
-                      <ImageIcon className="w-8 h-8 mb-2 text-slate-300 dark:text-slate-700" />
-                      <span>Upload photos in the entries tab to view metrics charts.</span>
-                    </div>
-                  );
-                }
+                const statusData = [
+                  { name: 'Approved', value: approvedCount, color: '#10B981', total: totalPhotos },
+                  { name: 'Pending', value: pendingCount, color: '#F59E0B', total: totalPhotos },
+                  { name: 'Disapproved', value: rejectedCount, color: '#7C3AED', total: totalPhotos }
+                ].filter(d => d.value > 0);
 
-                // Donut geometry calculations
-                const approvedPct = totalPhotos ? (approvedCount / totalPhotos) : 0;
-                const rejectedPct = totalPhotos ? (rejectedCount / totalPhotos) : 0;
-                const pendingPct = totalPhotos ? (pendingCount / totalPhotos) : 0;
-
-                const radius = 50;
-                const circumference = 2 * Math.PI * radius;
-
-                const approvedStroke = circumference * approvedPct;
-                const pendingStroke = circumference * pendingPct;
-                const rejectedStroke = circumference * rejectedPct;
-
-                const approvedOffset = circumference;
-                const pendingOffset = circumference - approvedStroke;
-                const rejectedOffset = circumference - approvedStroke - pendingStroke;
+                const displayData = statusData.length > 0 ? statusData : [
+                  { name: 'Pending', value: 1, color: '#F59E0B', total: 0 }
+                ];
 
                 return (
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
-                    <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Submission Status</h3>
-                    <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
-                      {/* SVG Circle */}
-                      <div className="relative w-32 h-32">
-                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
-                          {/* Background track */}
-                          <circle cx="70" cy="70" r={radius} fill="transparent" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="12" />
-                          {/* Approved segment (Green) */}
-                          {approvedStroke > 0 && (
-                            <circle
-                              cx="70"
-                              cy="70"
-                              r={radius}
-                              fill="transparent"
-                              stroke="#10b981"
-                              strokeWidth="12"
-                              strokeDasharray={circumference}
-                              strokeDashoffset={approvedOffset}
-                              strokeLinecap="round"
-                              className="transition-all duration-1000 ease-out"
-                            />
-                          )}
-                          {/* Pending segment (Amber) */}
-                          {pendingStroke > 0 && (
-                            <circle
-                              cx="70"
-                              cy="70"
-                              r={radius}
-                              fill="transparent"
-                              stroke="#f59e0b"
-                              strokeWidth="12"
-                              strokeDasharray={circumference}
-                              strokeDashoffset={pendingOffset}
-                              strokeLinecap="round"
-                              className="transition-all duration-1000 ease-out"
-                            />
-                          )}
-                          {/* Rejected segment (Red) */}
-                          {rejectedStroke > 0 && (
-                            <circle
-                              cx="70"
-                              cy="70"
-                              r={radius}
-                              fill="transparent"
-                              stroke="#ef4444"
-                              strokeWidth="12"
-                              strokeDasharray={circumference}
-                              strokeDashoffset={rejectedOffset}
-                              strokeLinecap="round"
-                              className="transition-all duration-1000 ease-out"
-                            />
-                          )}
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="font-display font-black text-2xl text-slate-900 dark:text-white">{totalPhotos}</span>
-                          <span className="text-[8px] text-slate-400 font-extrabold uppercase">Photos</span>
-                        </div>
-                      </div>
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-7 text-left flex flex-col justify-between gap-5 shadow-xs">
+                    <div>
+                      <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">
+                        Submission Status
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                        Breakdown of uploaded submissions by approval status
+                      </p>
+                    </div>
 
-                      {/* Legend details */}
-                      <div className="flex flex-col gap-2.5 text-[11px]">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-                          <span className="font-semibold text-slate-500 dark:text-slate-400">Approved: <strong className="text-slate-900 dark:text-white">{approvedCount}</strong></span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
-                          <span className="font-semibold text-slate-500 dark:text-slate-400">Pending: <strong className="text-slate-900 dark:text-white">{pendingCount}</strong></span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
-                          <span className="font-semibold text-slate-500 dark:text-slate-400">Disapproved: <strong className="text-slate-900 dark:text-white">{rejectedCount}</strong></span>
-                        </div>
+                    <div className="w-full h-52 sm:h-56 flex items-center justify-center my-1">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={displayData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={58}
+                            outerRadius={82}
+                            paddingAngle={displayData.length > 1 ? 5 : 0}
+                            dataKey="value"
+                            stroke="none"
+                          >
+                            {displayData.map((entry, index) => (
+                              <Cell key={`status-cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<CustomPieTooltip />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-start gap-y-3 gap-x-6 pt-3 border-t border-slate-100 dark:border-slate-800/60 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: '#10B981' }} />
+                        <span>Approved ({approvedCount})</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: '#F59E0B' }} />
+                        <span>Pending ({pendingCount})</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: '#7C3AED' }} />
+                        <span>Disapproved ({rejectedCount})</span>
                       </div>
                     </div>
                   </div>
                 );
               })()}
 
-              {/* Chart 2: Category distribution Bar Chart */}
+              {/* Chart 2: Donut Chart for Category Distribution */}
               {(() => {
                 const photosList = allSubmissions.reduce((acc, s) => [...acc, ...(s.photographs || [])], []);
+                const totalPhotos = photosList.length;
+                
+                const categoryColors = ['#7C3AED', '#F59E0B', '#10B981', '#EC4899', '#3B82F6', '#06B6D4', '#F97316'];
                 const categoriesMap = {};
+                
                 photosList.forEach(photo => {
-                  categoriesMap[photo.category] = (categoriesMap[photo.category] || 0) + 1;
+                  const cat = photo.category || 'General';
+                  categoriesMap[cat] = (categoriesMap[cat] || 0) + 1;
                 });
-                const catData = Object.entries(categoriesMap).map(([name, count]) => ({ name, count }));
 
-                if (catData.length === 0) {
-                  return (
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center min-h-65 shadow-sm">
-                      <ImageIcon className="w-8 h-8 mb-2 text-slate-300 dark:text-slate-700" />
-                      <span>Upload photos under categories to view distribution bar chart.</span>
-                    </div>
-                  );
-                }
-
-                const maxCount = Math.max(...catData.map(c => c.count));
+                const catEntries = Object.entries(categoriesMap);
+                
+                const catData = catEntries.length > 0 
+                  ? catEntries.map(([name, value], index) => ({
+                      name,
+                      value,
+                      color: categoryColors[index % categoryColors.length],
+                      total: totalPhotos
+                    }))
+                  : [
+                      { name: 'In-door', value: 1, color: '#7C3AED', total: 0 },
+                      { name: 'Out-Door', value: 1, color: '#F59E0B', total: 0 },
+                      { name: 'Color', value: 1, color: '#10B981', total: 0 }
+                    ];
 
                 return (
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
-                    <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Submission Categories</h3>
-                    <div className="flex flex-col gap-3 py-1">
-                      {catData.map(({ name, count }) => {
-                        const widthPct = maxCount ? (count / maxCount) * 100 : 0;
-                        return (
-                          <div key={name} className="flex flex-col gap-1">
-                            <div className="flex justify-between text-[11px] font-bold">
-                              <span className="text-slate-600 dark:text-slate-300">{name}</span>
-                              <span className="text-slate-500">{count} {count === 1 ? 'photo' : 'photos'}</span>
-                            </div>
-                            <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                              <div
-                                style={{ width: `${widthPct}%` }}
-                                className="bg-indigo-600 h-full rounded-full transition-all duration-1000 ease-out"
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-7 text-left flex flex-col justify-between gap-5 shadow-xs">
+                    <div>
+                      <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">
+                        Category Distribution
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                        Breakdown of uploaded submissions across event categories
+                      </p>
+                    </div>
+
+                    <div className="w-full h-52 sm:h-56 flex items-center justify-center my-1">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={catData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={58}
+                            outerRadius={82}
+                            paddingAngle={catData.length > 1 ? 5 : 0}
+                            dataKey="value"
+                            stroke="none"
+                          >
+                            {catData.map((entry, index) => (
+                              <Cell key={`cat-cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<CustomPieTooltip />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-start gap-y-3 gap-x-6 pt-3 border-t border-slate-100 dark:border-slate-800/60 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      {(catEntries.length > 0 ? catData : [
+                        { name: 'In-door', value: 0, color: '#7C3AED' },
+                        { name: 'Out-Door', value: 0, color: '#F59E0B' },
+                        { name: 'Color', value: 0, color: '#10B981' }
+                      ]).map((item) => (
+                        <div key={item.name} className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: item.color }} />
+                          <span>{item.name} ({item.value})</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 );

@@ -63,11 +63,11 @@ function MainLayout() {
   const isLanding = location.pathname === '/';
 
   return (
-    <div className={`flex flex-col min-h-screen transition-colors duration-300 ${isLanding ? '' : 'bg-slate-50 dark:bg-slate-950'}`}>
+    <div className={`flex flex-col min-h-screen w-full max-w-full overflow-x-hidden transition-colors duration-300 ${isLanding ? '' : 'bg-slate-50 dark:bg-slate-950'}`}>
       <ScrollToTop />
       <GlobalTooltip />
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow w-full max-w-full overflow-x-hidden">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Landing />} />

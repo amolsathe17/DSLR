@@ -339,7 +339,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center md:hidden gap-2">
-            {renderNotificationBell()}
+            {!isOpen && user && renderNotificationBell()}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

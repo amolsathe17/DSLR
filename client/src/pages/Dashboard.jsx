@@ -824,11 +824,11 @@ export default function Dashboard() {
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
       
       {/* Dashboard Sub-navigation Tabs */}
-      <div className="flex justify-center sm:justify-start mb-8">
-        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 w-full sm:w-auto">
+      <div className="flex justify-start sm:justify-start mb-8 max-w-full overflow-hidden">
+        <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 max-w-full overflow-x-auto no-scrollbar gap-1">
           <button
             onClick={() => setDashboardTab("overview")}
-            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+            className={`shrink-0 whitespace-nowrap text-center py-2 px-4 sm:px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
               dashboardTab === "overview"
                 ? "bg-indigo-600 text-white shadow-md"
                 : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
@@ -838,7 +838,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => setDashboardTab("entries")}
-            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+            className={`shrink-0 whitespace-nowrap text-center py-2 px-4 sm:px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
               dashboardTab === "entries"
                 ? "bg-indigo-600 text-white shadow-md"
                 : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
@@ -848,7 +848,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => setDashboardTab("certificates")}
-            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+            className={`shrink-0 whitespace-nowrap text-center py-2 px-4 sm:px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
               dashboardTab === "certificates"
                 ? "bg-indigo-600 text-white shadow-md"
                 : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
@@ -858,7 +858,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => setDashboardTab("event_history")}
-            className={`flex-1 sm:flex-none text-center py-2 px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+            className={`shrink-0 whitespace-nowrap text-center py-2 px-4 sm:px-6 rounded-xl text-xs font-bold cursor-pointer transition-all ${
               dashboardTab === "event_history"
                 ? "bg-indigo-600 text-white shadow-md"
                 : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"

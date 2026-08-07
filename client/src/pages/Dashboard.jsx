@@ -1657,7 +1657,7 @@ export default function Dashboard() {
                                           onClick={() => setSelectedPkgId(pkg.id)}
                                           className={`border-2 rounded-3xl p-6 flex flex-col gap-3 text-center cursor-pointer transition-all duration-200 ${
                                             isSelected
-                                              ? "bg-gradient-to-b from-indigo-50/90 to-purple-50/90 dark:from-indigo-950/60 dark:to-purple-950/60 border-indigo-600 dark:border-indigo-500 ring-4 ring-indigo-600/20 shadow-md scale-[1.02]"
+                                              ? "bg-linear-to-b from-indigo-50/90 to-purple-50/90 dark:from-indigo-950/60 dark:to-purple-950/60 border-indigo-600 dark:border-indigo-500 ring-4 ring-indigo-600/20 shadow-md scale-[1.02]"
                                               : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 opacity-90 hover:opacity-100"
                                           }`}
                                         >
@@ -2048,14 +2048,14 @@ export default function Dashboard() {
             if (pastSubmissions.length === 0) return null;
 
             return (
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm flex flex-col transition-all duration-300 mt-4 text-left">
+              <div className="bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xs flex flex-col transition-all duration-300 mt-4 text-left">
                 {/* Accordion Header */}
                 <div
                   onClick={() => setHistoryExpanded(!historyExpanded)}
-                  className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors select-none"
+                  className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-colors select-none"
                 >
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} className="text-indigo-600" />
+                  <div className="flex items-center gap-2.5">
+                    <Clock size={16} className="text-indigo-600 dark:text-indigo-400" />
                     <span className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
                       Historical Enrollments & Past Entries ({pastSubmissions.length})
                     </span>
@@ -2065,7 +2065,7 @@ export default function Dashboard() {
 
                 {/* Accordion Body */}
                 {historyExpanded && (
-                  <div className="border-t border-slate-100 dark:border-slate-800 p-6 flex flex-col gap-6 bg-slate-50/20 dark:bg-slate-900/5">
+                  <div className="border-t border-slate-200/80 dark:border-slate-800 p-6 flex flex-col gap-6 bg-white/80 dark:bg-slate-950/80">
                     <div className="grid grid-cols-1 gap-6">
                       {pastSubmissions.map((sub, idx) => {
                         const ev = eventsList.find(e => e._id === sub.eventId);
@@ -2546,7 +2546,7 @@ export default function Dashboard() {
         return (
           <div className="animate-in fade-in duration-200 flex flex-col gap-6">
             {/* Header & Event Selector ("My Event History & Details" card - Prominent style) */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-indigo-50 via-purple-50/60 to-indigo-50/40 dark:from-indigo-950/50 dark:via-purple-950/30 dark:to-slate-900/80 p-6 sm:p-7 rounded-3xl border-2 border-indigo-200/80 dark:border-indigo-800/60 shadow-md">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-linear-to-r from-indigo-50 via-purple-50/60 to-indigo-50/40 dark:from-indigo-950/50 dark:via-purple-950/30 dark:to-slate-900/80 p-6 sm:p-7 rounded-3xl border-2 border-indigo-200/80 dark:border-indigo-800/60 shadow-md">
               <div className="flex items-center gap-3.5">
                 <div className="p-3.5 bg-indigo-600 dark:bg-indigo-500 text-white rounded-2xl shrink-0 shadow-sm">
                   <History size={24} />
@@ -2648,7 +2648,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-6 bg-white/70 dark:bg-slate-950/40 border border-dashed border-amber-200/80 dark:border-amber-900/40 rounded-2xl text-center text-slate-500 dark:text-slate-400 text-xs">
+                    <div className="p-4 bg-black/10 dark:bg-slate-950/40 border border-dashed border-amber-200/80 dark:border-amber-900/40 rounded-2xl text-center text-slate-800 dark:text-slate-600 text-sm">
                       ⏳ Certificates will be generated automatically once final results are published by the judging panel.
                     </div>
                   )}

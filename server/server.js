@@ -49,6 +49,17 @@ if (!fs.existsSync(uploadsPath)) {
 // Static files
 app.use("/uploads", express.static(uploadsPath));
 
+// Middleware to ensure DB is initialized before processing API requests
+app.use(async (req, res, next) => {
+  try {
+    await initDB();
+    next();
+  } catch (err) {
+    console.error("DB init middleware error:", err.message);
+    next();
+  }
+});
+
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
@@ -135,18 +146,19 @@ const initDB = async () => {
   return initPromise;
 };
 
-// Middleware to ensure DB is initialized before processing API requests
-app.use(async (req, res, next) => {
-  await initDB();
-  next();
-});
-
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {
   initDB().then(() => {
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
+    });
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`⚠️ Port ${PORT} is currently in use. Make sure old server processes are stopped.`);
+      } else {
+        console.error("Server startup error:", err);
+      }
     });
   });
 }

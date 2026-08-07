@@ -226,7 +226,7 @@ export default function AdminDashboard() {
         'Basic editing (brightness, contrast, crop) is allowed. Heavily manipulated composites, AI additions, or removals are strictly forbidden.',
         'Entries must be uploaded before the submission deadline. Late entries will not be accepted under any circumstances.'
       ].join('\n');
-      defaultDesc = 'The premier national photography competition designed exclusively for DSLR & Mirrorless camera enthusiasts. Show us your vision of nature, wildlife, and landscapes.';
+      defaultDesc = '';
     } else if (eventType === 'Painting') {
       defaultRules = [
         'All submissions must be original hand-painted physical works (Watercolor, Acrylic, Oil, Canvas, etc.). Digital paintings are strictly prohibited.',

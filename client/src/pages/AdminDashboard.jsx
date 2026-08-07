@@ -4217,7 +4217,7 @@ export default function AdminDashboard() {
 
       {/* TAB 8: NOTIFICATIONS */}
       {activeTab === 'notifications' && (
-        <div className="max-w-4xl mx-auto animate-in fade-in duration-200 text-left flex flex-col gap-8">
+        <div className="max-w-7xl mx-auto animate-in fade-in duration-200 text-left flex flex-col gap-8">
           {/* CARD 1: Notification Management */}
           <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
             <div>

@@ -348,19 +348,6 @@ export default function Navbar() {
                             <span>Notifications</span>
                           </button>
                         </div>
-
-                        <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
-                          <button
-                            onClick={() => {
-                              setShowAdminProfileDropdown(false);
-                              handleLogout();
-                            }}
-                            className="w-full px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2.5 transition-colors cursor-pointer"
-                          >
-                            <LogOut size={15} />
-                            <span>Logout</span>
-                          </button>
-                        </div>
                       </div>
                     )}
                   </div>

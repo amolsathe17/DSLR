@@ -892,7 +892,7 @@ export default function Dashboard() {
       </div>
 
       {dashboardTab === "overview" && (
-        <div className="flex flex-col gap-8 animate-in fade-in duration-200">
+        <div className="flex flex-col gap-3 animate-in fade-in duration-200">
           {/* Welcome profile header */}
           <div className="bg-linear-to-r from-indigo-900/10 via-indigo-950/5 to-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex flex-col gap-2 text-left">
@@ -1160,7 +1160,7 @@ export default function Dashboard() {
                         <div className="flex flex-col gap-3.5 pl-3.5 border-l-2 border-indigo-100 dark:border-indigo-950/60 h-52 sm:h-56 overflow-y-auto pr-1 text-xs">
                           {timelineEvents.slice(0, 8).map((evt, idx) => (
                             <div key={idx} className="relative flex flex-col gap-0.5">
-                              <span className="absolute -left-[19px] top-1.5 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-600" />
+                              <span className="absolute -left-4.75 top-1.5 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-600" />
                               <span className="text-[10px] text-slate-400 font-semibold">
                                 {evt.date.toLocaleDateString()} {evt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </span>
@@ -1203,7 +1203,7 @@ export default function Dashboard() {
                           {refundedSubs.map((sub, idx) => (
                             <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-2xl flex flex-col gap-1.5 text-xs">
                               <div className="flex justify-between items-center">
-                                <span className="font-extrabold text-slate-900 dark:text-white truncate max-w-[120px]">{sub.eventTitle}</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white truncate max-w-30">{sub.eventTitle}</span>
                                 <span className={`px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full ${
                                   sub.paymentStatus === 'Refunded' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                                 }`}>
@@ -1493,24 +1493,38 @@ export default function Dashboard() {
                 );
               }
 
-              return activeEvents.map((e) => {
+              return activeEvents.map((e, index) => {
                 const isExpanded = !!expandedActiveEvents[e._id];
                 const activeSub = allSubmissions.find(s => s.eventId === e._id);
                 const hasPaid = activeSub && activeSub.paymentStatus === 'Paid';
                 const hasFinalized = activeSub && activeSub.isFinalSubmitted;
 
+                // Alternating soft light background colors for multiple events
+                const isEven = index % 2 === 0;
+                const panelBgClass = isEven
+                  ? "bg-indigo-50/70 dark:bg-indigo-950/25 border-indigo-200/60 dark:border-indigo-900/40 hover:border-indigo-300 dark:hover:border-indigo-800"
+                  : "bg-sky-50/70 dark:bg-sky-950/25 border-sky-200/60 dark:border-sky-900/40 hover:border-sky-300 dark:hover:border-sky-800";
+
+                const headerHoverClass = isEven
+                  ? "hover:bg-indigo-100/60 dark:hover:bg-indigo-950/40"
+                  : "hover:bg-sky-100/60 dark:hover:bg-sky-950/40";
+
+                const eventBadgeClass = isEven
+                  ? "text-indigo-700 dark:text-indigo-300 bg-indigo-100/90 dark:bg-indigo-900/60"
+                  : "text-sky-700 dark:text-sky-300 bg-sky-100/90 dark:bg-sky-900/60";
+
                 return (
-                  <div key={e._id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm flex flex-col transition-all duration-300">
+                  <div key={e._id} className={`${panelBgClass} border rounded-3xl overflow-hidden shadow-xs flex flex-col transition-all duration-300`}>
                     {/* Accordion Header */}
                     <div
                       onClick={() => toggleActiveEvent(e)}
-                      className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors select-none gap-4 sm:gap-2"
+                      className={`p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center cursor-pointer ${headerHoverClass} transition-colors select-none gap-4 sm:gap-2`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         <span className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
                           {e.title}
                         </span>
-                        <span className="text-[10px] text-indigo-500 font-extrabold uppercase bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-full w-fit">
+                        <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full w-fit ${eventBadgeClass}`}>
                           {e.eventType} Contest
                         </span>
                       </div>
@@ -1519,19 +1533,19 @@ export default function Dashboard() {
                         {activeSub ? (
                           <div className="flex gap-1.5 items-center">
                             {hasFinalized ? (
-                              <span className="bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500 border border-emerald-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                              <span className="bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
                                 Finalized
                               </span>
                             ) : hasPaid ? (
-                              <span className="bg-blue-100 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                              <span className="bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
                                 Paid (Uploading)
                               </span>
                             ) : (
-                              <span className="bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-200/40 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
+                              <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase">
                                 Unpaid
                               </span>
                             )}
-                            <span className="text-[10px] font-bold text-slate-400">
+                            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
                               ({activeSub.photographs?.length || 0} / {activeSub.photoLimit} Uploaded)
                             </span>
                           </div>
@@ -1546,7 +1560,7 @@ export default function Dashboard() {
 
                     {/* Accordion Body */}
                     {isExpanded && (
-                      <div className="border-t border-slate-100 dark:border-slate-800 p-6 flex flex-col gap-6 bg-slate-50/20 dark:bg-slate-950/5">
+                      <div className="border-t border-slate-200/60 dark:border-slate-800 p-6 flex flex-col gap-6 bg-white/80 dark:bg-slate-900/80">
                         {loadingEventWorkspace ? (
                           <div className="flex items-center justify-center py-10 gap-2.5">
                             <Camera className="w-5 h-5 text-indigo-600 animate-spin" />
@@ -1965,7 +1979,7 @@ export default function Dashboard() {
                                             <button
                                               onClick={handleFinalSubmit}
                                               disabled={submission.photographs.length !== selectedPackage?.maxPhotos}
-                                              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+                                              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                               Finalize & Lock Entry
                                             </button>
@@ -2245,7 +2259,7 @@ export default function Dashboard() {
                     rows={3}
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 border-slate-800 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 resize-none leading-relaxed font-semibold text-slate-700 dark:text-slate-300 text-xs"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-indigo-500 resize-none leading-relaxed font-semibold text-slate-700 dark:text-slate-300 text-xs"
                   />
                 </div>
 
@@ -2373,7 +2387,7 @@ export default function Dashboard() {
 
       {/* Custom Certificate Preview Alert Modal */}
       {certAlertMsg && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border-2 border-indigo-500/20 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 text-center">
             <div className="flex flex-col gap-2 items-center">
               <div className="p-3 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl mb-2">
@@ -2433,7 +2447,7 @@ export default function Dashboard() {
       )}
       {/* Custom Alert/Confirm Modal Popup Centered on Page */}
       {confirmModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 text-center items-center">
             <div className={`p-3 rounded-2xl ${confirmModal.isAlert ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-500' : 'bg-red-50 dark:bg-red-950/20 text-red-500'}`}>
               <AlertTriangle size={24} />
@@ -2454,7 +2468,7 @@ export default function Dashboard() {
                     if (confirmModal.onConfirm) confirmModal.onConfirm();
                     setConfirmModal(null);
                   }}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer text-xs font-bold"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer text-xs"
                 >
                   OK
                 </button>
@@ -2476,7 +2490,7 @@ export default function Dashboard() {
                       confirmModal.onConfirm();
                       setConfirmModal(null);
                     }}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl shadow-md cursor-pointer text-xs font-bold"
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl shadow-md cursor-pointer text-xs"
                   >
                     Confirm
                   </button>
@@ -2762,7 +2776,7 @@ export default function Dashboard() {
 
                         return (
                           <div key={pIdx} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex flex-col gap-3 shadow-2xs">
-                            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-slate-900 relative">
+                            <div className="aspect-4/3 rounded-xl overflow-hidden bg-slate-900 relative">
                               <img
                                 src={imgUrl}
                                 alt={photo.title || `Photo ${pIdx+1}`}

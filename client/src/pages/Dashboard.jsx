@@ -843,7 +843,7 @@ export default function Dashboard() {
   const isFinalized = !!submission?.isFinalSubmitted || user?.isSuspended;
 
   return (
-    <div className="w-full bg-slate-100/90 dark:bg-slate-950 py-5 transition-colors duration-300">
+    <div className="w-full bg-slate-100/90 dark:bg-slate-950 min-h-screen py-5 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
         
         {/* Dashboard Sub-navigation Tabs */}
@@ -959,7 +959,7 @@ export default function Dashboard() {
 
           {/* 4 Overview Cards Row */}
           {allSubmissions.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
               {/* Card 1: Donut Chart for Submission Status */}
               {(() => {

@@ -2727,7 +2727,7 @@ export default function AdminDashboard() {
                   <textarea
                     value={newEventTheme}
                     onChange={(e) => setNewEventTheme(e.target.value)}
-                    placeholder="e.g. Rain and Shadows - Capture the transition of weather, dark cloud details, reflecting pools, and urban silhouettes during rainfall."
+                    placeholder="The premier national photography competition designed exclusively for DSLR & Mirrorless camera enthusiasts. Show us your vision of nature, wildlife, and landscapes."
                     className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none"
                     required
                   />
@@ -2814,7 +2814,7 @@ export default function AdminDashboard() {
                 <textarea
                   value={newEventDescription}
                   onChange={(e) => setNewEventDescription(e.target.value)}
-                  placeholder="Enter descriptive details for the competition..."
+                  placeholder="The premier national photography competition designed exclusively for DSLR & Mirrorless camera enthusiasts. Show us your vision of nature, wildlife, and landscapes."
                   className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none"
                   required
                 />

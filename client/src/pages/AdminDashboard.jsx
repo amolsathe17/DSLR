@@ -2350,26 +2350,40 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Results Exporter */}
+            {/* Results Exporter - Display only selected event */}
             <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
               <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">Winner Rankings Export</h3>
               <div className="flex flex-col gap-3 mt-4">
-                {events.map(e => (
-                  <div key={e._id} className="flex justify-between items-center p-2 text-xs">
-                    <span className="font-medium truncate max-w-37.5">{e.title}</span>
-                    {e.winnersPublished ? (
-                      <button
-                        onClick={() => handleExportCSV('winners', e._id)}
-                        className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 p-1.5 rounded-lg flex items-center gap-1 font-bold cursor-pointer text-[10px]"
-                      >
-                        <Download size={12} />
-                        Winners CSV
-                      </button>
-                    ) : (
-                      <span className="text-slate-400 italic text-[10px]">Grades Pending</span>
-                    )}
-                  </div>
-                ))}
+                {(() => {
+                  const targetEvent = events.find(e => e._id === selectedEventId) || events[0];
+                  const eventsToDisplay = targetEvent ? [targetEvent] : [];
+
+                  if (eventsToDisplay.length === 0) {
+                    return <p className="text-xs text-slate-400 text-center py-4">No events found.</p>;
+                  }
+
+                  return eventsToDisplay.map(e => (
+                    <div key={e._id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs gap-2">
+                      <div className="flex flex-col text-left overflow-hidden">
+                        <span className="font-bold text-slate-900 dark:text-white truncate">{e.title}</span>
+                        <span className="text-[10px] text-slate-400">{e.eventType || 'Contest'} • {e.status}</span>
+                      </div>
+                      {e.winnersPublished ? (
+                        <button
+                          onClick={() => handleExportCSV('winners', e._id)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl flex items-center gap-1 font-bold cursor-pointer text-xs shadow-xs transition-all shrink-0"
+                        >
+                          <Download size={13} />
+                          Export Winners CSV
+                        </button>
+                      ) : (
+                        <span className="text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 px-2.5 py-1 rounded-xl text-[10px] font-bold shrink-0">
+                          Grades Pending
+                        </span>
+                      )}
+                    </div>
+                  ));
+                })()}
               </div>
             </div>
 

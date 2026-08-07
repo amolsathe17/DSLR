@@ -72,6 +72,8 @@ export default function WatermarkPreview({ src, className = "", enableZoom = fal
       <img 
         src={src} 
         alt="Image Preview" 
+        crossOrigin="anonymous"
+        referrerPolicy="no-referrer"
         style={enableZoom ? zoomStyle : undefined}
         className="w-full h-full object-contain mx-auto" 
       />

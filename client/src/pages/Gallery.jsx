@@ -241,6 +241,8 @@ export default function Gallery() {
                           <img
                             src={getBackendUrl(photo.fileUrl)}
                             alt={photo.title}
+                            crossOrigin="anonymous"
+                            referrerPolicy="no-referrer"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
@@ -369,6 +371,8 @@ export default function Gallery() {
                             <img
                               src={getBackendUrl(photo.fileUrl)}
                               alt={photo.title}
+                              crossOrigin="anonymous"
+                              referrerPolicy="no-referrer"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
                             />
                           ) : (
@@ -477,6 +481,8 @@ export default function Gallery() {
                           <img
                             src={getBackendUrl(w.fileUrl || photographs.find(p => p.photoId === w.photoId || p.photoId === w.photographId)?.fileUrl)}
                             alt={w.photoTitle}
+                            crossOrigin="anonymous"
+                            referrerPolicy="no-referrer"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
@@ -515,7 +521,7 @@ export default function Gallery() {
                             <div>
                               <p className="font-bold text-slate-400 uppercase text-[9px] tracking-wider">Reward & Accolades</p>
                               <p className="mt-0.5 text-indigo-600 dark:text-indigo-400 font-bold">{w.prizeAmount || (isFirst ? '₹50,000' : isSecond ? '₹30,000' : '₹20,000')} Cash</p>
-                              <p className="text-[10px] text-slate-450 mt-0.5">Includes Winner Trophy & Certificate</p>
+                              <p className="text-[10px] text-slate-455 mt-0.5">Includes Winner Trophy & Certificate</p>
                             </div>
                           </div>
                         </div>
@@ -528,6 +534,8 @@ export default function Gallery() {
                           <img
                             src={certImgSrc}
                             alt="Certificate Preview"
+                            crossOrigin="anonymous"
+                            referrerPolicy="no-referrer"
                             className="w-full h-full object-cover filter blur-[0.3px] pointer-events-none select-none"
                             onError={(e) => {
                               e.target.onerror = null;

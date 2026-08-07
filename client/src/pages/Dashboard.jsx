@@ -1635,34 +1635,45 @@ export default function Dashboard() {
                                 <form onSubmit={handleStartSubmission} className="flex flex-col gap-6">
                                   {/* Packages Selector */}
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    {e.packages.map((pkg) => (
-                                      <label
-                                        key={pkg.id}
-                                        onClick={() => setSelectedPkgId(pkg.id)}
-                                        className={`glass-panel border-2 rounded-2xl p-5 flex flex-col gap-3 text-center cursor-pointer transition-all ${
-                                          selectedPkgId === pkg.id
-                                            ? "border-indigo-600 ring-2 ring-indigo-600/20"
-                                            : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                                        }`}
-                                      >
-                                        <input
-                                          type="radio"
-                                          name="packageSelect"
-                                          checked={selectedPkgId === pkg.id}
-                                          onChange={() => setSelectedPkgId(pkg.id)}
-                                          className="sr-only"
-                                        />
-                                        <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedPkgId === pkg.id ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400"}`}>
-                                          {pkg.name}
-                                        </span>
-                                        <span className="font-display font-extrabold text-2xl text-slate-900 dark:text-white">
-                                          ₹{pkg.price}
-                                        </span>
-                                        <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                                          Max Uploads: {pkg.maxPhotos} {e.eventType === 'Photography' ? 'Photo' : 'Artwork'}{pkg.maxPhotos > 1 ? "s" : ""}
-                                        </span>
-                                      </label>
-                                    ))}
+                                    {e.packages.map((pkg) => {
+                                      const isSelected = selectedPkgId === pkg.id;
+                                      return (
+                                        <label
+                                          key={pkg.id}
+                                          onClick={() => setSelectedPkgId(pkg.id)}
+                                          className={`border-2 rounded-3xl p-6 flex flex-col gap-3 text-center cursor-pointer transition-all duration-200 ${
+                                            isSelected
+                                              ? "bg-gradient-to-b from-indigo-50/90 to-purple-50/90 dark:from-indigo-950/60 dark:to-purple-950/60 border-indigo-600 dark:border-indigo-500 ring-4 ring-indigo-600/20 shadow-md scale-[1.02]"
+                                              : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 opacity-90 hover:opacity-100"
+                                          }`}
+                                        >
+                                          <input
+                                            type="radio"
+                                            name="packageSelect"
+                                            checked={isSelected}
+                                            onChange={() => setSelectedPkgId(pkg.id)}
+                                            className="sr-only"
+                                          />
+                                          <span className={`text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full w-fit mx-auto transition-all ${
+                                            isSelected
+                                              ? "text-indigo-700 dark:text-indigo-300 bg-indigo-100/90 dark:bg-indigo-900/60 shadow-2xs"
+                                              : "text-slate-400 bg-slate-100/60 dark:bg-slate-800/40"
+                                          }`}>
+                                            {pkg.name}
+                                          </span>
+                                          <span className={`font-display font-black text-3xl transition-colors ${
+                                            isSelected ? "text-indigo-950 dark:text-white" : "text-slate-900 dark:text-white"
+                                          }`}>
+                                            ₹{pkg.price}
+                                          </span>
+                                          <span className={`text-[11px] font-extrabold transition-colors ${
+                                            isSelected ? "text-indigo-700 dark:text-indigo-300" : "text-slate-500 dark:text-slate-400"
+                                          }`}>
+                                            Max Uploads: {pkg.maxPhotos} {e.eventType === 'Photography' ? 'Photo' : 'Artwork'}{pkg.maxPhotos > 1 ? "s" : ""}
+                                          </span>
+                                        </label>
+                                      );
+                                    })}
                                   </div>
 
                                   {/* DSLR eligibility declaration */}

@@ -942,11 +942,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* SVG Charts Row */}
+          {/* 4 Overview Cards Row */}
           {allSubmissions.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
               
-              {/* Chart 1: Donut Chart for Submission Status */}
+              {/* Card 1: Donut Chart for Submission Status */}
               {(() => {
                 const photosList = allSubmissions.reduce((acc, s) => [...acc, ...(s.photographs || [])], []);
                 const totalPhotos = photosList.length;
@@ -1015,7 +1015,7 @@ export default function Dashboard() {
                 );
               })()}
 
-              {/* Chart 2: Donut Chart for Category Distribution */}
+              {/* Card 2: Donut Chart for Category Distribution */}
               {(() => {
                 const photosList = allSubmissions.reduce((acc, s) => [...acc, ...(s.photographs || [])], []);
                 const totalPhotos = photosList.length;
@@ -1092,37 +1092,28 @@ export default function Dashboard() {
                 );
               })()}
 
-            </div>
-          )}
-
-          {/* History Timeline & Refund details side by side */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            {/* Left side: Timeline */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-5 shadow-sm">
-              <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Activities History Timeline</h3>
-              
+              {/* Card 3: Activities History Timeline */}
               {(() => {
                 const timelineEvents = [];
                 allSubmissions.forEach(sub => {
                   timelineEvents.push({
-                    title: `Joined event: ${sub.eventTitle}`,
-                    desc: `Created entry folder under entry number ${sub.entryNumber}. Package: ${sub.photoLimit} photos.`,
+                    title: `Joined: ${sub.eventTitle}`,
+                    desc: `Entry #${sub.entryNumber} (${sub.photoLimit} photos limit).`,
                     date: new Date(sub.createdAt),
                     type: 'joined'
                   });
 
                   if (sub.paymentStatus === 'Paid') {
                     timelineEvents.push({
-                      title: `Payment Succeeded`,
-                      desc: `Paid INR ${sub.amount} for package ${sub.photoLimit} slots. Transaction reference ID attached.`,
+                      title: `Payment Received`,
+                      desc: `Paid INR ${sub.amount} for package slots.`,
                       date: new Date(sub.updatedAt),
                       type: 'payment'
                     });
                   } else if (sub.paymentStatus === 'Refunded') {
                     timelineEvents.push({
                       title: `Payment Refunded`,
-                      desc: `Refund of INR ${sub.amount} credited back to bank account by admin.`,
+                      desc: `INR ${sub.amount} refunded by admin.`,
                       date: new Date(sub.updatedAt),
                       type: 'refund'
                     });
@@ -1130,8 +1121,8 @@ export default function Dashboard() {
 
                   if (sub.isFinalSubmitted) {
                     timelineEvents.push({
-                      title: `Entries Locked (Final Submit)`,
-                      desc: `Finalized all uploaded frames for jury evaluation for ${sub.eventTitle}.`,
+                      title: `Final Submission`,
+                      desc: `Finalized frames for jury evaluation.`,
                       date: new Date(sub.updatedAt),
                       type: 'locked'
                     });
@@ -1139,81 +1130,110 @@ export default function Dashboard() {
 
                   (sub.photographs || []).forEach(photo => {
                     timelineEvents.push({
-                      title: `Uploaded photo: "${photo.title}"`,
-                      desc: `Exif verified (${photo.cameraBrand || 'N/A'} ${photo.cameraModel || 'N/A'}). Status: ${photo.status}.`,
+                      title: `Uploaded: "${photo.title}"`,
+                      desc: `EXIF verified (${photo.cameraBrand || 'Camera'}).`,
                       date: new Date(photo.dateCaptured || sub.createdAt),
                       type: 'photo'
                     });
                   });
                 });
 
-                // Sort timeline events
                 timelineEvents.sort((a, b) => b.date - a.date);
 
-                if (timelineEvents.length === 0) {
-                  return <p className="text-xs text-slate-400 py-6">No historical timeline activities yet.</p>;
-                }
-
                 return (
-                  <div className="flex flex-col gap-6 pl-4 border-l border-slate-100 dark:border-slate-800 max-h-80 overflow-y-auto pr-2">
-                    {timelineEvents.slice(0, 8).map((evt, idx) => (
-                      <div key={idx} className="relative flex flex-col gap-1 text-xs">
-                        {/* Circle dot marker */}
-                        <span className="absolute -left-5.5 top-1 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-500" />
-                        <span className="text-[10px] text-slate-400 font-semibold">
-                          {evt.date.toLocaleDateString()} {evt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        <h4 className="font-extrabold text-slate-900 dark:text-white leading-none">{evt.title}</h4>
-                        <p className="text-slate-500 text-[11px] leading-relaxed mt-0.5">{evt.desc}</p>
-                      </div>
-                    ))}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-7 text-left flex flex-col justify-between gap-5 shadow-xs">
+                    <div>
+                      <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">
+                        Activities History Timeline
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                        Recent account actions & contest activity log
+                      </p>
+                    </div>
+
+                    <div className="w-full my-1">
+                      {timelineEvents.length === 0 ? (
+                        <div className="h-52 sm:h-56 flex items-center justify-center text-xs text-slate-400">
+                          No timeline activities logged yet.
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-3.5 pl-3.5 border-l-2 border-indigo-100 dark:border-indigo-950/60 h-52 sm:h-56 overflow-y-auto pr-1 text-xs">
+                          {timelineEvents.slice(0, 8).map((evt, idx) => (
+                            <div key={idx} className="relative flex flex-col gap-0.5">
+                              <span className="absolute -left-[19px] top-1.5 w-2 h-2 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-600" />
+                              <span className="text-[10px] text-slate-400 font-semibold">
+                                {evt.date.toLocaleDateString()} {evt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              <h4 className="font-bold text-slate-900 dark:text-white leading-tight truncate">{evt.title}</h4>
+                              <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-snug line-clamp-2">{evt.desc}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      Total events: <strong className="text-slate-900 dark:text-white">{timelineEvents.length}</strong>
+                    </div>
                   </div>
                 );
               })()}
-            </div>
 
-            {/* Right side: Refund status tracking */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-left flex flex-col gap-4 shadow-sm">
-              <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Refund Status Tracking</h3>
+              {/* Card 4: Refund Status Tracking */}
               {(() => {
                 const refundedSubs = allSubmissions.filter(s => s.paymentStatus === 'Refunded' || s.paymentStatus === 'Withdrawn');
-                if (refundedSubs.length === 0) {
-                  return (
-                    <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs min-h-55">
-                      <span>No refunded or withdrawn entry packages.</span>
-                    </div>
-                  );
-                }
-
                 return (
-                  <div className="flex flex-col gap-3 overflow-y-auto max-h-80 pr-2">
-                    {refundedSubs.map((sub, idx) => (
-                      <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl flex flex-col gap-2 text-xs">
-                        <div className="flex justify-between items-center">
-                          <span className="font-extrabold text-slate-900 dark:text-white">{sub.eventTitle}</span>
-                          <span className={`px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full ${
-                            sub.paymentStatus === 'Refunded' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-550'
-                          }`}>
-                            {sub.paymentStatus === 'Refunded' ? 'Refunded' : 'Refund Pending'}
-                          </span>
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-7 text-left flex flex-col justify-between gap-5 shadow-xs">
+                    <div>
+                      <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">
+                        Refund Status Tracking
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                        Status of fee refunds & entry withdrawals
+                      </p>
+                    </div>
+
+                    <div className="w-full my-1">
+                      {refundedSubs.length === 0 ? (
+                        <div className="h-52 sm:h-56 flex flex-col items-center justify-center p-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 text-xs text-center">
+                          <span>No refunded or withdrawn entry packages.</span>
                         </div>
-                        <div className="flex justify-between text-[11px] text-slate-400">
-                          <span>Entry ID: {sub.entryNumber}</span>
-                          <span>Amount: <strong className="text-indigo-600 dark:text-indigo-400">INR {sub.amount}</strong></span>
+                      ) : (
+                        <div className="flex flex-col gap-3 h-52 sm:h-56 overflow-y-auto pr-1">
+                          {refundedSubs.map((sub, idx) => (
+                            <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-2xl flex flex-col gap-1.5 text-xs">
+                              <div className="flex justify-between items-center">
+                                <span className="font-extrabold text-slate-900 dark:text-white truncate max-w-[120px]">{sub.eventTitle}</span>
+                                <span className={`px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full ${
+                                  sub.paymentStatus === 'Refunded' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                                }`}>
+                                  {sub.paymentStatus === 'Refunded' ? 'Refunded' : 'Pending'}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                                <span>ID: #{sub.entryNumber}</span>
+                                <span className="font-bold text-indigo-600 dark:text-indigo-400">INR {sub.amount}</span>
+                              </div>
+                              <p className="text-[10px] text-slate-400 italic line-clamp-2">
+                                {sub.paymentStatus === 'Refunded'
+                                  ? 'Registration fees reverted back to bank account.'
+                                  : 'Withdrawal request registered; pending admin approval.'}
+                              </p>
+                            </div>
+                          ))}
                         </div>
-                        <div className="text-[10px] text-slate-400 italic mt-0.5">
-                          {sub.paymentStatus === 'Refunded'
-                            ? 'Status: The registration fees have been reverted. Photo upload limits reset to unpaid.'
-                            : 'Status: Submission has been withdrawn. Fee refund request is registered and pending admin review.'}
-                        </div>
-                      </div>
-                    ))}
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      Refunded / Withdrawn: <strong className="text-slate-900 dark:text-white">{refundedSubs.length}</strong>
+                    </div>
                   </div>
                 );
               })()}
-            </div>
 
-          </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -2520,9 +2520,8 @@ export default function Dashboard() {
 
         return (
           <div className="animate-in fade-in duration-200 flex flex-col gap-6">
-            
             {/* Header & Event Selector ("My Event History & Details" card) */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex flex-col gap-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
               <div className="flex items-center gap-3.5">
                 <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-2xl shrink-0">
                   <History size={24} />
@@ -2534,14 +2533,14 @@ export default function Dashboard() {
               </div>
 
               {myEnrolledEvents.length > 0 && (
-                <div className="w-full md:w-auto shrink-0">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <div className="w-full pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
                     Select Enrolled Event ({myEnrolledEvents.length})
                   </label>
                   <select
                     value={selectedHistoryEvent?._id || ''}
                     onChange={(e) => setHistorySelectedEventId(e.target.value)}
-                    className="w-full md:w-80 px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-indigo-200 dark:border-indigo-900/50 rounded-2xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-indigo-200 dark:border-indigo-900/50 rounded-2xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
                   >
                     {myEnrolledEvents.map(ev => (
                       <option key={ev._id} value={ev._id}>
@@ -2818,7 +2817,7 @@ export default function Dashboard() {
                     Event Information & History Log
                   </h4>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                     <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Key Event Dates</span>
                       <p className="text-slate-700 dark:text-slate-300">
@@ -2849,35 +2848,42 @@ export default function Dashboard() {
                         <strong>Selected Entry Package:</strong> {selectedHistorySub?.packageName || 'Standard Entry'} (₹{selectedHistorySub?.totalAmount || '200'})
                       </p>
                     </div>
-                  </div>
 
-                  {/* History Timeline */}
-                  <div className="mt-2 border-t border-slate-100 dark:border-slate-800 pt-4">
-                    <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block mb-3">Activity History Timeline</span>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-3 text-xs">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">Event Enrollment:</span>
-                        <span className="text-slate-400">Successfully enrolled in contest ({selectedHistorySub?.createdAt ? new Date(selectedHistorySub.createdAt).toLocaleDateString() : 'Completed'})</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs">
-                        <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">Payment Processed:</span>
-                        <span className="text-slate-400">Payment status {selectedHistorySub?.paymentStatus || 'Paid'} (₹{selectedHistorySub?.totalAmount || '200'})</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">Photo Uploads:</span>
-                        <span className="text-slate-400">{uploadedPhotos.length} photograph(s) submitted to entry folder</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs">
-                        <div className={`w-2 h-2 rounded-full ${selectedHistoryEvent?.winnersPublished ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">Results & Certification:</span>
-                        <span className="text-slate-400">{selectedHistoryEvent?.winnersPublished ? 'Winners & certificates published' : 'Awaiting judging completion'}</span>
+                    {/* Activity History Timeline placed beside right side of Contest Location & Details */}
+                    <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2.5">
+                      <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Activity History Timeline</span>
+                      <div className="flex flex-col gap-2.5 max-h-48 overflow-y-auto pr-1">
+                        <div className="flex items-start gap-2.5 text-xs">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 shrink-0"></div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">Event Enrollment:</span>
+                            <span className="text-slate-400 text-[11px]">Enrolled in contest ({selectedHistorySub?.createdAt ? new Date(selectedHistorySub.createdAt).toLocaleDateString() : 'Completed'})</span>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2.5 text-xs">
+                          <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 shrink-0"></div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">Payment Processed:</span>
+                            <span className="text-slate-400 text-[11px]">{selectedHistorySub?.paymentStatus || 'Paid'} (₹{selectedHistorySub?.totalAmount || '200'})</span>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2.5 text-xs">
+                          <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0"></div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">Photo Uploads:</span>
+                            <span className="text-slate-400 text-[11px]">{uploadedPhotos.length} photo(s) submitted</span>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2.5 text-xs">
+                          <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${selectedHistoryEvent?.winnersPublished ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">Results & Certification:</span>
+                            <span className="text-slate-400 text-[11px]">{selectedHistoryEvent?.winnersPublished ? 'Winners & certificates published' : 'Awaiting judging completion'}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-
                 </div>
 
               </div>

@@ -365,7 +365,7 @@ export default function Navbar() {
                   <Link
                     to="/login"
                     state={{ forceContestant: true }}
-                    className="bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-800 dark:bg-sky-950/40 dark:hover:bg-sky-900/60 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/60 font-medium text-sm px-4 py-1.5 rounded-lg shadow-2xs transition-all cursor-pointer"
+                    className="bg-sky-500 hover:bg-sky-600 text-white font-medium text-sm px-4 py-1.5 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer"
                   >
                     Login
                   </Link>

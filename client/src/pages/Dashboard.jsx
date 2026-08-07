@@ -2778,20 +2778,20 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* 3. Uploaded Photographs Section - Light Slate Card */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+                {/* 3. Uploaded Photographs Section - Light Purple Card */}
+                <div className="bg-purple-50/60 dark:bg-purple-950/25 border border-purple-200/60 dark:border-purple-900/40 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
                   <div className="flex justify-between items-center">
                     <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <Camera size={18} className="text-indigo-600" />
+                      <Camera size={18} className="text-purple-600 dark:text-purple-400" />
                       Uploaded Photographs ({uploadedPhotos.length})
                     </h4>
-                    <span className="text-xs text-slate-400 font-medium">
-                      Submission Status: <strong className="text-indigo-600 dark:text-indigo-400">{selectedHistorySub?.isFinalSubmitted ? 'Finalized' : 'Draft'}</strong>
+                    <span className="text-xs text-purple-950/70 dark:text-purple-300 font-semibold">
+                      Submission Status: <strong className="text-purple-700 dark:text-purple-400 font-extrabold">{selectedHistorySub?.isFinalSubmitted ? 'Finalized' : 'Draft'}</strong>
                     </span>
                   </div>
 
                   {uploadedPhotos.length === 0 ? (
-                    <div className="p-8 bg-slate-50 dark:bg-slate-950 rounded-2xl text-center text-slate-400 text-xs">
+                    <div className="p-8 bg-white/70 dark:bg-slate-950/60 rounded-2xl text-center text-slate-500 dark:text-slate-400 text-xs border border-dashed border-purple-200/60 dark:border-purple-900/30">
                       No photographs uploaded for this contest yet.
                     </div>
                   ) : (
@@ -2802,7 +2802,7 @@ export default function Dashboard() {
                         const finalScore = typeof photo.score === 'number' ? photo.score : (photo.scores?.[0]?.score || 'N/A');
 
                         return (
-                          <div key={pIdx} className="bg-slate-50/80 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-3.5 flex flex-col gap-3 shadow-2xs">
+                          <div key={pIdx} className="bg-white/90 dark:bg-slate-950 border border-purple-100 dark:border-purple-900/40 rounded-2xl p-3.5 flex flex-col gap-3 shadow-2xs">
                             <div className="aspect-4/3 rounded-xl overflow-hidden bg-slate-900 relative">
                               <img
                                 src={imgUrl}
@@ -2825,9 +2825,9 @@ export default function Dashboard() {
                               )}
                             </div>
 
-                            <div className="flex justify-between items-center pt-2 border-t border-slate-200/60 dark:border-slate-800 text-[10px]">
+                            <div className="flex justify-between items-center pt-2 border-t border-purple-100 dark:border-purple-950 text-[10px]">
                               <span className="text-slate-400 font-medium">Jury Rating:</span>
-                              <span className="font-black text-indigo-600 dark:text-indigo-400">
+                              <span className="font-black text-purple-600 dark:text-purple-400">
                                 {hasScore ? `${finalScore}/10` : 'Pending Grade'}
                               </span>
                             </div>

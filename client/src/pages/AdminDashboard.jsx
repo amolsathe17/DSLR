@@ -1772,9 +1772,7 @@ export default function AdminDashboard() {
             { id: 'judges', label: 'Judges & Results', icon: Award },
             { id: 'events', label: 'Contests & Configuration', icon: Calendar },
             { id: 'categories_config', label: 'Categories', icon: Layers },
-            { id: 'event_history', label: 'Event History', icon: History },
-            { id: 'profile_settings', label: 'Profile Settings', icon: User },
-            { id: 'notifications', label: 'Notifications', icon: Bell }
+            { id: 'event_history', label: 'Event History', icon: History }
           ].map(t => (
             <button
               key={t.id}
@@ -4125,7 +4123,7 @@ export default function AdminDashboard() {
 
       {/* TAB 7: PROFILE SETTINGS */}
       {activeTab === 'profile_settings' && (
-        <div className="max-w-2xl mx-auto animate-in fade-in duration-200 text-left">
+        <div className="max-7xl mx-auto animate-in fade-in duration-200 text-left">
           <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
             <div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">Profile Settings</h3>
@@ -4219,7 +4217,7 @@ export default function AdminDashboard() {
 
       {/* TAB 8: NOTIFICATIONS */}
       {activeTab === 'notifications' && (
-        <div className="max-w-3xl mx-auto animate-in fade-in duration-200 text-left">
+        <div className="max-7xl mx-auto animate-in fade-in duration-200 text-left">
           <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
             <div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">

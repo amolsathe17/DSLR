@@ -218,7 +218,7 @@ function ActiveEventDetailCard({ event, onEnroll }) {
 
       {/* Coloured header — uniform height */}
       <div
-        className={`relative bg-linear-to-br ${colors.header} px-6 pt-6 pb-5 text-white flex flex-col justify-between min-h-[180px]`}
+        className={`relative bg-linear-to-br ${colors.header} px-6 pt-6 pb-5 text-white flex flex-col justify-between min-h-45`}
       >
         <div>
           <div className="flex items-start justify-between mb-3">
@@ -470,7 +470,7 @@ function UpcomingEventCard({ event, onEnroll }) {
       />
 
       <div
-        className={`relative bg-linear-to-br ${colors.header} px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-[165px]`}
+        className={`relative bg-linear-to-br ${colors.header} px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-41.25`}
       >
         <div>
           <div className="flex items-start justify-between mb-3">
@@ -588,7 +588,7 @@ function ClosedEventCard({ event }) {
   return (
     <div className="group relative flex flex-col rounded-3xl overflow-hidden border border-slate-200/60 bg-white shadow-sm hover:shadow-md transition-all duration-300">
       <div className="absolute inset-0 bg-slate-50/40 pointer-events-none rounded-3xl" />
-      <div className="relative bg-linear-to-br from-slate-500 to-slate-700 px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-[165px]">
+      <div className="relative bg-linear-to-br from-slate-500 to-slate-700 px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-41.25">
         <div>
           <div className="flex items-start justify-between mb-3">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
@@ -1111,7 +1111,7 @@ export default function EventInfo() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
                 {upcomingEvents.map((event) => (
                   <UpcomingEventCard
                     key={event._id}

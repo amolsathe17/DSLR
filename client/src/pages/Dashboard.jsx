@@ -3,6 +3,28 @@ import { useAuth } from "../context/AuthContext";
 import { useEvent } from "../context/EventContext";
 import ExifReader from "exifreader";
 import confetti from "canvas-confetti";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+
+const CustomPieTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    const total = data.payload.total || 1;
+    const count = data.value;
+    const pct = Math.round((count / total) * 100);
+    return (
+      <div className="bg-slate-900/95 dark:bg-slate-900 text-white border border-slate-700/80 px-3 py-2 rounded-xl shadow-2xl text-xs backdrop-blur-md z-50 pointer-events-none">
+        <div className="flex items-center gap-2 font-bold">
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: data.payload.fill || data.color || '#6366f1' }} />
+          <span>{data.name}</span>
+        </div>
+        <div className="mt-1 text-[11px] text-slate-300 font-semibold pl-4">
+          <span className="text-white font-extrabold">{count}</span> {count === 1 ? 'photo' : 'photos'} ({pct}%)
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 import {
   Camera,
   CheckCircle,
@@ -888,7 +910,7 @@ export default function Dashboard() {
           </div>
 
           {/* Stats Widgets */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-sm">
               <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Registered Contests</span>
               <h3 className="font-display font-extrabold text-2xl text-indigo-600 dark:text-indigo-400">{allSubmissions.length}</h3>

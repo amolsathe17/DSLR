@@ -2618,505 +2618,528 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* TAB 5: CONTESTS AND CONFIGURATIONS */}
+      {/* TAB 5: CONTESTS AND CONFIGURATIONS - 6 CARDS STRUCTURE */}
       {activeTab === 'events' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-200">
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           
-          {/* Left Column: Create new contest & details list */}
-          <div className="lg:col-span-12 flex flex-col gap-6">
+          <form onSubmit={handleCreateEvent} className="flex flex-col gap-6">
             
-            {/* Create Contest Form */}
-            <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            {/* CARD 1: Setup New Contest (Saved as Draft) */}
+            <div className="bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
               <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">
                 Setup New Contest (Saved as Draft)
               </h3>
               
-              <form onSubmit={handleCreateEvent} className="flex flex-col gap-4 mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Contest Type</label>
-                    <select
-                      value={eventType}
-                      onChange={(e) => setEventType(e.target.value)}
-                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
-                      required
-                    >
-                      <option value="" disabled>Select Contest Type</option>
-                      {contestTypes.map(ct => (
-                        <option key={ct._id} value={ct.name}>{ct.name}</option>
-                      ))}
-                    </select>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-slate-500 font-semibold">Contest Type</label>
+                  <select
+                    value={eventType}
+                    onChange={(e) => setEventType(e.target.value)}
+                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold cursor-pointer"
+                    required
+                  >
+                    <option value="" disabled>Select Contest Type</option>
+                    {contestTypes.map(ct => (
+                      <option key={ct._id} value={ct.name}>{ct.name}</option>
+                    ))}
+                  </select>
+                </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Event Image (Login & Register Background)</label>
-                    <div className="flex items-center gap-2">
-                      <label className="flex-1 flex items-center justify-center px-3 py-2 bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
-                        <span className="text-[11px] text-slate-500 truncate">
-                          {uploadingBg ? 'Uploading...' : loginBgUrl ? 'Event Image Uploaded ✓' : 'Upload Event Image (PNG/JPG)'}
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-slate-500 font-semibold">Event Image (Login & Register Background)</label>
+                  <div className="flex items-center gap-2">
+                    <label className="flex-1 flex items-center justify-center px-3 py-2 bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
+                      <span className="text-[11px] text-slate-500 truncate">
+                        {uploadingBg ? 'Uploading...' : loginBgUrl ? 'Event Image Uploaded ✓' : 'Upload Event Image (PNG/JPG)'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLoginBgUpload}
+                        className="hidden"
+                        disabled={uploadingBg}
+                      />
+                    </label>
+                    {loginBgUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setLoginBgUrl('')}
+                        className="text-[10px] text-red-500 hover:underline cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Category Assignment Checkboxes */}
+              <div className="flex flex-col gap-2 bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-800/80 p-4 rounded-2xl text-left mt-1">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs text-slate-700 dark:text-slate-300 font-bold">
+                    Assign Categories to this Contest Type <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    ({selectedEventCategories.length} selected - mandatory)
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                  {categories.filter(c => c.contestTypes && c.contestTypes.includes(eventType)).map(cat => (
+                    <label key={cat._id} className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={selectedEventCategories.includes(cat.name)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedEventCategories([...selectedEventCategories, cat.name]);
+                          } else {
+                            setSelectedEventCategories(selectedEventCategories.filter(name => name !== cat.name));
+                          }
+                        }}
+                        className="w-4 h-4 text-indigo-600 rounded border-slate-350 dark:border-slate-800 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      {cat.name}
+                    </label>
+                  ))}
+                  {categories.filter(c => c.contestTypes && c.contestTypes.includes(eventType)).length === 0 && (
+                    <p className="text-xs text-amber-600 italic col-span-4 text-left">
+                      No categories are currently assigned to "{eventType}". Please assign/create categories for this type in the "Categories" tab first.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-slate-500 font-semibold">Contest Title</label>
+                  <input
+                    type="text"
+                    value={newEventTitle}
+                    onChange={(e) => setNewEventTitle(e.target.value)}
+                    placeholder="e.g. Monsoon Magic 2026"
+                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-slate-500 font-semibold">Theme & Description (Text relevant to the contest/event)</label>
+                  <textarea
+                    value={newEventTheme}
+                    onChange={(e) => setNewEventTheme(e.target.value)}
+                    placeholder="e.g. Rain and Shadows - Capture the transition of weather, dark cloud details, reflecting pools, and urban silhouettes during rainfall."
+                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-slate-500 font-semibold">
+                    Event Start Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={newEventStartDate}
+                    onChange={(e) => setNewEventStartDate(e.target.value)}
+                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-slate-500 font-semibold">
+                    Submission Deadline <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    min={newEventStartDate || new Date().toISOString().split('T')[0]}
+                    value={newEventDeadline}
+                    onChange={(e) => setNewEventDeadline(e.target.value)}
+                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-slate-500 font-semibold">Exhibition Venue</label>
+                  <input
+                    type="text"
+                    value={newEventVenue}
+                    onChange={(e) => setNewEventVenue(e.target.value)}
+                    placeholder="e.g. Bal-Gandharv Art Gallery Pune"
+                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-150 dark:border-slate-850 flex flex-col gap-3">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hasExhibition}
+                    onChange={(e) => setHasExhibition(e.target.checked)}
+                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                  />
+                  <span>Organizing physical exhibition at this venue?</span>
+                </label>
+                
+                {hasExhibition && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-semibold">Exhibition Start Date (Optional)</label>
+                      <input
+                        type="date"
+                        value={exhibitionFromDate}
+                        onChange={(e) => setExhibitionFromDate(e.target.value)}
+                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-semibold">Exhibition End Date (Optional)</label>
+                      <input
+                        type="date"
+                        value={exhibitionToDate}
+                        onChange={(e) => setExhibitionToDate(e.target.value)}
+                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-slate-500 font-semibold">Contest Description</label>
+                <textarea
+                  value={newEventDescription}
+                  onChange={(e) => setNewEventDescription(e.target.value)}
+                  placeholder="Enter descriptive details for the competition..."
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* CARD 2: Rewards & Prize Valuation */}
+            <div className="bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">
+                Rewards & Prize Valuation
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Side: Rewards */}
+                <div className="flex flex-col gap-2">
+                  <h4 className="font-display font-semibold text-slate-700 dark:text-slate-300 text-xs">Prizes Breakdown</h4>
+                  <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-3.5 flex-1">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-semibold">1st Prize Reward</label>
+                      <input
+                        type="text"
+                        value={prize1Reward}
+                        onChange={(e) => setPrize1Reward(e.target.value)}
+                        placeholder="e.g. ₹25,000 + Gold Trophy + Winner Certificate"
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-semibold">2nd Prize Reward</label>
+                      <input
+                        type="text"
+                        value={prize2Reward}
+                        onChange={(e) => setPrize2Reward(e.target.value)}
+                        placeholder="e.g. ₹15,000 + Silver Trophy + Winner Certificate"
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-slate-400 font-semibold">3rd Prize Reward</label>
+                      <input
+                        type="text"
+                        value={prize3Reward}
+                        onChange={(e) => setPrize3Reward(e.target.value)}
+                        placeholder="e.g. ₹10,000 + Bronze Trophy + Winner Certificate"
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side: Packages */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center h-4.5">
+                    <h4 className="font-display font-semibold text-slate-700 dark:text-slate-300 text-xs">Package Entry Fees (INR)</h4>
+                    <button
+                      type="button"
+                      onClick={() => setNewEventPackages([...newEventPackages, { name: '', price: 0, maxPhotos: 1 }])}
+                      className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
+                    >
+                      + Add Package
+                    </button>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
+                    {newEventPackages.map((pkg, idx) => (
+                      <div key={idx} className={`flex flex-row gap-1.5 sm:gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
+                        <div className="flex-1 min-w-0 flex flex-col gap-1">
+                          <label className="text-[10px] text-slate-400 font-semibold truncate">Package Name</label>
+                          <input
+                            type="text"
+                            value={pkg.name}
+                            onChange={(e) => {
+                              const updated = [...newEventPackages];
+                              updated[idx].name = e.target.value;
+                              setNewEventPackages(updated);
+                            }}
+                            placeholder="e.g. Starter"
+                            className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="w-14 sm:w-24 flex flex-col gap-1 shrink-0">
+                          <label className="text-[10px] text-slate-400 font-semibold truncate">Price <span className="hidden sm:inline">(₹)</span></label>
+                          <input
+                            type="number"
+                            value={pkg.price || ''}
+                            onChange={(e) => {
+                              const updated = [...newEventPackages];
+                              updated[idx].price = Number(e.target.value);
+                              setNewEventPackages(updated);
+                            }}
+                            placeholder="Price"
+                            className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+
+                        <div className="w-12 sm:w-20 flex flex-col gap-1 shrink-0">
+                          <label className="text-[10px] text-slate-400 font-semibold truncate">Max <span className="hidden sm:inline">Uploads</span></label>
+                          <input
+                            type="number"
+                            value={pkg.maxPhotos || ''}
+                            onChange={(e) => {
+                              const updated = [...newEventPackages];
+                              updated[idx].maxPhotos = Number(e.target.value);
+                              setNewEventPackages(updated);
+                            }}
+                            placeholder="Max"
+                            className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+                            required
+                          />
+                        </div>
+
+                        {newEventPackages.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = newEventPackages.filter((_, pIdx) => pIdx !== idx);
+                              setNewEventPackages(updated);
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors mb-0.5"
+                            data-tooltip="Remove Package"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 3: Event Certificate Templates (Linked to this Event) */}
+            <div className="bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+              <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <Award className="text-amber-500" size={18} />
+                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">
+                  Event Certificate Templates (Linked to this Event)
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Upload separate certificate images for 1st Prize, 2nd Prize, 3rd Prize, and Participation. These templates will be assigned only to participants of this event.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-1">
+                {[
+                  { key: 'firstPrize', label: '1st Prize Certificate' },
+                  { key: 'secondPrize', label: '2nd Prize Certificate' },
+                  { key: 'thirdPrize', label: '3rd Prize Certificate' },
+                  { key: 'participation', label: 'Participation Certificate' }
+                ].map(({ key, label }) => {
+                  const certs = newEventCertificates;
+                  const uploading = uploadingCert[key];
+                  const certUrl = certs[key];
+
+                  return (
+                    <div key={key} className="flex flex-col gap-2 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{label}</label>
+                      <label className="flex flex-col items-center justify-center px-2 py-3 bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
+                        <span className="text-[11px] font-semibold text-slate-500 truncate text-center">
+                          {uploading ? 'Uploading...' : certUrl ? 'Template Uploaded ✓' : 'Choose Image'}
                         </span>
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={handleLoginBgUpload}
+                          onChange={(e) => e.target.files?.[0] && handleCertificateFileUpload(key, e.target.files[0], false)}
                           className="hidden"
-                          disabled={uploadingBg}
+                          disabled={uploading}
                         />
                       </label>
-                      {loginBgUrl && (
-                        <button
-                          type="button"
-                          onClick={() => setLoginBgUrl('')}
-                          className="text-[10px] text-red-500 hover:underline cursor-pointer"
-                        >
-                          Clear
-                        </button>
+                      {certUrl && (
+                        <div className="flex items-center justify-between text-[10px] mt-1">
+                          <span className="text-emerald-600 font-bold truncate">Uploaded ✓</span>
+                          <button
+                            type="button"
+                            onClick={() => setNewEventCertificates(prev => ({ ...prev, [key]: '' }))}
+                            className="text-red-500 hover:underline font-bold cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       )}
                     </div>
-                  </div>
-                </div>
-
-                {/* Category Assignment Checkboxes */}
-                <div className="flex flex-col gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800/80 p-4 rounded-2xl text-left mt-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs text-slate-700 dark:text-slate-350 font-bold">
-                      Assign Categories to this Contest Type <span className="text-red-500">*</span>
-                    </label>
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      ({selectedEventCategories.length} selected - mandatory)
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
-                    {categories.filter(c => c.contestTypes && c.contestTypes.includes(eventType)).map(cat => (
-                      <label key={cat._id} className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={selectedEventCategories.includes(cat.name)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedEventCategories([...selectedEventCategories, cat.name]);
-                            } else {
-                              setSelectedEventCategories(selectedEventCategories.filter(name => name !== cat.name));
-                            }
-                          }}
-                          className="w-4 h-4 text-indigo-600 rounded border-slate-350 dark:border-slate-800 focus:ring-indigo-500 cursor-pointer"
-                        />
-                        {cat.name}
-                      </label>
-                    ))}
-                    {categories.filter(c => c.contestTypes && c.contestTypes.includes(eventType)).length === 0 && (
-                      <p className="text-xs text-amber-600 italic col-span-4 text-left">
-                        No categories are currently assigned to "{eventType}". Please assign/create categories for this type in the "Categories" tab first.
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Contest Title</label>
-                    <input
-                      type="text"
-                      value={newEventTitle}
-                      onChange={(e) => setNewEventTitle(e.target.value)}
-                      placeholder="e.g. Monsoon Magic 2026"
-                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Theme & Description (Text relevant to the contest/event)</label>
-                    <textarea
-                      value={newEventTheme}
-                      onChange={(e) => setNewEventTheme(e.target.value)}
-                      placeholder="e.g. Rain and Shadows - Capture the transition of weather, dark cloud details, reflecting pools, and urban silhouettes during rainfall."
-                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-20 resize-none"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">
-                      Event Start Date <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      min={new Date().toISOString().split('T')[0]}
-                      value={newEventStartDate}
-                      onChange={(e) => setNewEventStartDate(e.target.value)}
-                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">
-                      Submission Deadline <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      min={newEventStartDate || new Date().toISOString().split('T')[0]}
-                      value={newEventDeadline}
-                      onChange={(e) => setNewEventDeadline(e.target.value)}
-                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-semibold">Exhibition Venue</label>
-                    <input
-                      type="text"
-                      value={newEventVenue}
-                      onChange={(e) => setNewEventVenue(e.target.value)}
-                      placeholder="e.g. Bal-Gandharv Art Gallery Pune"
-                      className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-150 dark:border-slate-850 flex flex-col gap-3">
-                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-350 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={hasExhibition}
-                      onChange={(e) => setHasExhibition(e.target.checked)}
-                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
-                    />
-                    <span>Organizing physical exhibition at this venue?</span>
-                  </label>
-                  
-                  {hasExhibition && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 font-semibold">Exhibition Start Date (Optional)</label>
-                        <input
-                          type="date"
-                          value={exhibitionFromDate}
-                          onChange={(e) => setExhibitionFromDate(e.target.value)}
-                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 font-semibold">Exhibition End Date (Optional)</label>
-                        <input
-                          type="date"
-                          value={exhibitionToDate}
-                          onChange={(e) => setExhibitionToDate(e.target.value)}
-                          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-slate-500 font-semibold">Contest Description</label>
-                  <textarea
-                    value={newEventDescription}
-                    onChange={(e) => setNewEventDescription(e.target.value)}
-                    placeholder="Enter descriptive details for the competition..."
-                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-16"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-150 dark:border-slate-800 pt-4">
-                  
-                  {/* Left Side: Rewards */}
-                  <div className="flex flex-col gap-2">
-                    <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs">Rewards & Prize Valuation</h4>
-                    <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 font-semibold">1st Prize Reward</label>
-                        <input
-                          type="text"
-                          value={prize1Reward}
-                          onChange={(e) => setPrize1Reward(e.target.value)}
-                          className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                          required
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 font-semibold">2nd Prize Reward</label>
-                        <input
-                          type="text"
-                          value={prize2Reward}
-                          onChange={(e) => setPrize2Reward(e.target.value)}
-                          className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                          required
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 font-semibold">3rd Prize Reward</label>
-                        <input
-                          type="text"
-                          value={prize3Reward}
-                          onChange={(e) => setPrize3Reward(e.target.value)}
-                          className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Side: Packages */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex justify-between items-center h-4.5">
-                      <h4 className="font-display font-semibold text-slate-700 dark:text-slate-350 text-xs">Package Entry Fees (INR)</h4>
-                      <button
-                        type="button"
-                        onClick={() => setNewEventPackages([...newEventPackages, { name: '', price: 0, maxPhotos: 1 }])}
-                        className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
-                      >
-                        + Add Package
-                      </button>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col gap-4 flex-1">
-                      {newEventPackages.map((pkg, idx) => (
-                        <div key={idx} className={`flex flex-row gap-1.5 sm:gap-3 items-end ${idx > 0 ? 'border-t border-slate-200/50 dark:border-slate-800/40 pt-4' : ''}`}>
-                          <div className="flex-1 min-w-0 flex flex-col gap-1">
-                            <label className="text-[10px] text-slate-400 font-semibold truncate">Package Name</label>
-                            <input
-                              type="text"
-                              value={pkg.name}
-                              onChange={(e) => {
-                                const updated = [...newEventPackages];
-                                updated[idx].name = e.target.value;
-                                setNewEventPackages(updated);
-                              }}
-                              placeholder="e.g. Starter"
-                              className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                              required
-                            />
-                          </div>
-                          
-                          <div className="w-14 sm:w-24 flex flex-col gap-1 shrink-0">
-                            <label className="text-[10px] text-slate-400 font-semibold truncate">Price <span className="hidden sm:inline">(₹)</span></label>
-                            <input
-                              type="number"
-                              value={pkg.price || ''}
-                              onChange={(e) => {
-                                const updated = [...newEventPackages];
-                                updated[idx].price = Number(e.target.value);
-                                setNewEventPackages(updated);
-                              }}
-                              placeholder="Price"
-                              className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                              required
-                            />
-                          </div>
-
-                          <div className="w-12 sm:w-20 flex flex-col gap-1 shrink-0">
-                            <label className="text-[10px] text-slate-400 font-semibold truncate">Max <span className="hidden sm:inline">Uploads</span></label>
-                            <input
-                              type="number"
-                              value={pkg.maxPhotos || ''}
-                              onChange={(e) => {
-                                const updated = [...newEventPackages];
-                                updated[idx].maxPhotos = Number(e.target.value);
-                                setNewEventPackages(updated);
-                              }}
-                              placeholder="Max"
-                              className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
-                              required
-                            />
-                          </div>
-
-                          {newEventPackages.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const updated = newEventPackages.filter((_, pIdx) => pIdx !== idx);
-                                setNewEventPackages(updated);
-                              }}
-                              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors mb-0.5"
-                              data-tooltip="Remove Package"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Event Certificate Templates Section */}
-                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4.5 rounded-2xl flex flex-col gap-3">
-                  <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-2">
-                    <Award className="text-amber-500" size={16} />
-                    <h4 className="font-display font-extrabold text-xs text-slate-850 dark:text-white uppercase tracking-wider">
-                      Event Certificate Templates (Linked to this Event)
-                    </h4>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Upload separate certificate images for 1st Prize, 2nd Prize, 3rd Prize, and Participation. These templates will be assigned only to participants of this event.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-1">
-                    {[
-                      { key: 'firstPrize', label: '1st Prize Certificate' },
-                      { key: 'secondPrize', label: '2nd Prize Certificate' },
-                      { key: 'thirdPrize', label: '3rd Prize Certificate' },
-                      { key: 'participation', label: 'Participation Certificate' }
-                    ].map(({ key, label }) => {
-                      const certs = newEventCertificates;
-                      const uploading = uploadingCert[key];
-                      const certUrl = certs[key];
-
-                      return (
-                        <div key={key} className="flex flex-col gap-1.5 bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800">
-                          <label className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{label}</label>
-                          <label className="flex flex-col items-center justify-center px-2 py-2.5 bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs cursor-pointer hover:border-indigo-600 transition-colors">
-                            <span className="text-[10px] font-semibold text-slate-500 truncate text-center">
-                              {uploading ? 'Uploading...' : certUrl ? 'Template Uploaded ✓' : 'Choose Image'}
-                            </span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => e.target.files?.[0] && handleCertificateFileUpload(key, e.target.files[0], false)}
-                              className="hidden"
-                              disabled={uploading}
-                            />
-                          </label>
-                          {certUrl && (
-                            <div className="flex items-center justify-between text-[10px] mt-1">
-                              <span className="text-emerald-600 font-bold truncate">Uploaded ✓</span>
-                              <button
-                                type="button"
-                                onClick={() => setNewEventCertificates(prev => ({ ...prev, [key]: '' }))}
-                                className="text-red-500 hover:underline font-bold cursor-pointer"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800 pt-3">
-                  <label className="text-xs text-slate-500 font-semibold">Rules & Guidelines (One per line, auto-seeded)</label>
-                  <textarea
-                    value={newEventRules}
-                    onChange={(e) => setNewEventRules(e.target.value)}
-                    placeholder="Rules..."
-                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs h-24"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 px-6 rounded-xl self-start cursor-pointer shadow mt-2"
-                >
-                  Create Contest Draft
-                </button>
-              </form>
-            </div>
-
-            {/* List of events */}
-            <div className="flex flex-col gap-4">
-              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Active & Draft Contests</h3>
-              <div className="flex flex-col gap-3">
-                {events.map(e => (
-                  <div key={e._id} className="glass-panel border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex justify-between items-center">
-                    <div>
-                      <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{e.title}</h4>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Theme: "{e.theme}" • Deadline: {new Date(e.deadline).toLocaleDateString()}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {e.status === 'Draft' ? (
-                        <button
-                          onClick={() => handleActivateEvent(e._id)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
-                        >
-                          Activate
-                        </button>
-                      ) : (
-                        <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
-                          e.status === 'Active' 
-                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' 
-                            : 'bg-slate-100 text-slate-500'
-                        }`}>
-                          {e.status}
-                        </span>
-                      )}
-                      
-                      <button
-                        onClick={() => handleEditClick(e)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setEventToDeleteId(e._id);
-                          setEventToDeleteTitle(e.title);
-                          setShowDeleteEventModal(true);
-                        }}
-                        className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
-                        data-tooltip="Delete & Archive Contest"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
-            {/* Deleted Contests Backups */}
-            <div className="flex flex-col gap-4 mt-6">
-              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Deleted Contest Backups & Archives</h3>
-              <div className="flex flex-col gap-3">
-                {backups.map(b => (
-                  <div key={b._id} className="glass-panel border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/20">
-                    <div>
-                      <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{b.title}</h4>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        Type: {b.eventType} • Deleted: {new Date(b.deletedAt || b.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleDownloadBackup(b)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1.5 px-3.5 rounded-lg cursor-pointer transition-all shadow-sm"
-                      >
-                        Download PDF Backup
-                      </button>
-                      <button
-                        onClick={() => handlePurgeBackup(b)}
-                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                          b.downloaded 
-                            ? 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/40' 
-                            : 'bg-slate-100 text-slate-350 cursor-not-allowed dark:bg-slate-800 dark:text-slate-650'
-                        }`}
-                        disabled={!b.downloaded}
-                        data-tooltip={b.downloaded ? 'Permanently Purge from Database' : 'You must download the PDF backup before you can permanently purge this event'}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+            {/* CARD 4: Rules & Guidelines (One per line, auto-seeded) */}
+            <div className="bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">
+                Rules & Guidelines (One per line, auto-seeded)
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Define guidelines and rules for this contest. Separate each rule on a new line.
+              </p>
+              <textarea
+                value={newEventRules}
+                onChange={(e) => setNewEventRules(e.target.value)}
+                placeholder="1. Photographs must be taken using a DSLR camera.&#10;2. Basic color correction is permitted.&#10;3. Watermarks or signatures are strictly prohibited."
+                className="px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs h-32 resize-none"
+                required
+              />
+              
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-6 rounded-2xl cursor-pointer shadow-md transition-all"
+                >
+                  Create Contest Draft
+                </button>
+              </div>
+            </div>
 
-                {backups.length === 0 && (
-                  <div className="text-center text-xs text-slate-400 py-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+          </form>
+
+          {/* CARD 5: Active & Draft Contests */}
+          <div className="bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+            <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">
+              Active & Draft Contests
+            </h3>
+            <div className="flex flex-col gap-3">
+              {events.map(e => (
+                <div key={e._id} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex justify-between items-center">
+                  <div>
+                    <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{e.title}</h4>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Theme: "{e.theme}" • Deadline: {new Date(e.deadline).toLocaleDateString()}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {e.status === 'Draft' ? (
+                      <button
+                        onClick={() => handleActivateEvent(e._id)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                      >
+                        Activate
+                      </button>
+                    ) : (
+                      <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
+                        e.status === 'Active' 
+                          ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' 
+                          : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {e.status}
+                      </span>
+                    )}
+                    
+                    <button
+                      onClick={() => handleEditClick(e)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEventToDeleteId(e._id);
+                        setEventToDeleteTitle(e.title);
+                        setShowDeleteEventModal(true);
+                      }}
+                      className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                      data-tooltip="Delete & Archive Contest"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {events.length === 0 && (
+                <p className="text-xs text-slate-400 text-center py-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                  No active or draft contests found.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* CARD 6: Deleted Contest Backups & Archives */}
+          <div className="bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+            <h3 className="font-display font-bold text-slate-900 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-slate-800">
+              Deleted Contest Backups & Archives
+            </h3>
+            <div className="flex flex-col gap-3">
+              {backups.map(b => (
+                <div key={b._id} className="bg-slate-50/70 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex justify-between items-center">
+                  <div>
+                    <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{b.title}</h4>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      Type: {b.eventType} • Deleted: {new Date(b.deletedAt || b.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleDownloadBackup(b)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1.5 px-3.5 rounded-lg cursor-pointer transition-all shadow-sm"
+                    >
+                      Download PDF Backup
+                    </button>
+                    <button
+                      onClick={() => handlePurgeBackup(b)}
+                      className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                        b.downloaded 
+                          ? 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/40' 
+                          : 'bg-slate-100 text-slate-350 cursor-not-allowed dark:bg-slate-800 dark:text-slate-650'
+                      }`}
+                      disabled={!b.downloaded}
+                      data-tooltip={b.downloaded ? 'Permanently Purge from Database' : 'You must download the PDF backup before you can permanently purge this event'}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {backups.length === 0 && (
+                <div className="text-center text-xs text-slate-400 py-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
                     No deleted event archives or backups found.
                   </div>
                 )}
               </div>
             </div>
 
-          </div>
-      </div>
-    )}
+        </div>
+      )}
 
       {/* TAB 6: CATEGORIES CONFIGURATION */}
       {activeTab === 'categories_config' && (

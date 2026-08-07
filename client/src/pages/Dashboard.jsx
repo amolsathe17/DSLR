@@ -1517,8 +1517,8 @@ export default function Dashboard() {
                 // Alternating soft light background colors for multiple events
                 const isEven = index % 2 === 0;
                 const panelBgClass = isEven
-                  ? "bg-indigo-50/70 dark:bg-indigo-950/25 border-indigo-200/60 dark:border-indigo-900/40 hover:border-indigo-300 dark:hover:border-indigo-800"
-                  : "bg-sky-50/70 dark:bg-sky-950/25 border-sky-200/60 dark:border-sky-900/40 hover:border-sky-300 dark:hover:border-sky-800";
+                  ? "bg-indigo-50/70 dark:bg-indigo-950/25 border-2 border-indigo-300 dark:border-indigo-700 hover:border-indigo-400 dark:hover:border-indigo-600"
+                  : "bg-sky-50/70 dark:bg-sky-950/25 border-2 border-sky-300 dark:border-sky-700 hover:border-sky-400 dark:hover:border-sky-600";
 
                 const headerHoverClass = isEven
                   ? "hover:bg-indigo-100/60 dark:hover:bg-indigo-950/40"
@@ -2049,7 +2049,7 @@ export default function Dashboard() {
             if (pastSubmissions.length === 0) return null;
 
             return (
-              <div className="bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xs flex flex-col transition-all duration-300 mt-4 text-left">
+              <div className="bg-slate-100/90 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700 rounded-3xl overflow-hidden shadow-xs flex flex-col transition-all duration-300 mt-4 text-left">
                 {/* Accordion Header */}
                 <div
                   onClick={() => setHistoryExpanded(!historyExpanded)}
@@ -2547,7 +2547,7 @@ export default function Dashboard() {
         return (
           <div className="animate-in fade-in duration-200 flex flex-col gap-6">
             {/* Header & Event Selector ("My Event History & Details" card - Prominent style) */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-linear-to-r from-indigo-50 via-purple-50/60 to-indigo-50/40 dark:from-indigo-950/50 dark:via-purple-950/30 dark:to-slate-900/80 p-6 sm:p-7 rounded-3xl border-2 border-indigo-200/80 dark:border-indigo-800/60 shadow-md">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-linear-to-r from-indigo-50 via-purple-50/60 to-indigo-50/40 dark:from-indigo-950/50 dark:via-purple-950/30 dark:to-slate-900/80 p-6 sm:p-7 rounded-3xl border-2 border-indigo-300 dark:border-indigo-700 shadow-md">
               <div className="flex items-center gap-3.5">
                 <div className="p-3.5 bg-indigo-600 dark:bg-indigo-500 text-white rounded-2xl shrink-0 shadow-sm">
                   <History size={24} />
@@ -2583,7 +2583,7 @@ export default function Dashboard() {
 
             {/* Empty State: No Enrolled Events */}
             {myEnrolledEvents.length === 0 ? (
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center flex flex-col items-center gap-4 shadow-sm">
+              <div className="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-3xl p-12 text-center flex flex-col items-center gap-4 shadow-sm">
                 <div className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-400 rounded-full">
                   <Calendar size={40} />
                 </div>
@@ -2604,14 +2604,14 @@ export default function Dashboard() {
               <div className="flex flex-col gap-6">
                 
                 {/* 1. Certificates Received Section - Light Amber Card */}
-                <div className="bg-amber-50/60 dark:bg-amber-950/25 border border-amber-200/60 dark:border-amber-900/40 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+                <div className="bg-amber-50/60 dark:bg-amber-950/25 border-2 border-amber-300 dark:border-amber-700 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
                   <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                     <Award size={18} className="text-amber-500" />
                     Certificates & Accolades
                   </h4>
 
                   {isWinner ? (
-                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="bg-amber-500/10 border-2 border-amber-400 dark:border-amber-600 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
                       <div className="flex items-center gap-3.5">
                         <div className="p-3 bg-amber-500 text-white rounded-2xl font-black text-lg">
                           🏆
@@ -2630,7 +2630,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ) : selectedHistoryEvent?.winnersPublished ? (
-                    <div className="bg-white/80 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="bg-white/80 dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-700 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
                       <div className="flex items-center gap-3.5">
                         <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 rounded-2xl font-black text-lg">
                           🎖️
@@ -2649,17 +2649,17 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 bg-black/10 dark:bg-slate-950/40 border border-dashed border-amber-200/80 dark:border-amber-900/40 rounded-2xl text-center text-slate-800 dark:text-slate-600 text-sm">
+                    <div className="p-4 bg-black/10 dark:bg-slate-950/40 border border-dashed border-amber-300 dark:border-amber-700 rounded-2xl text-center text-slate-800 dark:text-slate-600 text-sm">
                       ⏳ Certificates will be generated automatically once final results are published by the judging panel.
                     </div>
                   )}
                 </div>
 
                 {/* 2. Status Overview & Event Banner - Light Indigo Card */}
-                <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200/60 dark:border-indigo-900/40 rounded-3xl p-6 shadow-xs flex flex-col gap-6">
+                <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border-2 border-indigo-300 dark:border-indigo-700 rounded-3xl p-6 shadow-xs flex flex-col gap-6">
                   
                   {/* Event Title Banner */}
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-indigo-100 dark:border-indigo-900/30 pb-5">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-indigo-200 dark:border-indigo-800/60 pb-5">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300">
@@ -2684,7 +2684,7 @@ export default function Dashboard() {
                     </div>
                     
                     {selectedHistorySub?.entryNumber && (
-                      <div className="px-3.5 py-2 bg-white/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 rounded-2xl flex items-center gap-2.5 shrink-0 whitespace-nowrap shadow-2xs">
+                      <div className="px-3.5 py-2 bg-white/90 dark:bg-indigo-950/60 border-2 border-indigo-300 dark:border-indigo-700 rounded-2xl flex items-center gap-2.5 shrink-0 whitespace-nowrap shadow-2xs">
                         <div className="p-1.5 bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl shrink-0 shadow-2xs">
                           <Hash size={14} />
                         </div>
@@ -2704,7 +2704,7 @@ export default function Dashboard() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     
                     {/* 1. Registration Status */}
-                    <div className="p-4 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl flex flex-col justify-between gap-2">
+                    <div className="p-4 bg-emerald-50/80 dark:bg-emerald-950/40 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl flex flex-col justify-between gap-2">
                       <div className="flex justify-between items-center">
                         <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-900/70 dark:text-emerald-300">Registration Status</span>
                         <CheckCircle size={14} className="text-emerald-500" />
@@ -2720,7 +2720,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* 2. Payment Status */}
-                    <div className="p-4 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl flex flex-col justify-between gap-2">
+                    <div className="p-4 bg-indigo-50/80 dark:bg-indigo-950/40 border-2 border-indigo-300 dark:border-indigo-700 rounded-2xl flex flex-col justify-between gap-2">
                       <div className="flex justify-between items-center">
                         <span className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-900/70 dark:text-indigo-300">Payment Status</span>
                         <CreditCard size={14} className="text-indigo-500" />
@@ -2739,7 +2739,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* 3. Withdrawal Status */}
-                    <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/30 rounded-2xl flex flex-col justify-between gap-2">
+                    <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border-2 border-blue-300 dark:border-blue-700 rounded-2xl flex flex-col justify-between gap-2">
                       <div className="flex justify-between items-center">
                         <span className="text-[9px] font-extrabold uppercase tracking-wider text-blue-900/70 dark:text-blue-300">Withdrawal Status</span>
                         <ShieldCheck size={14} className="text-blue-500" />
@@ -2757,7 +2757,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* 4. Judging / Result Status */}
-                    <div className="p-4 bg-purple-50/80 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/30 rounded-2xl flex flex-col justify-between gap-2">
+                    <div className="p-4 bg-purple-50/80 dark:bg-purple-950/40 border-2 border-purple-300 dark:border-purple-700 rounded-2xl flex flex-col justify-between gap-2">
                       <div className="flex justify-between items-center">
                         <span className="text-[9px] font-extrabold uppercase tracking-wider text-purple-900/70 dark:text-purple-300">Judging / Results</span>
                         <Award size={14} className="text-purple-500" />
@@ -2780,7 +2780,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* 3. Uploaded Photographs Section - Light Purple Card */}
-                <div className="bg-purple-50/60 dark:bg-purple-950/25 border border-purple-200/60 dark:border-purple-900/40 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+                <div className="bg-purple-50/60 dark:bg-purple-950/25 border-2 border-purple-300 dark:border-purple-700 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
                   <div className="flex justify-between items-center">
                     <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                       <Camera size={18} className="text-purple-600 dark:text-purple-400" />
@@ -2792,7 +2792,7 @@ export default function Dashboard() {
                   </div>
 
                   {uploadedPhotos.length === 0 ? (
-                    <div className="p-8 bg-white/70 dark:bg-slate-950/60 rounded-2xl text-center text-slate-500 dark:text-slate-400 text-xs border border-dashed border-purple-200/60 dark:border-purple-900/30">
+                    <div className="p-8 bg-white/70 dark:bg-slate-950/60 rounded-2xl text-center text-slate-500 dark:text-slate-400 text-xs border border-dashed border-purple-300 dark:border-purple-700">
                       No photographs uploaded for this contest yet.
                     </div>
                   ) : (
@@ -2803,7 +2803,7 @@ export default function Dashboard() {
                         const finalScore = typeof photo.score === 'number' ? photo.score : (photo.scores?.[0]?.score || 'N/A');
 
                         return (
-                          <div key={pIdx} className="bg-white/90 dark:bg-slate-950 border border-purple-100 dark:border-purple-900/40 rounded-2xl p-3.5 flex flex-col gap-3 shadow-2xs">
+                          <div key={pIdx} className="bg-white/90 dark:bg-slate-950 border-2 border-purple-200 dark:border-purple-800 rounded-2xl p-3.5 flex flex-col gap-3 shadow-2xs">
                             <div className="aspect-4/3 rounded-xl overflow-hidden bg-slate-900 relative">
                               <img
                                 src={imgUrl}
@@ -2840,14 +2840,14 @@ export default function Dashboard() {
                 </div>
 
                 {/* 4. Event Information & History Timeline - Light Sky Card */}
-                <div className="bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200/60 dark:border-sky-900/40 rounded-3xl p-6 shadow-xs flex flex-col gap-5">
+                <div className="bg-sky-50/50 dark:bg-sky-950/20 border-2 border-sky-300 dark:border-sky-700 rounded-3xl p-6 shadow-xs flex flex-col gap-5">
                   <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                     <FileText size={18} className="text-indigo-600" />
                     Event Information & History Log
                   </h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 flex flex-col gap-2">
+                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border-2 border-slate-300 dark:border-slate-700 flex flex-col gap-2">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Key Event Dates</span>
                       <p className="text-slate-700 dark:text-slate-300">
                         <strong>Start Date:</strong> {selectedHistoryEvent?.startDate ? new Date(selectedHistoryEvent.startDate).toLocaleDateString() : 'N/A'}
@@ -2862,7 +2862,7 @@ export default function Dashboard() {
                       )}
                     </div>
 
-                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 flex flex-col gap-2">
+                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border-2 border-slate-300 dark:border-slate-700 flex flex-col gap-2">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Contest Location & Details</span>
                       <p className="text-slate-700 dark:text-slate-300 flex items-center gap-1.5 flex-wrap">
                         <strong>Official Entry Code:</strong> <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/60 dark:border-indigo-800/40 rounded-lg text-xs">#{selectedHistorySub?.entryNumber || 'N/A'}</span>
@@ -2879,7 +2879,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Activity History Timeline placed beside right side of Contest Location & Details */}
-                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 flex flex-col gap-2.5">
+                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border-2 border-slate-300 dark:border-slate-700 flex flex-col gap-2.5">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Activity History Timeline</span>
                       <div className="flex flex-col gap-2.5 max-h-48 overflow-y-auto pr-1">
                         <div className="flex items-start gap-2.5 text-xs">

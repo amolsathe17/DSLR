@@ -239,14 +239,12 @@ export default function Navbar() {
   return (
     <nav className={`${navPosition} z-50 transition-all duration-300 ${navBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo — hidden on landing until user scrolls */}
-          <div className="flex items-center">
+        <div className={`flex items-center h-16 transition-all duration-300 ${onHero ? 'justify-center' : 'justify-between'}`}>
+          {/* Logo — hidden on hero, visible once scrolled or on inner pages */}
+          <div className={`items-center ${onHero ? 'hidden' : 'flex'}`}>
             <Link
               to="/"
-              className={`flex items-center gap-2 group transition-all duration-300 ${
-                isLandingPage && !scrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}
+              className="flex items-center gap-2 group"
             >
               <img
                 src="/sumbacontest.jpg"
@@ -257,11 +255,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
-            {/* <Link to="/about" className={navLinkClass('/about')}>
-              About Us
-            </Link> */}
-
+          <div className={`hidden md:flex items-center ${onHero ? 'justify-center gap-8 sm:gap-10 w-full' : 'gap-6'}`}>
             <Link to="/info" className={navLinkClass('/info')}>
               Event Info
             </Link>
@@ -354,7 +348,7 @@ export default function Navbar() {
                 ) : (
                   <Link
                     to="/profile"
-                    className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors ${onHero ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                    className={`flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors ${onHero ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-slate-700 hover:text-slate-955 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                   >
                     <User size={16} />
                     <span>{user.name.split(' ')[0]}</span>
@@ -369,17 +363,25 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <Link
                   to="/login"
                   state={{ forceContestant: true }}
-                  className="text-sm font-medium text-slate-700 hover:text-slate-955 dark:text-slate-300 dark:hover:text-white px-3.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  className={`font-medium transition-colors ${
+                    onHero 
+                      ? 'text-sm sm:text-base font-bold text-white hover:text-indigo-200' 
+                      : 'text-sm text-slate-700 hover:text-slate-955 dark:text-slate-300 dark:hover:text-white px-3.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg'
+                  }`}
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm hover:shadow transition-all"
+                  className={`bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all shadow-sm hover:shadow ${
+                    onHero 
+                      ? 'text-sm sm:text-base px-5 py-2 rounded-xl shadow-md' 
+                      : 'text-sm px-4 py-2 rounded-lg'
+                  }`}
                 >
                   Register
                 </Link>

@@ -213,14 +213,16 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
   const isLandingPage = location.pathname === '/';
 
-  // Link color helper — Blue buttons with Red on mouse over (white text) when scrolled, white text on hero
+  // Link color helper — Light buttons when scrolled (Active button has distinct indigo highlight), white text on hero
   const navLinkClass = (path) =>
-    `text-sm font-medium transition-colors ${
+    `text-sm font-medium transition-all rounded-lg cursor-pointer ${
       onHero
         ? isActive(path)
-          ? 'text-white font-medium underline underline-offset-4'
-          : 'text-white/90 hover:text-white font-medium'
-        : 'bg-blue-600 hover:bg-red-600 text-white px-3.5 py-1.5 rounded-lg font-medium shadow-xs cursor-pointer'
+          ? 'text-white font-semibold underline underline-offset-4 px-1 py-1'
+          : 'text-white/90 hover:text-white px-1 py-1'
+        : isActive(path)
+          ? 'bg-indigo-600 text-white font-semibold shadow-xs border border-indigo-600 px-3.5 py-1.5'
+          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 border border-slate-200/80 px-3.5 py-1.5'
     }`;
 
   // Position: fixed on landing page so navbar overlays hero background directly; sticky elsewhere
@@ -299,9 +301,9 @@ export default function Navbar() {
                     <div className="relative" ref={adminDropdownRef}>
                       <button
                         onClick={() => setShowAdminProfileDropdown(!showAdminProfileDropdown)}
-                        className="flex items-center gap-2 text-xs font-medium py-1.5 px-3 rounded-lg transition-all cursor-pointer bg-blue-600 hover:bg-red-600 text-white"
+                        className="flex items-center gap-2 text-xs font-medium py-1.5 px-3 rounded-lg transition-all cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
                       >
-                        <div className="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center font-medium text-[11px] shrink-0 shadow-xs">
+                        <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[11px] shrink-0 shadow-xs">
                           {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
                         </div>
                         <span>{user.name ? user.name.split(' ')[0] : 'Admin'}</span>
@@ -344,7 +346,7 @@ export default function Navbar() {
                   ) : (
                     <Link
                       to="/profile"
-                      className="flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors bg-blue-600 hover:bg-red-600 text-white"
+                      className="flex items-center gap-2 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
                     >
                       <User size={16} />
                       <span>{user.name.split(' ')[0]}</span>
@@ -352,7 +354,7 @@ export default function Navbar() {
                   )}
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/60 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer"
                   >
                     <LogOut size={16} />
                     Logout
@@ -363,13 +365,13 @@ export default function Navbar() {
                   <Link
                     to="/login"
                     state={{ forceContestant: true }}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm px-4 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
+                    className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 font-medium text-sm px-4 py-1.5 rounded-lg shadow-2xs transition-all cursor-pointer"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm px-4 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-1.5 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer"
                   >
                     Register
                   </Link>

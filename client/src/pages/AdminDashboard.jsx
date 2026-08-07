@@ -4217,7 +4217,8 @@ export default function AdminDashboard() {
 
       {/* TAB 8: NOTIFICATIONS */}
       {activeTab === 'notifications' && (
-        <div className="max-7xl mx-auto animate-in fade-in duration-200 text-left">
+        <div className="max-w-4xl mx-auto animate-in fade-in duration-200 text-left flex flex-col gap-8">
+          {/* CARD 1: Notification Management */}
           <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
             <div>
               <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">
@@ -4287,82 +4288,86 @@ export default function AdminDashboard() {
                 {broadcastSubmitting ? 'Dispatching Message...' : 'Send Broadcast Notification'}
               </button>
             </form>
+          </div>
 
-            <div className="border-t border-slate-100 dark:border-slate-800/80 pt-6 flex flex-col gap-4 mt-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h4 className="font-bold text-slate-900 dark:text-white text-xs">Announcements History</h4>
-                
-                <select
-                  value={broadcastFilter}
-                  onChange={(e) => setBroadcastFilter(e.target.value)}
-                  className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer focus:outline-none"
-                >
-                  <option value="all">All Recipients</option>
-                  <option value="Participant">Contestants Only</option>
-                  <option value="Judge">Judges Only</option>
-                  <option value="Both">Both Audience</option>
-                </select>
+          {/* CARD 2: Announcements History */}
+          <div className="glass-panel border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 bg-white dark:bg-slate-900">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/80 pb-4">
+              <div>
+                <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white">Announcements History</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Review and manage past broadcast announcements and sent notifications.</p>
               </div>
+              
+              <select
+                value={broadcastFilter}
+                onChange={(e) => setBroadcastFilter(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer focus:outline-none"
+              >
+                <option value="all">All Recipients</option>
+                <option value="Participant">Contestants Only</option>
+                <option value="Judge">Judges Only</option>
+                <option value="Both">Both Audience</option>
+              </select>
+            </div>
 
-              {(() => {
-                const filtered = broadcasts.filter(b => broadcastFilter === 'all' || b.recipientType === broadcastFilter);
-                if (filtered.length === 0) {
-                  return (
-                    <div className="bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-850 p-6 rounded-2xl text-center text-slate-400 italic text-[11px]">
-                      No previous notifications match this selection.
-                    </div>
-                  );
-                }
-
+            {(() => {
+              const filtered = broadcasts.filter(b => broadcastFilter === 'all' || b.recipientType === broadcastFilter);
+              if (filtered.length === 0) {
                 return (
-                  <div className="flex flex-col gap-3 max-h-75 overflow-y-auto pr-1">
-                    {filtered.map((b) => (
-                      <div key={b._id} className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-850 flex justify-between gap-4 items-start text-[11px] text-left">
-                        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                          <p className="font-semibold text-slate-700 dark:text-slate-300 leading-relaxed wrap-break-word">{b.message}</p>
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-slate-400 font-semibold">
-                            <span className="flex items-center gap-1">
-                              <Users size={11} className="text-slate-400" />
-                              Recipient: <strong className="text-indigo-500">{b.recipientType === 'Both' ? 'Contestants & Judges' : b.recipientType === 'Participant' ? 'Contestants' : 'Judges'}</strong>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock size={11} className="text-slate-400" />
-                              {new Date(b.createdAt).toLocaleString()}
-                            </span>
-                            {b.isArchived && (
-                              <span className="px-1.5 py-0.5 rounded text-[8px] bg-slate-200 text-slate-600 uppercase font-black">
-                                Archived
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex gap-1 shrink-0">
-                          <button
-                            onClick={() => handleToggleArchiveBroadcast(b._id)}
-                            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                              b.isArchived 
-                                ? 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-600 dark:bg-indigo-950/20' 
-                                : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-605 dark:bg-slate-900'
-                            }`}
-                            title={b.isArchived ? 'Activate Notification' : 'Archive Notification'}
-                          >
-                            <Archive size={12} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteBroadcast(b._id)}
-                            className="p-1.5 bg-red-50 hover:bg-red-100 border border-red-250 text-red-650 dark:bg-red-950/20 rounded-lg transition-colors cursor-pointer"
-                            title="Delete Record"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-850 p-6 rounded-2xl text-center text-slate-400 italic text-[11px]">
+                    No previous notifications match this selection.
                   </div>
                 );
-              })()}
-            </div>
+              }
+
+              return (
+                <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-1">
+                  {filtered.map((b) => (
+                    <div key={b._id} className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-850 flex justify-between gap-4 items-start text-[11px] text-left">
+                      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                        <p className="font-semibold text-slate-700 dark:text-slate-300 leading-relaxed wrap-break-word">{b.message}</p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-slate-400 font-semibold">
+                          <span className="flex items-center gap-1">
+                            <Users size={11} className="text-slate-400" />
+                            Recipient: <strong className="text-indigo-500">{b.recipientType === 'Both' ? 'Contestants & Judges' : b.recipientType === 'Participant' ? 'Contestants' : 'Judges'}</strong>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock size={11} className="text-slate-400" />
+                            {new Date(b.createdAt).toLocaleString()}
+                          </span>
+                          {b.isArchived && (
+                            <span className="px-1.5 py-0.5 rounded text-[8px] bg-slate-200 text-slate-600 uppercase font-black">
+                              Archived
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-1 shrink-0">
+                        <button
+                          onClick={() => handleToggleArchiveBroadcast(b._id)}
+                          className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                            b.isArchived 
+                              ? 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-600 dark:bg-indigo-950/20' 
+                              : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-605 dark:bg-slate-900'
+                          }`}
+                          title={b.isArchived ? 'Activate Notification' : 'Archive Notification'}
+                        >
+                          <Archive size={12} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBroadcast(b._id)}
+                          className="p-1.5 bg-red-50 hover:bg-red-100 border border-red-250 text-red-650 dark:bg-red-950/20 rounded-lg transition-colors cursor-pointer"
+                          title="Delete Record"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

@@ -2545,27 +2545,30 @@ export default function Dashboard() {
 
         return (
           <div className="animate-in fade-in duration-200 flex flex-col gap-6">
-            {/* Header & Event Selector ("My Event History & Details" card) */}
-            <div className="flex flex-col gap-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            {/* Header & Event Selector ("My Event History & Details" card - Prominent style) */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-indigo-50 via-purple-50/60 to-indigo-50/40 dark:from-indigo-950/50 dark:via-purple-950/30 dark:to-slate-900/80 p-6 sm:p-7 rounded-3xl border-2 border-indigo-200/80 dark:border-indigo-800/60 shadow-md">
               <div className="flex items-center gap-3.5">
-                <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-2xl shrink-0">
+                <div className="p-3.5 bg-indigo-600 dark:bg-indigo-500 text-white rounded-2xl shrink-0 shadow-sm">
                   <History size={24} />
                 </div>
-                <div>
-                  <h2 className="font-display font-extrabold text-lg text-slate-900 dark:text-white">My Event History & Details</h2>
-                  <p className="text-xs text-slate-400">View complete registration, payment, uploaded photos, and results for enrolled contests</p>
+                <div className="text-left">
+                  <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-widest block mb-0.5">
+                    Contest Archives
+                  </span>
+                  <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">My Event History & Details</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">View complete registration, payment, uploaded photos, and results for enrolled contests</p>
                 </div>
               </div>
 
               {myEnrolledEvents.length > 0 && (
-                <div className="w-full pt-2 border-t border-slate-100 dark:border-slate-800/80">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                <div className="w-full sm:w-auto shrink-0 text-left sm:text-right">
+                  <label className="text-[10px] font-extrabold text-indigo-900/70 dark:text-indigo-300 uppercase tracking-wider block mb-1">
                     Select Enrolled Event ({myEnrolledEvents.length})
                   </label>
                   <select
                     value={selectedHistoryEvent?._id || ''}
                     onChange={(e) => setHistorySelectedEventId(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-indigo-200 dark:border-indigo-900/50 rounded-2xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
+                    className="w-full sm:w-72 md:w-80 px-4 py-2.5 bg-white dark:bg-slate-950 border border-indigo-300 dark:border-indigo-700 rounded-2xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
                   >
                     {myEnrolledEvents.map(ev => (
                       <option key={ev._id} value={ev._id}>
@@ -2599,10 +2602,10 @@ export default function Dashboard() {
             ) : (
               <div className="flex flex-col gap-6">
                 
-                {/* 1. Certificates Received Section - Displayed directly below My Event History & Details card */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+                {/* 1. Certificates Received Section - Light Amber Card */}
+                <div className="bg-amber-50/60 dark:bg-amber-950/25 border border-amber-200/60 dark:border-amber-900/40 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
                   <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <Award size={16} className="text-amber-500" />
+                    <Award size={18} className="text-amber-500" />
                     Certificates & Accolades
                   </h4>
 
@@ -2626,7 +2629,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ) : selectedHistoryEvent?.winnersPublished ? (
-                    <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="bg-white/80 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
                       <div className="flex items-center gap-3.5">
                         <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 rounded-2xl font-black text-lg">
                           🎖️
@@ -2645,25 +2648,25 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-6 bg-slate-50/50 dark:bg-slate-950/30 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center text-slate-400 text-xs">
+                    <div className="p-6 bg-white/70 dark:bg-slate-950/40 border border-dashed border-amber-200/80 dark:border-amber-900/40 rounded-2xl text-center text-slate-500 dark:text-slate-400 text-xs">
                       ⏳ Certificates will be generated automatically once final results are published by the judging panel.
                     </div>
                   )}
                 </div>
 
-                {/* 2. Status Overview & Event Banner */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-6">
+                {/* 2. Status Overview & Event Banner - Light Indigo Card */}
+                <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200/60 dark:border-indigo-900/40 rounded-3xl p-6 shadow-xs flex flex-col gap-6">
                   
                   {/* Event Title Banner */}
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-5">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-indigo-100 dark:border-indigo-900/30 pb-5">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400">
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300">
                           {selectedHistoryEvent?.eventType || 'Photography'}
                         </span>
                         <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                          selectedHistoryEvent?.status === 'Active' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30' :
-                          selectedHistoryEvent?.status === 'Completed' ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/30' :
+                          selectedHistoryEvent?.status === 'Active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' :
+                          selectedHistoryEvent?.status === 'Completed' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300' :
                           'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                         }`}>
                           {selectedHistoryEvent?.status || 'Active'}
@@ -2680,7 +2683,7 @@ export default function Dashboard() {
                     </div>
                     
                     {selectedHistorySub?.entryNumber && (
-                      <div className="px-3.5 py-2 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 rounded-2xl flex items-center gap-2.5 shrink-0 whitespace-nowrap shadow-2xs">
+                      <div className="px-3.5 py-2 bg-white/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 rounded-2xl flex items-center gap-2.5 shrink-0 whitespace-nowrap shadow-2xs">
                         <div className="p-1.5 bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl shrink-0 shadow-2xs">
                           <Hash size={14} />
                         </div>
@@ -2700,25 +2703,25 @@ export default function Dashboard() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     
                     {/* 1. Registration Status */}
-                    <div className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-2">
+                    <div className="p-4 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl flex flex-col justify-between gap-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Registration Status</span>
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-900/70 dark:text-emerald-300">Registration Status</span>
                         <CheckCircle size={14} className="text-emerald-500" />
                       </div>
                       <div>
                         <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">
                           Enrolled & Confirmed
                         </span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                        <span className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70 block mt-0.5">
                           Enrolled: {selectedHistorySub?.createdAt ? new Date(selectedHistorySub.createdAt).toLocaleDateString() : 'Active'}
                         </span>
                       </div>
                     </div>
 
                     {/* 2. Payment Status */}
-                    <div className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-2">
+                    <div className="p-4 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl flex flex-col justify-between gap-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Payment Status</span>
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-900/70 dark:text-indigo-300">Payment Status</span>
                         <CreditCard size={14} className="text-indigo-500" />
                       </div>
                       <div>
@@ -2728,16 +2731,16 @@ export default function Dashboard() {
                         }`}>
                           {selectedHistorySub?.paymentStatus || 'Paid'} (₹{selectedHistorySub?.totalAmount || '200'})
                         </span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5 truncate" title={selectedHistorySub?.transactionId}>
+                        <span className="text-[10px] text-indigo-600/70 dark:text-indigo-400/70 block mt-0.5 truncate" title={selectedHistorySub?.transactionId}>
                           Package: {selectedHistorySub?.packageName || 'Standard'} • Txn: #{selectedHistorySub?.transactionId || 'TXN-OK'}
                         </span>
                       </div>
                     </div>
 
                     {/* 3. Withdrawal Status */}
-                    <div className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-2">
+                    <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/30 rounded-2xl flex flex-col justify-between gap-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Withdrawal Status</span>
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-blue-900/70 dark:text-blue-300">Withdrawal Status</span>
                         <ShieldCheck size={14} className="text-blue-500" />
                       </div>
                       <div>
@@ -2746,16 +2749,16 @@ export default function Dashboard() {
                         }`}>
                           {selectedHistorySub?.isWithdrawn ? 'Withdrawn' : 'Active (Not Withdrawn)'}
                         </span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                        <span className="text-[10px] text-blue-600/70 dark:text-blue-400/70 block mt-0.5">
                           {selectedHistorySub?.isWithdrawn ? 'Entry withdrawn by participant' : 'Entry eligible for judging'}
                         </span>
                       </div>
                     </div>
 
                     {/* 4. Judging / Result Status */}
-                    <div className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-2">
+                    <div className="p-4 bg-purple-50/80 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/30 rounded-2xl flex flex-col justify-between gap-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Judging / Results</span>
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider text-purple-900/70 dark:text-purple-300">Judging / Results</span>
                         <Award size={14} className="text-purple-500" />
                       </div>
                       <div>
@@ -2766,7 +2769,7 @@ export default function Dashboard() {
                           {selectedHistoryEvent?.winnersPublished ? 'Winners Declared' :
                            selectedHistoryEvent?.status === 'Completed' ? 'Under Evaluation' : 'Pending Judging'}
                         </span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                        <span className="text-[10px] text-purple-600/70 dark:text-purple-400/70 block mt-0.5">
                           {selectedHistoryEvent?.winnersPublished ? 'Final grades & ranks released' : 'Evaluating jury panel'}
                         </span>
                       </div>
@@ -2775,11 +2778,11 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* 3. Uploaded Photographs Section */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+                {/* 3. Uploaded Photographs Section - Light Slate Card */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
                   <div className="flex justify-between items-center">
                     <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <Camera size={16} className="text-indigo-600" />
+                      <Camera size={18} className="text-indigo-600" />
                       Uploaded Photographs ({uploadedPhotos.length})
                     </h4>
                     <span className="text-xs text-slate-400 font-medium">
@@ -2799,7 +2802,7 @@ export default function Dashboard() {
                         const finalScore = typeof photo.score === 'number' ? photo.score : (photo.scores?.[0]?.score || 'N/A');
 
                         return (
-                          <div key={pIdx} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex flex-col gap-3 shadow-2xs">
+                          <div key={pIdx} className="bg-slate-50/80 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-3.5 flex flex-col gap-3 shadow-2xs">
                             <div className="aspect-4/3 rounded-xl overflow-hidden bg-slate-900 relative">
                               <img
                                 src={imgUrl}
@@ -2835,15 +2838,15 @@ export default function Dashboard() {
                   )}
                 </div>
 
-                {/* 4. Event Information & History Timeline */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col gap-5">
+                {/* 4. Event Information & History Timeline - Light Sky Card */}
+                <div className="bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200/60 dark:border-sky-900/40 rounded-3xl p-6 shadow-xs flex flex-col gap-5">
                   <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <FileText size={16} className="text-indigo-600" />
+                    <FileText size={18} className="text-indigo-600" />
                     Event Information & History Log
                   </h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                    <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 flex flex-col gap-2">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Key Event Dates</span>
                       <p className="text-slate-700 dark:text-slate-300">
                         <strong>Start Date:</strong> {selectedHistoryEvent?.startDate ? new Date(selectedHistoryEvent.startDate).toLocaleDateString() : 'N/A'}
@@ -2858,7 +2861,7 @@ export default function Dashboard() {
                       )}
                     </div>
 
-                    <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 flex flex-col gap-2">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Contest Location & Details</span>
                       <p className="text-slate-700 dark:text-slate-300 flex items-center gap-1.5 flex-wrap">
                         <strong>Official Entry Code:</strong> <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/60 dark:border-indigo-800/40 rounded-lg text-xs">#{selectedHistorySub?.entryNumber || 'N/A'}</span>
@@ -2875,7 +2878,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Activity History Timeline placed beside right side of Contest Location & Details */}
-                    <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2.5">
+                    <div className="p-4 bg-white/80 dark:bg-slate-950/60 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 flex flex-col gap-2.5">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Activity History Timeline</span>
                       <div className="flex flex-col gap-2.5 max-h-48 overflow-y-auto pr-1">
                         <div className="flex items-start gap-2.5 text-xs">

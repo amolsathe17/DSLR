@@ -37,9 +37,9 @@ import {
   Send,
   Archive,
   Clock,
-  Sliders,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Upload
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import StatsCharts from '../components/StatsCharts';

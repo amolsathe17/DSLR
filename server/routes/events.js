@@ -29,15 +29,6 @@ router.get('/', async (req, res) => {
       { $set: { status: 'Active' } }
     );
 
-    // 2. Keep events starting > 1 month from now as Draft (Upcoming)
-    await Event.updateMany(
-      {
-        status: 'Active',
-        startDate: { $exists: true, $ne: null, $gt: oneMonthFromNow }
-      },
-      { $set: { status: 'Draft' } }
-    );
-
     let query = {};
     if (includeDrafts === 'false') {
       query.status = { $ne: 'Draft' };
@@ -224,9 +215,8 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
       const oneMonthFromNow = new Date(now);
       oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
 
-      if (stDate > oneMonthFromNow) {
-        updateData.status = 'Draft';
-      } else {
+      // Auto-activate if start date is within 1 month and event is currently Draft
+      if (stDate <= oneMonthFromNow && event.status === 'Draft') {
         updateData.status = 'Active';
       }
     }

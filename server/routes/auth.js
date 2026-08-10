@@ -276,6 +276,7 @@ router.get('/profile', protect, async (req, res) => {
       mobile: req.user.mobile,
       city: req.user.city,
       role: req.user.role,
+      avatar: req.user.avatar || '',
       notifications: req.user.notifications || []
     }
   });
@@ -413,6 +414,7 @@ router.put('/profile', protect, async (req, res) => {
     user.name = req.body.name || user.name;
     user.mobile = req.body.mobile || user.mobile;
     user.city = req.body.city || user.city;
+    if (req.body.avatar !== undefined) user.avatar = req.body.avatar;
 
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
@@ -437,13 +439,69 @@ router.put('/profile', protect, async (req, res) => {
         email: updatedUser.email,
         mobile: updatedUser.mobile,
         city: updatedUser.city,
-        role: updatedUser.role
+        role: updatedUser.role,
+        avatar: updatedUser.avatar || ''
       }
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
+});
+
+// @desc    Upload user avatar photo
+// @route   POST /api/auth/upload-avatar
+// @access  Private
+router.post('/upload-avatar', protect, (req, res, next) => {
+  const upload = require('../middleware/upload');
+  upload.single('avatar')(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload an image file' });
+    }
+
+    try {
+      let fileUrl = `/uploads/${req.file.filename}`;
+      try {
+        const cloudinary = require('../config/cloudinary');
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'dslr_contest/avatars',
+          use_filename: true
+        });
+        if (result && result.secure_url) {
+          fileUrl = result.secure_url;
+        }
+      } catch (cloudinaryErr) {
+        console.warn('Cloudinary upload failed, falling back to local file:', cloudinaryErr.message);
+      }
+
+      const user = await User.findById(req.user._id);
+      if (user) {
+        user.avatar = fileUrl;
+        await user.save();
+      }
+
+      res.json({
+        success: true,
+        avatarUrl: fileUrl,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          mobile: user.mobile,
+          city: user.city,
+          role: user.role,
+          avatar: fileUrl
+        },
+        message: 'Profile photo updated successfully'
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Server error during avatar upload: ' + error.message });
+    }
+  });
 });
 
 // @desc    Request OTP for mobile login/signup

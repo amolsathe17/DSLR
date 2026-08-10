@@ -302,8 +302,16 @@ export default function Navbar() {
                       onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                       className="flex items-center gap-2 text-xs font-medium py-1.5 px-3 rounded-lg transition-all cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
                     >
-                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[11px] shrink-0 shadow-xs">
-                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[11px] shrink-0 shadow-xs overflow-hidden">
+                        {user.avatar ? (
+                          <img
+                            src={getBackendUrl(user.avatar)}
+                            alt={user.name}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          user.name ? user.name.charAt(0).toUpperCase() : 'U'
+                        )}
                       </div>
                       <span>{user.name ? user.name.split(' ')[0] : 'User'}</span>
                       <ChevronDown size={14} className={`transition-transform duration-200 ${showProfileDropdown ? 'rotate-180' : ''}`} />
@@ -311,9 +319,22 @@ export default function Navbar() {
 
                     {showProfileDropdown && (
                       <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
-                        <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
-                          <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{user.name}</p>
-                          <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium truncate">{user.email}</p>
+                        <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs overflow-hidden">
+                            {user.avatar ? (
+                              <img
+                                src={getBackendUrl(user.avatar)}
+                                alt={user.name}
+                                className="w-full h-full object-cover rounded-full"
+                              />
+                            ) : (
+                              user.name ? user.name.charAt(0).toUpperCase() : 'U'
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{user.name}</p>
+                            <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium truncate">{user.email}</p>
+                          </div>
                         </div>
 
                         <div className="py-1">

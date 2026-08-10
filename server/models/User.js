@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   mobile: { type: String, required: true },
   city: { type: String, required: true },
   role: { type: String, enum: ['Participant', 'Judge', 'Admin'], default: 'Participant' },
+  avatar: { type: String, default: '' },
   isVerified: { type: Boolean, default: false },
   otp: { type: String },
   otpExpires: { type: Date },

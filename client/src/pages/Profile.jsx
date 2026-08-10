@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Phone, Lock, Building, Camera, CheckCircle2, ShieldAlert, Check } from 'lucide-react';
+import { User, Phone, Lock, Building, Camera, CheckCircle2, ShieldAlert, Check, Upload } from 'lucide-react';
+import { getBackendUrl } from '../utils/url';
 
 export default function Profile() {
-  const { user, updateProfile, logout } = useAuth();
+  const { user, updateProfile, logout, apiFetch, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState(user?.name || '');
   const [mobile, setMobile] = useState(user?.mobile || '');
@@ -14,7 +15,41 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Profile photo must be less than 5 MB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const data = await apiFetch('/api/auth/upload-avatar', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (data.success) {
+        setSuccess('Profile photo updated successfully!');
+        if (refreshUser) await refreshUser();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to upload profile photo');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,7 +100,53 @@ export default function Profile() {
           </div>
           <div>
             <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">Profile Settings</h2>
-            <p className="text-xs text-slate-400">Manage your DSLR Contest Portal account details</p>
+            <p className="text-xs text-slate-400">Manage your DSLR Contest Portal account details and profile photo</p>
+          </div>
+        </div>
+
+        {/* Profile Photo Upload Section */}
+        <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+          <div className="relative group">
+            <div className="w-24 h-24 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-3xl shadow-md overflow-hidden border-2 border-indigo-500">
+              {user?.avatar ? (
+                <img
+                  src={getBackendUrl(user.avatar)}
+                  alt={user.name}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
+              )}
+            </div>
+            <label className="absolute inset-0 rounded-full bg-slate-900/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              <Camera size={20} />
+              <span className="text-[10px] font-bold mt-1">Change</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                disabled={uploadingAvatar}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-1">
+            <h3 className="font-display font-bold text-sm text-slate-900 dark:text-white">Profile Photo</h3>
+            <p className="text-xs text-slate-400 max-w-sm">
+              Upload a clear photograph. This photo will appear in the blue circle avatar on your navigation bar and account profile.
+            </p>
+            <label className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer">
+              <Upload size={14} />
+              <span>{uploadingAvatar ? 'Uploading Photo...' : 'Upload New Photo'}</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                disabled={uploadingAvatar}
+                className="hidden"
+              />
+            </label>
           </div>
         </div>
 

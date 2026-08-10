@@ -421,6 +421,40 @@ export default function AdminDashboard() {
     }
   };
 
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const handleAvatarUploadAdmin = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileError('Profile photo must be less than 5 MB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setProfileError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const data = await apiFetch('/api/auth/upload-avatar', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (data.success) {
+        if (refreshUser) await refreshUser();
+        triggerSuccessModal('Photo Updated', 'Your profile photo has been updated successfully!');
+      }
+    } catch (err) {
+      setProfileError(err.message || 'Failed to upload profile photo');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setProfileError('');
@@ -4136,6 +4170,52 @@ export default function AdminDashboard() {
                 <span>{profileError}</span>
               </div>
             )}
+
+            {/* Profile Photo Upload Section */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+              <div className="relative group shrink-0">
+                <div className="w-20 h-20 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-2xl shadow-md overflow-hidden border-2 border-indigo-500">
+                  {user?.avatar ? (
+                    <img
+                      src={getBackendUrl(user.avatar)}
+                      alt={user.name}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'A'}</span>
+                  )}
+                </div>
+                <label className="absolute inset-0 rounded-full bg-slate-900/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <Camera size={18} />
+                  <span className="text-[9px] font-bold mt-0.5">Change</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUploadAdmin}
+                    disabled={uploadingAvatar}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-1">
+                <h4 className="font-display font-bold text-xs text-slate-900 dark:text-white">Profile Photo</h4>
+                <p className="text-[11px] text-slate-400 max-w-sm">
+                  Upload an administrator photo. This photo will appear in the blue circle avatar on your top navigation bar.
+                </p>
+                <label className="mt-1.5 inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer">
+                  <Upload size={13} />
+                  <span>{uploadingAvatar ? 'Uploading Photo...' : 'Upload Photo'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUploadAdmin}
+                    disabled={uploadingAvatar}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
 
             <form onSubmit={handleUpdateProfile} className="flex flex-col gap-5 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

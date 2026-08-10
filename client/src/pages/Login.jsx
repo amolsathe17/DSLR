@@ -233,21 +233,10 @@ export default function Login() {
       }}
     >
       <style>{`
-        @media (min-width: 640px) {
-          .login-bg-responsive {
-            background-image: var(--login-bg) !important;
-          }
-        }
-        @media (max-width: 639px) {
-          .login-bg-responsive {
-            background-image: ${
-              loginRole === 'Admin'
-                ? 'linear-gradient(135deg, #d97706 0%, #78350f 100%)'
-                : loginRole === 'Judge'
-                  ? 'linear-gradient(135deg, #059669 0%, #064e3b 100%)'
-                  : 'linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%)'
-            } !important;
-          }
+        .login-bg-responsive {
+          background-image: var(--login-bg) !important;
+          background-size: cover;
+          background-position: center;
         }
       `}</style>
       {/* DEADLINE BLOCK MODAL */}

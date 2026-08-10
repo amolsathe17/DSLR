@@ -204,15 +204,10 @@ export default function Register() {
       }}
     >
       <style>{`
-        @media (min-width: 640px) {
-          .login-bg-responsive {
-            background-image: var(--login-bg) !important;
-          }
-        }
-        @media (max-width: 639px) {
-          .login-bg-responsive {
-            background-image: linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%) !important;
-          }
+        .login-bg-responsive {
+          background-image: var(--login-bg) !important;
+          background-size: cover;
+          background-position: center;
         }
       `}</style>
       {/* DEADLINE BLOCK MODAL */}
@@ -256,8 +251,8 @@ export default function Register() {
               {/* Top Bar with Brand Header & Semi-Transparent Info Control Button */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-1 min-w-0">
-                  <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white leading-tight">
-                    {isVerifying ? 'Email Verification' : 'Register to submit entries and track results'}
+                  <h2 className="font-display font-extrabold text-xl text-white dark:text-white leading-tight">
+                    {isVerifying ? 'Email Verification' : 'Register to submit Entries'}
                   </h2>
                 </div>
 
@@ -313,7 +308,7 @@ export default function Register() {
                     <form onSubmit={handleEmailRegister} className="flex flex-col gap-4 animate-in fade-in duration-200">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-semibold text-slate-500">Full Name</label>
+                          <label className="text-xs font-semibold text-white">Full Name</label>
                           <div className="relative">
                             <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -328,7 +323,7 @@ export default function Register() {
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-semibold text-slate-500">Mobile Number</label>
+                          <label className="text-xs font-semibold text-white">Mobile Number</label>
                           <div className="relative">
                             <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -359,7 +354,7 @@ export default function Register() {
                       </div>
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">City</label>
+                        <label className="text-xs font-semibold text-white">City</label>
                         <div className="relative">
                           <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                           <input
@@ -374,7 +369,7 @@ export default function Register() {
                       </div>
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Create Password</label>
+                        <label className="text-xs font-semibold text-white">Create Password</label>
                         <div className="relative">
                           <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                           <input
@@ -403,7 +398,7 @@ export default function Register() {
                     /* Mobile/OTP Signup */
                     <form onSubmit={handleMobileRegister} className="flex flex-col gap-4 animate-in fade-in duration-200">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Full Name</label>
+                        <label className="text-xs font-semibold text-white">Full Name</label>
                         <div className="relative">
                           <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                           <input

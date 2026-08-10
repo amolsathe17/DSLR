@@ -254,7 +254,7 @@ export default function Login() {
             </p>
             <button
               onClick={() => setLoginRole('Judge')}
-              className="mt-2 w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+              className="mt-2 w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
             >
               Log in as Judge/Admin
             </button>

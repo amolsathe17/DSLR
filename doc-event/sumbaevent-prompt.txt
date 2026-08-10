@@ -1,0 +1,39 @@
+------------------------------------------------------------------------------------
+in "Contests & Configuration" while setup new event uploaded image for must be used for background page of login (Login Page Background Image)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+done
+mobile errors
+on mobile could not able to login. login error "failed to fetch" for all participants, judge, admin login. fix this problem with zero error.
+1) on mobile view port hide background image and insert gradient in registration. different gradient color for participants, judge, admin login.
+2) in exhibition gallery and result page- all tab should be display properly. Avoid horizontal scrolling.
+3) decrease width of max uploads field and keep label and field besides price. Package name, price, max uploads in one line in mobile view port.
+4) offline and online zoom mode should be working on mobile view port. Photograph details ( right side panel ) and scoring assessment ( right side panel)should be below photo zoom functionality in only mobile view port.
+5) in grading completion process keep graded and ungraded besides chart.
+-----------------------------------------------------------------------------------
+In the Exhibition Gallery & Results page, the Approved and Disapproved photographs should be displayed only for the currently selected event. When the event selection changes, the gallery must automatically refresh to show only the approved and disapproved photographs belonging to that event. No photographs from other events should be displayed.
+
+In judge Evaluation Portal 
+
+----------------------------------------------------------------------------------------------------------------
+
+in admin dashboard - 
+
+1) admin can not able to create back dated event. if event is completed it should display in "event history" tab with all details and here admin can download pdf file of that completed event.
+2) If an admin creates an event with a start date that is more than 4 months from the current date, the system should automatically classify it as an Upcoming Event. These events must appear only in the Upcoming Events tab and should not be displayed in the Active Events tab until they become active according to their scheduled dates. Once the event reaches its active period, it should automatically move from Upcoming Events to Active Events without requiring any manual action from the admin
+-----------------------------------------------------------------------------------------------------------------------------
+In participant dashboard
+photo title should be mandatory field.
+
+==================================================================================
+in landing page
+
+
+==============================================================================================
+In event info page
+Add 3 tabs, Active Events, Upcoming Events, Past Events and add respective event details in them. by default active event is open.
+refer image.  when participant enrolled to event he should redirect to register page, and these details should be display according to event selected/enrolled by participant.
+
+=====================================================================
+
+

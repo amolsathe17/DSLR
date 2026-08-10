@@ -1833,7 +1833,7 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           
           {/* Key Stats Cards Grid - 4 distinct light backgrounds with 2px borders */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Total Revenue */}
             <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
               <span className="text-[10px] text-emerald-900/80 dark:text-emerald-300 font-extrabold uppercase tracking-wider">Total Revenue</span>
@@ -2164,7 +2164,7 @@ export default function AdminDashboard() {
             return (
               <>
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/30 rounded-2xl px-5 py-4 shadow-sm">
                     <div className="p-2.5 bg-emerald-500/10 rounded-xl">
                       <ThumbsUp size={20} className="text-emerald-500 shrink-0" />

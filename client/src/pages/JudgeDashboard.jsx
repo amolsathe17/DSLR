@@ -572,7 +572,7 @@ export default function JudgeDashboard() {
 
             return (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   {/* Card 1: Assigned Contests */}
                   <div className="bg-indigo-50/70 dark:bg-indigo-950/30 border-2 border-indigo-300 dark:border-indigo-700 rounded-2xl p-5 text-left flex flex-col gap-1.5 shadow-xs transition-all hover:shadow-sm">
                     <span className="text-[10px] text-indigo-900/80 dark:text-indigo-300 font-extrabold uppercase tracking-wider">Assigned Contests</span>
@@ -759,7 +759,7 @@ export default function JudgeDashboard() {
                     {/* Event wise approvals / disapproval tracking */}
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left">
                       <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Events Breakdown Tracking</h3>
-                      <div className="flex flex-col gap-4 max-h-[170px] overflow-y-auto pr-1">
+                      <div className="flex flex-col gap-4 max-h-42.5 overflow-y-auto pr-1">
                         {events.map((e, idx) => {
                           const eventPhotos = allPhotographsByEvent[e._id] || [];
                           const total = eventPhotos.length;
@@ -770,7 +770,7 @@ export default function JudgeDashboard() {
                           return (
                             <div key={idx} className="p-3 bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl flex flex-col gap-2 text-xs">
                               <div className="flex justify-between items-center">
-                                <span className="font-extrabold text-slate-900 dark:text-white text-xs truncate max-w-[120px]">{e.title}</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white text-xs truncate max-w-30">{e.title}</span>
                                 <span className={`px-2 py-0.5 text-[8px] font-extrabold uppercase rounded-full ${
                                   evaluated === total && total > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
                                 }`}>
@@ -818,7 +818,7 @@ export default function JudgeDashboard() {
                 )}
 
                 {/* Past Evaluation History Log (Full-Width modern table/grid view) */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left h-[400px] overflow-y-auto">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-sm text-left h-100 overflow-y-auto">
                   <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-white">Past Evaluation History Log</h3>
                   
                   {(() => {
@@ -932,7 +932,7 @@ export default function JudgeDashboard() {
                   <select
                     value={event?._id || ''}
                     onChange={(e) => handleEventChange(e.target.value)}
-                    className="flex-grow sm:flex-grow-0 px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-[200px] sm:max-w-xs truncate"
+                    className="grow sm:grow-0 px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-50 sm:max-w-xs truncate"
                   >
                     {events.map(e => (
                       <option key={e._id} value={e._id}>{e.title}</option>
@@ -946,7 +946,7 @@ export default function JudgeDashboard() {
                     <select
                       value={selectedSubmissionId}
                       onChange={(e) => setSelectedSubmissionId(e.target.value)}
-                      className="flex-grow sm:flex-grow-0 px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-[200px] sm:max-w-xs truncate"
+                      className="grow sm:grow-0 px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-50 sm:max-w-xs truncate"
                     >
                       <option value="all">All ({participants.length})</option>
                       {participants.map(p => (
@@ -1018,7 +1018,7 @@ export default function JudgeDashboard() {
 
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-slate-500">Grading Progress:</span>
-                    <span className="text-sm font-black text-indigo-600 dark:text-indigo-400 font-bold">
+                    <span className="text-sm font-black text-indigo-600 dark:text-indigo-400">
                       {activePhotos.filter(p => p.graded).length} / {activePhotos.length}
                     </span>
                   </div>
@@ -1074,9 +1074,9 @@ export default function JudgeDashboard() {
                           </span>
                         </div>
 
-                        <div className="p-4 flex flex-col gap-3.5 flex-grow justify-between">
+                        <div className="p-4 flex flex-col gap-3.5 grow justify-between">
                           <div className="flex flex-col gap-1">
-                            <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white truncate font-black">
+                            <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white truncate">
                               {photo.title}
                             </h4>
                             <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider block">
@@ -1090,7 +1090,7 @@ export default function JudgeDashboard() {
                                 <span className="px-2 py-0.5 rounded text-[8px] font-extrabold uppercase bg-rose-500/10 text-rose-600 dark:bg-rose-950/20 dark:text-rose-450">
                                   Unpaid
                                 </span>
-                                <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                <span className="text-xs font-black text-slate-900 dark:text-white ml-1">
                                   Grade: 0
                                 </span>
                               </div>
@@ -1101,7 +1101,7 @@ export default function JudgeDashboard() {
                                 }`}>
                                   {photo.score.approvalStatus}
                                 </span>
-                                <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                <span className="text-xs font-black text-slate-900 dark:text-white ml-1">
                                   Grade: {photo.score.approvalStatus === 'Disapproved' ? 0 : photo.score.averageScore}
                                 </span>
                               </div>
@@ -1171,9 +1171,9 @@ export default function JudgeDashboard() {
                             </span>
                           </div>
 
-                          <div className="p-4 flex flex-col gap-3.5 flex-grow justify-between">
+                          <div className="p-4 flex flex-col gap-3.5 grow justify-between">
                             <div className="flex flex-col gap-1">
-                              <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white truncate font-black">
+                              <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white truncate">
                                 {photo.title}
                               </h4>
                               <span className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider block">
@@ -1187,7 +1187,7 @@ export default function JudgeDashboard() {
                                   <span className="px-2 py-0.5 rounded text-[8px] font-extrabold uppercase bg-rose-500/10 text-rose-600 dark:bg-rose-950/20 dark:text-rose-450">
                                     Unpaid
                                   </span>
-                                  <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                  <span className="text-xs font-black text-slate-900 dark:text-white ml-1">
                                     Grade: 0
                                   </span>
                                 </div>
@@ -1198,7 +1198,7 @@ export default function JudgeDashboard() {
                                   }`}>
                                     {photo.score.approvalStatus === 'Approved' ? 'APPROVED' : 'DISAPPROVED'}
                                   </span>
-                                  <span className="text-xs font-black text-slate-900 dark:text-white ml-1 font-bold">
+                                  <span className="text-xs font-black text-slate-900 dark:text-white ml-1">
                                     Grade: {photo.score.approvalStatus === 'Disapproved' ? 0 : photo.score.averageScore}
                                   </span>
                                 </div>
@@ -1263,7 +1263,7 @@ export default function JudgeDashboard() {
                 </span>
               </div>
 
-              <div className="flex-grow flex items-center justify-center p-4 shrink-0">
+              <div className="grow flex items-center justify-center p-4 shrink-0">
                 <div className="relative w-full h-64 sm:h-80 md:h-full md:max-h-[68vh] flex items-center justify-center group cursor-zoom-in shrink-0">
                   <WatermarkPreview
                     src={getBackendUrl(activePhoto.fileUrl)}
@@ -1290,7 +1290,7 @@ export default function JudgeDashboard() {
                     {activePhoto.customFields.map((cf, idx) => (
                       <div key={idx} className="flex flex-col gap-0.5 min-w-0">
                         <span className="text-slate-500 uppercase text-[8px] font-bold">{cf.label}</span>
-                        <span className="font-extrabold text-slate-300 break-words">{cf.value || 'N/A'}</span>
+                        <span className="font-extrabold text-slate-300 wrap-break-word">{cf.value || 'N/A'}</span>
                       </div>
                     ))}
                   </div>
@@ -1320,7 +1320,7 @@ export default function JudgeDashboard() {
                 {/* Photo Description Box at bottom */}
                 <div className="bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-[10px] flex flex-col gap-1">
                   <span className="text-slate-500 uppercase text-[8px] font-bold">Photo Description</span>
-                  <p className="text-slate-300 leading-relaxed max-h-[60px] overflow-y-auto pr-1">
+                  <p className="text-slate-300 leading-relaxed max-h-15 overflow-y-auto pr-1">
                     {activePhoto.description || 'No description shared.'}
                   </p>
                 </div>
@@ -1328,7 +1328,7 @@ export default function JudgeDashboard() {
             </div>
 
             {/* Right Column: Scoring parameters sheet */}
-            <div className="w-full md:w-[380px] bg-white dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-auto md:h-full md:overflow-y-auto">
+            <div className="w-full md:w-95 bg-white dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 h-auto md:h-full md:overflow-y-auto">
               
               {/* Grading Form header */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
@@ -1345,7 +1345,7 @@ export default function JudgeDashboard() {
               </div>
 
               {/* Assessment inputs */}
-              <form onSubmit={handleScoreSubmit} className="p-6 flex-grow flex flex-col gap-5 text-xs">
+              <form onSubmit={handleScoreSubmit} className="p-6 grow flex flex-col gap-5 text-xs">
                 
                 {/* ApprovalStatus switcher */}
                 <div className="flex flex-col gap-1.5">
@@ -1547,7 +1547,7 @@ export default function JudgeDashboard() {
                   </span>
                 </div>
 
-                <div className="flex-grow flex items-center justify-center p-4 shrink-0">
+                <div className="grow flex items-center justify-center p-4 shrink-0">
                   <div className="relative w-full h-64 sm:h-80 lg:h-full lg:max-h-[68vh] flex items-center justify-center group cursor-zoom-in shrink-0">
                     <WatermarkPreview 
                       src={getBackendUrl(offlineZoomPhoto.fileUrl)} 
@@ -1574,7 +1574,7 @@ export default function JudgeDashboard() {
                       {offlineZoomPhoto.customFields.map((cf, idx) => (
                         <div key={idx} className="flex flex-col gap-0.5 min-w-0 text-left">
                           <span className="text-slate-500 uppercase text-[8px] font-bold">{cf.label}</span>
-                          <span className="font-extrabold text-slate-300 break-words">{cf.value || 'N/A'}</span>
+                          <span className="font-extrabold text-slate-300 wrap-break-word">{cf.value || 'N/A'}</span>
                         </div>
                       ))}
                     </div>
@@ -1614,7 +1614,7 @@ export default function JudgeDashboard() {
               </div>
 
               {/* Right Side: Grading Sheet Card */}
-              <div className="w-full lg:w-[380px] shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 p-6 h-auto lg:h-full lg:overflow-y-auto text-left flex flex-col gap-5 bg-slate-50/30 dark:bg-slate-900/30">
+              <div className="w-full lg:w-95 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 p-6 h-auto lg:h-full lg:overflow-y-auto text-left flex flex-col gap-5 bg-slate-50/30 dark:bg-slate-900/30">
                 <div>
                   <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">Grading Sheet (Offline)</h3>
                   <span className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">"{offlineZoomPhoto.title}"</span>
@@ -1737,7 +1737,7 @@ export default function JudgeDashboard() {
       {/* SIGN OFF CONFIRMATION MODAL */}
       {showSignOffModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-[95%] sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 mx-auto animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full max-w-[95%] sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200 mx-auto animate-in fade-in zoom-in-95">
             <div className="text-center flex flex-col gap-2 items-center">
               <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-2xl mb-2">
                 <AlertTriangle size={28} />
@@ -1754,7 +1754,7 @@ export default function JudgeDashboard() {
               <button
                 type="button"
                 onClick={() => setShowSignOffModal(false)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center font-bold"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
               >
                 Cancel
               </button>
@@ -1789,7 +1789,7 @@ export default function JudgeDashboard() {
             <button
               type="button"
               onClick={() => setShowSuccessModal(false)}
-              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center font-bold"
+              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center"
             >
               Awesome, Understood
             </button>
@@ -1812,7 +1812,7 @@ export default function JudgeDashboard() {
             </p>
             <button
               onClick={() => setShowSignedOffBlockModal(false)}
-              className="mt-2 w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold"
+              className="mt-2 w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer"
             >
               Close
             </button>

@@ -1,0 +1,248 @@
+1) Analyze the entire project first. Do not push anything to GitHub and do not use Git at any stage. We will make all modifications and new features only on my localhost (local development environment). I will test every change thoroughly on my local machine before deploying the project.
+
+For now, do not configure or connect any external services, including:
+
+MongoDB
+Vercel
+Render
+Railway
+Cloudinary
+GitHub
+Git or Git commands
+
+Focus only on analyzing the existing project, understanding its structure, and implementing the required changes locally. Do not make any deployment-related changes, production configurations, or cloud integrations. We will handle deployment only after I confirm that everything works correctly on localhost.
+=======================================================================================================================================================
+
+1. Create a Modern Landing Page (index)
+
+Create a new index page as the application's landing page. basically i want Multi-Event Management System
+
+Requirements:
+
+Follow the existing project's color scheme and branding.
+Use a modern, premium UI/UX with a clean, minimal, and professional design.
+Ensure the layout is fully responsive for desktop, tablet, and mobile.
+Use smooth animations and proper spacing without making the interface cluttered.
+Include clear call-to-action buttons for Login and Register.
+Display currently active events ( drawing, painting etc.) on the landing page. 
+Participants should only be able to enroll in active events when participant click on active event button he should redirect to login page.
+add hero section.
+=======================================================================================================================
+
+
+
+Implement a complete event-based workflow throughout the application.
+
+Participant 
+If one or more events are marked as Active, display all active events in a dropdown on the Login/Registration card.
+Selecting an event is mandatory before registration.
+A participant can register for only one selected active event during that registration.
+Save the selected event with the participant's account.
+Prevent registration into inactive, completed, or archived events.
+Participant Dashboard
+
+After login, participants should only see data related to the event in which they are enrolled.
+
+This includes:
+
+Event details
+Event rules
+Categories
+Uploaded photographs
+Submission status
+Payment status
+Certificates
+Notifications
+Results
+Rankings
+Profile information related to that event only
+
+Participants must never be able to view or access information from any other event.
+
+All APIs, pages, database queries, and navigation should strictly filter data by the participant's enrolled event.
+
+Admin Dashboard
+
+Selecting an event must be mandatory before viewing dashboard data.
+
+Add an Event Selector at the top of the Admin Dashboard.
+
+After an event is selected, every module should display data only for that event, including:
+
+Dashboard Overview
+Participant Statistics
+Enrolled Participants
+Categories
+Photo Submissions
+Payments
+Judges
+Scores
+Winners
+Certificates
+Notifications
+Reports
+Analytics
+Downloads
+Settings
+
+Changing the selected event should instantly refresh all dashboard data without requiring a page reload.
+
+Judges Dashboard
+
+Judges must only work with their assigned event.
+
+Requirements:
+
+Judges should be assigned to one or more events by the Admin.
+After login, judges should select an assigned event if multiple assignments exist.
+Judges must only see:
+Participants of the assigned event
+Submitted photographs
+Scoring interface
+Scores
+Results
+Judges must never access photographs, participants, or scores from other events.
+
+
+3. Event-Based Access Control
+
+Implement event-based filtering consistently across the entire application.
+
+Every API, database query, page, component, report, search, filter, export, notification, certificate, and statistics module must use the selected or assigned Event ID.
+
+No user should be able to access another event's data by modifying URLs, API requests, or browser parameters.
+
+This applies to:
+
+Participants
+Judges
+Administrators
+
+
+4. Admin Event History
+
+Add a new History tab in the Admin Dashboard.
+
+This tab should display all events created from the Contests & Configuration section.
+
+Each event card should include:
+
+Event Name
+Event Banner
+Event Type
+Categories
+Registration Start Date
+Registration End Date
+Event Date
+Status (Upcoming / Active / Completed / Archived)
+Total Participants
+Total Judges
+Total Photo Submissions
+Total Payments Collected
+Winners Published (Yes/No)
+Certificates Generated (Yes/No)
+Created Date
+Last Updated Date
+
+Additional features:
+
+Search events
+Filter by status
+Sort by date
+View complete event details
+Duplicate an existing event
+Archive completed events
+Permanently delete events (with confirmation)
+Export event reports
+
+The History tab should function as a complete archive of every event ever created.
+
+
+5. History Tab for Participants and Judges
+Participant Dashboard
+
+Create a new History tab where participants can view all events in which they have participated.
+
+Each event should display:
+
+Event Name
+Event Banner
+Event Category
+Registration Date
+Event Date
+Event Status (Upcoming / Active / Completed)
+Payment Status
+Submission Status
+Number of Photographs Uploaded
+Final Score (after results are published)
+Rank (if available)
+Certificate Status
+Result Status
+Awards Won (if any)
+
+Additional features:
+
+Search events
+Filter by event status
+View complete event details
+View uploaded photographs
+View payment receipt
+View submission details
+View certificates (when available)
+
+Participants must only see the history of events in which they were enrolled. They must never have access to other participants' information.
+
+Judges Dashboard
+
+Create a new History tab where judges can view all events they have been assigned to.
+
+Each event should display:
+
+Event Name
+Event Banner
+Assignment Date
+Judging Start Date
+Judging Completion Date
+Event Status
+Total Participants Judged
+Total Photographs Reviewed
+Total Scores Submitted
+Judging Status (Pending / In Progress / Completed)
+
+Additional features:
+
+Search assigned events
+Filter by event status
+View assigned participants
+View submitted scores
+View judging summary
+View final results after publication
+
+Judges must only see events that were assigned to them by the Admin. They must not have access to any unassigned events or other judges' data.
+
+History Tab Requirements
+Implement a consistent History module across all dashboards:
+Admin Dashboard: Displays every event created in the Contests & Configuration section with full management and reporting capabilities.
+Judge Dashboard: Displays only events assigned to the logged-in judge.
+Participant Dashboard: Displays only events in which the logged-in participant has enrolled.
+
+All history pages should support:
+
+Search
+Sort
+Filter
+Responsive design
+Event detail view
+Fast loading with pagination (if required)
+
+The History tabs should act as a permanent archive while maintaining strict role-based and event-based access control. No user should be able to access history records outside their authorized role or assigned/enrolled events.
+
+5. General Requirements
+Do not change the existing project theme or brand colors.
+Maintain a modern, clean, premium, and consistent UI/UX across all pages.
+Keep the application responsive.
+Preserve the existing project architecture wherever possible.
+Implement proper validation, authorization, and event-based security throughout the application.
+Ensure all new features integrate seamlessly with the existing codebase without breaking current functionality.
+===============================================================================================================================================================
+

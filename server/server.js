@@ -21,13 +21,28 @@ const contestTypeRoutes = require("./routes/contestTypes");
 
 const app = express();
 
-// Middleware
-// Official Robust CORS Middleware Configuration
+// Universal CORS & Preflight OPTIONS Middleware to support Vercel, Railway, and cross-origin clients
+app.use((req, res, next) => {
+  const origin = req.headers.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma'
+  );
+
+  // Instantly resolve browser OPTIONS preflight requests before any DB or route processing
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
+});
+
 app.use(cors({
-  origin: true, // Mirrors request origin back dynamically to support credentials
+  origin: true,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  // Omit allowedHeaders so it dynamically mirrors whatever headers the browser requests in preflight
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
 }));
 
 // Capture raw request body for Razorpay webhook verification

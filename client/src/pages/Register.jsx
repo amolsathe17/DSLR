@@ -505,12 +505,12 @@ export default function Register() {
                 </form>
               )}
 
-              <div className="text-center text-xs text-slate-400">
+              <div className="text-center text-xs text-white">
                 Already have an account?{' '}
                 <Link
                   to="/login"
                   state={{ fromRegister: true }}
-                  className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline inline-flex items-center gap-0.5"
+                  className="font-semibold text-white hover:text-black transition-colors hover:underline inline-flex items-center gap-0.5"
                 >
                   Login here
                   <ArrowRight size={12} />

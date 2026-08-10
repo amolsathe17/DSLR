@@ -521,7 +521,7 @@ export default function Login() {
                   <Link
                     to="/register"
                     state={{ fromLogin: true }}
-                    className={`font-semibold hover:underline inline-flex items-center gap-0.5 ${primaryText}`}
+                    className="font-semibold text-white hover:text-black transition-colors hover:underline inline-flex items-center gap-0.5"
                   >
                     Register here
                     <ArrowRight size={12} />

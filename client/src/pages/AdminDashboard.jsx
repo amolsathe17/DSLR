@@ -3926,15 +3926,15 @@ export default function AdminDashboard() {
               {activeHistoryEvent ? (
                 <div className="flex flex-col gap-6">
                   {/* Event Title & status */}
-                  <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div>
-                      <h4 className="text-base font-extrabold text-slate-900 dark:text-white font-display">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="w-full">
+                      <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white font-display leading-snug">
                         {activeHistoryEvent.title}
                       </h4>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Theme: {activeHistoryEvent.theme}</p>
+                      <p className="text-xs sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 sm:mt-0.5 leading-relaxed">Theme: {activeHistoryEvent.theme}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${
+                    <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto shrink-0 flex-wrap sm:flex-nowrap">
+                      <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg ${
                         activeHistoryEvent.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' :
                         activeHistoryEvent.status === 'Closed' ? 'bg-red-50 text-red-600 dark:bg-red-950/20' :
                         activeHistoryEvent.status === 'Active' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' :
@@ -3944,11 +3944,11 @@ export default function AdminDashboard() {
                       </span>
                       <button
                         onClick={() => downloadEventPDF(activeHistoryEvent)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
+                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 sm:py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
                         title="Download Completed Event PDF"
                       >
                         <Download size={14} />
-                        Download Event PDF
+                        <span>Download Event PDF</span>
                       </button>
                       <button
                         onClick={() => {
@@ -3956,10 +3956,10 @@ export default function AdminDashboard() {
                           setEventToDeleteTitle(activeHistoryEvent.title);
                           setShowDeleteEventModal(true);
                         }}
-                        className="p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 rounded-lg cursor-pointer transition-colors"
+                        className="p-2.5 sm:p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 rounded-xl sm:rounded-lg cursor-pointer transition-colors"
                         data-tooltip="Archive & Delete Contest"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
@@ -5813,15 +5813,15 @@ export default function AdminDashboard() {
                 {activeHistoryEvent ? (
                   <div className="flex flex-col gap-6">
                     {/* Event Title & status */}
-                    <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-                      <div>
-                        <h4 className="text-base font-extrabold text-slate-900 dark:text-white font-display">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                      <div className="w-full">
+                        <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white font-display leading-snug">
                           {activeHistoryEvent.title}
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Theme: {activeHistoryEvent.theme}</p>
+                        <p className="text-xs sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 sm:mt-0.5 leading-relaxed">Theme: {activeHistoryEvent.theme}</p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${
+                      <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto shrink-0 flex-wrap sm:flex-nowrap">
+                        <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg ${
                           activeHistoryEvent.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' :
                           activeHistoryEvent.status === 'Closed' ? 'bg-red-50 text-red-600 dark:bg-red-950/20' :
                           activeHistoryEvent.status === 'Active' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' :
@@ -5836,10 +5836,10 @@ export default function AdminDashboard() {
                             setShowDeleteEventModal(true);
                             setShowHistoryModal(false);
                           }}
-                          className="p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 rounded-lg cursor-pointer transition-colors"
+                          className="p-2.5 sm:p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 rounded-xl sm:rounded-lg cursor-pointer transition-colors"
                           data-tooltip="Archive & Delete Contest"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>

@@ -9,15 +9,17 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isFlipped, setIsFlipped] = useState(true);
+  const [isFlipped, setIsFlipped] = useState(!location.state?.fromRegister);
 
   // 2-second automatic flip ONLY on initial page load (Information Card -> Login Form Card)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsFlipped(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!location.state?.fromRegister) {
+      const timer = setTimeout(() => {
+        setIsFlipped(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state?.fromRegister]);
 
   useEffect(() => {
     if (user) {
@@ -283,59 +285,60 @@ export default function Login() {
           >
             {/* SIDE A: Login Form Card (Front Face) */}
             <div
-              className={`w-full bg-white/90 dark:bg-slate-950/85 border rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 backdrop-blur-xl relative [backface-visibility:hidden] ${primaryBorderColor}`}
+              className={`w-full bg-white/90 dark:bg-slate-950/85 border rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-5 backdrop-blur-xl relative [backface-visibility:hidden] ${primaryBorderColor}`}
             >
-              {/* Top-Right Flip Control Button to View Info Card */}
-              <button
-                type="button"
-                onClick={() => setIsFlipped(true)}
-                className="absolute top-5 right-5 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/90 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all shadow-xs cursor-pointer border border-slate-200/80 dark:border-slate-700"
-                title="View Contest Event Information"
-              >
-                <Info size={14} className={primaryText} />
-                <span className="text-[11px] font-extrabold">Info</span>
-              </button>
-
-              {/* Brand & Tabs */}
+              {/* Top Bar with Role Tabs & Semi-Transparent Info Control Button */}
               <div className="flex flex-col gap-4">
-                {/* Role Tabs */}
-                <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 pr-20 sm:pr-24">
+                <div className="flex items-center justify-between gap-2.5">
+                  <div className="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 flex-1 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => { setLoginRole('Participant'); setError(''); }}
+                      className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                        loginRole === 'Participant'
+                          ? 'bg-indigo-600 text-white shadow-md'
+                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      Contestant
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setLoginRole('Judge'); setError(''); }}
+                      className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                        loginRole === 'Judge'
+                          ? 'bg-emerald-600 text-white shadow-md'
+                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      Judge
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setLoginRole('Admin'); setError(''); }}
+                      className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                        loginRole === 'Admin'
+                          ? 'bg-amber-600 text-white shadow-md'
+                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      Admin
+                    </button>
+                  </div>
+
+                  {/* Semi-transparent Top-Right Info Control Button */}
                   <button
                     type="button"
-                    onClick={() => { setLoginRole('Participant'); setError(''); }}
-                    className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-                      loginRole === 'Participant'
-                        ? 'bg-indigo-600 text-white shadow-md'
-                        : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                    }`}
+                    onClick={() => setIsFlipped(true)}
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-100/60 hover:bg-slate-200/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all shadow-2xs cursor-pointer border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-md"
+                    title="View Contest Event Information"
                   >
-                    Contestant
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setLoginRole('Judge'); setError(''); }}
-                    className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-                      loginRole === 'Judge'
-                        ? 'bg-emerald-600 text-white shadow-md'
-                        : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    Judge
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setLoginRole('Admin'); setError(''); }}
-                    className={`flex-1 text-center py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-                      loginRole === 'Admin'
-                        ? 'bg-amber-600 text-white shadow-md'
-                        : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    Admin
+                    <Info size={14} className={primaryText} />
+                    <span className="text-[11px] font-extrabold">Info</span>
                   </button>
                 </div>
 
-                <div className="flex flex-col items-center gap-1.5 text-center mt-1">
+                <div className="flex flex-col items-center gap-1 text-center">
                   <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white select-none">
                     {loginRole === 'Admin' ? 'Admin Login' : loginRole === 'Judge' ? 'Judge Login' : 'Contestant Login'}
                   </h2>
@@ -517,6 +520,7 @@ export default function Login() {
                   Don't have an account?{' '}
                   <Link
                     to="/register"
+                    state={{ fromLogin: true }}
                     className={`font-semibold hover:underline inline-flex items-center gap-0.5 ${primaryText}`}
                   >
                     Register here

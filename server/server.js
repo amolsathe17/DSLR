@@ -62,16 +62,33 @@ app.use(async (req, res, next) => {
   }
 });
 
-// API Routes
+// API Routes (Dual mounted under /api and root to support all Vercel/serverless environments)
 app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
+
 app.use("/api/events", eventRoutes);
+app.use("/events", eventRoutes);
+
 app.use("/api/categories", categoryRoutes);
+app.use("/categories", categoryRoutes);
+
 app.use("/api/submissions", submissionRoutes);
+app.use("/submissions", submissionRoutes);
+
 app.use("/api/payments", paymentRoutes);
+app.use("/payments", paymentRoutes);
+
 app.use("/api/judges", judgeRoutes);
+app.use("/judges", judgeRoutes);
+
 app.use("/api/admin", adminRoutes);
+app.use("/admin", adminRoutes);
+
 app.use("/api/reports", reportRoutes);
+app.use("/reports", reportRoutes);
+
 app.use("/api/contest-types", contestTypeRoutes);
+app.use("/contest-types", contestTypeRoutes);
 
 // Image proxy route to eliminate cross-origin third-party Tracking Prevention browser warnings permanently
 app.get("/api/image-proxy", (req, res) => {

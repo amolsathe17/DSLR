@@ -276,19 +276,19 @@ export default function Login() {
       <div className="absolute inset-0 bg-slate-950/15"></div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex items-center justify-center min-h-[calc(100vh-8rem)] py-8">
-        {/* 3D Flip Card Container with Constant Fixed Height */}
-        <div className="w-full max-w-md mx-auto [perspective:1200px] relative h-[520px] sm:h-[530px]">
+        {/* 3D Flip Card Container */}
+        <div className="w-full max-w-md mx-auto [perspective:1200px] relative">
           <div
-            className={`w-full h-full transition-transform duration-700 ease-in-out [transform-style:preserve-3d] relative ${
+            className={`w-full transition-transform duration-700 ease-in-out [transform-style:preserve-3d] relative ${
               isFlipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
             }`}
           >
             {/* SIDE A: Login Form Card (Front Face) */}
             <div
-              className={`w-full h-full bg-white/20 dark:bg-slate-950/35 border border-white/30 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col justify-between backdrop-blur-xl relative [backface-visibility:hidden] ${primaryBorderColor}`}
+              className={`w-full bg-white/20 dark:bg-slate-950/35 border border-white/30 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-5 backdrop-blur-xl relative [backface-visibility:hidden] ${primaryBorderColor}`}
             >
               {/* Top Bar with Role Tabs & Semi-Transparent Info Control Button */}
-              <div className="flex flex-col gap-3.5">
+              <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-2.5">
                   <div className="flex bg-slate-100/60 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 flex-1 min-w-0 backdrop-blur-md">
                     <button
@@ -342,7 +342,7 @@ export default function Login() {
                   <h2 className="font-display font-extrabold text-xl text-white dark:text-white select-none">
                     {loginRole === 'Admin' ? 'Admin Login' : loginRole === 'Judge' ? 'Judge Login' : 'Contestant Login'}
                   </h2>
-                  <p className="text-xs text-white dark:text-slate-350 min-h-[32px] flex items-center justify-center leading-tight">
+                  <p className="text-xs text-white/90 dark:text-slate-300 h-9 flex items-center justify-center text-center leading-tight">
                     {loginRole === 'Admin' 
                       ? 'Access your administrator control panel' 
                       : loginRole === 'Judge' 

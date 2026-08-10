@@ -242,16 +242,16 @@ export default function Register() {
       <div className="absolute inset-0 bg-slate-950/15"></div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex items-center justify-center min-h-[calc(100vh-8rem)] py-8">
-        {/* 3D Flip Card Container with Constant Fixed Height */}
-        <div className="w-full max-w-lg mx-auto [perspective:1200px] relative min-h-[540px]">
+        {/* 3D Flip Card Container */}
+        <div className="w-full max-w-lg mx-auto [perspective:1200px] relative">
           <div
-            className={`w-full h-full transition-transform duration-700 ease-in-out [transform-style:preserve-3d] relative ${
+            className={`w-full transition-transform duration-700 ease-in-out [transform-style:preserve-3d] relative ${
               isFlipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
             }`}
           >
             {/* SIDE A: Register Form Card (Front Face) */}
             <div
-              className="w-full h-full bg-white/20 dark:bg-slate-950/35 border border-white/30 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col justify-between backdrop-blur-xl relative [backface-visibility:hidden]"
+              className="w-full bg-white/20 dark:bg-slate-950/35 border border-white/30 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-5 backdrop-blur-xl relative [backface-visibility:hidden]"
             >
               {/* Top Bar with Brand Header & Semi-Transparent Info Control Button */}
               <div className="flex items-start justify-between gap-3">

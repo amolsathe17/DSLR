@@ -2033,32 +2033,35 @@ export default function AdminDashboard() {
                       {p.lastLogin ? new Date(p.lastLogin).toLocaleString() : 'Never'}
                     </td>
                     <td className="py-3.5 pl-4 pr-6 text-right">
-                      <div className="flex justify-end gap-4 px-1.5">
+                      <div className="flex justify-end items-center gap-2">
                         <button
                           onClick={() => setSelectedParticipant(p)}
-                          className="p-1.5 bg-indigo-50 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/20 rounded-lg cursor-pointer"
+                          className="p-2 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:border-indigo-800 dark:text-indigo-300 rounded-xl cursor-pointer transition-colors shadow-2xs"
                           data-tooltip="Audit Profile Details"
+                          title="Audit Profile Details"
                         >
-                          <FileCheck size={14} />
+                          <FileCheck size={16} />
                         </button>
                         <button
                           onClick={() => handleSuspendParticipant(p._id, !p.isSuspended, p.name)}
-                          className={`p-1.5 rounded-lg border cursor-pointer ${
+                          className={`p-2 rounded-xl border cursor-pointer transition-colors shadow-2xs ${
                             p.isSuspended 
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
-                              : 'bg-amber-50 border-amber-200 text-amber-600 dark:bg-amber-950/20'
+                              ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300' 
+                              : 'bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300'
                           }`}
                           data-tooltip={p.isSuspended ? 'Activate User' : 'Suspend User'}
+                          title={p.isSuspended ? 'Activate User' : 'Suspend User'}
                         >
-                          <Ban size={14} />
+                          <Ban size={16} />
                         </button>
                         {(p.paymentStatus === 'Paid' || p.paymentStatus === 'Withdrawn') && (
                           <button
                             onClick={() => handleRefundParticipant(p._id, p.name)}
-                            className="p-1.5 bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-950/20 rounded-lg cursor-pointer"
+                            className="p-2 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300 rounded-xl cursor-pointer transition-colors shadow-2xs"
                             data-tooltip="Refund & Credit Payment"
+                            title="Refund & Credit Payment"
                           >
-                            <RotateCcw size={14} />
+                            <RotateCcw size={16} />
                           </button>
                         )}
                         <button
@@ -2067,10 +2070,11 @@ export default function AdminDashboard() {
                             setParticipantToDeleteName(p.name);
                             setShowDeleteParticipantModal(true);
                           }}
-                          className="p-1.5 bg-red-50 border border-red-200 text-red-600 dark:bg-red-950/20 rounded-lg cursor-pointer"
+                          className="p-2 bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 dark:bg-red-950/40 dark:border-red-800 dark:text-red-300 rounded-xl cursor-pointer transition-colors shadow-2xs"
                           data-tooltip="Delete User & Submissions"
+                          title="Delete User & Submissions"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
@@ -3083,21 +3087,21 @@ export default function AdminDashboard() {
             </h3>
             <div className="flex flex-col gap-3">
               {events.map(e => (
-                <div key={e._id} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex justify-between items-center">
-                  <div>
-                    <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{e.title}</h4>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Theme: "{e.theme}" • Deadline: {new Date(e.deadline).toLocaleDateString()}</p>
+                <div key={e._id} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                  <div className="w-full">
+                    <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm leading-snug">{e.title}</h4>
+                    <p className="text-xs sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Theme: "{e.theme}" • Deadline: {new Date(e.deadline).toLocaleDateString()}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60 dark:border-slate-800">
                     {e.status === 'Draft' ? (
                       <button
                         onClick={() => handleActivateEvent(e._id)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-1.5 px-3.5 rounded-xl cursor-pointer transition-all shadow-sm"
                       >
                         Activate
                       </button>
                     ) : (
-                      <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
+                      <span className={`text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wider ${
                         e.status === 'Active' 
                           ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20' 
                           : 'bg-slate-100 text-slate-500'
@@ -3108,7 +3112,7 @@ export default function AdminDashboard() {
                     
                     <button
                       onClick={() => handleEditClick(e)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-3 rounded-lg cursor-pointer transition-all shadow-sm"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3.5 rounded-xl cursor-pointer transition-all shadow-sm"
                     >
                       Edit
                     </button>
@@ -3119,10 +3123,10 @@ export default function AdminDashboard() {
                         setEventToDeleteTitle(e.title);
                         setShowDeleteEventModal(true);
                       }}
-                      className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg cursor-pointer transition-colors"
+                      className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-xl cursor-pointer transition-colors"
                       data-tooltip="Delete & Archive Contest"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
@@ -3142,23 +3146,23 @@ export default function AdminDashboard() {
             </h3>
             <div className="flex flex-col gap-3">
               {backups.map(b => (
-                <div key={b._id} className="bg-slate-50/70 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex justify-between items-center">
-                  <div>
-                    <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm">{b.title}</h4>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
+                <div key={b._id} className="bg-slate-50/70 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                  <div className="w-full">
+                    <h4 className="font-display font-bold text-slate-900 dark:text-white text-sm leading-snug">{b.title}</h4>
+                    <p className="text-xs sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                       Type: {b.eventType} • Deleted: {new Date(b.deletedAt || b.createdAt).toLocaleString()}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60 dark:border-slate-800">
                     <button
                       onClick={() => handleDownloadBackup(b)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1.5 px-3.5 rounded-lg cursor-pointer transition-all shadow-sm"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3.5 rounded-xl cursor-pointer transition-all shadow-sm"
                     >
                       Download PDF Backup
                     </button>
                     <button
                       onClick={() => handlePurgeBackup(b)}
-                      className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                      className={`p-2 rounded-xl transition-colors cursor-pointer ${
                         b.downloaded 
                           ? 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/40' 
                           : 'bg-slate-100 text-slate-350 cursor-not-allowed dark:bg-slate-800 dark:text-slate-650'
@@ -3166,7 +3170,7 @@ export default function AdminDashboard() {
                       disabled={!b.downloaded}
                       data-tooltip={b.downloaded ? 'Permanently Purge from Database' : 'You must download the PDF backup before you can permanently purge this event'}
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>

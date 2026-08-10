@@ -220,7 +220,7 @@ export default function Login() {
         '--login-bg': `url('${
           (event?.loginBgUrl || event?.imageUrl || event?.image || event?.coverImage)
             ? getBackendUrl(event.loginBgUrl || event.imageUrl || event.image || event.coverImage)
-            : '/login_bg.jpg'
+            : '/hero-bg.jpg'
         }')`
       }}
     >

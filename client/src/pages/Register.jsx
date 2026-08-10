@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getBackendUrl } from '../utils/url';
+import { getBackendUrl, getEventFallbackImage } from '../utils/url';
 import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, ShieldCheck, Key, Calendar, MapPin, Clock } from 'lucide-react';
 
 export default function Register() {
@@ -188,11 +188,7 @@ export default function Register() {
     <div 
       className="min-h-[calc(100vh-4rem)] w-full flex items-center bg-cover bg-center relative login-bg-responsive"
       style={{
-        '--login-bg': `url('${
-          (event?.loginBgUrl || event?.imageUrl || event?.image || event?.coverImage)
-            ? getBackendUrl(event.loginBgUrl || event.imageUrl || event.image || event.coverImage)
-            : '/hero-bg.jpg'
-        }')`
+        '--login-bg': `url('${getBackendUrl(getEventFallbackImage(event))}')`
       }}
     >
       <style>{`

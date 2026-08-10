@@ -38,7 +38,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { getBackendUrl } from "../utils/url";
+import { getBackendUrl, getEventFallbackImage } from "../utils/url";
 
 // ── Event type helpers ────────────────────────────────────────────────────────
 
@@ -187,7 +187,8 @@ function ActiveEventDetailCard({ event, onEnroll }) {
     ? event.rules.filter(r => r && String(r).trim() !== '')
     : (event.rules ? String(event.rules).split('\n').filter(r => r.trim() !== '') : []);
 
-  const headerBgImg = event.loginBgUrl || event.imageUrl || event.image || event.coverImage || '/wild.jpg';
+  const fallbackImg = getEventFallbackImage(event);
+  const headerBgImg = (event.loginBgUrl || event.imageUrl || event.image || event.coverImage) || fallbackImg;
 
   return (
     <div
@@ -207,7 +208,7 @@ function ActiveEventDetailCard({ event, onEnroll }) {
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = '/wild.jpg';
+            e.target.src = fallbackImg;
           }}
         />
         {/* Dark overlay for text readability */}
@@ -455,7 +456,8 @@ function UpcomingEventCard({ event, onEnroll }) {
   const colors = getColors(event.eventType);
   const Icon = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
   const [themeExpanded, setThemeExpanded] = useState(false);
-  const headerBgImg = event.loginBgUrl || event.imageUrl || event.image || event.coverImage || '/wild.jpg';
+  const fallbackImg = getEventFallbackImage(event);
+  const headerBgImg = (event.loginBgUrl || event.imageUrl || event.image || event.coverImage) || fallbackImg;
 
   return (
     <div
@@ -474,7 +476,7 @@ function UpcomingEventCard({ event, onEnroll }) {
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = '/wild.jpg';
+            e.target.src = fallbackImg;
           }}
         />
         <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[1px]" />
@@ -591,7 +593,8 @@ function UpcomingEventCard({ event, onEnroll }) {
 function ClosedEventCard({ event }) {
   const Icon = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
   const [themeExpanded, setThemeExpanded] = useState(false);
-  const headerBgImg = event.loginBgUrl || event.imageUrl || event.image || event.coverImage || '/wild.jpg';
+  const fallbackImg = getEventFallbackImage(event);
+  const headerBgImg = (event.loginBgUrl || event.imageUrl || event.image || event.coverImage) || fallbackImg;
 
   return (
     <div className="group relative flex flex-col rounded-3xl overflow-hidden border border-slate-200/60 bg-white shadow-sm hover:shadow-md transition-all duration-300">
@@ -603,7 +606,7 @@ function ClosedEventCard({ event }) {
           className="absolute inset-0 w-full h-full object-cover grayscale opacity-40 transition-transform duration-700 group-hover:scale-105"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = '/wild.jpg';
+            e.target.src = fallbackImg;
           }}
         />
         <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[1px]" />

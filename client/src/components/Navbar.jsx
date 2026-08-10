@@ -242,8 +242,8 @@ export default function Navbar() {
     <nav className={`${navPosition} z-50 transition-all duration-300 ${navBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={`flex items-center h-16 transition-all duration-300 ${onHero ? 'justify-center' : 'justify-between'}`}>
-          {/* Logo — hidden on hero desktop, visible once scrolled or on inner pages */}
-          <div className={`items-center ${onHero ? 'hidden md:flex' : 'flex'}`}>
+          {/* Logo — hidden on hero, visible once scrolled or on inner pages */}
+          <div className={`items-center ${onHero ? 'hidden' : 'flex'}`}>
             <Link
               to="/"
               className="flex items-center gap-2 group"

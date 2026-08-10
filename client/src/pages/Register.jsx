@@ -242,16 +242,16 @@ export default function Register() {
       <div className="absolute inset-0 bg-slate-950/15"></div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex items-center justify-center min-h-[calc(100vh-8rem)] py-8">
-        {/* 3D Flip Card Container */}
-        <div className="w-full max-w-lg mx-auto [perspective:1200px] relative">
+        {/* 3D Flip Card Container with Constant Fixed Height */}
+        <div className="w-full max-w-lg mx-auto [perspective:1200px] relative min-h-[540px]">
           <div
-            className={`w-full transition-transform duration-700 ease-in-out [transform-style:preserve-3d] relative ${
+            className={`w-full h-full transition-transform duration-700 ease-in-out [transform-style:preserve-3d] relative ${
               isFlipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
             }`}
           >
             {/* SIDE A: Register Form Card (Front Face) */}
             <div
-              className="w-full bg-white/35 dark:bg-slate-950/40 border border-white/40 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-5 backdrop-blur-xl relative [backface-visibility:hidden]"
+              className="w-full h-full bg-white/20 dark:bg-slate-950/35 border border-white/30 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col justify-between backdrop-blur-xl relative [backface-visibility:hidden]"
             >
               {/* Top Bar with Brand Header & Semi-Transparent Info Control Button */}
               <div className="flex items-start justify-between gap-3">
@@ -265,7 +265,7 @@ export default function Register() {
                 <button
                   type="button"
                   onClick={() => setIsFlipped(true)}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-100/60 hover:bg-slate-200/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all shadow-2xs cursor-pointer border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-md mt-0.5"
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/40 hover:bg-white/70 dark:bg-slate-800/50 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-100 text-xs font-bold transition-all shadow-2xs cursor-pointer border border-white/50 dark:border-slate-700/50 backdrop-blur-md mt-0.5"
                   title="View Contest Event Information"
                 >
                   <Info size={14} className="text-indigo-600 dark:text-indigo-400" />
@@ -344,7 +344,7 @@ export default function Register() {
                       </div>
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Email Address</label>
+                        <label className="text-xs font-semibold text-white">Email Address</label>
                         <div className="relative">
                           <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                           <input

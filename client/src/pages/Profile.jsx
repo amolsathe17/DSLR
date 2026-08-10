@@ -185,7 +185,7 @@ export default function Profile() {
 
             {/* Email (Disabled) */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-500">Email Address (Cannot Change)</label>
+              <label className="text-xs font-semibold text-white">Email Address (Cannot Change)</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input

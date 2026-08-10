@@ -118,7 +118,7 @@ export default function ForgotPassword() {
         {!isResetting ? (
           <form onSubmit={handleRequestOtp} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-500">Email Address</label>
+              <label className="text-xs font-semibold text-white">Email Address</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input

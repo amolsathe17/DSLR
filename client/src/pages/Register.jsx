@@ -251,7 +251,7 @@ export default function Register() {
           >
             {/* SIDE A: Register Form Card (Front Face) */}
             <div
-              className="w-full bg-white/90 dark:bg-slate-950/85 border border-white/20 dark:border-white/5 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-5 backdrop-blur-xl relative [backface-visibility:hidden]"
+              className="w-full bg-white/35 dark:bg-slate-950/40 border border-white/40 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-5 backdrop-blur-xl relative [backface-visibility:hidden]"
             >
               {/* Top Bar with Brand Header & Semi-Transparent Info Control Button */}
               <div className="flex items-start justify-between gap-3">
@@ -520,7 +520,7 @@ export default function Register() {
 
             {/* SIDE B: Information Card (Back Face) */}
             <div
-              className="w-full min-h-[460px] h-full absolute inset-0 bg-slate-950/90 text-white p-6 sm:p-8 rounded-3xl border border-white/15 backdrop-blur-xl shadow-2xl flex flex-col justify-between [transform:rotateY(180deg)] [backface-visibility:hidden] z-10 overflow-y-auto"
+              className="w-full min-h-[460px] h-full absolute inset-0 bg-slate-950/45 text-white p-6 sm:p-8 rounded-3xl border border-white/20 backdrop-blur-xl shadow-2xl flex flex-col justify-between [transform:rotateY(180deg)] [backface-visibility:hidden] z-10 overflow-y-auto"
             >
               {/* Top-Right Flip Control Button to Return to Form Card */}
               <button

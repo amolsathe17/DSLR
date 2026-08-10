@@ -106,54 +106,39 @@ function getColors(type) {
   return EVENT_COLORS[type] || EVENT_COLORS.default;
 }
 
-// ── Countdown hook ─────────────────────────────────────────────────────────────
-
-function useCountdown(deadline) {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-    expired: false,
-  });
-  useEffect(() => {
-    if (!deadline) return;
-    const tick = () => {
-      const diff = +new Date(deadline) - +new Date();
-      if (diff <= 0) {
-        setTimeLeft({
-          days: 0,
-          hours: 0,
-          minutes: 0,
-          seconds: 0,
-          expired: true,
-        });
-        return;
-      }
-      setTimeLeft({
-        days: Math.floor(diff / 86400000),
-        hours: Math.floor((diff / 3600000) % 24),
-        minutes: Math.floor((diff / 60000) % 60),
-        seconds: Math.floor((diff / 1000) % 60),
-        expired: false,
-      });
+function useCountdown(targetDateStr) {
+  const calc = () => {
+    if (!targetDateStr) return { expired: false, days: 0, hours: 0, minutes: 0, seconds: 0 };
+    const diff = new Date(targetDateStr).getTime() - Date.now();
+    if (diff <= 0) return { expired: true, days: 0, hours: 0, minutes: 0, seconds: 0 };
+    return {
+      expired: false,
+      days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((diff / (1000 * 60)) % 60),
+      seconds: Math.floor((diff / 1000) % 60),
     };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [deadline]);
-  return timeLeft;
+  };
+
+  const [time, setTime] = useState(calc);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(calc()), 1000);
+    return () => clearInterval(timer);
+  }, [targetDateStr]);
+
+  return time;
 }
 
 function CountdownUnit({ value, label, colorClass }) {
   return (
-    <div className="flex flex-col items-center bg-white border border-slate-200 px-3 py-2 rounded-xl min-w-14 shadow-sm">
-      <span
-        className={`font-display font-black text-xl tabular-nums leading-none ${colorClass}`}
+    <div className="flex flex-col items-center">
+      <div
+        className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-black text-base sm:text-lg shadow-sm ${colorClass}`}
       >
-        {String(value).padStart(2, "0")}
-      </span>
-      <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5 text-slate-400">
+        {String(value).padStart(2, '0')}
+      </div>
+      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
         {label}
       </span>
     </div>
@@ -161,40 +146,33 @@ function CountdownUnit({ value, label, colorClass }) {
 }
 
 function PrizeRow({ prize, idx, faded }) {
-  const medals = ["🥇", "🥈", "🥉"];
-  const base = faded
-    ? "bg-slate-50 border-slate-100 text-slate-400"
-    : idx === 0
-      ? "bg-amber-50 border-amber-200/70 text-amber-800"
-      : idx === 1
-        ? "bg-slate-50 border-slate-200 text-slate-600"
-        : "bg-orange-50 border-orange-100 text-orange-700";
+  const badges = [
+    { rank: '1st', bg: 'bg-amber-400 text-amber-950', ring: 'ring-amber-400/30' },
+    { rank: '2nd', bg: 'bg-slate-300 text-slate-900', ring: 'ring-slate-300/30' },
+    { rank: '3rd', bg: 'bg-amber-700 text-amber-100', ring: 'ring-amber-700/30' },
+  ];
+  const b = badges[idx] || { rank: `${idx + 1}th`, bg: 'bg-slate-200 text-slate-700', ring: '' };
 
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2 rounded-xl border text-xs font-semibold ${base}`}
+      className={`flex items-center justify-between p-2.5 rounded-xl border border-slate-100 text-xs font-semibold ${
+        faded ? 'bg-slate-50 opacity-60' : 'bg-slate-50'
+      }`}
     >
-      <span className="text-base shrink-0">{medals[idx] || "🏅"}</span>
-      <div className="flex-1 min-w-0">
-        <p
-          className={`font-bold text-[10px] uppercase tracking-wider ${faded ? "opacity-60" : "opacity-70"}`}
+      <div className="flex items-center gap-2">
+        <span
+          className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] uppercase shadow-2xs ${b.bg}`}
         >
-          {prize.rank}
-        </p>
-        <p className="font-black text-sm truncate">{prize.reward}</p>
-        {prize.description && (
-          <p
-            className={`text-[10px] truncate mt-0.5 ${faded ? "opacity-40" : "opacity-60"}`}
-          >
-            {prize.description}
-          </p>
-        )}
+          {b.rank}
+        </span>
+        <span className="text-slate-700 font-bold">{prize.title || prize.rank || `Prize ${idx + 1}`}</span>
       </div>
+      <span className="font-extrabold text-slate-900">₹{Number(prize.amount).toLocaleString('en-IN')}</span>
     </div>
   );
 }
 
-// ── Active Event Detail Card ─────────────────────────────────────────────────
+// ── Active Event Card ─────────────────────────────────────────────────────────
 
 function ActiveEventDetailCard({ event, onEnroll }) {
   const colors = getColors(event.eventType);
@@ -208,6 +186,8 @@ function ActiveEventDetailCard({ event, onEnroll }) {
     ? event.rules.filter(r => r && String(r).trim() !== '')
     : (event.rules ? String(event.rules).split('\n').filter(r => r.trim() !== '') : []);
 
+  const headerBgImg = event.loginBgUrl || event.imageUrl || event.image || event.coverImage || '/wild.jpg';
+
   return (
     <div
       className={`group relative flex flex-col rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white border-2 ${colors.bg}`}
@@ -216,38 +196,50 @@ function ActiveEventDetailCard({ event, onEnroll }) {
         className={`absolute inset-0 bg-linear-to-br ${colors.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}
       />
 
-      {/* Coloured header — uniform height */}
+      {/* Header with background image and dark overlay */}
       <div
-        className={`relative bg-linear-to-br ${colors.header} px-6 pt-6 pb-5 text-white flex flex-col justify-between min-h-45`}
+        className={`relative bg-linear-to-br ${colors.header} px-6 pt-6 pb-5 text-white flex flex-col justify-between min-h-48 overflow-hidden`}
       >
-        <div>
+        <img
+          src={getBackendUrl(headerBgImg)}
+          alt={event.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = '/wild.jpg';
+          }}
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[1px]" />
+
+        <div className="relative z-10">
           <div className="flex items-start justify-between mb-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/20">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/20 shadow-sm">
               <Icon size={24} className="text-white" />
             </div>
             <div className="flex flex-col items-end gap-1">
-              <span className="px-2.5 py-1 rounded-full bg-emerald-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 Live · Active
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
                 {event.eventType}
               </span>
             </div>
           </div>
-          <h3 className="font-display font-black text-2xl leading-tight">
+          <h3 className="font-display font-black text-2xl leading-tight text-white drop-shadow-sm">
             {event.title}
           </h3>
         </div>
 
         {event.theme ? (
-          <p className="text-white/75 text-xs mt-1.5 italic leading-relaxed">
+          <p className="relative z-10 text-white/90 text-xs mt-2 italic leading-relaxed font-medium drop-shadow-xs">
             "{themeExpanded ? event.theme : (event.theme.length > 70 ? event.theme.slice(0, 70) + "..." : event.theme)}"
             {event.theme.length > 70 && (
               <button
                 type="button"
                 onClick={() => setThemeExpanded(!themeExpanded)}
-                className="ml-1 text-white underline font-bold hover:text-white/80 cursor-pointer text-xs"
+                className="ml-1.5 text-indigo-200 underline font-bold hover:text-white cursor-pointer text-xs"
               >
                 {themeExpanded ? "less" : "more"}
               </button>
@@ -443,12 +435,14 @@ function ActiveEventDetailCard({ event, onEnroll }) {
           )}
         </div>
 
-        <button
-          onClick={() => onEnroll(event)}
-          className={`w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold text-white shadow-md transition-all cursor-pointer ${colors.btn}`}
-        >
-          Enroll in This Event <ArrowRight size={15} />
-        </button>
+        <div className="flex justify-center">
+          <button
+            onClick={() => onEnroll(event)}
+            className={`w-fit px-8 py-3 rounded-full text-sm font-bold text-white shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${colors.btn}`}
+          >
+            Enroll in This Event <ArrowRight size={15} />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -460,6 +454,7 @@ function UpcomingEventCard({ event, onEnroll }) {
   const colors = getColors(event.eventType);
   const Icon = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
   const [themeExpanded, setThemeExpanded] = useState(false);
+  const headerBgImg = event.loginBgUrl || event.imageUrl || event.image || event.coverImage || '/wild.jpg';
 
   return (
     <div
@@ -470,29 +465,40 @@ function UpcomingEventCard({ event, onEnroll }) {
       />
 
       <div
-        className={`relative bg-linear-to-br ${colors.header} px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-41.25`}
+        className={`relative bg-linear-to-br ${colors.header} px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-44 overflow-hidden`}
       >
-        <div>
+        <img
+          src={getBackendUrl(headerBgImg)}
+          alt={event.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = '/wild.jpg';
+          }}
+        />
+        <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[1px]" />
+
+        <div className="relative z-10">
           <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/20">
               <Icon size={20} className="text-white" />
             </div>
             <div className="flex flex-col items-end gap-1">
               <span className="px-2 py-0.5 rounded-full bg-blue-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
                 <Clock size={8} /> Upcoming
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
+              <span className="px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
                 {event.eventType}
               </span>
             </div>
           </div>
-          <h3 className="font-display font-black text-lg leading-tight line-clamp-2">
+          <h3 className="font-display font-black text-lg leading-tight line-clamp-2 drop-shadow-xs">
             {event.title}
           </h3>
         </div>
 
         {event.theme ? (
-          <p className="text-white/75 text-[11px] mt-1 italic leading-relaxed">
+          <p className="relative z-10 text-white/90 text-[11px] mt-1 italic leading-relaxed font-medium drop-shadow-xs">
             "{themeExpanded ? event.theme : (event.theme.length > 70 ? event.theme.slice(0, 70) + "..." : event.theme)}"
             {event.theme.length > 70 && (
               <button
@@ -567,10 +573,10 @@ function UpcomingEventCard({ event, onEnroll }) {
         )}
       </div>
 
-      <div className="relative px-5 pb-5 pt-1">
+      <div className="relative px-5 pb-5 pt-1 flex justify-center">
         <button
           onClick={() => onEnroll(event)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold border-2 border-blue-300 text-blue-600 hover:bg-blue-50 transition-all cursor-pointer"
+          className="w-fit px-6 py-2.5 rounded-full text-xs font-bold border-2 border-blue-300 text-blue-600 hover:bg-blue-50 transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
           Register to Get Notified <ChevronRight size={13} />
         </button>
@@ -584,26 +590,38 @@ function UpcomingEventCard({ event, onEnroll }) {
 function ClosedEventCard({ event }) {
   const Icon = EVENT_ICONS[event.eventType] || EVENT_ICONS.default;
   const [themeExpanded, setThemeExpanded] = useState(false);
+  const headerBgImg = event.loginBgUrl || event.imageUrl || event.image || event.coverImage || '/wild.jpg';
 
   return (
     <div className="group relative flex flex-col rounded-3xl overflow-hidden border border-slate-200/60 bg-white shadow-sm hover:shadow-md transition-all duration-300">
       <div className="absolute inset-0 bg-slate-50/40 pointer-events-none rounded-3xl" />
-      <div className="relative bg-linear-to-br from-slate-500 to-slate-700 px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-41.25">
-        <div>
+      <div className="relative bg-linear-to-br from-slate-500 to-slate-700 px-5 pt-5 pb-8 text-white flex flex-col justify-between min-h-44 overflow-hidden">
+        <img
+          src={getBackendUrl(headerBgImg)}
+          alt={event.title}
+          className="absolute inset-0 w-full h-full object-cover grayscale opacity-40 transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = '/wild.jpg';
+          }}
+        />
+        <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[1px]" />
+
+        <div className="relative z-10">
           <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/20">
               <Icon size={20} className="text-white/80" />
             </div>
             <div className="flex flex-col items-end gap-1">
-              <span className="px-2 py-0.5 rounded-full bg-slate-400 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full bg-slate-500 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
                 <Lock size={8} /> Closed
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-white/20 text-white/70 text-[9px] font-bold uppercase tracking-wider">
+              <span className="px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-white/80 text-[9px] font-bold uppercase tracking-wider">
                 {event.eventType}
               </span>
             </div>
           </div>
-          <h3 className="font-display font-black text-lg leading-tight line-clamp-2 text-white/90">
+          <h3 className="font-display font-black text-lg leading-tight line-clamp-2 text-white/90 drop-shadow-xs">
             {event.title}
           </h3>
         </div>

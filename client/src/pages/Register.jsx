@@ -2,12 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getBackendUrl, getEventFallbackImage } from '../utils/url';
-import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, ShieldCheck, Key, Calendar, MapPin, Clock } from 'lucide-react';
+import { Camera, User, Mail, Phone, Lock, Building, ShieldAlert, ArrowRight, ShieldCheck, Key, Calendar, MapPin, Clock, RotateCcw, Info } from 'lucide-react';
 
 export default function Register() {
   const { user, register, verifyOtp, requestMobileOtp, verifyMobileOtp, apiFetch } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [isFlipped, setIsFlipped] = useState(true);
+
+  // 2-second automatic flip ONLY on initial page load (Information Card -> Register Form Card)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsFlipped(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -229,318 +239,351 @@ export default function Register() {
       {/* Dark tint overlay without blur */}
       <div className="absolute inset-0 bg-slate-950/15"></div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center md:items-end justify-center md:justify-between gap-12">
-        <div className="relative w-full max-w-lg bg-white/85 dark:bg-slate-950/75 border border-white/20 dark:border-white/5 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 backdrop-blur-lg shrink-0">
-        
-        {/* Brand Header */}
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">
-            {isVerifying ? 'Email Verification' : 'Register to submit entries and track results'}
-          </h2>
-        </div>
-
-        {error && (
-          <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-xs text-red-600 dark:text-red-400">
-            <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {!isVerifying ? (
-          <div className="flex flex-col gap-5">
-            {/* Toggle tabs */}
-            <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={() => { setRegisterMethod('email'); setError(''); }}
-                className={`flex-1 text-center py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
-                  registerMethod === 'email'
-                    ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-355'
-                }`}
-              >
-                Email & Password
-              </button>
-              <button
-                type="button"
-                onClick={() => { setRegisterMethod('mobile'); setError(''); }}
-                className={`flex-1 text-center py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
-                  registerMethod === 'mobile'
-                    ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-355'
-                }`}
-              >
-                Mobile & OTP
-              </button>
-            </div>
-
-            {/* Email/Password Signup */}
-            {registerMethod === 'email' ? (
-              <form onSubmit={handleEmailRegister} className="flex flex-col gap-4 animate-in fade-in duration-200">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-slate-500">Full Name</label>
-                    <div className="relative">
-                      <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="John Doe"
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-slate-500">Mobile Number</label>
-                    <div className="relative">
-                      <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="tel"
-                        value={mobile}
-                        onChange={(e) => setMobile(e.target.value)}
-                        placeholder="9876543210"
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-500">Email Address</label>
-                  <div className="relative">
-                    <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="john@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-500">City</label>
-                  <div className="relative">
-                    <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="Mumbai"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-500">Create Password</label>
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
-                  >
-                    <ShieldCheck size={16} />
-                    {loading ? 'Processing...' : 'Register & Verify'}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              /* Mobile/OTP Signup */
-              <form onSubmit={handleMobileRegister} className="flex flex-col gap-4 animate-in fade-in duration-200">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-500">Full Name</label>
-                  <div className="relative">
-                    <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="John Doe"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-500">City</label>
-                  <div className="relative">
-                    <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="Mumbai"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-500">Mobile Number</label>
-                  <div className="relative">
-                    <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="tel"
-                      value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
-                      placeholder="9876543210"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
-                  >
-                    <Key size={16} />
-                    {loading ? 'Sending OTP...' : 'Send Signup OTP'}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        ) : (
-          /* OTP verification form */
-          <form onSubmit={handleOtpVerify} className="flex flex-col gap-5 animate-in fade-in duration-200">
-            <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-4 flex flex-col gap-1">
-              <span className="text-[10px] font-extrabold uppercase text-slate-400">Test OTP Code (Development Only)</span>
-              <span className="font-mono text-lg font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">
-                {devOtp}
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-slate-500 text-center">
-                We've sent a 6-digit OTP verification code. Please input it below:
-              </label>
-              <input
-                type="text"
-                maxLength={6}
-                value={otpVal}
-                onChange={(e) => setOtpVal(e.target.value)}
-                placeholder="123456"
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-center font-mono text-2xl tracking-widest focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
-                required
-              />
-            </div>
-
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-              >
-                Verify Account
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => { setIsVerifying(false); setError(''); }}
-              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-center cursor-pointer"
-            >
-              Change registration details
-            </button>
-          </form>
-        )}
-
-        <div className="text-center text-xs text-slate-400">
-          Already have an account?{' '}
-          <Link
-            to="/login"
-            className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline inline-flex items-center gap-0.5"
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex items-center justify-center min-h-[calc(100vh-8rem)] py-8">
+        {/* 3D Flip Card Container */}
+        <div className="w-full max-w-lg mx-auto [perspective:1200px] relative">
+          <div
+            className={`w-full transition-transform duration-700 ease-in-out [transform-style:preserve-3d] relative ${
+              isFlipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
+            }`}
           >
-            Login here
-            <ArrowRight size={12} />
-          </Link>
-        </div>
+            {/* SIDE A: Register Form Card (Front Face) */}
+            <div
+              className="w-full bg-white/90 dark:bg-slate-950/85 border border-white/20 dark:border-white/5 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 backdrop-blur-xl relative [backface-visibility:hidden]"
+            >
+              {/* Top-Right Flip Control Button to View Info Card */}
+              <button
+                type="button"
+                onClick={() => setIsFlipped(true)}
+                className="absolute top-5 right-5 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/90 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all shadow-xs cursor-pointer border border-slate-200/80 dark:border-slate-700"
+                title="View Contest Event Information"
+              >
+                <Info size={14} className="text-indigo-600 dark:text-indigo-400" />
+                <span className="text-[11px] font-extrabold">Info</span>
+              </button>
 
-        </div>
+              {/* Brand Header */}
+              <div className="flex flex-col items-center gap-2 text-center pr-20 sm:pr-24">
+                <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">
+                  {isVerifying ? 'Email Verification' : 'Register to submit entries and track results'}
+                </h2>
+              </div>
 
-        {/* Right Side: Exhibition Event Details in White Text */}
-        {event && (
-          <div className="flex flex-col gap-6 text-white max-w-md w-full bg-slate-950/60 p-6 sm:p-8 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300">
-            {/* Block 1: Submission Deadline */}
-            <div className="flex items-center gap-4">
-              <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0">
-                <Clock size={28} className="text-indigo-400" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">SUBMISSION DEADLINE</p>
-                <p className="text-base font-black font-display text-white mt-0.5">
-                  {new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </p>
-              </div>
-            </div>
+              {error && (
+                <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/20 p-3 rounded-xl text-xs text-red-600 dark:text-red-400">
+                  <ShieldAlert size={16} className="shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
 
-            {/* Block 2: Exhibition Date */}
-            <div className="flex items-center gap-4">
-              <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0">
-                <Calendar size={28} className="text-indigo-400" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">EXHIBITION DATE</p>
-                <p className="text-base font-black font-display text-white mt-0.5">
-                  {event.exhibitionFromDate ? (
-                    new Date(event.exhibitionFromDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-                  ) : event.eventDate ? (
-                    new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+              {!isVerifying ? (
+                <div className="flex flex-col gap-5">
+                  {/* Toggle tabs */}
+                  <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => { setRegisterMethod('email'); setError(''); }}
+                      className={`flex-1 text-center py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                        registerMethod === 'email'
+                          ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-sm'
+                          : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-355'
+                      }`}
+                    >
+                      Email & Password
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setRegisterMethod('mobile'); setError(''); }}
+                      className={`flex-1 text-center py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                        registerMethod === 'mobile'
+                          ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-sm'
+                          : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-355'
+                      }`}
+                    >
+                      Mobile & OTP
+                    </button>
+                  </div>
+
+                  {/* Email/Password Signup */}
+                  {registerMethod === 'email' ? (
+                    <form onSubmit={handleEmailRegister} className="flex flex-col gap-4 animate-in fade-in duration-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-semibold text-slate-500">Full Name</label>
+                          <div className="relative">
+                            <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                              type="text"
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                              placeholder="John Doe"
+                              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-semibold text-slate-500">Mobile Number</label>
+                          <div className="relative">
+                            <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                              type="tel"
+                              value={mobile}
+                              onChange={(e) => setMobile(e.target.value)}
+                              placeholder="9876543210"
+                              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-500">Email Address</label>
+                        <div className="relative">
+                          <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="john@example.com"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-500">City</label>
+                        <div className="relative">
+                          <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                            placeholder="Mumbai"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-500">Create Password</label>
+                        <div className="relative">
+                          <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
+                        >
+                          <ShieldCheck size={16} />
+                          {loading ? 'Processing...' : 'Register & Verify'}
+                        </button>
+                      </div>
+                    </form>
                   ) : (
-                    new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                    /* Mobile/OTP Signup */
+                    <form onSubmit={handleMobileRegister} className="flex flex-col gap-4 animate-in fade-in duration-200">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-500">Full Name</label>
+                        <div className="relative">
+                          <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="John Doe"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-500">City</label>
+                        <div className="relative">
+                          <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                            placeholder="Mumbai"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-500">Mobile Number</label>
+                        <div className="relative">
+                          <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="tel"
+                            value={mobile}
+                            onChange={(e) => setMobile(e.target.value)}
+                            placeholder="9876543210"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
+                        >
+                          <Key size={16} />
+                          {loading ? 'Sending OTP...' : 'Send Signup OTP'}
+                        </button>
+                      </div>
+                    </form>
                   )}
-                </p>
-              </div>
-            </div>
-            
-            {/* Block 3: Exhibition Venue */}
-            <div className="flex items-start gap-4">
-              <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0 mt-0.5">
-                <MapPin size={28} className="text-indigo-400" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">EXHIBITION VENUE</p>
-                <p className="text-sm font-semibold leading-relaxed text-white mt-0.5">
-                  {event.venue || 'Bal-Gandharv Art Gallery, Jangali Maharaj Road, Pune 411030'}
-                </p>
+                </div>
+              ) : (
+                /* OTP verification form */
+                <form onSubmit={handleOtpVerify} className="flex flex-col gap-5 animate-in fade-in duration-200">
+                  <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-4 flex flex-col gap-1">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-400">Test OTP Code (Development Only)</span>
+                    <span className="font-mono text-lg font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">
+                      {devOtp}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-semibold text-slate-500 text-center">
+                      We've sent a 6-digit OTP verification code. Please input it below:
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={otpVal}
+                      onChange={(e) => setOtpVal(e.target.value)}
+                      placeholder="123456"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-center font-mono text-2xl tracking-widest focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex justify-center">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    >
+                      Verify Account
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => { setIsVerifying(false); setError(''); }}
+                    className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-center cursor-pointer"
+                  >
+                    Change registration details
+                  </button>
+                </form>
+              )}
+
+              <div className="text-center text-xs text-slate-400">
+                Already have an account?{' '}
+                <Link
+                  to="/login"
+                  className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline inline-flex items-center gap-0.5"
+                >
+                  Login here
+                  <ArrowRight size={12} />
+                </Link>
               </div>
             </div>
 
-            {/* Divider and Event Title Only */}
-            <div className="border-t border-white/15 pt-4 mt-2">
-              <p className="text-sm text-slate-200 leading-relaxed font-bold">
-                {event.title}.
-              </p>
+            {/* SIDE B: Information Card (Back Face) */}
+            <div
+              className="w-full min-h-[460px] h-full absolute inset-0 bg-slate-950/90 text-white p-6 sm:p-8 rounded-3xl border border-white/15 backdrop-blur-xl shadow-2xl flex flex-col justify-between [transform:rotateY(180deg)] [backface-visibility:hidden] z-10 overflow-y-auto"
+            >
+              {/* Top-Right Flip Control Button to Return to Form Card */}
+              <button
+                type="button"
+                onClick={() => setIsFlipped(false)}
+                className="absolute top-5 right-5 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-all shadow-sm cursor-pointer border border-white/20 backdrop-blur-md"
+                title="Back to Registration Form"
+              >
+                <RotateCcw size={14} className="text-indigo-400" />
+                <span className="text-[11px] font-extrabold">Form</span>
+              </button>
+
+              <div className="flex flex-col gap-6 my-auto pt-2">
+                {/* Block 1: Submission Deadline */}
+                <div className="flex items-center gap-4">
+                  <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0">
+                    <Clock size={28} className="text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">SUBMISSION DEADLINE</p>
+                    <p className="text-sm sm:text-base font-black font-display text-white mt-0.5">
+                      {event ? new Date(event.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '17 September 2026'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Block 2: Exhibition Date */}
+                <div className="flex items-center gap-4">
+                  <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0">
+                    <Calendar size={28} className="text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">EXHIBITION DATE</p>
+                    <p className="text-sm sm:text-base font-black font-display text-white mt-0.5">
+                      {event?.exhibitionFromDate ? (
+                        new Date(event.exhibitionFromDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                      ) : event?.eventDate ? (
+                        new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                      ) : (
+                        '20 September 2026'
+                      )}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Block 3: Exhibition Venue */}
+                <div className="flex items-start gap-4">
+                  <div className="p-3.5 bg-white/10 rounded-2xl text-white shrink-0 mt-0.5">
+                    <MapPin size={28} className="text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase text-slate-300 font-extrabold tracking-widest">EXHIBITION VENUE</p>
+                    <p className="text-xs sm:text-sm font-semibold leading-relaxed text-white mt-0.5">
+                      {event?.venue || 'Bal-Gandharv Art Gallery, Jangali Maharaj Road, Pune 411030'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Divider and Event Title Only */}
+                <div className="border-t border-white/15 pt-4 mt-2">
+                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-bold">
+                    {event?.title || 'National DSLR Wildlife & Landscape Championship 2026'}.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        )}
-
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,4 @@
-export const getBackendUrl = (path) => {
-  if (!path) return '';
-
+export const getBackendUrl = (path = '') => {
   // If path is a legacy local certificate upload that no longer exists on ephemeral storage,
   // return fallback static template to prevent 404 console errors
   if (typeof path === 'string' && path.includes('/uploads/certificateImage-')) {
@@ -27,6 +25,10 @@ export const getBackendUrl = (path) => {
     } else {
       baseUrl = '';
     }
+  }
+
+  if (!path) {
+    return baseUrl;
   }
 
   // If path is a raw Cloudinary public ID or filename without http prefix (e.g. "vnqoqivjgdvgb4cx60ui.jpg" or "vnqoqivjgdvgb4cx60ui")

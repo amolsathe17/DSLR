@@ -1758,7 +1758,7 @@ export default function AdminDashboard() {
 
   if (loading && !stats) {
     return (
-      <div className="min-h-screen bg-[#eef2f7] dark:bg-slate-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#e3e7f0] dark:bg-slate-950 flex flex-col items-center justify-center">
         <RefreshCw className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
         <span className="text-sm text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
           Loading Admin Control Panel...
@@ -1768,7 +1768,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#eef2f7] dark:bg-slate-950 py-5 transition-colors duration-300">
+    <div className="w-full min-h-screen bg-[#e3e7f0] dark:bg-slate-950 py-5 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
       
       {/* Page Header */}
@@ -3804,7 +3804,7 @@ export default function AdminDashboard() {
                     type="button"
                     disabled={isSavingCatLabels}
                     onClick={handleSaveCategoryLabels}
-                    className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-xs cursor-pointer transition-all shadow-md disabled:opacity-50"
+                    className="w-fit px-8 py-2.5 rounded-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold  text-xs cursor-pointer transition-all shadow-md disabled:opacity-50"
                   >
                     {isSavingCatLabels ? 'Saving...' : 'Save Configuration'}
                   </button>
@@ -4288,13 +4288,15 @@ export default function AdminDashboard() {
                 <p className="text-[10px] text-slate-400 mt-2">Leave blank if you do not want to change your password.</p>
               </div>
 
-              <button
-                type="submit"
-                disabled={profileSubmitting}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 mt-4"
-              >
-                {profileSubmitting ? 'Saving Changes...' : 'Save Profile Changes'}
-              </button>
+              <div className="flex justify-center mt-4">
+                <button
+                  type="submit"
+                  disabled={profileSubmitting}
+                  className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {profileSubmitting ? 'Saving Changes...' : 'Save Profile Changes'}
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -4367,7 +4369,7 @@ export default function AdminDashboard() {
               <button
                 type="submit"
                 disabled={broadcastSubmitting || !broadcastMessage.trim()}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 <Send size={13} />
                 {broadcastSubmitting ? 'Dispatching Message...' : 'Send Broadcast Notification'}

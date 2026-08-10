@@ -1,6 +1,12 @@
 export const getBackendUrl = (path) => {
   if (!path) return '';
 
+  // If path is a legacy local certificate upload that no longer exists on ephemeral storage,
+  // return fallback static template to prevent 404 console errors
+  if (typeof path === 'string' && path.includes('/uploads/certificateImage-')) {
+    return '/participation-template.png';
+  }
+
   // Resolve VITE_API_URL dynamically to support local network/mobile access for uploads & proxy
   const envUrl = import.meta.env.VITE_API_URL;
   let baseUrl = '';

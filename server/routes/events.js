@@ -890,7 +890,7 @@ router.post('/upload-certificate', protect, authorize('Admin'), (req, res, next)
     let fileUrl = `/uploads/${req.file.filename}`;
 
     try {
-      const { cloudinary } = require('../config/cloudinary');
+      const cloudinary = require('../config/cloudinary');
       if (cloudinary && process.env.CLOUDINARY_CLOUD_NAME) {
         const result = await cloudinary.uploader.upload(req.file.path, {
           folder: 'dslr_contest/certificates',

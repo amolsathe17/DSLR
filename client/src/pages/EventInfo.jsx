@@ -154,21 +154,44 @@ function PrizeRow({ prize, idx, faded }) {
   ];
   const b = badges[idx] || { rank: `${idx + 1}th`, bg: 'bg-slate-200 text-slate-700', ring: '' };
 
+  const rawVal = (prize.reward !== undefined && prize.reward !== null && String(prize.reward).trim() !== '')
+    ? prize.reward
+    : (prize.amount !== undefined && prize.amount !== null && String(prize.amount).trim() !== '')
+      ? prize.amount
+      : prize.value;
+
+  const displayAmount = (() => {
+    if (rawVal === undefined || rawVal === null || String(rawVal).trim() === '') {
+      return idx === 0 ? '₹50,000' : idx === 1 ? '₹30,000' : '₹20,000';
+    }
+    const str = String(rawVal).trim();
+    if (str.startsWith('₹') || str.startsWith('$') || /[a-zA-Z]/.test(str)) {
+      return str;
+    }
+    const num = Number(str.replace(/[^0-9.]/g, ''));
+    if (!isNaN(num) && num > 0) {
+      return `₹${num.toLocaleString('en-IN')}`;
+    }
+    return str;
+  })();
+
+  const title = prize.rank || prize.title || `Prize ${idx + 1}`;
+
   return (
     <div
       className={`flex items-center justify-between p-2.5 rounded-xl border border-slate-100 text-xs font-semibold ${
         faded ? 'bg-slate-50 opacity-60' : 'bg-slate-50'
       }`}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         <span
           className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] uppercase shadow-2xs ${b.bg}`}
         >
           {b.rank}
         </span>
-        <span className="text-slate-700 font-bold">{prize.title || prize.rank || `Prize ${idx + 1}`}</span>
+        <span className="text-slate-700 font-bold">{title}</span>
       </div>
-      <span className="font-extrabold text-slate-900">₹{Number(prize.amount).toLocaleString('en-IN')}</span>
+      <span className="font-extrabold text-slate-900 text-right ml-2">{displayAmount}</span>
     </div>
   );
 }

@@ -470,7 +470,7 @@ export default function JudgeDashboard() {
 
   if (loading && photographs.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-100/90 dark:bg-slate-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#eef2f7] dark:bg-slate-950 flex flex-col items-center justify-center">
         <Camera className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
         <span className="text-sm text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
           Loading assigned entries...
@@ -480,7 +480,7 @@ export default function JudgeDashboard() {
   }
 
   return (
-    <div className="w-full bg-slate-100/90 dark:bg-slate-950 py-5 transition-colors duration-300">
+    <div className="w-full min-h-screen bg-[#eef2f7] dark:bg-slate-950 py-5 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-200">
       
       {user?.role === 'Admin' && (

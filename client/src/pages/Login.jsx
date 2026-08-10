@@ -396,14 +396,16 @@ export default function Login() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`w-full text-white font-semibold py-2.5 rounded-xl shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2 ${primaryBg} ${primaryHoverBg}`}
-                >
-                  <LogIn size={16} />
-                  {loading ? 'Logging in...' : 'Log In'}
-                </button>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={`w-fit px-8 py-2.5 rounded-full text-white font-semibold shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2 ${primaryBg} ${primaryHoverBg}`}
+                  >
+                    <LogIn size={16} />
+                    {loading ? 'Logging in...' : 'Log In'}
+                  </button>
+                </div>
               </form>
             ) : (
               /* Mobile/OTP Form */
@@ -423,14 +425,16 @@ export default function Login() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`w-full text-white font-semibold py-2.5 rounded-xl shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2 ${primaryBg} ${primaryHoverBg}`}
-                >
-                  <Key size={16} />
-                  {loading ? 'Sending OTP...' : 'Send Login OTP'}
-                </button>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={`w-fit px-8 py-2.5 rounded-full text-white font-semibold shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2 ${primaryBg} ${primaryHoverBg}`}
+                  >
+                    <Key size={16} />
+                    {loading ? 'Sending OTP...' : 'Send Login OTP'}
+                  </button>
+                </div>
               </form>
             )}
           </div>
@@ -459,13 +463,15 @@ export default function Login() {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full text-white font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer ${primaryBg} ${primaryHoverBg}`}
-            >
-              Verify OTP
-            </button>
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-fit px-8 py-2.5 rounded-full text-white font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer ${primaryBg} ${primaryHoverBg}`}
+              >
+                Verify OTP
+              </button>
+            </div>
             <button
               type="button"
               onClick={() => { setRequiresOtp(false); setError(''); }}

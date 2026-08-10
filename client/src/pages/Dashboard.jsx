@@ -1972,13 +1972,15 @@ export default function Dashboard() {
                                             A registration invoice of <strong>₹{submission.amount}</strong> is pending for this submission slot. Pay now to initiate uploads.
                                           </p>
                                         </div>
-                                        <button
-                                          onClick={() => setShowPaymentModal(true)}
-                                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer text-sm"
-                                        >
-                                          <CreditCard size={16} />
-                                          Complete Online Payment
-                                        </button>
+                                        <div className="flex justify-center">
+                                          <button
+                                            onClick={() => setShowPaymentModal(true)}
+                                            className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer text-sm"
+                                          >
+                                            <CreditCard size={16} />
+                                            Complete Online Payment
+                                          </button>
+                                        </div>
                                       </div>
                                     )}
 
@@ -2002,26 +2004,31 @@ export default function Dashboard() {
                                                 <span>You must upload exactly {selectedPackage?.maxPhotos} photo{selectedPackage?.maxPhotos > 1 ? 's' : ''} for your selected package tier before you can finalize and lock your entry folder. (Currently {submission.photographs.length} uploaded)</span>
                                               </div>
                                             )}
-                                            <button
-                                              onClick={handleFinalSubmit}
-                                              disabled={submission.photographs.length !== selectedPackage?.maxPhotos}
-                                              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                              Finalize & Lock Entry
-                                            </button>
+                                            <div className="flex justify-center">
+                                              <button
+                                                onClick={handleFinalSubmit}
+                                                disabled={submission.photographs.length !== selectedPackage?.maxPhotos}
+                                                className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                              >
+                                                Finalize & Lock Entry
+                                              </button>
+                                            </div>
                                           </>
                                         )}
                                       </div>
                                     )}
+
                                     {/* Withdrawal Button */}
                                     {submission && submission.paymentStatus !== 'Withdrawn' && submission.paymentStatus !== 'Refunded' && (new Date() < new Date(e.deadline)) && (
-                                      <button
-                                        onClick={() => handleWithdrawClick(submission._id)}
-                                        className="w-full mt-3 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
-                                      >
-                                        <RotateCcw size={13} className="shrink-0" />
-                                        Withdraw Entry & Refund
-                                      </button>
+                                      <div className="flex justify-center mt-3">
+                                        <button
+                                          onClick={() => handleWithdrawClick(submission._id)}
+                                          className="w-fit px-8 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
+                                        >
+                                          <RotateCcw size={13} className="shrink-0" />
+                                          Withdraw Entry & Refund
+                                        </button>
+                                      </div>
                                     )}
                                   </div>
                                 </div>
@@ -2362,11 +2369,11 @@ export default function Dashboard() {
 
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col items-center gap-3">
               <button
                 type="button"
                 onClick={handlePayment}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
+                className="w-fit px-8 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
               >
                 <CreditCard size={14} />
                 Pay via Razorpay (UPI, Cards, Netbanking)
@@ -2375,7 +2382,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={handleDummyPayment}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
+                className="w-fit px-8 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-md transition-all cursor-pointer text-xs text-center flex items-center justify-center gap-2"
               >
                 <ShieldCheck size={14} />
                 Simulate Dummy Payment (Instant Bypass)
@@ -2384,7 +2391,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
-                className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-xl transition-all cursor-pointer text-xs text-center"
+                className="w-fit px-6 py-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-all cursor-pointer text-xs text-center"
               >
                 Cancel Checkout
               </button>

@@ -260,12 +260,14 @@ export default function DragDropUpload({ onUpload, isUploading, allowedTypes = [
           )}
 
           {!isUploading && uploadProgress === 0 && (
-            <button
-              onClick={triggerUpload}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs py-2 rounded-lg shadow-sm hover:shadow transition-all"
-            >
-              Upload Photo & Metadata
-            </button>
+            <div className="flex justify-center">
+              <button
+                onClick={triggerUpload}
+                className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md transition-all cursor-pointer"
+              >
+                Upload Photo & Metadata
+              </button>
+            </div>
           )}
         </div>
       )}

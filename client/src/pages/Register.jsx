@@ -354,14 +354,16 @@ export default function Register() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
-                >
-                  <ShieldCheck size={16} />
-                  {loading ? 'Processing...' : 'Register & Verify'}
-                </button>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
+                  >
+                    <ShieldCheck size={16} />
+                    {loading ? 'Processing...' : 'Register & Verify'}
+                  </button>
+                </div>
               </form>
             ) : (
               /* Mobile/OTP Signup */
@@ -411,14 +413,16 @@ export default function Register() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
-                >
-                  <Key size={16} />
-                  {loading ? 'Sending OTP...' : 'Send Signup OTP'}
-                </button>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow hover:shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
+                  >
+                    <Key size={16} />
+                    {loading ? 'Sending OTP...' : 'Send Signup OTP'}
+                  </button>
+                </div>
               </form>
             )}
           </div>
@@ -447,13 +451,15 @@ export default function Register() {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
-            >
-              Verify Account
-            </button>
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-fit px-8 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                Verify Account
+              </button>
+            </div>
 
             <button
               type="button"

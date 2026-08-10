@@ -411,7 +411,7 @@ export default function Login() {
                           <label className="text-xs font-semibold text-white">Password</label>
                           <Link
                             to="/forgot-password"
-                            className={`text-xs hover:underline ${primaryText}`}
+                            className="text-xs text-white hover:text-black transition-colors font-medium hover:underline"
                           >
                             Forgot Password?
                           </Link>

@@ -38,6 +38,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { getBackendUrl } from "../utils/url";
 
 // ── Event type helpers ────────────────────────────────────────────────────────
 

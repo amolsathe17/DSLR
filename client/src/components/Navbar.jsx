@@ -242,8 +242,8 @@ export default function Navbar() {
     <nav className={`${navPosition} z-50 transition-all duration-300 ${navBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={`flex items-center h-16 transition-all duration-300 ${onHero ? 'justify-center' : 'justify-between'}`}>
-          {/* Logo — hidden on hero, visible once scrolled or on inner pages */}
-          <div className={`items-center ${onHero ? 'hidden' : 'flex'}`}>
+          {/* Logo — hidden on hero desktop, visible once scrolled or on inner pages */}
+          <div className={`items-center ${onHero ? 'hidden md:flex' : 'flex'}`}>
             <Link
               to="/"
               className="flex items-center gap-2 group"
@@ -251,7 +251,7 @@ export default function Navbar() {
               <img
                 src="/sumbacontest.jpg"
                 alt="SumbaContest Logo"
-                className="h-16 w-auto object-contain rounded-lg transition-transform group-hover:scale-102"
+                className="h-9 sm:h-11 md:h-12 max-h-10 md:max-h-12 w-auto object-contain rounded-md transition-transform group-hover:scale-102"
               />
             </Link>
           </div>
@@ -381,46 +381,41 @@ export default function Navbar() {
             {!isOpen && user && renderNotificationBell()}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              aria-label="Toggle Navigation Menu"
             >
-              {isOpen ? <X size={20} /> : <Menu size={20} />}
+              {isOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Drawer */}
       {isOpen && (
-        <div className="md:hidden glass-panel border-t border-slate-200/50 dark:border-slate-800/50 animate-in fade-in slide-in-from-top-4 duration-200">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {/* <Link
-              to="/about"
-              onClick={() => setIsOpen(false)}
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/about') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
-              }`}
-            >
-              About Us
-            </Link> */}
-
+        <div className="md:hidden bg-slate-900/92 dark:bg-slate-950/95 backdrop-blur-2xl border-b border-slate-800 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200 text-white rounded-b-3xl overflow-hidden">
+          <div className="px-4 pt-3 pb-6 space-y-2 max-h-[85vh] overflow-y-auto">
             <Link
               to="/info"
               onClick={() => setIsOpen(false)}
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/info') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+              className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                isActive('/info')
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-200 hover:bg-white/10 hover:text-white'
               }`}
             >
-              Event Info
+              <span>Event Info</span>
             </Link>
 
             <Link
               to="/gallery"
               onClick={() => setIsOpen(false)}
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/gallery') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white'
+              className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                isActive('/gallery')
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-200 hover:bg-white/10 hover:text-white'
               }`}
             >
-              Gallery & Results
+              <span>Gallery &amp; Results</span>
             </Link>
 
             {(!user || user.role === 'Admin') && (
@@ -431,11 +426,13 @@ export default function Navbar() {
                   handleAdminClick();
                   setIsOpen(false);
                 }}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive('/admin') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-855'
+                className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                  isActive('/admin')
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-200 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                Admin Portal
+                <span>Admin Portal</span>
               </Link>
             )}
 
@@ -447,11 +444,13 @@ export default function Navbar() {
                   handleJudgeClick();
                   setIsOpen(false);
                 }}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive('/judge') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-855'
+                className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                  isActive('/judge')
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-200 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                Judges Portal
+                <span>Judges Portal</span>
               </Link>
             )}
 
@@ -459,11 +458,13 @@ export default function Navbar() {
               <Link
                 to="/dashboard"
                 onClick={() => setIsOpen(false)}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive('/dashboard') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                  isActive('/dashboard')
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-200 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                Dashboard
+                <span>Dashboard</span>
               </Link>
             )}
 
@@ -471,77 +472,69 @@ export default function Navbar() {
               <Link
                 to="/judge"
                 onClick={() => setIsOpen(false)}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive('/judge') ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                  isActive('/judge')
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-200 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                Dashboard
+                <span>Dashboard</span>
               </Link>
             )}
 
-            <div className="pt-4 pb-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="pt-3 mt-2 border-t border-slate-800/80">
               {user ? (
-                <div className="space-y-1">
-                  {user.role === 'Admin' ? (
-                    <div className="space-y-1">
-                      <div className="px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-left">
-                        Admin ({user.name})
-                      </div>
-                      <button
-                        onClick={() => {
-                          setIsOpen(false);
-                          navigate('/admin', { state: { tab: 'profile_settings' } });
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
-                      >
-                        <User size={16} className="text-indigo-600 dark:text-indigo-400" />
-                        Profile Settings
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsOpen(false);
-                          navigate('/admin', { state: { tab: 'notifications' } });
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
-                      >
-                        <Bell size={16} className="text-indigo-600 dark:text-indigo-400" />
-                        Notifications
-                      </button>
-                    </div>
-                  ) : (
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      if (user.role === 'Admin') {
+                        navigate('/admin', { state: { tab: 'profile_settings' } });
+                      } else {
+                        navigate('/profile');
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-200 hover:bg-white/10 transition-all text-left cursor-pointer"
+                  >
+                    <User size={18} className="text-indigo-400" />
+                    <span>Profile Settings</span>
+                  </button>
+
+                  {user.role === 'Admin' && (
                     <button
                       onClick={() => {
                         setIsOpen(false);
-                        navigate('/profile');
+                        navigate('/admin', { state: { tab: 'notifications' } });
                       }}
-                      className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-200 hover:bg-white/10 transition-all text-left cursor-pointer"
                     >
-                      <User size={16} className="text-indigo-600 dark:text-indigo-400" />
-                      Profile Settings
+                      <Bell size={18} className="text-indigo-400" />
+                      <span>Notifications</span>
                     </button>
                   )}
+
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-rose-400 hover:bg-rose-500/10 transition-all text-left cursor-pointer"
                   >
                     <LogOut size={18} />
-                    Logout
+                    <span>Logout</span>
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2 px-3">
+                <div className="grid grid-cols-2 gap-3 pt-1">
                   <Link
                     to="/login"
                     state={{ forceContestant: true }}
                     onClick={() => setIsOpen(false)}
-                    className="text-center px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-md text-base font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    className="text-center py-2.5 px-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold transition-all shadow-md"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setIsOpen(false)}
-                    className="text-center px-4 py-2 bg-indigo-600 text-white rounded-md text-base font-medium hover:bg-indigo-700"
+                    className="text-center py-2.5 px-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold transition-all shadow-md"
                   >
                     Register
                   </Link>

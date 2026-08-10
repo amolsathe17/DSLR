@@ -255,17 +255,10 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
 
     if (updateData.assignedJudges && Array.isArray(updateData.assignedJudges)) {
       const Submission = require('../models/Submission');
-      const submissions = await Submission.find({ eventId: req.params.id });
-      for (const sub of submissions) {
-        let changed = false;
-        sub.photographs.forEach(photo => {
-          photo.assignedJudges = updateData.assignedJudges;
-          changed = true;
-        });
-        if (changed) {
-          await sub.save();
-        }
-      }
+      await Submission.updateMany(
+        { eventId: req.params.id },
+        { $set: { "photographs.$[].assignedJudges": updateData.assignedJudges } }
+      ).catch(err => console.warn('Bulk update assignedJudges error:', err.message));
     }
 
     event = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true });
@@ -274,33 +267,40 @@ router.put('/:id', protect, authorize('Admin'), async (req, res) => {
     if (updateData.assignedJudges && Array.isArray(updateData.assignedJudges)) {
       const User = require('../models/User');
       for (const jId of updateData.assignedJudges) {
-        const judgeUser = await User.findById(jId);
-        if (judgeUser) {
-          if (!judgeUser.notifications) judgeUser.notifications = [];
-          
-          // Verify if notification has already been sent to prevent duplicates
-          const hasNotif = judgeUser.notifications.some(n => n.message.includes(event.title) && n.message.includes('assigned'));
-          if (!hasNotif) {
-            judgeUser.notifications.push({
-              message: `You have been assigned to evaluate entries for the contest event: "${event.title}".`,
-              type: 'info',
-              isRead: false,
-              createdAt: new Date()
-            });
-            await judgeUser.save();
+        try {
+          const judgeUser = await User.findById(jId);
+          if (judgeUser) {
+            if (!judgeUser.notifications) judgeUser.notifications = [];
+            
+            const hasNotif = judgeUser.notifications.some(n => n.message?.includes(event.title) && n.message?.includes('assigned'));
+            if (!hasNotif) {
+              judgeUser.notifications.push({
+                message: `You have been assigned to evaluate entries for the contest event: "${event.title}".`,
+                type: 'info',
+                isRead: false,
+                createdAt: new Date()
+              });
+              await judgeUser.save();
+            }
           }
+        } catch (jErr) {
+          console.warn('Judge notification error:', jErr.message);
         }
       }
     }
 
-    await AuditLog.create({
-      userId: req.user._id,
-      userName: req.user.name,
-      userEmail: req.user.email,
-      action: 'Update Event',
-      details: `Updated event: ${event.title}`,
-      ipAddress: req.ip
-    });
+    try {
+      await AuditLog.create({
+        userId: req.user?._id || req.user?.id || 'unknown',
+        userName: req.user?.name || 'Admin',
+        userEmail: req.user?.email || 'admin@dslr.com',
+        action: 'Update Event',
+        details: `Updated event: ${event?.title || req.params.id}`,
+        ipAddress: req.ip
+      });
+    } catch (auditErr) {
+      console.warn('Audit log create error:', auditErr.message);
+    }
 
     res.json({ success: true, event });
   } catch (error) {

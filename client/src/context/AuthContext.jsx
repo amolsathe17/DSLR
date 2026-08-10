@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // Common API Fetch Function with automatic retry for server cold-starts/502s
+  // Common API Fetch Function with automatic retry for server cold-starts/502s/404s
   const apiFetch = async (url, options = {}, retries = 2) => {
     const isFormData = options.body instanceof FormData;
     const headers = {
@@ -28,6 +28,9 @@ export const AuthProvider = ({ children }) => {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
+    const apiBase = getApiBaseUrl();
+    const fullTargetUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `${apiBase}${url}`;
+
     let lastErr = null;
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
@@ -36,7 +39,7 @@ export const AuthProvider = ({ children }) => {
           await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
         }
 
-        const response = await fetch(`${API_BASE_URL}${url}`, {
+        const response = await fetch(fullTargetUrl, {
           ...options,
           headers,
         });
@@ -57,16 +60,26 @@ export const AuthProvider = ({ children }) => {
 
         if (!response.ok) {
           let msg = data?.message;
-          if (!msg || typeof msg !== 'string' || msg.includes('<html') || msg.includes('Application failed to respond')) {
+          if (
+            !msg ||
+            typeof msg !== 'string' ||
+            msg.includes('<html') ||
+            msg.includes('Application failed to respond') ||
+            msg.includes('Application not found') ||
+            msg.includes('Cannot GET') ||
+            msg.includes('Cannot POST')
+          ) {
             if (response.status === 502 || response.status === 503 || response.status === 504) {
-              msg = "Backend server is temporarily unavailable or restarting. Please refresh or try again in a few moments.";
+              msg = "Backend server is temporarily unavailable or restarting. Please try again in a few moments.";
+            } else if (response.status === 404) {
+              msg = "Server endpoint not found. Please ensure the backend server is running.";
             } else {
               msg = `Server Error (${response.status})`;
             }
           }
 
-          // If server returns 502, 503, or 504 and we have retries left, retry seamlessly
-          if ((response.status === 502 || response.status === 503 || response.status === 504) && attempt < retries) {
+          // If server returns 502, 503, 504, or transient 404 while backend initializes and we have retries left, retry seamlessly
+          if ((response.status === 502 || response.status === 503 || response.status === 504 || response.status === 404) && attempt < retries) {
             console.warn(`API returned status ${response.status}. Retrying attempt ${attempt + 1}/${retries}...`);
             continue;
           }
@@ -82,7 +95,8 @@ export const AuthProvider = ({ children }) => {
           (err.name === "TypeError" ||
             err.message?.includes("fetch") ||
             err.message?.includes("temporarily unavailable") ||
-            err.message?.includes("502"))
+            err.message?.includes("502") ||
+            err.message?.includes("404"))
         ) {
           console.warn(`Network/API error: ${err.message}. Retrying attempt ${attempt + 1}/${retries}...`);
           continue;

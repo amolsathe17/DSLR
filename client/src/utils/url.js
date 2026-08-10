@@ -14,11 +14,17 @@ export const getBackendUrl = (path) => {
   if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
     baseUrl = envUrl;
   } else {
-    // If on Vite dev server (port 5173), request should go to backend at port 5000 on the same host
-    if (window.location.port === "5173") {
+    // If on local dev/preview server (port is not 5000), target port 5000 on the same host
+    if (
+      typeof window !== 'undefined' &&
+      window.location.port !== "5000" &&
+      (window.location.hostname === 'localhost' ||
+       window.location.hostname === '127.0.0.1' ||
+       window.location.hostname.startsWith('192.168.') ||
+       window.location.hostname.startsWith('10.'))
+    ) {
       baseUrl = `${window.location.protocol}//${window.location.hostname}:5000`;
     } else {
-      // Relative URL for same host/port serving
       baseUrl = '';
     }
   }

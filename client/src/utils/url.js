@@ -23,15 +23,23 @@ export const getBackendUrl = (path) => {
     }
   }
 
+  // If path is a raw Cloudinary public ID or filename without http prefix (e.g. "vnqoqivjgdvgb4cx60ui.jpg" or "vnqoqivjgdvgb4cx60ui")
+  if (typeof path === 'string' && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('/') && !path.startsWith('uploads/') && !path.includes('/uploads/')) {
+    if (path.endsWith('.jpg') || path.endsWith('.png') || path.endsWith('.jpeg') || path.endsWith('.webp') || path.length > 15) {
+      const fullCloudinaryUrl = `https://res.cloudinary.com/dwyx96tgh/image/upload/${path}`;
+      return `${baseUrl}/api/image-proxy?url=${encodeURIComponent(fullCloudinaryUrl)}`;
+    }
+  }
+
   // If path is an external URL (e.g. Cloudinary), proxy it through our backend server
   // to serve it as a first-party resource and permanently eliminate Tracking Prevention browser warnings!
-  if (path.startsWith('http://') || path.startsWith('https://')) {
+  if (typeof path === 'string' && (path.startsWith('http://') || path.startsWith('https://'))) {
     if (path.includes('/api/image-proxy?url=')) return path;
     return `${baseUrl}/api/image-proxy?url=${encodeURIComponent(path)}`;
   }
 
   // Non-upload paths (static public assets like certificate templates in client/public)
-  if (!path.includes('/uploads/') && !path.startsWith('uploads/')) {
+  if (typeof path === 'string' && !path.includes('/uploads/') && !path.startsWith('uploads/')) {
     return path.startsWith('/') ? path : `/${path}`;
   }
 

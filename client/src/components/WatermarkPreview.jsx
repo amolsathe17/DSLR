@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function WatermarkPreview({ src, className = "", enableZoom = false }) {
+  const [currentSrc, setCurrentSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({
     transform: 'scale(1)',
     transformOrigin: 'center'
   });
+
+  useEffect(() => {
+    setCurrentSrc(src);
+    setHasError(false);
+  }, [src]);
 
   if (!src) {
     return (
@@ -15,6 +22,13 @@ export default function WatermarkPreview({ src, className = "", enableZoom = fal
       </div>
     );
   }
+
+  const handleImgError = (e) => {
+    if (!hasError) {
+      setHasError(true);
+      setCurrentSrc('/wild.jpg');
+    }
+  };
 
   const handleMouseMove = (e) => {
     if (!enableZoom) return;
@@ -70,10 +84,9 @@ export default function WatermarkPreview({ src, className = "", enableZoom = fal
       onTouchCancel={handleTouchEnd}
     >
       <img 
-        src={src} 
+        src={currentSrc || '/wild.jpg'} 
         alt="Image Preview" 
-        crossOrigin="anonymous"
-        referrerPolicy="no-referrer"
+        onError={handleImgError}
         style={enableZoom ? zoomStyle : undefined}
         className="w-full h-full object-contain mx-auto" 
       />

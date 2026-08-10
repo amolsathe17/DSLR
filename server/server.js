@@ -99,6 +99,11 @@ app.get("/api/image-proxy", (req, res) => {
         return res.redirect(proxyRes.headers.location);
       }
 
+      // If upstream image server returns 404 (missing/deleted Cloudinary image), redirect to fallback image
+      if (proxyRes.statusCode === 404) {
+        return res.redirect('/wild.jpg');
+      }
+
       res.status(proxyRes.statusCode || 200);
       if (proxyRes.headers["content-type"]) {
         res.setHeader("Content-Type", proxyRes.headers["content-type"]);

@@ -37,6 +37,7 @@ import {
   Send,
   Archive,
   Clock,
+  Sliders,
   ArrowUp,
   ArrowDown,
   Upload

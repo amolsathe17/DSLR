@@ -165,6 +165,55 @@ export default function Dashboard() {
     );
   };
 
+  // Form Draft Persistence Key
+  const getUploadDraftKey = () => user ? `uploadFormDraft_${user._id || user.id}` : 'uploadFormDraft';
+
+  // Restore form draft on mount / user change
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const key = getUploadDraftKey();
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.title) setTitle(parsed.title);
+        if (parsed.category) setCategory(parsed.category);
+        if (parsed.cameraBrand) setCameraBrand(parsed.cameraBrand);
+        if (parsed.cameraModel) setCameraModel(parsed.cameraModel);
+        if (parsed.lensUsed) setLensUsed(parsed.lensUsed);
+        if (parsed.location) setLocation(parsed.location);
+        if (parsed.dateCaptured) setDateCaptured(parsed.dateCaptured);
+        if (parsed.description) setDescription(parsed.description);
+        if (parsed.customFieldValues && typeof parsed.customFieldValues === 'object') {
+          setCustomFieldValues(parsed.customFieldValues);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load upload form draft:", err);
+    }
+  }, [user?.id, user?._id]);
+
+  // Persist form draft whenever fields change
+  useEffect(() => {
+    if (!user) return;
+    const key = getUploadDraftKey();
+    const draftObj = {
+      title,
+      category,
+      cameraBrand,
+      cameraModel,
+      lensUsed,
+      location,
+      dateCaptured,
+      description,
+      customFieldValues
+    };
+    const hasData = title || category || cameraBrand || cameraModel || lensUsed || location || dateCaptured || description || (customFieldValues && Object.keys(customFieldValues).some(k => customFieldValues[k]));
+    if (hasData) {
+      localStorage.setItem(key, JSON.stringify(draftObj));
+    }
+  }, [title, category, cameraBrand, cameraModel, lensUsed, location, dateCaptured, description, customFieldValues, user?.id, user?._id]);
+
   // Package & Declaration selection
   const [selectedPkgId, setSelectedPkgId] = useState("");
   const [acceptedDeclaration, setAcceptedDeclaration] = useState(false);
@@ -185,9 +234,17 @@ export default function Dashboard() {
         const categoryData = await apiFetch(`/api/categories?contestType=${encodeURIComponent(e.eventType || '')}`);
         if (categoryData.success) {
           setCategories(categoryData.categories);
-          if (categoryData.categories.length > 0) {
-            setCategory("");
-          }
+          setCategory((prevCat) => {
+            if (prevCat && categoryData.categories.some(c => c.name === prevCat)) return prevCat;
+            try {
+              const saved = localStorage.getItem(getUploadDraftKey());
+              if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.category && categoryData.categories.some(c => c.name === parsed.category)) return parsed.category;
+              }
+            } catch {}
+            return prevCat || "";
+          });
         }
         const subData = await apiFetch(`/api/submissions/my-submission/${e._id}`);
         if (subData.success) {
@@ -234,9 +291,17 @@ export default function Dashboard() {
       const categoryData = await apiFetch(`/api/categories?contestType=${encodeURIComponent(activeEvent?.eventType || activeType || '')}`);
       if (categoryData.success) {
         setCategories(categoryData.categories);
-        if (categoryData.categories.length > 0) {
-          setCategory("");
-        }
+        setCategory((prevCat) => {
+          if (prevCat && categoryData.categories.some(c => c.name === prevCat)) return prevCat;
+          try {
+            const saved = localStorage.getItem(getUploadDraftKey());
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.category && categoryData.categories.some(c => c.name === parsed.category)) return parsed.category;
+            }
+          } catch {}
+          return prevCat || "";
+        });
       }
 
       try {
@@ -474,12 +539,19 @@ export default function Dashboard() {
         }
 
         setTitle("");
+        setCategory("");
         setCameraBrand("");
         setCameraModel("");
         setLensUsed("");
         setLocation("");
         setDateCaptured("");
         setDescription("");
+        setCustomFieldValues({});
+        if (user) {
+          try {
+            localStorage.removeItem(getUploadDraftKey());
+          } catch {}
+        }
 
         confetti({
           particleCount: 40,
